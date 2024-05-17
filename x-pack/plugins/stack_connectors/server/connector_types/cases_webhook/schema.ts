@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { CasesWebhookMethods } from './types';
 import { nullableType } from '../lib/nullable';
+import { AuthType as CasesWebhookAuthType } from '../../../common/constants';
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
@@ -52,6 +53,11 @@ export const ExternalIncidentServiceConfiguration = {
   createCommentJson: schema.nullable(schema.string()),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
+  authType: schema.maybe(
+    schema.oneOf([schema.literal(CasesWebhookAuthType.Basic), schema.literal(null)], {
+      defaultValue: CasesWebhookAuthType.Basic,
+    })
+  ),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(

@@ -22,7 +22,8 @@ import {
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
+import { SSLCertType } from '../../../common/webhook/constants';
+import { AuthType as WebhookAuthType } from '../../../common/constants';
 import { PFX_FILE, CRT_FILE, KEY_FILE } from './mocks';
 
 jest.mock('axios');

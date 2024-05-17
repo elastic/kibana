@@ -26,7 +26,8 @@ import {
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
+import { SSLCertType } from '../../../common/webhook/constants';
+import { AuthType as WebhookAuthType } from '../../../common/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';

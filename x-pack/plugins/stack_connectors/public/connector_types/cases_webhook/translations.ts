@@ -547,3 +547,24 @@ export const STATUS_IN_PROGRESS = i18n.translate(
     defaultMessage: 'In progress',
   }
 );
+
+export const AUTHENTICATION_NONE = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.authenticationMethodNoneLabel',
+  {
+    defaultMessage: 'None',
+  }
+);
+
+export const AUTHENTICATION_BASIC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.authenticationMethodBasicLabel',
+  {
+    defaultMessage: 'Basic authentication',
+  }
+);
+
+export const AUTHENTICATION_SSL = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.authenticationMethodSSLLabel',
+  {
+    defaultMessage: 'SSL authentication',
+  }
+);

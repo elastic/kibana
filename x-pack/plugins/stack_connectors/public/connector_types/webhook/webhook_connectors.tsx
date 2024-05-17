@@ -37,7 +37,9 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { WebhookAuthType, SSLCertType } from '../../../common/webhook/constants';
+import { SSLCertType } from '../../../common/webhook/constants';
+import { AuthType as WebhookAuthType } from '../../../common/constants';
+
 import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];
