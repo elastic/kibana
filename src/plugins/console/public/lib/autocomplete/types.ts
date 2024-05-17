@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { MonacoEditorActionsProvider } from '../../application/containers/editor/monaco/monaco_editor_actions_provider';
 import { CoreEditor, Range, Token } from '../../types';
 
 export interface ResultTerm {
@@ -53,7 +54,7 @@ export interface AutoCompleteContext {
   replacingToken?: boolean;
   rangeToReplace?: Range;
   autoCompleteType?: null | string;
-  editor?: CoreEditor;
+  editor?: CoreEditor | MonacoEditorActionsProvider;
 
   /**
    * The tokenized user input that prompted the current autocomplete at the cursor. This can be out of sync with

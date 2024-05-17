@@ -7,7 +7,7 @@
  */
 
 import { CSSProperties, Dispatch } from 'react';
-import { debounce } from 'lodash';
+import { debounce, range } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -384,7 +384,7 @@ export class MonacoEditorActionsProvider {
         position.lineNumber
       );
       const requestStartLineNumber = requests[0].startLineNumber;
-      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber);
+      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber, this);
       return {
         suggestions,
       };
@@ -564,5 +564,25 @@ export class MonacoEditorActionsProvider {
       // The next request edge is the end line of the request
       this.editor.setPosition({ lineNumber: firstRequestAfter.endLineNumber, column: 1 });
     }
+  }
+
+  /*
+   * This function is to get an array of line contents
+   * from startLine to endLine including both line numbers
+   */
+  public getLines(startLine: number, endLine: number): string[] {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
+    // range returns an array not including the end of the range, so we need to add 1
+    return range(startLine, endLine + 1).map((lineNumber) => model.getLineContent(lineNumber));
+  }
+
+  /*
+   * This function returns the current position of the cursor
+   */
+  public getCurrentPosition(): monaco.IPosition {
+    return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 }
