@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
@@ -15,6 +15,7 @@ import type { StartDependencies } from './plugin';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
   async ({ element }: AppMountParameters) => {
+    const root = createRoot(element);
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
@@ -39,9 +40,9 @@ export const mount =
       </i18nCore.Context>
     );
 
-    render(reactElement, element);
+    root.render(reactElement);
     return () => {
-      unmountComponentAtNode(element);
+      root.unmount();
       plugins.data.search.session.clear();
     };
   };

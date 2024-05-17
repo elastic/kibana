@@ -7,7 +7,7 @@
  */
 
 import React, { CSSProperties } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
@@ -44,12 +44,13 @@ export const getMetricRenderer =
       config: MetricRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
       const { MetricComponent } = await import('../components/metric_component');
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
             <KibanaThemeProvider theme={{ theme$ }}>
@@ -63,7 +64,6 @@ export const getMetricRenderer =
             </KibanaThemeProvider>
           </KibanaErrorBoundary>
         </KibanaErrorBoundaryProvider>,
-        domNode,
         () => handlers.done()
       );
     },

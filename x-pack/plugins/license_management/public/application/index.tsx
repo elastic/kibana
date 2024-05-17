@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from '@kbn/shared-ux-router';
 
 import { AppDependencies } from './app_context';
@@ -21,7 +21,9 @@ const AppWithRouter = (props: { [key: string]: any }) => (
 );
 
 export const renderApp = (element: Element, dependencies: AppDependencies) => {
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <AppProviders appDependencies={dependencies}>
       <AppWithRouter
         telemetry={dependencies.plugins.telemetry}
@@ -33,7 +35,7 @@ export const renderApp = (element: Element, dependencies: AppDependencies) => {
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

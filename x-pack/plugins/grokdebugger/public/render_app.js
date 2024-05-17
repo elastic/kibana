@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaContextProvider, KibanaRenderContextProvider } from './shared_imports';
 import { GrokDebugger } from './components/grok_debugger';
@@ -14,6 +14,8 @@ import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_servic
 import { InactiveLicenseSlate } from './components/inactive_license';
 
 export function renderApp(license, element, coreStart, theme$) {
+  const root = createRoot(element);
+
   const content = license.isActive ? (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart }}>
@@ -26,7 +28,7 @@ export function renderApp(license, element, coreStart, theme$) {
     </KibanaRenderContextProvider>
   );
 
-  render(content, element);
+  root.render(content, element);
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

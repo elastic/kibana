@@ -6,8 +6,9 @@
  */
 
 import type { History } from 'history';
-import React, { FC, PropsWithChildren } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { Redirect } from 'react-router-dom';
 
 import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
@@ -58,8 +59,9 @@ export const usersManagementApp = Object.freeze({
           import('./user_api_client'),
           import('../roles'),
         ]);
+        const root = createRoot(element);
 
-        render(
+        root.render(
           <Providers
             services={coreStart}
             history={history}
@@ -117,12 +119,11 @@ export const usersManagementApp = Object.freeze({
                 </Route>
               </Routes>
             </Breadcrumb>
-          </Providers>,
-          element
+          </Providers>
         );
 
         return () => {
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;

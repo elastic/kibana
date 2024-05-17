@@ -18,7 +18,7 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableAppContext } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import { pluginServices } from '../../../public/services';
 import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
@@ -201,7 +201,7 @@ export const embeddableRendererFactory = (
         const palettes = await plugins.charts.palettes.getPalettes();
 
         embeddablesRegistry[uniqueId] = embeddableObject;
-        ReactDOM.unmountComponentAtNode(domNode);
+        root.unmount();
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
           const updatedExpression = embeddableInputToExpression(
@@ -216,7 +216,7 @@ export const embeddableRendererFactory = (
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
+        root.render(renderEmbeddable(embeddableObject), () => handlers.done());
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();
@@ -224,7 +224,7 @@ export const embeddableRendererFactory = (
 
           delete embeddablesRegistry[uniqueId];
 
-          return ReactDOM.unmountComponentAtNode(domNode);
+          return root.unmount();
         });
       } else {
         /**

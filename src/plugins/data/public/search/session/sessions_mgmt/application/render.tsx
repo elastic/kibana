@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { AppDependencies } from '..';
@@ -21,21 +21,22 @@ export const renderApp = (
     return () => undefined;
   }
 
+  const root = createRoot(elem);
+
   // uiSettings is required by the listing table to format dates in the timezone from Settings
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
   });
 
-  render(
+  root.render(
     <KibanaRenderContextProvider theme={homeDeps.core.theme} i18n={i18n}>
       <KibanaReactContextProvider>
         <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
       </KibanaReactContextProvider>
-    </KibanaRenderContextProvider>,
-    elem
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };

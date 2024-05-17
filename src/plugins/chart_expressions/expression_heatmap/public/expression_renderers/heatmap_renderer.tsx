@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { getTimeZone } from '@kbn/visualization-utils';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -49,8 +49,9 @@ export const heatmapRenderer: (
   render: async (domNode, config, handlers) => {
     const { core, plugins } = getStartDeps();
 
+    const root = createRoot(domNode);
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
@@ -97,7 +98,7 @@ export const heatmapRenderer: (
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
 
-    render(
+    root.render(
       <KibanaRenderContextProvider {...core}>
         <div className="heatmap-container" data-test-subj="heatmapChart">
           <HeatmapComponent
@@ -118,8 +119,7 @@ export const heatmapRenderer: (
             onClickMultiValue={onClickMultiValue}
           />
         </div>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
 import {
@@ -49,7 +49,9 @@ const renderApp = (
   getUrlForApp: ApplicationStart['getUrlForApp'],
   executionContext: ExecutionContextStart
 ): UnmountCallback => {
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <Provider store={ccrStore}>
         <AppWithExecutionContext
@@ -58,11 +60,10 @@ const renderApp = (
           executionContext={executionContext}
         />
       </Provider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };
 
 export async function mountApp({

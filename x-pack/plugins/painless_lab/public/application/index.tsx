@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { CoreSetup, CoreStart, HttpSetup, ChromeStart } from '@kbn/core/public';
 
 import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';
@@ -32,20 +32,19 @@ export function renderApp(
   if (!element) {
     return () => undefined;
   }
+  const root = createRoot(element);
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
     settings,
   });
-  render(
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <KibanaReactContextProvider>
         <AppContextProvider value={{ http, links, chrome }}>
           <Main />
         </AppContextProvider>
       </KibanaReactContextProvider>
-    </KibanaRenderContextProvider>,
-
-    element
+    </KibanaRenderContextProvider>
   );
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

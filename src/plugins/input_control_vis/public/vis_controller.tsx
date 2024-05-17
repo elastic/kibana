@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { isEqual } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 
 import { I18nStart } from '@kbn/core/public';
@@ -32,6 +32,7 @@ export const createInputControlVisController = (
   handlers: IInterpreterRenderHandlers,
   el: Element
 ) => {
+  const root = createRoot(el);
   let I18nContext: I18nStart['Context'] | undefined;
   let isLoaded = false;
 
@@ -81,7 +82,7 @@ export const createInputControlVisController = (
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
-      unmountComponentAtNode(el);
+      root.unmount();
       this.controls.forEach((control) => control.destroy());
     }
 
@@ -90,7 +91,7 @@ export const createInputControlVisController = (
         throw new Error('no i18n context found');
       }
 
-      render(
+      root.render(
         <I18nContext>
           <VisualizationContainer handlers={handlers}>
             <InputControlVis
@@ -106,8 +107,7 @@ export const createInputControlVisController = (
               isDarkMode={this.isDarkMode}
             />
           </VisualizationContainer>
-        </I18nContext>,
-        el
+        </I18nContext>
       );
     };
 

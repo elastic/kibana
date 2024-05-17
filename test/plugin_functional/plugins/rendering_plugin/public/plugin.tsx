@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class RenderingPlugin implements Plugin {
@@ -17,9 +17,9 @@ export class RenderingPlugin implements Plugin {
       title: 'Rendering',
       appRoute: '/render/core',
       async mount({ element }) {
-        render(<h1 data-test-subj="renderingHeader">rendering service</h1>, element);
-
-        return () => unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(<h1 data-test-subj="renderingHeader">rendering service</h1>, element);
+        return () => root.unmount();
       },
     });
 
@@ -28,9 +28,9 @@ export class RenderingPlugin implements Plugin {
       title: 'Custom App Route',
       appRoute: '/custom/appRoute',
       async mount({ element }) {
-        render(<h1 data-test-subj="customAppRouteHeader">Custom App Route</h1>, element);
-
-        return () => unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(<h1 data-test-subj="customAppRouteHeader">Custom App Route</h1>);
+        return () => root.unmount();
       },
     });
   }

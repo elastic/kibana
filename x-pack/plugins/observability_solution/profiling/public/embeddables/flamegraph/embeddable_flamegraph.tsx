@@ -8,7 +8,7 @@ import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import { createFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { FlameGraph } from '../../components/flamegraph';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
@@ -25,6 +25,7 @@ export class EmbeddableFlamegraph extends Embeddable<
 > {
   readonly type = EMBEDDABLE_FLAMEGRAPH;
   private _domNode?: HTMLElement;
+  private _root?;
 
   constructor(
     private deps: ProfilingEmbeddablesDependencies,
@@ -36,17 +37,17 @@ export class EmbeddableFlamegraph extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    render(
+    this._root = createRoot(domNode);
+    this._root.render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <Flamegraph {...this.input} />
-      </ProfilingEmbeddableProvider>,
-      domNode
+      </ProfilingEmbeddableProvider>
     );
   }
 
   public destroy() {
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
+    if (this._root) {
+      this._root.unmount();
     }
   }
 

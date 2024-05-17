@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreSetup, AppMountParameters, APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -14,6 +14,7 @@ import { StartDependencies } from './plugin';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
   async ({ element }: AppMountParameters) => {
+    const root = createRoot(element);
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
@@ -41,6 +42,6 @@ export const mount =
         </i18nCore.Context>
       </KibanaContextProvider>
     );
-    render(reactElement, element);
-    return () => unmountComponentAtNode(element);
+    root.render(reactElement, element);
+    return () => root.unmount();
   };

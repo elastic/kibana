@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { SelfChangingComponent } from './self_changing_vis/self_changing_components';
@@ -17,10 +17,12 @@ export const selfChangingVisRenderer: ExpressionRenderDefinition<SelfChangingVis
   name: 'self_changing_vis',
   reuseDomNode: true,
   render: (domNode, { visParams }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
-    render(<SelfChangingComponent renderComplete={handlers.done} visParams={visParams} />, domNode);
+    root.render(<SelfChangingComponent renderComplete={handlers.done} visParams={visParams} />);
   },
 };

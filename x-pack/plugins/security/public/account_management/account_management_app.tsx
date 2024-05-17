@@ -6,8 +6,9 @@
  */
 
 import type { History } from 'history';
-import React, { FC, PropsWithChildren } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 
 import type {
   ApplicationSetup,
@@ -50,8 +51,9 @@ export const accountManagementApp = Object.freeze({
           getStartServices(),
           import('./account_management_page'),
         ]);
+        const root = createRoot(element);
 
-        render(
+        root.render(
           <Providers
             services={coreStart}
             history={history}
@@ -59,11 +61,10 @@ export const accountManagementApp = Object.freeze({
             securityApiClients={securityApiClients}
           >
             <AccountManagementPage />
-          </Providers>,
-          element
+          </Providers>
         );
 
-        return () => unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   },

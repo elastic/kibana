@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -42,7 +42,8 @@ export async function mountManagementSection(
     share: shareService,
   };
 
-  render(
+  const root = createRoot(params.element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={services}>
         <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
@@ -59,11 +60,10 @@ export async function mountManagementSection(
           </PolicyStatusContextProvider>
         </InternalApiClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    params.element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

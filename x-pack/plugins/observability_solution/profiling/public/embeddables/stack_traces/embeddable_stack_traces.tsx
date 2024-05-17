@@ -7,7 +7,7 @@
 import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_STACK_TRACES } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   ProfilingEmbeddableProvider,
   ProfilingEmbeddablesDependencies,
@@ -21,6 +21,7 @@ export class EmbeddableStackTraces extends Embeddable<
 > {
   readonly type = EMBEDDABLE_STACK_TRACES;
   private _domNode?: HTMLElement;
+  private _root?;
 
   constructor(
     private deps: ProfilingEmbeddablesDependencies,
@@ -32,20 +33,20 @@ export class EmbeddableStackTraces extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
+    this._root = createRoot(domNode);
     const props = this.input;
-    render(
+    this._root.render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <div style={{ width: '100%' }}>
           <StackTraces {...props} />
         </div>
-      </ProfilingEmbeddableProvider>,
-      domNode
+      </ProfilingEmbeddableProvider>
     );
   }
 
   public destroy() {
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
+    if (this._root) {
+      this._root.unmount();
     }
   }
 

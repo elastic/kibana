@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { EventEmitter } from 'events';
 import type {
   Vis,
@@ -27,13 +27,16 @@ export class EditorController implements IEditorController {
     private el: HTMLElement,
     private vis: Vis<TimeseriesVisParams>,
     private eventEmitter: EventEmitter,
-    private embeddableHandler: VisualizeEmbeddableContract
+    private embeddableHandler: VisualizeEmbeddableContract,
+    private root
   ) {}
 
   async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
     const defaultIndexPattern = (await getDataViewsStart().getDefault()) || undefined;
 
-    render(
+    this.root = createRoot(this.el);
+
+    this.root.render(
       <KibanaRenderContextProvider {...getCoreStart()}>
         <VisEditor
           config={getUISettings()}
@@ -46,12 +49,11 @@ export class EditorController implements IEditorController {
           query={query}
           defaultIndexPattern={defaultIndexPattern}
         />
-      </KibanaRenderContextProvider>,
-      this.el
+      </KibanaRenderContextProvider>
     );
   }
 
   destroy() {
-    unmountComponentAtNode(this.el);
+    this.root.unmount();
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { EuiConfirmModal, EuiFlyout } from '@elastic/eui';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import React from 'react';
 import {
@@ -46,13 +46,15 @@ class GenericOverlayRef implements OverlayRef {
 
 export const overlaysServiceFactory: OverlaysServiceFactory = () => {
   const flyoutDomElement = document.createElement('div');
+  const flyoutRoot = createRoot(flyoutDomElement);
   const modalDomElement = document.createElement('div');
+  const modalRoot = createRoot(modalDomElement);
   let activeFlyout: OverlayRef | null;
   let activeModal: OverlayRef | null;
 
   const cleanupModal = () => {
     if (modalDomElement != null) {
-      unmountComponentAtNode(modalDomElement);
+      modalRoot.unmount();
       modalDomElement.innerHTML = '';
     }
     activeModal = null;
@@ -60,7 +62,7 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
 
   const cleanupFlyout = () => {
     if (flyoutDomElement != null) {
-      unmountComponentAtNode(flyoutDomElement);
+      flyoutRoot.unmount();
       flyoutDomElement.innerHTML = '';
     }
     activeFlyout = null;
@@ -91,11 +93,10 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
         flyout.close();
       };
 
-      render(
+      flyoutRoot.render(
         <EuiFlyout onClose={onCloseFlyout}>
           <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
-        </EuiFlyout>,
-        flyoutDomElement
+        </EuiFlyout>
       );
 
       return flyout;
@@ -140,7 +141,7 @@ export const overlaysServiceFactory: OverlaysServiceFactory = () => {
           confirmButtonText: options?.confirmButtonText || '', // stub default confirm text
         };
 
-        render(<EuiConfirmModal {...props} />, modalDomElement);
+        modalRoot.render(<EuiConfirmModal {...props} />);
       });
     },
   };

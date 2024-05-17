@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPage,
   EuiPageBody,
@@ -42,6 +42,7 @@ const App = ({ appName }: { appName: string }) => (
 );
 
 export const renderApp = (appName: string, { element }: AppMountParameters) => {
-  render(<App appName={appName} />, element);
-  return () => unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<App appName={appName} />);
+  return () => root.unmount();
 };

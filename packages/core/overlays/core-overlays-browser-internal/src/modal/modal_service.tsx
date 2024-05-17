@@ -11,7 +11,7 @@
 import { i18n as t } from '@kbn/i18n';
 import { EuiModal, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -64,10 +64,10 @@ interface StartDeps {
 /** @internal */
 export class ModalService {
   private activeModal: ModalRef | null = null;
-  private targetDomElement: Element | null = null;
+  private root: Element | null = null;
 
   public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayModalStart {
-    this.targetDomElement = targetDomElement;
+    this.root = createRoot(targetDomElement);
 
     return {
       open: (mount: MountPoint, options: OverlayModalOpenOptions = {}): OverlayRef => {
@@ -88,13 +88,12 @@ export class ModalService {
 
         this.activeModal = modal;
 
-        render(
+        this.root.render(
           <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
             <EuiModal {...options} onClose={() => modal.close()}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiModal>
-          </KibanaRenderContextProvider>,
-          targetDomElement
+          </KibanaRenderContextProvider>
         );
 
         return modal;
@@ -168,7 +167,7 @@ export class ModalService {
    */
   private cleanupDom(): void {
     if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
+      this.root.unmount();
       this.targetDomElement.innerHTML = '';
     }
     this.activeModal = null;

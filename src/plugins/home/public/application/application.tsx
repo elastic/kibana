@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ScopedHistory, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -27,6 +27,7 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
+  const root = createRoot(domNode);
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
   // FIXME: use featureCatalogue.getFeatures$()
@@ -42,7 +43,7 @@ export const renderApp = async (
         )
       );
 
-    render(
+    root.render(
       <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
         <RedirectAppLinks
           coreStart={{
@@ -55,8 +56,7 @@ export const renderApp = async (
             </SampleDataTabKibanaProvider>
           </KibanaContextProvider>
         </RedirectAppLinks>
-      </KibanaRenderContextProvider>,
-      element
+      </KibanaRenderContextProvider>
     );
   });
 
@@ -68,7 +68,7 @@ export const renderApp = async (
   });
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
     navLinksSubscription.unsubscribe();
   };

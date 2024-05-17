@@ -15,7 +15,7 @@ import {
   ScopedHistory,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -89,9 +89,10 @@ export interface TriggersAndActionsUiServices extends CoreStart {
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
-  render(<App deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<App deps={deps} />);
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

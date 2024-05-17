@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -56,7 +56,9 @@ export const SaveModal = ({
 }) => {
   const [selectedTags, setSelectedTags] = useState<string[]>(tags);
 
-  const closeModal = () => unmountComponentAtNode(domElement);
+  const root = createRoot(domElement);
+
+  const closeModal = () => root.unmount();
 
   return (
     <SavedObjectSaveModal
@@ -253,6 +255,7 @@ export const onSave = async ({
   });
 
   closeModal();
+  const root = createRoot(element);
 
   toasts.addSuccess({
     title: i18n.translate(
@@ -265,7 +268,7 @@ export const onSave = async ({
       }
     ),
     text: ((element) =>
-      render(
+      root.render(
         <KibanaRenderContextProvider {...startServices}>
           <FormattedMessage
             id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
@@ -286,8 +289,7 @@ export const onSave = async ({
               ),
             }}
           />
-        </KibanaRenderContextProvider>,
-        element
+        </KibanaRenderContextProvider>
       )) as MountPoint,
   });
 };
@@ -333,8 +335,8 @@ export const getSaveLayerAction = ({
     execute: async (domElement) => {
       if (domElement) {
         const metadata = getGroupMetadataFromAnnotationLayer(layer);
-
-        render(
+        const root = createRoot(domElement);
+        root.render(
           <KibanaRenderContextProvider {...startServices}>
             <SaveModal
               domElement={domElement}
@@ -356,8 +358,7 @@ export const getSaveLayerAction = ({
               {...metadata}
               showCopyOnSave={!neverSaved}
             />
-          </KibanaRenderContextProvider>,
-          domElement
+          </KibanaRenderContextProvider>
         );
       }
     },

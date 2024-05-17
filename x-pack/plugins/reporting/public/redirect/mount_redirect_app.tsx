@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { AppMountParameters } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -29,7 +29,8 @@ export const mountRedirectApp = ({
   screenshotMode,
   share,
 }: MountParams) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <EuiErrorBoundary>
       <RedirectApp
         apiClient={apiClient}
@@ -37,11 +38,10 @@ export const mountRedirectApp = ({
         screenshotMode={screenshotMode}
         share={share}
       />
-    </EuiErrorBoundary>,
-    element
+    </EuiErrorBoundary>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

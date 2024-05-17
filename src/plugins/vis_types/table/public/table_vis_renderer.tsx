@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
@@ -40,8 +40,10 @@ export const getTableVisRenderer: (
   name: 'table_vis',
   reuseDomNode: true,
   render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const showNoResult =
@@ -64,7 +66,7 @@ export const getTableVisRenderer: (
       handlers.done();
     };
 
-    render(
+    root.render(
       <KibanaRenderContextProvider {...core}>
         <VisualizationContainer
           data-test-subj="tbvChartContainer"
@@ -80,8 +82,7 @@ export const getTableVisRenderer: (
             renderComplete={renderCompete}
           />
         </VisualizationContainer>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

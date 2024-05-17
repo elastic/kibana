@@ -7,7 +7,7 @@
 
 import { CoreStart, HttpSetup } from '@kbn/core/public';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { ApplicationStart } from '@kbn/core/public';
 import { NotificationsSetup, IUiSettingsClient } from '@kbn/core/public';
@@ -61,7 +61,9 @@ export const renderApp = (
   services: AppServices,
   coreServices: CoreServices
 ) => {
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaRenderContextProvider {...coreServices}>
       <AuthorizationProvider
         privilegesEndpoint={`${API_BASE_PATH}/privileges`}
@@ -71,11 +73,10 @@ export const renderApp = (
           <App />
         </KibanaContextProvider>
       </AuthorizationProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

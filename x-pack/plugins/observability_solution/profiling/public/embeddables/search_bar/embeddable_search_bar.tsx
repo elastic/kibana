@@ -8,7 +8,7 @@ import { css } from '@emotion/react';
 import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_PROFILING_SEARCH_BAR } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ProfilingSearchBar } from '../../components/profiling_app_page_template/profiling_search_bar';
 import {
   ProfilingEmbeddableProvider,
@@ -22,6 +22,7 @@ export class EmbeddableSearchBar extends Embeddable<
 > {
   readonly type = EMBEDDABLE_PROFILING_SEARCH_BAR;
   private _domNode?: HTMLElement;
+  private _root?;
 
   constructor(
     private deps: ProfilingEmbeddablesDependencies,
@@ -33,9 +34,10 @@ export class EmbeddableSearchBar extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
+    this._root = createRoot(domNode);
     const { showDatePicker, kuery, onQuerySubmit, onRefresh, rangeFrom, rangeTo } = this.input;
 
-    render(
+    this._root.render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <div
           css={css`
@@ -59,14 +61,13 @@ export class EmbeddableSearchBar extends Embeddable<
             rangeTo={rangeTo}
           />
         </div>
-      </ProfilingEmbeddableProvider>,
-      domNode
+      </ProfilingEmbeddableProvider>
     );
   }
 
   public destroy() {
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
+    if (this._root) {
+      this._root.unmount();
     }
   }
 

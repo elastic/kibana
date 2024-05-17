@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -50,6 +50,7 @@ export async function renderApp({
   isMonacoEnabled,
   startServices,
 }: BootDependencies) {
+  const root = createRoot(element);
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
 
@@ -67,7 +68,7 @@ export async function renderApp({
 
   autocompleteInfo.mapping.setup(http, settings);
 
-  render(
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <ServicesContextProvider
         value={{
@@ -96,9 +97,8 @@ export async function renderApp({
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 }

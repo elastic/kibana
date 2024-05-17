@@ -10,7 +10,7 @@ import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
   debounceTime,
@@ -160,6 +160,7 @@ export class MapEmbeddable
   private _prevMapExtent?: MapExtent;
   private _prevSyncColors?: boolean;
   private _domNode?: HTMLElement;
+  private _root?;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
@@ -505,6 +506,7 @@ export class MapEmbeddable
    */
   render(domNode: HTMLElement) {
     this._domNode = domNode;
+    this._root = createRoot(domNode);
     if (!this._isInitialized) {
       return;
     }
@@ -581,15 +583,14 @@ export class MapEmbeddable
         />
       );
 
-    render(
+    this._root.render(
       <KibanaRenderContextProvider
         analytics={getAnalytics()}
         i18n={getCoreI18n()}
         theme={getTheme()}
       >
         <Provider store={this._savedMap.getStore()}>{content}</Provider>
-      </KibanaRenderContextProvider>,
-      this._domNode
+      </KibanaRenderContextProvider>
     );
   }
 
@@ -784,8 +785,8 @@ export class MapEmbeddable
       this._unsubscribeFromStore();
     }
 
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
+    if (this._root) {
+      this._root.unmount();
     }
 
     this._subscriptions.forEach((subscription) => {

@@ -10,7 +10,7 @@ import './_dashboard_app.scss';
 
 import React from 'react';
 import { parse, ParsedQuery } from 'query-string';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -184,11 +184,14 @@ export async function mountApp({
       iconType: 'glasses',
     });
   }
-  render(app, element);
+
+  const root = createRoot(element);
+
+  root.render(app, element);
   return () => {
     dataStart.search.session.clear();
     unlistenParentHistory();
-    unmountComponentAtNode(element);
+    root.unmount();
     appUnMounted();
   };
 }

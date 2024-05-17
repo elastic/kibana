@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { StartDependencies, UiActionsEnhancedExamplesStart } from './plugin';
 import { UiActionsExampleAppContextValue, context } from './context';
@@ -14,6 +14,7 @@ import { UiActionsExampleAppContextValue, context } from './context';
 export const mount =
   (coreSetup: CoreSetup<StartDependencies, UiActionsEnhancedExamplesStart>) =>
   async ({ appBasePath, element }: AppMountParameters) => {
+    const root = createRoot(element);
     const [
       core,
       plugins,
@@ -34,6 +35,6 @@ export const mount =
         <App />
       </context.Provider>
     );
-    render(reactElement, element);
-    return () => unmountComponentAtNode(element);
+    root.render(reactElement);
+    return () => root.unmount();
   };

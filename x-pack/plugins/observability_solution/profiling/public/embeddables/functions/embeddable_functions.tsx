@@ -7,7 +7,7 @@
 import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 import {
   ProfilingEmbeddableProvider,
@@ -22,6 +22,7 @@ export class EmbeddableFunctions extends Embeddable<
 > {
   readonly type = EMBEDDABLE_FUNCTIONS;
   private _domNode?: HTMLElement;
+  private _root?;
 
   constructor(
     private deps: ProfilingEmbeddablesDependencies,
@@ -33,23 +34,23 @@ export class EmbeddableFunctions extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
+    this._root = createRoot(domNode);
     const { data, isLoading, rangeFrom, rangeTo } = this.input;
     const totalSeconds = (rangeTo - rangeFrom) / 1000;
-    render(
+    this._root.render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <AsyncEmbeddableComponent isLoading={isLoading}>
           <div style={{ width: '100%' }}>
             <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
           </div>
         </AsyncEmbeddableComponent>
-      </ProfilingEmbeddableProvider>,
-      domNode
+      </ProfilingEmbeddableProvider>
     );
   }
 
   public destroy() {
-    if (this._domNode) {
-      unmountComponentAtNode(this._domNode);
+    if (this._root) {
+      this._root.unmount();
     }
   }
 

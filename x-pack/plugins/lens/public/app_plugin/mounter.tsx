@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import {
@@ -413,7 +413,8 @@ export async function mountApp(
 
   const PresentationUtilContext = getPresentationUtilContext();
 
-  render(
+  const root = createRoot(params.element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={lensServices}>
         <PresentationUtilContext>
@@ -431,11 +432,11 @@ export async function mountApp(
           </HashRouter>
         </PresentationUtilContext>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    params.element
+    </KibanaRenderContextProvider>
   );
   return () => {
     data.search.session.clear();
+    root.unmount();
     unmountComponentAtNode(params.element);
     lensServices.inspector.close();
     unlistenParentHistory();

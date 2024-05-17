@@ -10,7 +10,7 @@
 
 import { EuiFlyout } from '@elastic/eui';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -70,10 +70,10 @@ interface StartDeps {
 /** @internal */
 export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
-  private targetDomElement: Element | null = null;
+  private root: Element | null = null;
 
   public start({ analytics, i18n, theme, targetDomElement }: StartDeps): OverlayFlyoutStart {
-    this.targetDomElement = targetDomElement;
+    this.root = createRoot(targetDomElement);
 
     return {
       open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
@@ -102,13 +102,12 @@ export class FlyoutService {
           }
         };
 
-        render(
+        this.root.render(
           <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
             <EuiFlyout {...options} onClose={onCloseFlyout}>
               <MountWrapper mount={mount} className="kbnOverlayMountWrapper" />
             </EuiFlyout>
-          </KibanaRenderContextProvider>,
-          this.targetDomElement
+          </KibanaRenderContextProvider>
         );
 
         return flyout;
@@ -125,7 +124,7 @@ export class FlyoutService {
    */
   private cleanupDom(): void {
     if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
+      this.root.unmount();
       this.targetDomElement.innerHTML = '';
     }
     this.activeFlyout = null;

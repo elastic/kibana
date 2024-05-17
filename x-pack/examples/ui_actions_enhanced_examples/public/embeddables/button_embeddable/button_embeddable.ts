@@ -6,7 +6,7 @@
  */
 
 import { createElement } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { Embeddable, EmbeddableInput, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ButtonEmbeddableComponent } from './button_embeddable_component';
@@ -26,12 +26,12 @@ export class ButtonEmbeddable extends Embeddable {
 
   reload() {}
 
-  private el?: HTMLElement;
+  private root?;
 
   public render(el: HTMLElement): void {
     super.render(el);
-    this.el = el;
-    render(
+    this.root = createRoot(this.el);
+    this.root.render(
       createElement(ButtonEmbeddableComponent, {
         onClick: () => {
           this.params.uiActions.getTrigger(VALUE_CLICK_TRIGGER).exec({
@@ -41,13 +41,12 @@ export class ButtonEmbeddable extends Embeddable {
             },
           });
         },
-      }),
-      el
+      })
     );
   }
 
   public destroy() {
     super.destroy();
-    if (this.el) unmountComponentAtNode(this.el);
+    if (this.root) this.root.unmount();
   }
 }
