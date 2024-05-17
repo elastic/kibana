@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RESULTS_ROUTE_PATH } from '../../../common/constants';
+import { RESULTS_INDICES_LATEST_ROUTE_PATH } from '../../../common/constants';
 
 import { serverMock } from '../../__mocks__/server';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import type { LatestAggResponseBucket } from './get_results';
-import { getResultsRoute, getQuery } from './get_results';
+import { getResultsIndicesLatestRoute, getQuery } from './get_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { resultDocument } from './results.mock';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -41,7 +41,7 @@ jest.mock('./privileges', () => ({
     mockCheckIndicesPrivileges(params),
 }));
 
-describe('getResultsRoute route', () => {
+describe('getResultsIndicesLatestRoute route', () => {
   describe('querying', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
@@ -49,8 +49,8 @@ describe('getResultsRoute route', () => {
 
     const req = requestMock.create({
       method: 'get',
-      path: RESULTS_ROUTE_PATH,
-      query: { pattern: 'logs-*' },
+      path: RESULTS_INDICES_LATEST_ROUTE_PATH,
+      params: { pattern: 'logs-*' },
     });
 
     beforeEach(() => {
@@ -65,7 +65,7 @@ describe('getResultsRoute route', () => {
         [resultDocument.indexName]: {},
       });
 
-      getResultsRoute(server.router, logger);
+      getResultsIndicesLatestRoute(server.router, logger);
     });
 
     it('gets result', async () => {
@@ -114,8 +114,8 @@ describe('getResultsRoute route', () => {
 
     const req = requestMock.create({
       method: 'get',
-      path: RESULTS_ROUTE_PATH,
-      query: { pattern: 'logs-*' },
+      path: RESULTS_INDICES_LATEST_ROUTE_PATH,
+      params: { pattern: 'logs-*' },
     });
 
     beforeEach(() => {
@@ -132,7 +132,7 @@ describe('getResultsRoute route', () => {
         [resultDocument.indexName]: {},
       });
 
-      getResultsRoute(server.router, logger);
+      getResultsIndicesLatestRoute(server.router, logger);
     });
 
     it('should authorize indices from pattern', async () => {
@@ -225,14 +225,14 @@ describe('getResultsRoute route', () => {
     beforeEach(() => {
       server = serverMock.create();
       logger = loggerMock.create();
-      getResultsRoute(server.router, logger);
+      getResultsIndicesLatestRoute(server.router, logger);
     });
 
-    test('disallows invalid query param', () => {
+    test('disallows invalid path param', () => {
       const req = requestMock.create({
         method: 'get',
-        path: RESULTS_ROUTE_PATH,
-        query: {},
+        path: RESULTS_INDICES_LATEST_ROUTE_PATH,
+        params: {},
       });
       const result = server.validate(req);
 
