@@ -435,41 +435,6 @@ export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): Activi
   return [...nonEndpointActionsDocs, ...onlyEndpointActionsDocWithoutFleetActions];
 };
 
-export const hasAckInResponse = (response: EndpointActionResponse): boolean => {
-  return response.action_response?.endpoint?.ack ?? false;
-};
-
-// return TRUE if for given action_id/agent_id
-// there is no doc in .logs-endpoint.action.response-default
-export const hasNoEndpointResponse = ({
-  action,
-  agentId,
-  indexedActionIds,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  indexedActionIds: string[];
-}): boolean => {
-  return action.agents.includes(agentId) && !indexedActionIds.includes(action.action_id);
-};
-
-// return TRUE if for given action_id/agent_id
-// there is no doc in .fleet-actions-results
-export const hasNoFleetResponse = ({
-  action,
-  agentId,
-  agentResponses,
-}: {
-  action: EndpointAction;
-  agentId: string;
-  agentResponses: EndpointActionResponse[];
-}): boolean => {
-  return (
-    action.agents.includes(agentId) &&
-    !agentResponses.map((e) => e.action_id).includes(action.action_id)
-  );
-};
-
 const matchesDsNamePattern = ({
   dataStreamName,
   index,
