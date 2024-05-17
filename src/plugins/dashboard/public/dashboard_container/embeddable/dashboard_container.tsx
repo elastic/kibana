@@ -25,6 +25,7 @@ import {
   EmbeddableFactoryNotFoundError,
   embeddableInputToSubject,
   isExplicitInputWithAttributes,
+  PanelIncompatibleError,
   PanelNotFoundError,
   ViewMode,
   type EmbeddableFactory,
@@ -569,16 +570,19 @@ export class DashboardContainer
 
   public getDashboardPanelFromId = async (panelId: string) => {
     const {
-      embeddable: { reactEmbeddableRegistryHasKey },
+      embeddable: { reactEmbeddableRegistryHasKey, getReactEmbeddableFactory },
     } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
     if (reactEmbeddableRegistryHasKey(panel.type)) {
+      const factory = await getReactEmbeddableFactory(panel.type);
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
-      const serialized = apiHasSerializableState(child) ? child.serializeState() : { rawState: {} };
+      if (!apiHasSerializableState(child)) throw new PanelIncompatibleError();
+      const serialized = child.serializeState();
+      const deserialized = factory.deserializeState(serialized);
       return {
         type: panel.type,
-        explicitInput: { ...panel.explicitInput, ...serialized.rawState },
+        explicitInput: { ...panel.explicitInput, ...deserialized },
         gridData: panel.gridData,
       };
     }

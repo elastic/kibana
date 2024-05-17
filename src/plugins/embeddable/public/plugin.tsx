@@ -64,6 +64,7 @@ import {
   registerReactEmbeddableFactory,
 } from './react_embeddable_system';
 import { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
+import { getReactEmbeddableFactory } from './react_embeddable_system/react_embeddable_registry';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -142,6 +143,16 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
    * Checks if a {@link ReactEmbeddableFactory} has been registered using {@link registerReactEmbeddableFactory}
    */
   reactEmbeddableRegistryHasKey: (type: string) => boolean;
+
+  /**
+   * Gets the {@link ReactEmbeddableFactory} for a given type.
+   */
+  getReactEmbeddableFactory: <
+    StateType extends object = object,
+    ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+  >(
+    key: string
+  ) => Promise<ReactEmbeddableFactory<StateType, ApiType>>;
 
   /**
    *
@@ -252,6 +263,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     const embeddableStart: EmbeddableStart = {
       reactEmbeddableRegistryHasKey,
       getReactEmbeddableSavedObjects,
+      getReactEmbeddableFactory,
 
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,

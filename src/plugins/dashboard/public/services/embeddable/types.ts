@@ -11,6 +11,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 export type DashboardEmbeddableService = Pick<
   EmbeddableStart,
   | 'reactEmbeddableRegistryHasKey'
+  | 'getReactEmbeddableFactory'
   | 'getEmbeddableFactories'
   | 'getEmbeddableFactory'
   | 'getAllMigrations'

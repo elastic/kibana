@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  isReferenceOrValueEmbeddable,
-  PanelIncompatibleError,
-  PanelNotFoundError,
-} from '@kbn/embeddable-plugin/public';
-import { apiHasSerializableState } from '@kbn/presentation-containers';
+import { isReferenceOrValueEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiPublishesPanelTitle, getPanelTitle } from '@kbn/presentation-publishing';
 import { filter, map, max } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -58,17 +53,13 @@ const duplicateReactEmbeddableInput = async (
   idToDuplicate: string
 ) => {
   const child = dashboard.children$.value[idToDuplicate];
-  if (!child || !apiHasSerializableState(child)) throw new PanelIncompatibleError();
-
   const lastTitle = apiPublishesPanelTitle(child) ? getPanelTitle(child) ?? '' : '';
   const newTitle = await incrementPanelTitle(dashboard, lastTitle);
   const id = uuidv4();
-  const serializedState = await child.serializeState();
   return {
     type: panelToClone.type,
     explicitInput: {
       ...panelToClone.explicitInput,
-      ...serializedState.rawState,
       title: newTitle,
       id,
     },
@@ -80,7 +71,7 @@ export async function duplicateDashboardPanel(this: DashboardContainer, idToDupl
     notifications: { toasts },
     embeddable: { reactEmbeddableRegistryHasKey },
   } = pluginServices.getServices();
-  const panelToClone = this.getInput().panels[idToDuplicate] as DashboardPanelState;
+  const panelToClone = await this.getDashboardPanelFromId(idToDuplicate);
 
   const duplicatedPanelState = reactEmbeddableRegistryHasKey(panelToClone.type)
     ? await duplicateReactEmbeddableInput(this, panelToClone, idToDuplicate)
