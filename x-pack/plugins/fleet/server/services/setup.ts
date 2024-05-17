@@ -68,8 +68,28 @@ export async function setupFleet(
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
+  const logger = appContextService.getLogger();
 
   try {
+    // check if fleet setup is already started
+    const settings = await settingsService.getSettingsOrUndefined(soClient);
+
+    if (settings && settings.fleet_setup_status === 'in_progress') {
+      logger.info('Fleet setup already in progress, aborting');
+      return {
+        isInitialized: false,
+        nonFatalErrors: [],
+      };
+    }
+
+    try {
+      await settingsService.saveSettings(soClient, {
+        fleet_setup_status: 'in_progress',
+      });
+    } catch (error) {
+      logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
+    }
+
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
     apm.captureError(error);
@@ -77,6 +97,13 @@ export async function setupFleet(
     throw error;
   } finally {
     t.end();
+    try {
+      await settingsService.saveSettings(soClient, {
+        fleet_setup_status: 'completed',
+      });
+    } catch (error) {
+      logger.warn(`Error setting fleet setup status to completed: ${error}`);
+    }
   }
 }
 
@@ -86,25 +113,6 @@ async function createSetupSideEffects(
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
-
-  // check if fleet setup is already started
-  const settings = await settingsService.getSettingsOrUndefined(soClient);
-
-  if (settings && settings.fleet_setup_status === 'in_progress') {
-    logger.info('Fleet setup already in progress, aborting');
-    return {
-      isInitialized: false,
-      nonFatalErrors: [],
-    };
-  }
-
-  try {
-    await settingsService.saveSettings(soClient, {
-      fleet_setup_status: 'in_progress',
-    });
-  } catch (error) {
-    logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
-  }
 
   await cleanUpOldFileIndices(esClient, logger);
 
@@ -245,14 +253,6 @@ async function createSetupSideEffects(
         logger.info(error);
         apm.captureError(error);
       });
-  }
-
-  try {
-    await settingsService.saveSettings(soClient, {
-      fleet_setup_status: 'completed',
-    });
-  } catch (error) {
-    logger.warn(`Error setting fleet setup status to completed: ${error}`);
   }
 
   logger.info('Fleet setup completed');

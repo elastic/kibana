@@ -1037,14 +1037,13 @@ class AgentPolicyService {
       return acc;
     }, [] as FleetServerPolicy[]);
 
-    appContextService.getLogger().info(
-      `Deploying policies: ${JSON.stringify(
-        fleetServerPolicies.map((pol) => ({
-          policy_id: pol.policy_id,
-          revision_idx: pol.revision_idx,
-        }))
-      )}`
-    );
+    appContextService
+      .getLogger()
+      .info(
+        `Deploying policies: ${fleetServerPolicies
+          .map((pol) => `${pol.policy_id}:${pol.revision_idx}`)
+          .join(', ')}`
+      );
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
       {
