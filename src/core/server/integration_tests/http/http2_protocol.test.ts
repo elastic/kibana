@@ -39,28 +39,30 @@ describe('Http2 - Smoke tests', () => {
   beforeEach(() => {
     coreContext = mockCoreContext.create();
     logger = coreContext.logger.get();
-
-    const rawConfig = httpConfig.schema.validate({
-      name: 'kibana',
-      protocol: 'http2',
-      host: '127.0.0.1',
-      port: 10002,
-      ssl: {
-        enabled: true,
-        certificate: KBN_CERT_PATH,
-        key: KBN_KEY_PATH,
-        cipherSuites: ['TLS_AES_256_GCM_SHA384'],
-        redirectHttpFromPort: 10003,
-      },
-      shutdownTimeout: '5s',
-    });
-    config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
-
-    server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
   });
 
   describe('When HTTP2 is enabled', () => {
     let innerServerListener: Server;
+
+    beforeEach(() => {
+      const rawConfig = httpConfig.schema.validate({
+        name: 'kibana',
+        protocol: 'http2',
+        host: '127.0.0.1',
+        port: 10002,
+        ssl: {
+          enabled: true,
+          certificate: KBN_CERT_PATH,
+          key: KBN_KEY_PATH,
+          cipherSuites: ['TLS_AES_256_GCM_SHA384'],
+          redirectHttpFromPort: 10003,
+        },
+        shutdownTimeout: '5s',
+      });
+      config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+
+      server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
+    });
 
     beforeEach(async () => {
       const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
@@ -90,14 +92,14 @@ describe('Http2 - Smoke tests', () => {
       await server.stop();
     });
 
-    test('Should respond to POST endpoint', async () => {
+    test('Should respond to POST endpoint for an HTTP/2 request', async () => {
       const response = await supertest(innerServerListener).post('/').http2();
 
       expect(response.status).toBe(200);
       expect(response.body).toStrictEqual({ ok: true });
     });
 
-    test('Should respond to POST endpoint on HTTP/1.1', async () => {
+    test('Should respond to POST endpoint for an HTTP/1.x request', async () => {
       const response = await supertest(innerServerListener).post('/');
 
       expect(response.status).toBe(200);
