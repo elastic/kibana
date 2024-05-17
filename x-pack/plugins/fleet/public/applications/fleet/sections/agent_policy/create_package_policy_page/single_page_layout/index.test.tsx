@@ -337,6 +337,36 @@ describe('when on the package policy create page', () => {
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledTimes(1);
     });
 
+    test('should show unprivileged warning and agents modal on submit if conditions match', async () => {
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getMockPackageInfo(true));
+      (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
+        data: { results: { total: 1 } },
+      });
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByText('This action will update 1 agent')).toBeInTheDocument();
+        expect(
+          renderResult.getByText('Unprivileged agents enrolled to the selected policy')
+        ).toBeInTheDocument();
+        expect(renderResult.getByTestId('unprivilegedAgentsCallout').textContent).toContain(
+          'This integration requires Elastic Agents to have root privileges. There is 1 agent running in an unprivileged mode using Agent policy 1. To ensure that all data required by the integration can be collected, re-enroll the agent using an account with root privileges.'
+        );
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+      });
+
+      expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+    });
+
     test('should create package policy on submit when query param agent policy id is set', async () => {
       await act(async () => {
         render('agent-policy-1');
@@ -529,7 +559,7 @@ describe('when on the package policy create page', () => {
         expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
       });
 
-      test('should not show modal if agent policy has agents', async () => {
+      test('should show modal if agent policy has agents', async () => {
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
           data: { results: { total: 1 } },
         });
