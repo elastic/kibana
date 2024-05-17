@@ -249,7 +249,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      navigateToUrl(url);
+      navigateToUrl(url, { openInNewTab: true });
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
