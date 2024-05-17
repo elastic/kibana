@@ -22,10 +22,12 @@ import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '../../common/navigation/constants';
 import { bsearchFindingsPageDefault } from '../../test/handlers/bsearch/findings_page';
 import userEvent from '@testing-library/user-event';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { CspClientPluginStartDeps } from '../../types';
 
-const renderFindingsPage = () => {
+const renderFindingsPage = (mockServicesSetup = getMockServerServicesSetup()) => {
   return render(
-    <TestProvider {...getMockServerServicesSetup()}>
+    <TestProvider {...mockServicesSetup}>
       <MemoryRouter initialEntries={[findingsNavigation.findings_default.path]}>
         <Configurations />
       </MemoryRouter>
@@ -33,7 +35,7 @@ const renderFindingsPage = () => {
   );
 };
 
-const server = setupMockServiceWorker(true);
+const server = setupMockServiceWorker();
 
 describe('<Findings />', () => {
   setupMockServiceWorkerServer(server);
@@ -204,29 +206,50 @@ describe('<Findings />', () => {
 
       await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
     });
+    it('remove filter', async () => {
+      server.use(cspmStatusIndexed);
+      server.use(bsearchFindingsPageDefault);
+      const mockedFilterManager = new FilterManager(getMockServerServicesSetup().core.uiSettings);
+      mockedFilterManager.setFilters([
+        {
+          meta: {
+            alias: 'rule.section: Logging and Monitoring',
+            negate: false,
+            disabled: false,
+            key: 'rule.section',
+            value: 'Logging and Monitoring',
+          },
+          query: {
+            match_phrase: {
+              'rule.section': 'Logging and Monitoring',
+            },
+          },
+        },
+      ]);
+      const mockWithFilter = {
+        ...getMockServerServicesSetup(),
+        deps: {
+          ...getMockServerServicesSetup().deps,
+          data: {
+            ...getMockServerServicesSetup().deps.data,
+            query: {
+              ...getMockServerServicesSetup().deps.data!.query,
+              filterManager: mockedFilterManager,
+            },
+          },
+        } as unknown as Partial<CspClientPluginStartDeps>,
+      };
+      const { getByText, getByTestId, getAllByText, getByRole } =
+        renderFindingsPage(mockWithFilter);
+      expect(getByText('Loading...')).toBeInTheDocument();
+      await waitFor(() => expect(getByText('Loading results')).toBeInTheDocument());
+      await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
+      expect(getAllByText('azure-disk')).toHaveLength(1);
+      const deleteFilter = getByRole('button', {
+        name: 'Delete rule.section: Logging and Monitoring',
+      });
+      userEvent.click(deleteFilter);
+      await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(2));
+    });
   });
-  //   it('Opens the findings flyout', async () => {
-  //     server.use(cspmStatusIndexed);
-  //     server.use(bsearchFindingsPageDefault);
-  //     const { getByText, getByTestId, getAllByText, debug } = renderFindingsPage();
-
-  //     // Loading while checking the status API
-  //     expect(getByText('Loading...')).toBeInTheDocument();
-
-  //     await waitFor(() => expect(getByText('Loading results')).toBeInTheDocument());
-  //     await waitFor(() => expect(getByTestId('latest_findings_container')).toBeInTheDocument());
-  //     await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
-
-  //     expect(getAllByText('azure-disk')).toHaveLength(2);
-
-  //     debug(undefined, 9999999);
-  //     const queryInput = getByTestId('queryInput');
-  //     userEvent.type(queryInput, 'rule.section : "Logging and Monitoring"');
-
-  //     const submitButton = getByTestId('querySubmitButton');
-  //     userEvent.click(submitButton);
-
-  //     await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
-  //   });
-  // });
 });

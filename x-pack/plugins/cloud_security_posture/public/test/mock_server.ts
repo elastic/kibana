@@ -16,7 +16,12 @@ import { defaultHandlers } from './handlers';
 import { getMockDependencies } from './fixtures/get_mock_dependencies';
 import { CspClientPluginStartDeps } from '../types';
 
-export function setupMockServiceWorker(debug = false) {
+/**
+ * Setup a mock service worker with the default handlers
+ * @param debug - If true, log all requests to the console
+ * @returns The mock service worker server
+ */
+export function setupMockServiceWorker({ debug = false }: { debug?: boolean } = {}) {
   const server = setupServer(...defaultHandlers);
 
   if (debug) {

@@ -22,6 +22,7 @@ jest.mock('rxjs', () => {
  * This function wraps beforeAll, afterAll and beforeEach for setup MSW server into a single call.
  * That makes the describe code further down easier to read and makes
  * sure you don't forget the handlers. Can easily be shared between tests.
+ * @param server - The MSW server instance
  */
 const setupMockServiceWorkerServer = (server: SetupServerApi) => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
