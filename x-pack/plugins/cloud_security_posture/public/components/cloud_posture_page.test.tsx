@@ -97,12 +97,7 @@ describe('<CloudPosturePage />', () => {
       })
     );
 
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: undefined,
-      })
-    );
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() => undefined);
 
     renderCloudPosturePage();
     expect(screen.getByTestId('no_locator')).toBeInTheDocument();

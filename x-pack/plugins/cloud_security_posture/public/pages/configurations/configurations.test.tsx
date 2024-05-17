@@ -33,7 +33,7 @@ const renderFindingsPage = () => {
   );
 };
 
-const server = setupMockServiceWorker(true);
+const server = setupMockServiceWorker();
 
 describe('<Findings />', () => {
   setupMockServiceWorkerServer(server);
