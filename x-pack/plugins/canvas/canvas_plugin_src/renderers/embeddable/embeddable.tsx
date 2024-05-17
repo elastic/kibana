@@ -130,6 +130,7 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
+      const root = createRoot(domNode);
       const { embeddables } = pluginServices.getServices();
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
@@ -140,7 +141,7 @@ export const embeddableRendererFactory = (
         /**
          * Prioritize React embeddables
          */
-        ReactDOM.render(
+        root.render(
           renderReactEmbeddable({
             input,
             handlers,
@@ -149,13 +150,12 @@ export const embeddableRendererFactory = (
             container: canvasApi,
             core,
           }),
-          domNode,
           () => handlers.done()
         );
 
         handlers.onDestroy(() => {
           handlers.onEmbeddableDestroyed();
-          return ReactDOM.unmountComponentAtNode(domNode);
+          return root.unmount();
         });
       } else if (!embeddablesRegistry[uniqueId]) {
         /**

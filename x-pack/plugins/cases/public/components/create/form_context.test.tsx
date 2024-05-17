@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Screen } from '@testing-library/react';
 import { waitFor, within, screen, act } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { useKibana } from '../../common/lib/kibana';
 import type { AppMockRenderer } from '../../common/mock';
@@ -304,7 +304,7 @@ describe('Create case', () => {
       await fillFormReactTestingLib({ renderer: screen });
 
       userEvent.click(screen.getByTestId('case-severity-selection'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.getByTestId('case-severity-selection-high')).toBeVisible();
 

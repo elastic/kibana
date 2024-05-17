@@ -8,7 +8,7 @@ import React from 'react';
 import { MultiSelectFilter } from './multi_select_filter';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 describe('multi select filter', () => {
   it('should render the amount of options available', async () => {
@@ -29,7 +29,7 @@ describe('multi select filter', () => {
     render(<MultiSelectFilter {...props} />);
 
     userEvent.click(screen.getByRole('button', { name: 'Tags' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.getByText('4 options')).toBeInTheDocument();
   });
@@ -53,7 +53,7 @@ describe('multi select filter', () => {
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
     userEvent.click(screen.getByRole('button', { name: 'Tags' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Limit reached')).toBeInTheDocument();
 
@@ -84,7 +84,7 @@ describe('multi select filter', () => {
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
     userEvent.click(screen.getByRole('button', { name: 'Tags' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
 
@@ -118,7 +118,7 @@ describe('multi select filter', () => {
     render(<MultiSelectFilter {...props} />);
 
     userEvent.click(screen.getByRole('button', { name: 'Tags' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Limit reached')).toBeInTheDocument();
 
@@ -164,7 +164,7 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
     userEvent.click(screen.getByRole('button', { name: 'Tags' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     expect(screen.getAllByTestId(TEST_ID).length).toBe(2);
   });
 

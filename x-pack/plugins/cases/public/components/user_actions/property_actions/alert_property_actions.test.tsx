@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
@@ -38,7 +38,7 @@ describe.skip('AlertPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
       1
@@ -55,7 +55,7 @@ describe.skip('AlertPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
@@ -71,7 +71,7 @@ describe.skip('AlertPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 

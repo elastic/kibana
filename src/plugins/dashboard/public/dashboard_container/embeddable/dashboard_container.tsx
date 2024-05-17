@@ -355,7 +355,7 @@ export class DashboardContainer
     this.domNode.className = 'dashboardContainer';
     this.root = createRoot(this.domNode);
 
-    ReactDOM.render(
+    this.root.render(
       <KibanaRenderContextProvider
         analytics={this.analyticsService}
         i18n={this.i18n}
@@ -368,8 +368,7 @@ export class DashboardContainer
             <DashboardViewport />
           </DashboardContainerContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
-      </KibanaRenderContextProvider>,
-      dom
+      </KibanaRenderContextProvider>
     );
   }
 

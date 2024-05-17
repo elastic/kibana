@@ -6,7 +6,7 @@
  */
 
 import React, { CSSProperties } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
@@ -27,7 +27,8 @@ export const getMarkdownRenderer =
     render(domNode, config, handlers) {
       const fontStyle = config.font ? config.font.spec : {};
 
-      ReactDOM.render(
+      const root = createRoot(domNode);
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <Markdown
             className="canvasMarkdown"

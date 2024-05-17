@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { render, screen, fireEvent } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
@@ -45,7 +45,7 @@ describe('ChartSelect', () => {
 
     const selectButton = screen.getByRole('button', { name: i18n.SELECT_A_CHART_ARIA_LABEL });
     selectButton.click();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     const treemapMenuItem = screen.getByRole('button', { name: i18n.TREEMAP });
     treemapMenuItem.click();

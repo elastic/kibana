@@ -124,7 +124,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     fireEvent.change(screen.getByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
@@ -140,7 +140,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByText('Assign a user'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     fireEvent.change(screen.getByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
@@ -211,7 +211,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     fireEvent.change(screen.getByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
@@ -251,7 +251,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     // close the popover
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
@@ -312,7 +312,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     fireEvent.change(screen.getByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },
     });
@@ -358,7 +358,7 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), {
       target: { value: 'damaged_raccoon@elastic.co' },

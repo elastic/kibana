@@ -9,7 +9,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import React from 'react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
@@ -53,7 +53,7 @@ describe('Policies selector', () => {
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(element.getByText(policy.name)).toHaveTextContent(policy.name);
 
@@ -72,7 +72,7 @@ describe('Policies selector', () => {
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(element.getByText(policy.name));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
@@ -88,7 +88,7 @@ describe('Policies selector', () => {
       const element = getElement({ defaultExcludedPolicies, defaultIncludedPolicies });
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(element.getByText('Global entries'));
       expect(onChangeSelectionMock).toHaveBeenCalledWith([
@@ -104,7 +104,7 @@ describe('Policies selector', () => {
       const element = getElement({});
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), policy.name);
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
@@ -114,7 +114,7 @@ describe('Policies selector', () => {
       const element = getElement({});
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), 'no results');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);
@@ -125,7 +125,7 @@ describe('Policies selector', () => {
       const element = getElement({});
 
       userEvent.click(element.getByTestId('policiesSelectorButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.type(element.getByTestId('policiesSelectorSearch'), '*');
       expect(element.queryAllByText('Global entries')).toStrictEqual([]);

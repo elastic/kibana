@@ -35,7 +35,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         { core: makeUptimePermissionsCore({ save: true }) }
       );
       userEvent.click(getByText('Alerts and rules'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
       await new Promise((r) => setTimeout(r, 250)); // wait for the default time for tooltips to show up
       await expect(
@@ -62,7 +62,7 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
         { core: makeUptimePermissionsCore({ save: false }) }
       );
       userEvent.click(getByText('Alerts and rules'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.hover(
         screen

@@ -65,7 +65,7 @@ export async function openLinkEditorFlyout({
       await unmountFlyout();
     };
 
-    ReactDOM.render(
+    root.render(
       <KibanaRenderContextProvider {...coreServices}>
         <LinkEditor
           link={link}
@@ -73,8 +73,7 @@ export async function openLinkEditorFlyout({
           onClose={onCancel}
           parentDashboard={parentDashboard}
         />
-      </KibanaRenderContextProvider>,
-      ref.current
+      </KibanaRenderContextProvider>
     );
   }).catch(() => {
     // on reject (i.e. on cancel), just return the original list of links

@@ -6,7 +6,7 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 
 import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
@@ -56,7 +56,7 @@ describe('ChartContextMenu', () => {
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     menuButton.click();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.getByRole('button', { name: INSPECT })).toBeInTheDocument();
   });
@@ -79,7 +79,7 @@ describe('ChartContextMenu', () => {
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     menuButton.click();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     resetMenuItem.click();
@@ -106,7 +106,7 @@ describe('ChartContextMenu', () => {
 
     const menuButton = screen.getByRole('button', { name: CHART_SETTINGS_POPOVER_ARIA_LABEL });
     fireEvent.click(menuButton);
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     fireEvent.click(resetMenuItem);

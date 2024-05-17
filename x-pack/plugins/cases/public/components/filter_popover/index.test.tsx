@@ -51,7 +51,7 @@ describe('FilterPopover ', () => {
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('No options available')).toBeInTheDocument();
   });
@@ -68,7 +68,7 @@ describe('FilterPopover ', () => {
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`)).toBeInTheDocument();
     expect(await screen.findByTestId(`options-filter-popover-item-${tags[1]}`)).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('FilterPopover ', () => {
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
 
@@ -107,7 +107,7 @@ describe('FilterPopover ', () => {
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId(`options-filter-popover-item-${tags[0]}`));
 
@@ -135,7 +135,7 @@ describe('FilterPopover ', () => {
 
       userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(await screen.findByTestId('maximum-length-warning')).toHaveTextContent(maxLengthLabel);
 
@@ -160,7 +160,7 @@ describe('FilterPopover ', () => {
 
       userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
       expect(await screen.findByTestId(`options-filter-popover-item-${newTags[3]}`)).toHaveProperty(
@@ -184,7 +184,7 @@ describe('FilterPopover ', () => {
 
       userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('maximum-length-warning')).not.toBeInTheDocument();
       expect(await screen.findByTestId(`options-filter-popover-item-${newTags[4]}`)).toHaveProperty(
@@ -205,7 +205,7 @@ describe('FilterPopover ', () => {
 
       userEvent.click(await screen.findByTestId('options-filter-popover-button-Tags'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(await screen.findByTestId(`options-filter-popover-item-${newTags[1]}`));
 

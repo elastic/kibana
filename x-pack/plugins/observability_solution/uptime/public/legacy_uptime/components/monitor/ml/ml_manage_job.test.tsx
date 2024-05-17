@@ -54,7 +54,7 @@ describe('Manage ML Job', () => {
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
       userEvent.click(anomalyDetectionBtn as HTMLElement);
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.hover(getByText(labels.ENABLE_ANOMALY_ALERT));
       expect(
@@ -92,7 +92,7 @@ describe('Manage ML Job', () => {
       const anomalyDetectionBtn = forNearestButton(getByText)(labels.ANOMALY_DETECTION);
       expect(anomalyDetectionBtn).toBeInTheDocument();
       userEvent.click(anomalyDetectionBtn as HTMLElement);
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.hover(
         screen.getByTestSubject('uptimeEnableAnomalyAlertBtn').closest('span') as HTMLElement

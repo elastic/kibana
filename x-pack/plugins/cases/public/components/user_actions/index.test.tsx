@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
@@ -143,7 +143,7 @@ describe(`UserActions`, () => {
       ).findByTestId('property-actions-user-action-ellipses')
     );
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
@@ -169,7 +169,7 @@ describe(`UserActions`, () => {
       ).findByTestId('property-actions-user-action-ellipses')
     );
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
@@ -217,7 +217,7 @@ describe(`UserActions`, () => {
       ).findByTestId('property-actions-user-action-ellipses')
     );
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
 

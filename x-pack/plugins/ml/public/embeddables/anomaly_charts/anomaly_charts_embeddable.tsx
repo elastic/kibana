@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import type { createRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
@@ -92,8 +92,9 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
 
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
+    this.root = createRoot(node);
 
-    ReactDOM.render(
+    this.root.render(
       <KibanaRenderContextProvider {...this.services[0]}>
         <KibanaContextProvider
           services={{
@@ -119,8 +120,7 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
             />
           </Suspense>
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>,
-      node
+      </KibanaRenderContextProvider>
     );
   }
 

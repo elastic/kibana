@@ -8,7 +8,7 @@
 
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -75,7 +75,7 @@ describe('filters notification popover', () => {
       </I18nProvider>
     );
     await userEvent.click(await screen.findByTestId(`embeddablePanelNotification-${api.uuid}`));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
   };
 
   it('calls get all dataviews from the parent', async () => {

@@ -22,11 +22,11 @@ export const getTextRenderer =
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, { text: textString }, handlers) {
-      ReactDOM.render(
+      const root = createRoot(domNode);
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <div>{textString}</div>
         </KibanaRenderContextProvider>,
-        domNode,
         () => handlers.done()
       );
       handlers.onDestroy(() => root.unmount());

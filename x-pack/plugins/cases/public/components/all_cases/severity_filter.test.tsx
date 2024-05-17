@@ -11,7 +11,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
 describe('Severity form field', () => {
@@ -35,7 +35,7 @@ describe('Severity form field', () => {
 
     userEvent.click(popoverButton);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     const allOptions = await within(await screen.findByTestId('euiSelectableList')).findAllByRole(
       'option'
@@ -53,7 +53,7 @@ describe('Severity form field', () => {
 
     userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(
       await within(await screen.findByTestId('euiSelectableList')).findByRole('option', {

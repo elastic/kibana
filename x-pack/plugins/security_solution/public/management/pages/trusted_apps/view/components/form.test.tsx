@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
 import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -263,7 +263,7 @@ describe('Trusted apps form', () => {
 
     it('should correctly change OS', async () => {
       userEvent.click(getOsField());
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(screen.getByRole('option', { name: 'Linux' }));
       const expected = createOnChangeArgs({
         item: createItem({ os_types: [OperatingSystem.LINUX] }),

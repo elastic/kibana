@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
@@ -120,7 +120,7 @@ describe('Presentation panel', () => {
       const getActions = jest.fn().mockReturnValue([mockAction('actionA'), mockAction('actionB')]);
       await renderPresentationPanel({ api, props: { getActions } });
       userEvent.click(screen.getByTestId('embeddablePanelToggleMenuIcon'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       await waitFor(() => {
         expect(screen.getByTestId('embeddablePanelContextMenuOpen')).toBeInTheDocument();
         expect(screen.getByTestId('presentationPanelContextMenuItems')).toBeInTheDocument();

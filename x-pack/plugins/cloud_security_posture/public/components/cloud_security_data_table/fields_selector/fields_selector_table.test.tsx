@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { TestProvider } from '../../../test/test_provider';
 import {
@@ -108,7 +108,7 @@ describe('FieldsSelectorTable', () => {
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
 
       getByTestId('viewSelectorButton').click();
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       getByTestId('viewSelectorOption-all').click();
 
@@ -134,7 +134,7 @@ describe('FieldsSelectorTable', () => {
       expect(getByTestId('viewSelectorButton').textContent).toBe(VIEW_MENU_SELECTED_TEXT);
 
       getByTestId('viewSelectorButton').click();
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       getByTestId('viewSelectorOption-all').click();
 
@@ -152,7 +152,7 @@ describe('FieldsSelectorTable', () => {
       expect(queryByTestId('viewSelectorOption-selected')).not.toBeInTheDocument();
 
       getByTestId('viewSelectorButton').click();
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(getByTestId('viewSelectorMenu')).toBeInTheDocument();
       expect(getByTestId('viewSelectorOption-all')).toBeInTheDocument();

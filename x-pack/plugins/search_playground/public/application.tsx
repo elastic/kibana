@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,8 +20,9 @@ export const renderApp = async (
   element: HTMLElement
 ) => {
   const { PlaygroundRouter } = await import('./playground_router');
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
@@ -30,8 +31,7 @@ export const renderApp = async (
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => root.unmount();

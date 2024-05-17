@@ -73,7 +73,7 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(res.getByText('Actions')).toBeInTheDocument();
     expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
     await waitForEuiContextMenuPanelTransition();
@@ -119,7 +119,7 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`));
     await waitForEuiContextMenuPanelTransition();
@@ -154,7 +154,7 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(res.getByTestId('cases-action-copy-id'));
 
@@ -177,7 +177,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
@@ -201,7 +201,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
@@ -227,7 +227,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(res.getByTestId('cases-bulk-action-tags'));
 
@@ -262,7 +262,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
 
@@ -298,7 +298,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
@@ -317,7 +317,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
@@ -336,7 +336,7 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
       expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();

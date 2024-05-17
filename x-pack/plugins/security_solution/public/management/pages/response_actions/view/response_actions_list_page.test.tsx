@@ -7,7 +7,7 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
@@ -533,7 +533,7 @@ describe('Response actions history page', () => {
 
       // pick another relative date
       userEvent.click(quickMenuButton);
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
 

@@ -40,6 +40,7 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
     help: strings.getHelpDescription(),
     reuseDomNode: true, // must be true, otherwise popovers don't work
     render: async (domNode: HTMLElement, config: Arguments, handlers: RendererHandlers) => {
+      const root = createRoot(domNode);
       let filterExpression = handlers.getFilter();
 
       if (filterExpression === undefined || filterExpression.indexOf('timefilter') !== 0) {
@@ -58,7 +59,7 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
         }
       }
 
-      ReactDOM.render(
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <TimeFilter
             commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
@@ -67,7 +68,6 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
             dateFormat={customDateFormat}
           />
         </KibanaRenderContextProvider>,
-        domNode,
         () => handlers.done()
       );
 

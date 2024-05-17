@@ -47,7 +47,7 @@ import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -1530,7 +1530,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // select agent-based and check for cloudformation option
       userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(
@@ -1585,7 +1585,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // select agent-based and check for Cloud Shell option
       userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
@@ -1677,7 +1677,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // select agent-based and check for ARM template option
       userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();

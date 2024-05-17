@@ -8,7 +8,7 @@
 import { fromExpression, toExpression, Ast } from '@kbn/interpreter';
 import { get } from 'lodash';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';
 import { RendererFactory } from '../../../../types';
@@ -48,6 +48,7 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
     reuseDomNode: true,
     height: 50,
     render(domNode, config, handlers) {
+      const root = createRoot(domNode);
       let filterExpression = handlers.getFilter();
 
       if (
@@ -96,9 +97,8 @@ export const dropdownFilterFactory: StartInitializer<RendererFactory<Config>> =
         />
       );
 
-      ReactDOM.render(
+      root.render(
         <KibanaRenderContextProvider {...core}>{filter}</KibanaRenderContextProvider>,
-        domNode,
         () => handlers.done()
       );
 

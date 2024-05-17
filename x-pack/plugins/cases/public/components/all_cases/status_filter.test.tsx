@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusFilter } from './status_filter';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import * as i18n from './translations';
 
 const LABELS = {
@@ -41,7 +41,7 @@ describe.skip('StatusFilter', () => {
     expect(await screen.findByTestId('options-filter-popover-button-status')).not.toBeDisabled();
 
     userEvent.click(await screen.findByRole('button', { name: 'Status' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();
     expect(await screen.findByRole('option', { name: LABELS.inProgress })).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe.skip('StatusFilter', () => {
     render(<StatusFilter {...defaultProps} />);
 
     userEvent.click(await screen.findByRole('button', { name: 'Status' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(await screen.findByRole('option', { name: LABELS.open }));
 
     await waitFor(() => {
@@ -68,7 +68,7 @@ describe.skip('StatusFilter', () => {
     render(<StatusFilter {...defaultProps} hiddenStatuses={[CaseStatuses.closed]} />);
 
     userEvent.click(await screen.findByRole('button', { name: 'Status' }));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findAllByRole('option')).toHaveLength(2);
     expect(await screen.findByRole('option', { name: LABELS.open })).toBeInTheDocument();

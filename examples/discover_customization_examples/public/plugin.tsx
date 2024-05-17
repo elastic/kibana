@@ -60,8 +60,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
       visibleIn: [],
       mount: async (appMountParams) => {
         const [_, { discover, data }] = await core.getStartServices();
-
-        ReactDOM.render(
+        const root = createRoot(appMountParams.element);
+        root.render(
           <I18nProvider>
             <KibanaThemeProvider theme={core.theme}>
               <Router history={appMountParams.history}>
@@ -78,16 +78,14 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 </Routes>
               </Router>
             </KibanaThemeProvider>
-          </I18nProvider>,
-          appMountParams.element
+          </I18nProvider>
         );
 
         return () => {
           // work around race condition between unmount effect and current app id
           // observable in the search session service
           data.search.session.clear();
-
-          ReactDOM.unmountComponentAtNode(appMountParams.element);
+          root.unmount();
         };
       },
     });
@@ -179,7 +177,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                   </EuiWrappingPopover>
                 );
 
-                ReactDOM.render(element, optionsContainer);
+                createRoot(optionsContainer).render(element);
               },
             },
             order: 100,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import {
   DetailPanelAlertActions,
@@ -62,7 +62,7 @@ describe('DetailPanelAlertActions component', () => {
       );
 
       userEvent.click(renderResult.getByTestId(BUTTON_TEST_ID));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId(SHOW_DETAILS_TEST_ID));
       expect(mockShowAlertDetails.mock.calls.length).toBe(1);
       expect(mockShowAlertDetails.mock.results[0].value).toBe(mockEvent.kibana?.alert?.uuid);
@@ -81,7 +81,7 @@ describe('DetailPanelAlertActions component', () => {
       );
 
       userEvent.click(renderResult.getByTestId(BUTTON_TEST_ID));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId(JUMP_TO_PROCESS_TEST_ID));
       expect(mockOnJumpToEvent.mock.calls.length).toBe(1);
       expect(mockOnJumpToEvent.mock.results[0].value).toEqual(mockEvent);

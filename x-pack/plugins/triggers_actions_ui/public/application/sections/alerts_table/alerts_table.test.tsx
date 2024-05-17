@@ -8,7 +8,7 @@ import React, { useMemo, useReducer } from 'react';
 import { identity } from 'lodash';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   ALERT_RULE_NAME,
   ALERT_REASON,
@@ -377,7 +377,7 @@ describe('AlertsTable', () => {
         }
       );
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(
         renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),

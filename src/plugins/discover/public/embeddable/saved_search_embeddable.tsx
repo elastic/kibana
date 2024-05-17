@@ -655,7 +655,7 @@ export class SavedSearchEmbeddable
       searchProps.dataView &&
       Array.isArray(searchProps.columns)
     ) {
-      ReactDOM.render(
+      this.root.render(
         <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <FieldStatisticsTable
@@ -694,7 +694,7 @@ export class SavedSearchEmbeddable
     if (searchProps.services) {
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
 
-      ReactDOM.render(
+      this.root.render(
         <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>

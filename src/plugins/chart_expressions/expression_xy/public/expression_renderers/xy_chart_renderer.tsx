@@ -259,7 +259,7 @@ export const getXyChartRenderer = ({
       height: '100%',
     });
 
-    ReactDOM.render(
+    root.render(
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
           <XYChartReportable
@@ -288,8 +288,7 @@ export const getXyChartRenderer = ({
             setChartSize={setChartSize}
           />
         </div>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

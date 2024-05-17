@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartInitializer } from '../../../plugin';
 import { RendererFactory } from '../../../../types';
@@ -23,14 +23,14 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
     reuseDomNode: true,
     height: 50,
     render(domNode, _, handlers) {
-      ReactDOM.render(
+      const root = createRoot(domNode);
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <AdvancedFilter
             commit={(filter) => handlers.event({ name: 'applyFilterAction', data: filter })}
             value={handlers.getFilter()}
           />
         </KibanaRenderContextProvider>,
-        domNode,
         () => handlers.done()
       );
 

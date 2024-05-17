@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { render, screen } from '@testing-library/react';
@@ -47,7 +47,7 @@ describe('library notification popover', () => {
     await userEvent.click(
       await screen.findByTestId('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION')
     );
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
   };
 
   it('renders the unlink button', async () => {

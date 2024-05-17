@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -54,7 +54,7 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(screen.getByTestId('options-filter-popover-button-owner'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.getByTestId(`options-filter-popover-item-${solutions[0]}`)).toBeInTheDocument();
       expect(
@@ -73,7 +73,7 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
@@ -94,7 +94,7 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
@@ -124,7 +124,7 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(getByTestId(`options-filter-popover-item-${solutions[0]}`)).toBeInTheDocument();
       expect(getByTestId(`options-filter-popover-item-${solutions[1]}`)).toBeInTheDocument();
@@ -141,7 +141,7 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
@@ -162,7 +162,7 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 

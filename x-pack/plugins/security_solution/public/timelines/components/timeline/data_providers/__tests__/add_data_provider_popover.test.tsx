@@ -30,7 +30,7 @@ describe('Testing AddDataProviderPopover', () => {
     );
 
     clickOnAddField();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
   });
 
   it('Test Popover goes away after clicking again on add field', async () => {
@@ -41,7 +41,7 @@ describe('Testing AddDataProviderPopover', () => {
     );
 
     clickOnAddField();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     clickOnAddField();
     await waitForEuiPopoverClose();

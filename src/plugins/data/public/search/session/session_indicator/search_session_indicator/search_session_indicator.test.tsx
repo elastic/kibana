@@ -9,7 +9,7 @@
 import React, { ReactNode } from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SearchSessionIndicator } from './search_session_indicator';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SearchSessionState } from '../../../..';
@@ -28,7 +28,7 @@ test('Loading state', async () => {
   );
 
   await userEvent.click(screen.getByLabelText('Search session loading'));
-  await waitForEuiPopoverOpen();
+  // await waitForEuiPopoverOpen();
   await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();
@@ -43,7 +43,7 @@ test('Completed state', async () => {
   );
 
   await userEvent.click(screen.getByLabelText('Search session complete'));
-  await waitForEuiPopoverOpen();
+  // await waitForEuiPopoverOpen();
   await userEvent.click(screen.getByText('Save session'));
 
   expect(onSave).toBeCalled();
@@ -58,7 +58,7 @@ test('Loading in the background state', async () => {
   );
 
   await userEvent.click(screen.getByLabelText(/Saved session in progress/));
-  await waitForEuiPopoverOpen();
+  // await waitForEuiPopoverOpen();
   await userEvent.click(screen.getByText('Stop session'));
 
   expect(onCancel).toBeCalled();

@@ -5,46 +5,46 @@ exports[`CheckerErrors should render nothing if errors is empty 1`] = `null`;
 exports[`CheckerErrors should render typical boom errors from api response 1`] = `
 Array [
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
   />,
   <div
-    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-m-danger-euiCallOut"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft css-ospg6n-euiPanel-none-m-danger-euiCallOut"
   >
     <p
-      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
+      class="euiTitle euiCallOutHeader__title css-1gwdoox-euiTitle-xs-euiCallOutHeader-danger"
     >
       Errors found
     </p>
     <div
-      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
     />
     <div
-      class="euiText emotion-euiText-s-euiTextColor-default"
+      class="euiText css-f9i6fj-euiText-s-euiTextColor-default"
     >
       <p>
         There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
       </p>
       <dl
-        class="euiDescriptionList emotion-euiDescriptionList-row-left"
+        class="euiDescriptionList css-uznago-euiDescriptionList-row-left"
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          class="euiDescriptionList__title css-xxhp2h-euiDescriptionList__title-row-normal-s"
         >
           403 Forbidden
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          class="euiDescriptionList__description css-zdkgi8-euiDescriptionList__description-row-normal"
         >
           no access for you
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          class="euiDescriptionList__title css-xxhp2h-euiDescriptionList__title-row-normal-s"
         >
           500 Internal Server Error
         </dt>
         <dd
-          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+          class="euiDescriptionList__description css-zdkgi8-euiDescriptionList__description-row-normal"
         >
           An internal server error occurred
         </dd>

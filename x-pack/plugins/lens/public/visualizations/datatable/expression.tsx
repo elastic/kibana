@@ -155,7 +155,7 @@ export const getDatatableRenderer = (dependencies: {
       getColumnsFilterable(config.data, handlers),
     ]);
 
-    ReactDOM.render(
+    root.render(
       <KibanaRenderContextProvider {...startServices}>
         <DatatableComponent
           {...config}
@@ -171,8 +171,7 @@ export const getDatatableRenderer = (dependencies: {
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
         />
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

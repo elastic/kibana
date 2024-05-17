@@ -17,7 +17,7 @@ import type { CaseConnectors } from '../../containers/types';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { choices, resilientIncidentTypes, resilientSeverity } from '../connectors/mock';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 
@@ -123,7 +123,7 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -176,7 +176,7 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -266,7 +266,7 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(screen.getAllByTestId('dropdown-connector-no-connector')[0]);
 
     userEvent.click(screen.getByTestId('edit-connectors-submit'));
@@ -289,7 +289,7 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -322,7 +322,7 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -372,7 +372,7 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
 
     await waitFor(() => {

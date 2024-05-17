@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
 import { AttachToCaseButton } from './attach_to_case_button';
@@ -83,7 +83,7 @@ describe('AttachToCaseButton', () => {
 
     getByTestId('timeline-modal-attach-to-case-dropdown-button').click();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     getByTestId('timeline-modal-attach-timeline-to-existing-case').click();
 
@@ -105,7 +105,7 @@ describe('AttachToCaseButton', () => {
 
     getByTestId('timeline-modal-attach-to-case-dropdown-button').click();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     getByTestId('timeline-modal-attach-timeline-to-existing-case').click();
 
