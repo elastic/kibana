@@ -443,15 +443,14 @@ export class RangeSliderEmbeddable
     }
     this.root = createRoot(node);
     const ControlsServicesProvider = pluginServices.getContextProvider();
-    ReactDOM.render(
+    this.root.render(
       <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <ControlsServicesProvider>
           <RangeSliderControlContext.Provider value={this}>
             <RangeSliderControl />
           </RangeSliderControlContext.Provider>
         </ControlsServicesProvider>
-      </KibanaRenderContextProvider>,
-      node
+      </KibanaRenderContextProvider>
     );
   };
 

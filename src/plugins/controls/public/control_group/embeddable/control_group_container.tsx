@@ -561,16 +561,15 @@ export class ControlGroupContainer extends Container<
     if (this.root) {
       this.root.unmount();
     }
-    this.domNode = dom;
-    ReactDOM.render(
+    this.root = createRoot(dom);
+    this.root.render(
       <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <Provider store={this.store}>
           <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />
           </ControlGroupContainerContext.Provider>
         </Provider>
-      </KibanaRenderContextProvider>,
-      dom
+      </KibanaRenderContextProvider>
     );
   }
 

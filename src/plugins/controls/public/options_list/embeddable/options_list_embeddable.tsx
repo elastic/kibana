@@ -464,7 +464,7 @@ export class OptionsListEmbeddable
     }
     this.root = createRoot(node)
 
-    ReactDOM.render(
+    this.root.render(
       <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <OptionsListEmbeddableContext.Provider value={this}>
           <OptionsListControl
@@ -472,8 +472,7 @@ export class OptionsListEmbeddable
             loadMoreSubject={this.loadMoreSubject}
           />
         </OptionsListEmbeddableContext.Provider>
-      </KibanaRenderContextProvider>,
-      node
+      </KibanaRenderContextProvider>
     );
   };
 

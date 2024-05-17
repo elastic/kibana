@@ -16,7 +16,7 @@ import type { Chart, PointerUpdateListener } from '@elastic/charts';
 import { parseSyncOptions } from './active_cursor_utils';
 
 import type { ActiveCursor } from './active_cursor';
-import type { ActiveCursorPayload, ActiveCursorSyncOption } from './types';
+import type { ActiveCursorSyncOption } from './types';
 
 const DEFAULT_DEBOUNCE_TIME_MS = 8; // don't update more than once per frame but try to avoid skipping frames
 

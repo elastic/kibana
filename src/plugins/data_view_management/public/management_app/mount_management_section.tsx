@@ -101,7 +101,8 @@ export async function mountManagementSection(
   const createPath = '/dataView/:id/create-field/';
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
         <Router history={params.history}>

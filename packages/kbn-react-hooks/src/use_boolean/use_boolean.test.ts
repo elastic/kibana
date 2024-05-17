@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act, cleanup, renderHook } from '@testing-library/react-hooks';
+import { act, cleanup, renderHook } from '@testing-library/react';
 
 import { useBoolean } from './use_boolean';
 
