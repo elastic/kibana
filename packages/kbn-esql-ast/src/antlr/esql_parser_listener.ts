@@ -32,8 +32,6 @@ import { FieldsContext } from "./esql_parser";
 import { FieldContext } from "./esql_parser";
 import { FromCommandContext } from "./esql_parser";
 import { FromIdentifierContext } from "./esql_parser";
-import { FromOptionsContext } from "./esql_parser";
-import { ConfigOptionContext } from "./esql_parser";
 import { MetadataContext } from "./esql_parser";
 import { MetadataOptionContext } from "./esql_parser";
 import { Deprecated_metadataContext } from "./esql_parser";
@@ -399,26 +397,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitFromIdentifier?: (ctx: FromIdentifierContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.fromOptions`.
-	 * @param ctx the parse tree
-	 */
-	enterFromOptions?: (ctx: FromOptionsContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.fromOptions`.
-	 * @param ctx the parse tree
-	 */
-	exitFromOptions?: (ctx: FromOptionsContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.configOption`.
-	 * @param ctx the parse tree
-	 */
-	enterConfigOption?: (ctx: ConfigOptionContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.configOption`.
-	 * @param ctx the parse tree
-	 */
-	exitConfigOption?: (ctx: ConfigOptionContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.metadata`.
 	 * @param ctx the parse tree
