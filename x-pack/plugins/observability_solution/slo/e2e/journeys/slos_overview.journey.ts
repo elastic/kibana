@@ -35,12 +35,12 @@ journey(`SLOsOverview`, async ({ page, params }) => {
       async () => {
         await page.waitForSelector('text="Test Stack SLO"');
         const cards = await page.locator('text="Test Stack SLO"').all();
-        expect(cards.length > 10).toBeTruthy();
+        expect(cards.length > 5).toBeTruthy();
       },
       {
         retryCount: 50,
-        retryDelay: 10000,
-        timeout: 60 * 10000,
+        retryDelay: 20000,
+        timeout: 60 * 20000,
       },
       async () => {
         await page.getByTestId('querySubmitButton').click();

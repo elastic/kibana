@@ -28,7 +28,7 @@ export class SLoDataService {
     lookback?: string;
     eventsPerCycle?: number;
   } = {}) {
-    cli({
+    await cli({
       kibanaUrl: this.kibanaUrl,
       elasticsearchHost: this.elasticsearchUrl,
       lookback: DEFAULTS.LOOKBACK,
@@ -36,7 +36,7 @@ export class SLoDataService {
       config: null,
       payloadSize: DEFAULTS.PAYLOAD_SIZE,
       concurrency: DEFAULTS.CONCURRENCY,
-      indexInterval: DEFAULTS.INDEX_INTERVAL,
+      indexInterval: 10_000,
       dataset: 'fake_stack',
       scenario: DEFAULTS.SCENARIO,
       elasticsearchUsername: DEFAULTS.ELASTICSEARCH_USERNAME,
@@ -48,6 +48,7 @@ export class SLoDataService {
       reduceWeekendTrafficBy: DEFAULTS.REDUCE_WEEKEND_TRAFFIC_BY,
       ephemeralProjectIds: DEFAULTS.EPHEMERAL_PROJECT_IDS,
       alignEventsToInterval: DEFAULTS.ALIGN_EVENTS_TO_INTERVAL,
+      scheduleEnd: 'now+10m',
     }).then((res) => {
       // eslint-disable-next-line no-console
       console.log(res);

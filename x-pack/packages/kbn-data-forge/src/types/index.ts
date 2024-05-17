@@ -179,4 +179,5 @@ export interface CliOptions {
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
+  scheduleEnd?: string;
 }
