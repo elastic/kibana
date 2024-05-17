@@ -65,6 +65,32 @@ export default function ({ getService }: FtrProviderContext) {
             expect(name).to.eql('test_api_key_with_metadata');
           });
       });
+
+      it('should allow a cross cluster API Key to be created', async () => {
+        await supertest
+          .post('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            type: 'cross_cluster',
+            name: 'test_cc_api_key',
+            metadata: {},
+            access: {
+              search: [
+                {
+                  names: ['logs*'],
+                  query: { bool: { must_not: { term: { field2: 'value2' } } } },
+                  field_security: { grant: ['field2'] },
+                  allow_restricted_indices: true,
+                },
+              ],
+            },
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            const { name } = response.body;
+            expect(name).to.eql('test_cc_api_key');
+          });
+      });
     });
 
     describe('PUT /internal/security/api_key', () => {
@@ -95,6 +121,59 @@ export default function ({ getService }: FtrProviderContext) {
               role_1: {
                 cluster: ['monitor'],
               },
+            },
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            const { updated } = response.body;
+            expect(updated).to.eql(true);
+          });
+      });
+
+      it('should allow a cross cluster API Key to be updated', async () => {
+        let id = '';
+
+        await supertest
+          .post('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            type: 'cross_cluster',
+            name: 'test_cc_api_key',
+            metadata: {},
+            access: {
+              search: [
+                {
+                  names: ['logs*'],
+                  query: { bool: { must_not: { term: { field2: 'value2' } } } },
+                  field_security: { grant: ['field2'] },
+                  allow_restricted_indices: true,
+                },
+              ],
+            },
+          })
+          .expect(200)
+          .then((response: Record<string, any>) => {
+            id = response.body.id;
+          });
+
+        await supertest
+          .put('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            type: 'cross_cluster',
+            id,
+            metadata: {
+              foo: 'bar',
+            },
+            access: {
+              search: [
+                {
+                  names: ['somethingelse*'],
+                  query: { bool: { must_not: { term: { field2: 'value3' } } } },
+                  field_security: { grant: ['field3'] },
+                  allow_restricted_indices: false,
+                },
+              ],
             },
           })
           .expect(200)
