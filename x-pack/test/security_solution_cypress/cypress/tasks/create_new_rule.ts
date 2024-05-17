@@ -613,16 +613,23 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillEsqlQueryBar = (query: string) => {
+const typeEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
 };
 
-export const clearEsqlQueryBar = () => {
-  // monaco editor under the hood is quite complex in matter to clear it
-  // underlying textarea holds just the last character of query displayed in search bar
-  // in order to clear it - it requires to select all text within editor and type in it
-  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
+/**
+ * clears ES|QL search bar first
+ * types new query
+ */
+export const fillEsqlQueryBar = (query: string) => {
+  // before typing anything in query bar, we need to clear it
+  // Since first click on ES|QL query bar trigger re-render. We need to clear search bar during second attempt
+  typeEsqlQueryBar(' ');
+  typeEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a{del}' : '{ctrl}a{del}');
+
+  // only after this query can be safely typed
+  typeEsqlQueryBar(query);
 };
 
 /**

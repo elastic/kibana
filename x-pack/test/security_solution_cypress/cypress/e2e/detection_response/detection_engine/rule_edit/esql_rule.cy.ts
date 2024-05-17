@@ -30,7 +30,6 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { getDetails } from '../../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
-  clearEsqlQueryBar,
   expandEsqlQueryBar,
   fillEsqlQueryBar,
   fillOverrideEsqlRuleName,
@@ -82,7 +81,6 @@ describe(
       // ensure once edit form opened, correct query is displayed in ES|QL input
       cy.get(ESQL_QUERY_BAR).contains(rule.query);
 
-      clearEsqlQueryBar();
       fillEsqlQueryBar(expectedValidEsqlQuery);
 
       saveEditedRule();
@@ -92,7 +90,6 @@ describe(
     });
 
     it('edits ES|QL rule query and override rule name with new property', () => {
-      clearEsqlQueryBar();
       fillEsqlQueryBar(expectedValidEsqlQuery);
 
       goToAboutStepTab();
