@@ -231,7 +231,6 @@ async function searchAvailableTasks({
   //       : 'taskTypesToSkip'
   // );
   const partitions = await taskPartitioner.getPartitions();
-  // eslint-disable-next-line no-console
   // console.log('Running claiming on partitions:', JSON.stringify(partitions));
   const queryForScheduledTasks = mustBeAllOf(
     // Task must be enabled

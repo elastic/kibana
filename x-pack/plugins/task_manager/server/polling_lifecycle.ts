@@ -12,7 +12,7 @@ import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
