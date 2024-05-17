@@ -89,7 +89,23 @@ export const AgentPolicyBaseSchema = {
       schema.object({
         name: schema.string(),
         value: schema.oneOf([schema.string(), schema.number()]),
-      })
+      }),
+      {
+        validate: (tags) => {
+          const seen = new Set<string>([]);
+          const duplicates: string[] = [];
+
+          for (const tag of tags) {
+            if (!seen.has(tag.name)) {
+              seen.add(tag.name);
+            } else {
+              duplicates.push(tag.name);
+            }
+          }
+
+          return `found duplicate tags: [${duplicates.join(', ')}], duplicate tags are not allowed`;
+        },
+      }
     )
   ),
 };
