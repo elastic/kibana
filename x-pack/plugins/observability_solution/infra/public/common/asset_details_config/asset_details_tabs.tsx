@@ -108,9 +108,11 @@ export const hostDetailsTabs: Tab[] = [
   osqueryTab,
   dashboardsTab,
 ];
+export const hostDetailsFlyoutTabs: Tab[] = [...hostDetailsTabs, linkToApmTab];
+
 // Profiling and Logs tab would be added in next iteration
 export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab];
-export const containerDetailsFlyoutTabs: Tab[] = [overviewTab, metadataTab];
+export const containerDetailsFlyoutTabs: Tab[] = [overviewTab, metadataTab, linkToApmTab];
 
 export const getAssetDetailsTabs = (type: string): Tab[] => {
   switch (type) {
@@ -126,7 +128,7 @@ export const getAssetDetailsTabs = (type: string): Tab[] => {
 export const getAssetDetailsFlyoutTabs = (type: string): Tab[] => {
   switch (type) {
     case 'host':
-      return [...hostDetailsTabs, linkToApmTab];
+      return hostDetailsFlyoutTabs;
     case 'container':
       return containerDetailsFlyoutTabs;
     default:
