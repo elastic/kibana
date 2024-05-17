@@ -42,7 +42,11 @@ const queryOptions = {
 };
 
 /**
- * @deprecated Use newer response action services instead
+ * Used only for the deprecated `/api/endpoint/action_log/{agent_id}` legacy API route
+ *
+ * Use newer response action services instead
+ *
+ * @deprecated
  */
 export const getAuditLogResponse = async ({
   elasticAgentId,
