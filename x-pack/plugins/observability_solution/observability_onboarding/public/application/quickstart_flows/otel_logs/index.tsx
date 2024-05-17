@@ -31,6 +31,8 @@ const getCollectorConfig = (
   host: string[] = ['https://CHANGEME.elastic.cloud'],
   apikey: string = 'CHANGEME'
 ) => `receivers:
+  hostmetrics:
+    default_stuff: true
   filelog:
     include:
       # Common log file locations on different systems. Uncomment the paths relevant to your deployment environment.
@@ -118,7 +120,7 @@ export const OtelLogsPanel: React.FC = () => {
         <EuiModalHeaderTitle>
           {i18n.translate(
             'xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel',
-            { defaultMessage: 'OTel Logs' }
+            { defaultMessage: 'OTel Logs and host metrics' }
           )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

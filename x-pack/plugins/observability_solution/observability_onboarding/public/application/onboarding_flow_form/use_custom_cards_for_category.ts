@@ -172,7 +172,7 @@ export function useCustomCardsForCategory(
         {
           id: 'otel-logs',
           type: 'virtual',
-          title: 'OTel Logs',
+          title: 'OTel Logs and host metrics',
           description: 'Collect logs using the OTel collector',
           name: 'custom-logs-virtual',
           categories: ['observability'],
