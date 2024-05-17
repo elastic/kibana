@@ -32,6 +32,7 @@ describe('SearchSource service', () => {
 
       expect(Object.keys(start)).toEqual([
         'create',
+        'createLazy',
         'createEmpty',
         'extract',
         'inject',

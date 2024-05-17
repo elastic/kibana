@@ -37,10 +37,12 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   toExpressionAst: jest.fn(),
   getActiveIndexFilter: jest.fn(),
   parseActiveIndexPatternFromQueryString: jest.fn(),
+  loadDataViewFields: jest.fn(),
 };
 
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  createLazy: jest.fn().mockReturnValue(searchSourceInstanceMock),
   createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
   telemetry: jest.fn(),
   getAllMigrations: jest.fn(),
