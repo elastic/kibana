@@ -155,8 +155,8 @@ export const RiskScoreWeightGlobalShared = z.object({
   type: z.literal('global_identifier'),
 });
 
-export type RiskScoreWeight = z.infer<typeof RiskScoreWeight>;
-export const RiskScoreWeight = z.union([
+export type RiskScoreWeightGlobal = z.infer<typeof RiskScoreWeightGlobal>;
+export const RiskScoreWeightGlobal = z.union([
   RiskScoreWeightGlobalShared.merge(
     z.object({
       host: RiskScoreEntityIdentifierWeights,
@@ -170,6 +170,34 @@ export const RiskScoreWeight = z.union([
     })
   ),
 ]);
+
+export type RiskScoreWeightCategoryShared = z.infer<typeof RiskScoreWeightCategoryShared>;
+export const RiskScoreWeightCategoryShared = z.object({
+  type: z.literal('risk_category'),
+  value: RiskScoreCategories,
+});
+
+export type RiskScoreWeightCategory = z.infer<typeof RiskScoreWeightCategory>;
+export const RiskScoreWeightCategory = z.union([
+  RiskScoreWeightCategoryShared.merge(
+    z.object({
+      host: RiskScoreEntityIdentifierWeights,
+      user: RiskScoreEntityIdentifierWeights.optional(),
+    })
+  ),
+  RiskScoreWeightCategoryShared.merge(
+    z.object({
+      host: RiskScoreEntityIdentifierWeights.optional(),
+      user: RiskScoreEntityIdentifierWeights,
+    })
+  ),
+]);
+
+/**
+ * Configuration used to tune risk scoring. Weights can be used to change the score contribution of risk inputs for hosts and users at both a global level and also for Risk Input categories (e.g. 'category_1').
+ */
+export type RiskScoreWeight = z.infer<typeof RiskScoreWeight>;
+export const RiskScoreWeight = z.union([RiskScoreWeightGlobal, RiskScoreWeightCategory]);
 
 /**
  * A list of weights to be applied to the scoring calculation.
