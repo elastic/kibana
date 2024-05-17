@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { DefinedUseQueryResult } from '@tanstack/react-query';
 
 import { useAssistantOverlay } from '.';
-import { waitFor } from '@testing-library/react';
 import { useFetchCurrentUserConversations } from '../api';
 import { Conversation } from '../../assistant_context/types';
 
