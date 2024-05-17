@@ -59,7 +59,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import { ComposableProfile } from '../../../context_awareness/composable_profile';
+import { ComposableProfile } from '../../../context_awareness';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -298,6 +298,7 @@ export function getDiscoverStateContainer({
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
     setDataSourceProfile,
+    uppdateAppState: appStateContainer.update,
   });
 
   const loadDataViewList = async () => {

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
-import { Profile } from '../composable_profile';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecordWithProfile, Profile } from '../types';
 import { ProfileService } from '../profile_service';
-import { DataTableRecordWithProfile } from '../types';
 
 export enum DocumentType {
   Log = 'log',

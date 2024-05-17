@@ -69,9 +69,17 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
         },
         ...prev(),
       ],
+    getDefaultColumns: () => () => ({
+      columns: ['@timestamp', 'log.level', 'message'],
+      settings: {
+        'log.level': {
+          width: 120,
+        },
+      },
+    }),
     getCellRenderers: (prev) => () => ({
       ...prev(),
-      ['@timestamp']: (props) => {
+      '@timestamp': (props) => {
         const timestamp = getFieldValue(props.row, '@timestamp');
 
         return (
@@ -80,7 +88,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
           </EuiBadge>
         );
       },
-      ['log.level']: (props) => {
+      'log.level': (props) => {
         const level = getFieldValue(props.row, 'log.level');
 
         if (!level) {

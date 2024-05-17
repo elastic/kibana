@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query } from '@kbn/es-query';
-import { DiscoverDataSource } from '../../../common/data_sources';
-import { Profile } from '../composable_profile';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { DiscoverDataSource } from '../../../common/data_sources';
 import { AsyncProfileService } from '../profile_service';
+import { Profile } from '../types';
 
 export enum DataSourceCategory {
   Logs = 'logs',

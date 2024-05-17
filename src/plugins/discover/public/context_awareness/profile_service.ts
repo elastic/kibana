@@ -8,7 +8,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ComposableProfile, PartialProfile, Profile } from './composable_profile';
+import type { ComposableProfile, PartialProfile } from './composable_profile';
+import type { Profile } from './types';
 
 export type ResolveProfileResult<TContext> =
   | { isMatch: true; context: TContext }
