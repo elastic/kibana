@@ -6,18 +6,37 @@
       - "processor_cores"
   when: ansible_processor_vcpus is not defined
 
-- name: fix /var/log permissions for kibana
-  become: yes
-  file:
-    path: /var/log
-    state: directory
-    recurse: true
-    mode: "0777"
+- name: setup env variables
+  blockinfile:
+    path: "/home/vagrant/.profile"
+    block: |
+      export OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
+      export TEST_BROWSER_HEADLESS=1
+      export FTR_DISABLE_ES_TMPDIR=true
+    owner: vagrant
+    group: vagrant
+    mode: '0644'
 
-- name: create tmp dir for ES
-  file:
-    path: "{{ kibana_src_path }}/.es/tmp"
-    state: directory
+- name: add chrome apt signing key
+  become: yes
+  apt_key:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    state: present
+
+- name: add chrome apt repository
+  become: yes
+  apt_repository:
+    repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+    state: present
+
+- name: install apt packages
+  become: yes
+  apt:
+    pkg:
+      - build-essential
+      - google-chrome-stable
+      - unzip
+    state: latest
 
 - name: slurp kibana node version
   slurp:
@@ -31,7 +50,7 @@
 - name: install nvm
   shell:
     chdir: "$HOME"
-    cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | bash
+    cmd: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_ver }}/install.sh | PROFILE=/home/vagrant/.profile bash
 
 - name: install kibana node version
   shell:
@@ -40,12 +59,11 @@
   args:
     executable: /bin/bash
 
-- name: "ensure {{ kibana_dist_path }} dir exists"
+- name: "ensure {{ openssl_path }} dir exists"
   become: yes
   file:
-    path: "{{ kibana_dist_path }}"
+    path: "{{ openssl_path }}"
     state: directory
-    mode: "0777"
 
 - name: find kibana distribution
   find:
@@ -99,35 +117,54 @@
   delay: 10
   get_url:
     url: "https://www.openssl.org/source/openssl-{{ openssl_ver }}.tar.gz"
-    dest: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}.tar.gz"
+    dest: "{{ openssl_src_path }}.tar.gz"
     checksum: "{{ openssl_sha }}"
 
 - name: extract OpenSSL
   become: yes
   unarchive:
-    src: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}.tar.gz"
+    src: "{{ openssl_src_path }}.tar.gz"
     dest: "{{ kibana_dist_path }}"
     remote_src: yes
 
 - name: configure OpenSSL for FIPS
   become: yes
   shell:
-    chdir: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
-    cmd: ./Configure enable-fips
+    chdir: "{{ openssl_src_path }}"
+    cmd: "./Configure --prefix={{ openssl_path }} --openssldir={{ openssl_path }}/ssl --libdir={{ openssl_path }}/lib enable-fips"
 
 - name: compile OpenSSL with FIPS
   become: yes
   make:
-    chdir: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
+    chdir: "{{ openssl_src_path }}"
     jobs: "{{ ansible_facts['processor_vcpus'] }}"
 
 - name: install OpenSSL with FIPS
   become: yes
   make:
-    chdir: "{{ kibana_dist_path }}/openssl-{{ openssl_ver }}"
+    chdir: "{{ openssl_src_path }}"
     target: install
 
-- name: link OpenSSL package
+- name: "change owner of {{ kibana_dist_path }} to vagrant"
   become: yes
-  shell:
-    cmd: ldconfig /usr/local/lib64/
+  file:
+    path: "{{ kibana_dist_path }}"
+    owner: vagrant
+    group: vagrant
+    recurse: yes
+
+- name: fix /var/log permissions for kibana
+  become: yes
+  file:
+    path: /var/log
+    state: directory
+    recurse: true
+    mode: "0777"
+
+- name: increase vm.max_map_count for ES
+  become: yes
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes

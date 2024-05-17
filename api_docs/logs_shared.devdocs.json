@@ -2945,7 +2945,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; isNewVersion: () => boolean; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/logs_shared/public/types.ts",
             "deprecated": false,
