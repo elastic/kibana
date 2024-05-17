@@ -9,7 +9,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConfigSchema } from '..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps, ApmServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
@@ -70,21 +71,23 @@ export const renderApp = ({
   const root = createRoot(element);
 
   root.render(
-    <KibanaThemeProvider
-      theme$={theme$}
-      modify={{
-        breakpoint: {
-          xxl: 1600,
-          xxxl: 2000,
-        },
-      }}
-    >
-      <ApmAppRoot
-        apmPluginContextValue={apmPluginContextValue}
-        pluginsStart={pluginsStart}
-        apmServices={apmServices}
-      />
-    </KibanaThemeProvider>
+    <KibanaRenderContextProvider {...coreStart}>
+      <KibanaThemeProvider
+        theme={{ theme$ }}
+        modify={{
+          breakpoint: {
+            xxl: 1600,
+            xxxl: 2000,
+          },
+        }}
+      >
+        <ApmAppRoot
+          apmPluginContextValue={apmPluginContextValue}
+          pluginsStart={pluginsStart}
+          apmServices={apmServices}
+        />
+      </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
   return () => {
     root.unmount();

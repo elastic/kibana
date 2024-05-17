@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -13,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -66,7 +66,6 @@ export const renderApp = ({
   isServerless?: boolean;
 }) => {
   const { element, history, theme$ } = appMountParameters;
-  const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   core.chrome.setHelpExtension({
@@ -88,8 +87,8 @@ export const renderApp = ({
   const root = createRoot(element);
 
   root.render(
-    <PresentationContextProvider>
-      <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...core}>
+      <PresentationContextProvider>
         <ApplicationUsageTrackingProvider>
           <KibanaThemeProvider {...{ theme: { theme$ } }}>
             <CloudProvider>
@@ -114,17 +113,15 @@ export const renderApp = ({
                 >
                   <Router history={history}>
                     <EuiThemeProvider darkMode={isDarkMode}>
-                      <i18nCore.Context>
-                        <RedirectAppLinks
-                          coreStart={core}
-                          data-test-subj="observabilityMainContainer"
-                        >
-                          <QueryClientProvider client={queryClient}>
-                            <App />
-                            <HideableReactQueryDevTools />
-                          </QueryClientProvider>
-                        </RedirectAppLinks>
-                      </i18nCore.Context>
+                      <RedirectAppLinks
+                        coreStart={core}
+                        data-test-subj="observabilityMainContainer"
+                      >
+                        <QueryClientProvider client={queryClient}>
+                          <App />
+                          <HideableReactQueryDevTools />
+                        </QueryClientProvider>
+                      </RedirectAppLinks>
                     </EuiThemeProvider>
                   </Router>
                 </PluginContext.Provider>
@@ -132,8 +129,8 @@ export const renderApp = ({
             </CloudProvider>
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
-      </EuiErrorBoundary>
-    </PresentationContextProvider>
+      </PresentationContextProvider>
+    </KibanaRenderContextProvider>
   );
   return () => {
     // This needs to be present to fix https://github.com/elastic/kibana/issues/155704

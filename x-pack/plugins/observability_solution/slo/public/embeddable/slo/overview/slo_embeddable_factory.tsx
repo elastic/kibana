@@ -34,7 +34,7 @@ import {
   GroupSloCustomInput,
 } from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
-import { PluginContext } from '../../../context/plugin_context';
+import { OverviewEmbeddableContext } from '../../../context/plugin_context';
 
 const queryClient = new QueryClient();
 export const getOverviewPanelTitle = () =>
@@ -138,6 +138,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
               return (
                 <Wrapper>
                   <EuiFlexGroup
+                    data-test-subj="sloGroupOverviewPanel"
                     data-shared-item=""
                     justifyContent="flexEnd"
                     wrap
@@ -154,7 +155,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                             embeddable: api,
                           } as ActionExecutionContext);
                         }}
-                        data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
+                        data-test-subj="o11ySloOverviewEditCriteriaLink"
                       >
                         {i18n.translate('xpack.slo.overviewEmbeddable.editCriteriaLabel', {
                           defaultMessage: 'Edit criteria',
@@ -190,7 +191,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             <Router history={createBrowserHistory()}>
               <EuiThemeProvider darkMode={true}>
                 <KibanaContextProvider services={deps}>
-                  <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
+                  <OverviewEmbeddableContext.Provider value={{ observabilityRuleTypeRegistry }}>
                     <QueryClientProvider client={queryClient}>
                       {showAllGroupByInstances ? (
                         <SloCardChartList sloId={sloId!} />
@@ -198,7 +199,7 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
                         renderOverview()
                       )}
                     </QueryClientProvider>
-                  </PluginContext.Provider>
+                  </OverviewEmbeddableContext.Provider>
                 </KibanaContextProvider>
               </EuiThemeProvider>
             </Router>

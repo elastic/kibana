@@ -45,14 +45,20 @@ export function getServiceNowITOMConnectorType(): ConnectorTypeModel<
       const translations = await import('../lib/servicenow/translations');
       const errors = {
         severity: new Array<string>(),
+        additional_info: new Array<string>(),
       };
-      const validationResult = { errors };
 
       if (actionParams?.subActionParams?.severity == null) {
         errors.severity.push(translations.SEVERITY_REQUIRED);
       }
 
-      return validationResult;
+      try {
+        JSON.parse(actionParams.subActionParams?.additional_info || '{}');
+      } catch (error) {
+        errors.additional_info.push(translations.ADDITIONAL_INFO_JSON_ERROR);
+      }
+
+      return { errors };
     },
     actionParamsFields: lazy(() => import('./servicenow_itom_params')),
   };

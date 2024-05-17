@@ -11,6 +11,21 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AgentStatusFilter } from './agent_status_filter';
 
 const PARTIAL_TOUR_TEXT = 'Some agents have become inactive and have been hidden';
+const mockStorage: Record<any, any> = {};
+
+jest.mock('../../../../../../hooks', () => {
+  return {
+    useStartServices: jest.fn(() => ({
+      uiSettings: {
+        get: jest.fn(() => false),
+      },
+      storage: {
+        get: jest.fn((key) => mockStorage[key]),
+        set: jest.fn((key, val) => (mockStorage[key] = val)),
+      },
+    })),
+  };
+});
 
 const renderComponent = (props: React.ComponentProps<typeof AgentStatusFilter>) => {
   return render(
@@ -21,18 +36,7 @@ const renderComponent = (props: React.ComponentProps<typeof AgentStatusFilter>) 
   );
 };
 
-const mockLocalStorage: Record<any, any> = {};
 describe('AgentStatusFilter', () => {
-  beforeEach(() => {
-    Object.defineProperty(window, 'localStorage', {
-      value: {
-        getItem: jest.fn((key) => mockLocalStorage[key]),
-        setItem: jest.fn((key, val) => (mockLocalStorage[key] = val)),
-      },
-      writable: true,
-    });
-  });
-
   it('Renders all statuses', () => {
     const { getByText } = renderComponent({
       selectedStatus: [],
@@ -71,12 +75,12 @@ describe('AgentStatusFilter', () => {
 
       expect(getByText('999')).toBeInTheDocument();
 
-      expect(mockLocalStorage['fleet.inactiveAgentsCalloutHasBeenDismissed']).toBe('true');
+      expect(mockStorage['fleet.inactiveAgentsTour']).toEqual({ active: false });
     });
   });
 
   it('Should not show tour if previously been dismissed', async () => {
-    mockLocalStorage['fleet.inactiveAgentsCalloutHasBeenDismissed'] = 'true';
+    mockStorage['fleet.inactiveAgentsTour'] = { active: false };
 
     const { getByText } = renderComponent({
       selectedStatus: [],
@@ -90,7 +94,7 @@ describe('AgentStatusFilter', () => {
   });
 
   it('Should should show difference between last seen inactive agents and total agents', async () => {
-    mockLocalStorage['fleet.lastSeenInactiveAgentsCount'] = '100';
+    mockStorage['fleet.lastSeenInactiveAgentsCount'] = '100';
 
     const { getByText, getByTestId } = renderComponent({
       selectedStatus: [],

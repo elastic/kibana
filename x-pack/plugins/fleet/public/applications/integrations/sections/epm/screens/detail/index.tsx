@@ -137,6 +137,7 @@ export function Detail() {
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
 
   const authz = useAuthz();
+  const canAddAgent = authz.fleet.addAgents;
   const canInstallPackages = authz.integrations.installPackages;
   const canReadPackageSettings = authz.integrations.readPackageSettings;
   const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
@@ -268,7 +269,8 @@ export function Detail() {
     useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Only show config tab if package has `inputs`
-  const showConfigTab = packageInfo ? packageToPackagePolicyInputs(packageInfo).length > 0 : false;
+  const showConfigTab =
+    canAddAgent && (packageInfo ? packageToPackagePolicyInputs(packageInfo).length > 0 : false);
 
   // Only show API references tab if it is allowed & has documentation to show
   const showDocumentationTab =

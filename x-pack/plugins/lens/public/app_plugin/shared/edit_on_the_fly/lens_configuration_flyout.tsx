@@ -233,7 +233,6 @@ export function LensEditConfigurationFlyout({
       },
       references,
       visualizationType: visualization.activeId,
-      title: visualization.activeId ?? '',
     };
     if (savedObjectId) {
       saveByRef?.(attrs);

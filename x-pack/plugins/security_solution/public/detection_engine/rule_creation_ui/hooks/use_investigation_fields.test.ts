@@ -13,18 +13,21 @@ import { useInvestigationFields } from './use_investigation_fields';
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
 
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
-import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 
 jest.mock('@kbn/securitysolution-utils', () => ({
   computeIsESQLQueryAggregating: jest.fn(),
 }));
 
-jest.mock('@kbn/text-based-editor', () => ({
-  fetchFieldsFromESQL: jest.fn(),
-}));
+jest.mock('@kbn/esql-utils', () => {
+  return {
+    getESQLQueryColumns: jest.fn(),
+    getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('auditbeat*'),
+  };
+});
 
 const computeIsESQLQueryAggregatingMock = computeIsESQLQueryAggregating as jest.Mock;
-const fetchFieldsFromESQLMock = fetchFieldsFromESQL as jest.Mock;
+const getESQLQueryColumnsMock = getESQLQueryColumns as jest.Mock;
 
 const { wrapper } = createQueryWrapperMock();
 
@@ -48,7 +51,7 @@ const mockEsqlDatatable = {
 describe('useInvestigationFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    fetchFieldsFromESQLMock.mockResolvedValue(mockEsqlDatatable);
+    getESQLQueryColumnsMock.mockResolvedValue(mockEsqlDatatable.columns);
   });
 
   it('should return loading true when esql fields still loading', () => {

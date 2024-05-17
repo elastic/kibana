@@ -18,7 +18,8 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mock;
 
-describe('useGetCurrentUserProfile', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/183144
+describe.skip('useGetCurrentUserProfile', () => {
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 

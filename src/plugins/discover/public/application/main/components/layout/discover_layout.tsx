@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -156,6 +158,37 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
+  const onPopulateWhereClause = useCallback(
+    (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
+      if (query && isOfAggregateQueryType(query) && 'esql' in query) {
+        const fieldName = typeof field === 'string' ? field : field.name;
+        // send the field type for casting
+        const fieldType = typeof field !== 'string' ? field.type : undefined;
+        // weird existence logic from Discover components
+        // in the field it comes the operator _exists_ and in the value the field
+        // I need to take care of it here but I think it should be handled on the fieldlist instead
+        const updatedQuery = appendWhereClauseToESQLQuery(
+          query.esql,
+          fieldName === '_exists_' ? String(values) : fieldName,
+          fieldName === '_exists_' ? undefined : values,
+          fieldName === '_exists_' ? '_exists_' : operation,
+          fieldType
+        );
+        data.query.queryString.setQuery({
+          esql: updatedQuery,
+        });
+        if (trackUiMetric) {
+          trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
+        }
+      }
+    },
+    [data.query.queryString, query, trackUiMetric]
+  );
+
+  const onFilter = isPlainRecord
+    ? (onPopulateWhereClause as DocViewFilterFn)
+    : (onAddFilter as DocViewFilterFn);
+
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
@@ -234,7 +267,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}
-          onAddFilter={onAddFilter as DocViewFilterFn}
+          onAddFilter={onFilter}
           onFieldEdited={onFieldEdited}
           container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
@@ -244,16 +277,16 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       </>
     );
   }, [
-    currentColumns,
-    dataView,
-    isPlainRecord,
-    mainContainer,
-    onAddFilter,
-    onDropFieldToTable,
-    onFieldEdited,
     resultState,
+    isPlainRecord,
+    dataView,
     stateContainer,
+    currentColumns,
     viewMode,
+    onFilter,
+    onFieldEdited,
+    mainContainer,
+    onDropFieldToTable,
     panelsToggle,
   ]);
 
@@ -296,7 +329,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
-        updateQuery={stateContainer.actions.onUpdateQuery}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
@@ -329,7 +361,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 documents$={stateContainer.dataState.data$.documents$}
                 onAddField={onAddColumn}
                 columns={currentColumns}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onAddFilter={onFilter}
                 onRemoveField={onRemoveColumn}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
                 selectedDataView={dataView}

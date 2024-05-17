@@ -460,25 +460,28 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
-      onFilter: async (field, value, operator) => {
-        let filters = generateFilters(
-          this.services.filterManager,
-          // @ts-expect-error
-          field,
-          value,
-          operator,
-          dataView
-        );
-        filters = filters.map((filter) => ({
-          ...filter,
-          $state: { store: FilterStateStore.APP_STATE },
-        }));
+      // I don't want to create filters when is embedded
+      ...(!this.isTextBasedSearch(savedSearch) && {
+        onFilter: async (field, value, operator) => {
+          let filters = generateFilters(
+            this.services.filterManager,
+            // @ts-expect-error
+            field,
+            value,
+            operator,
+            dataView
+          );
+          filters = filters.map((filter) => ({
+            ...filter,
+            $state: { store: FilterStateStore.APP_STATE },
+          }));
 
-        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
-          embeddable: this,
-          filters,
-        });
-      },
+          await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+            embeddable: this,
+            filters,
+          });
+        },
+      }),
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',

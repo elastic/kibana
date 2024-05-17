@@ -81,7 +81,7 @@ export const RetrievalDocsFlyout: React.FC<RetrievalDocsFlyoutProps> = ({
   ];
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.retrievalDocsFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.retrievalDocsFlyoutOpened);
   }, [usageTracker]);
 
   return (
