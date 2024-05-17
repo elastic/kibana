@@ -568,3 +568,5 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/observability_solution_api_integration/test_suites/alerting/burn_rate/configs/serverless.config.ts
   - x-pack/test/observability_solution_api_integration/test_suites/alerting/burn_rate/configs/ess.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/custom_threshold/configs/serverless.config.ts
+  - x-pack/test/observability_solution_api_integration/test_suites/alerting/custom_threshold/configs/ess.config.ts

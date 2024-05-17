@@ -10,6 +10,7 @@ import { services } from '../../../api_integration/services';
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
+  publicBaseUrl?: boolean;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -36,6 +37,13 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       },
       mochaOpts: {
         grep: '/^(?!.*@skipInEss).*@ess.*/',
+      },
+      kbnTestServer: {
+        ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        serverArgs: [
+          ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...(options.publicBaseUrl ? ['--server.publicBaseUrl=http://localhost:5620'] : []),
+        ],
       },
     };
   };
