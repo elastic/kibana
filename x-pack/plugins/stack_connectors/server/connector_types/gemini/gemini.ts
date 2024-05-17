@@ -250,13 +250,11 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: RunActionParams): Promise<StreamingResponse> {
-    console.log('rohan test inside stream API');
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const accessToken = this.secrets.accessToken;
     const data = formatGeminiPayload(body);
 
-    console.log("rohan test stream API payload= ", JSON.stringify(data))
 
     const response = await this.request({
       url: `${this.url}${path}`,
@@ -271,26 +269,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       signal,
       timeout,
     });
-    // const candidate = response.data.candidates[0];
-    // const completionText = candidate.content.parts[0].text;
-    console.log('Stream API response received');
 
-    // response.data.on('data', (chunk: any) => {
-    //   console.log('Received chunk:', chunk.toString());
-    // });
-
-    // response.data.on('end', () => {
-    //   console.log('Stream ended');
-    // });
-
-    // response.data.on('error', (err: any) => {
-    //   console.error('Stream error:', err);
-    // });
-
-
-    // return { completion: completionText }
-
-    return response.data.pipe(new PassThrough()); //this.runApiLatest({ ...requestArgs, responseSchema: StreamingResponseSchema });
+    return response.data.pipe(new PassThrough());
   }
 
   /**
@@ -309,8 +289,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
-    console.log("rohan test invokeStream API called")
-    console.log("rohan test invokeStream API got message ", messages)
     const res = (await this.streamAPI({
       body: JSON.stringify(messages),
       model,
@@ -323,28 +301,26 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }
 
 }
-
 /** Format the json body to meet Gemini payload requirements */
 const formatGeminiPayload = (data: string): Payload => {
-    let payload: Payload = {
-        contents: [],
-        generation_config: {
-            temperature: 0,
-            maxOutputTokens: DEFAULT_TOKEN_LIMIT,
-            // response_mime_type: "application/json",
-        }
-    };
-    console.log("rohan test formatGeminiPayload input =", data)
-    for (const row of JSON.parse(data)) {
-      payload.contents.push({
-            role: row.role,
-            parts: [
-                {
-                    text: row.content
-                }
-            ]
-        });
-    }
-
-    return payload;
+  let payload: Payload = {
+      contents: [],
+      generation_config: {
+          temperature: 0,
+          maxOutputTokens: DEFAULT_TOKEN_LIMIT
+      }
   };
+  for (const row of JSON.parse(data)) {
+    let correct_role = (row.role == 'assistant') ? 'model' : 'user';
+    payload.contents.push({
+          role: correct_role,
+          parts: [
+              {
+                  text: row.content
+              }
+          ]
+      });
+  }
+
+  return payload;
+};
