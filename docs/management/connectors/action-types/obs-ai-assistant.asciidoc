@@ -1,0 +1,79 @@
+[[obs-ai-assistant-action-type]]
+== Observability AI Assistant connector and action
+++++
+<titleabbrev>Observability AI Assistant</titleabbrev>
+++++
+:frontmatter-description: Add a rule action that adds AI-driven insights and custom actions to your workflow.
+:frontmatter-tags-products: [kibana]
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [configure]
+
+preview::[]
+
+The Observability AI Assistant connector adds AI-driven insights and custom actions to your workflow.
+You configure the connector to send a message containing the tasks you want the AI Assistant to perform.
+When the rule's conditions are met, contextual details about the event (for example, when the alert fired, the service impacted, and the threshold breached) are sent to the AI Assistant, along with the message provided during configuration.
+The AI Assistant runs the tasks requested in the message and creates a conversation that you can use to chat with the assistant.
+
+IMPORTANT: Conversations created by the AI Assistant are public and accessible to every user with permissions to use the assistant.
+
+To create this connector, you must first set up the Observability AI Assistant and create an connector for your large language model (LLM). For more information, refer to the {observability-guide}/obs-ai-assistant.html[Observability AI Assistant] documentation.
+
+[float]
+[[define-obs-ai-assistant-ui]]
+=== Create connectors in {kib}
+
+To use this connector, you must have the `api:observabilityAIAssistant` and `app:observabilityAIAssistant` privileges.
+
+// QUESTION: Do we document these privileges somewhere? How/where are these privileges specified? Are these Kibana feature
+// privileges? When I look at the Kibana UI, the available feature privileges for the Observability AI Assistant seem to be All or None.
+// Should the above sentence say, "To use this connector, you must have `all` privileges for the Observability AI
+// Assistant feature. For more information on configuring roles that provide access to features, go to Feature privileges."
+// (where "Feature privileges" would point to https://www.elastic.co/guide/en/kibana/master/kibana-privileges.html#kibana-feature-privileges).
+
+You cannot manage this connector in *{stack-manage-app} > {connectors-ui}* or by using APIs.
+You also cannot create an Observability AI Assistant <<pre-configured-connectors,preconfigured connector>>.
+This connector is available only when you're creating a rule.
+For example:
+
+[role="screenshot"]
+image::management/connectors/images/obs-ai-assistant-action.png[Add an Observability AI Assistant action while creating a rule in the Observability UI]
+//TODO: Check with Lisa to see if we can autogenerate this.
+
+NOTE: You can have only one Observability AI Assistant action in each rule.
+
+[float]
+[[obs-ai-assistant-connector-configuration]]
+==== Connector configuration
+
+Observability AI Assistant connectors have the following configuration properties:
+
+Connector::
+The name of the connector to use to send requests to your AI provider.
+For more information, refer to <<openai-action-type>> or <<bedrock-action-type>>.
+
+Message::
+A message containing the prompt to send to the Observability AI Assistant.
+The message can specify a set of tasks for the assistant to perform, such as creating a graph or report,
+and it can call an available connector to send messages to an external system, such as Slack.
+
+NOTE: Currently you can only send messages to a Slack webhook.
+Support for additional connectors will be added in the future.
+
+For example, you can create a rule that sends the following prompt to the AI Assistant when an error count threshold is breached:
+
+-----
+High error count alert has triggered. Execute the following steps:
+  - create a graph of the error count for the service impacted by the alert for the
+  last 24h
+  - to help troubleshoot, recall past occurrences of this alert, plus any other active
+  alerts.   Generate a report with all the found information and send it to the Slack
+  connector as a single   message. Also include the link to this conversation in the
+  report.
+-----
+
+[float]
+[[obs-ai-assistant-action-configuration]]
+=== Test connectors
+
+You cannot test or edit these connectors in {kib} or by using APIs.
