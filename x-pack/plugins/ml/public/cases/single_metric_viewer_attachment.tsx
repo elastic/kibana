@@ -7,93 +7,88 @@
 
 import { EuiDescriptionList } from '@elastic/eui';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import { CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER } from '../../common/constants/cases';
-import type {
-  SingleMetricViewerEmbeddableApi,
-  SingleMetricViewerEmbeddableState,
-} from '../embeddables/types';
+import type { SingleMetricViewerEmbeddableState } from '../embeddables/types';
+import type { SingleMetricViewerSharedComponent } from '../shared_components/single_metric_viewer';
 
-export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
-  return React.memo(
-    (props: PersistableStateAttachmentViewProps) => {
-      const { persistableStateAttachmentState, caseData } = props;
+export const initComponent = memoize(
+  (
+    fieldFormats: FieldFormatsStart,
+    SingleMetricViewerComponent: SingleMetricViewerSharedComponent
+  ) => {
+    return React.memo(
+      (props: PersistableStateAttachmentViewProps) => {
+        const { persistableStateAttachmentState, caseData } = props;
 
-      const inputProps =
-        persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState;
+        const inputProps =
+          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState;
 
-      const dataFormatter = fieldFormats.deserialize({
-        id: FIELD_FORMAT_IDS.DATE,
-      });
-
-      const listItems = [
-        {
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.singleMetricViewer.description.jobIdsLabel"
-              defaultMessage="Job IDs"
-            />
-          ),
-          description: inputProps.jobIds.join(', '),
-        },
-        {
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.singleMetricViewer.description.timeRangeLabel"
-              defaultMessage="Time range"
-            />
-          ),
-          description: `${dataFormatter.convert(
-            inputProps.timeRange!.from
-          )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
-        },
-      ];
-
-      if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
-        listItems.push({
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.singleMetricViewer.description.queryLabel"
-              defaultMessage="Query"
-            />
-          ),
-          description: inputProps.query?.query,
+        const dataFormatter = fieldFormats.deserialize({
+          id: FIELD_FORMAT_IDS.DATE,
         });
-      }
 
-      return (
-        <>
-          <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
-          <ReactEmbeddableRenderer<
-            SingleMetricViewerEmbeddableState,
-            SingleMetricViewerEmbeddableApi
-          >
-            maybeId={inputProps.id}
-            type={CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER}
-            state={{
-              rawState: inputProps,
-            }}
-            parentApi={{
-              executionContext: {
-                type: 'cases',
-                description: caseData.title,
-                id: caseData.id,
-              },
-            }}
-          />
-        </>
-      );
-    },
-    (prevProps, nextProps) =>
-      deepEqual(
-        prevProps.persistableStateAttachmentState,
-        nextProps.persistableStateAttachmentState
-      )
-  );
-});
+        const listItems = [
+          {
+            title: (
+              <FormattedMessage
+                id="xpack.ml.cases.singleMetricViewer.description.jobIdLabel"
+                defaultMessage="Job ID"
+              />
+            ),
+            description: inputProps.jobIds.join(', '),
+          },
+          {
+            title: (
+              <FormattedMessage
+                id="xpack.ml.cases.singleMetricViewer.description.timeRangeLabel"
+                defaultMessage="Time range"
+              />
+            ),
+            description: `${dataFormatter.convert(
+              inputProps.timeRange!.from
+            )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+          },
+        ];
+
+        if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
+          listItems.push({
+            title: (
+              <FormattedMessage
+                id="xpack.ml.cases.singleMetricViewer.description.queryLabel"
+                defaultMessage="Query"
+              />
+            ),
+            description: inputProps.query?.query,
+          });
+        }
+
+        const { jobIds, timeRange, ...rest } = inputProps;
+        const selectedJobId = jobIds[0];
+
+        return (
+          <>
+            <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
+            <SingleMetricViewerComponent
+              bounds={{ min: moment(timeRange!.from), max: moment(timeRange!.to) }}
+              lastRefresh={Date.now()}
+              selectedJobId={selectedJobId}
+              uuid={caseData.id}
+              {...rest}
+            />
+          </>
+        );
+      },
+      (prevProps, nextProps) =>
+        deepEqual(
+          prevProps.persistableStateAttachmentState,
+          nextProps.persistableStateAttachmentState
+        )
+    );
+  }
+);

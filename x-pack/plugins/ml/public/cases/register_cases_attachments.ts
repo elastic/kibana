@@ -15,9 +15,10 @@ import { registerAnomalySwimLaneCasesAttachment } from './register_anomaly_swim_
 export function registerCasesAttachments(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies
+  pluginStart: MlStartDependencies,
+  mlServices?: any
 ) {
   registerAnomalySwimLaneCasesAttachment(cases, pluginStart);
   registerAnomalyChartsCasesAttachment(cases, coreStart, pluginStart);
-  registerSingleMetricViewerCasesAttachment(cases, pluginStart);
+  registerSingleMetricViewerCasesAttachment(cases, coreStart, pluginStart, mlServices);
 }
