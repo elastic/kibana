@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -29,10 +28,6 @@ import { useDiscoverTopNav } from './use_discover_topnav';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
-  updateQuery: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => void;
   stateContainer: DiscoverStateContainer;
   textBasedLanguageModeErrors?: Error;
   textBasedLanguageModeWarning?: string;
@@ -44,7 +39,6 @@ export interface DiscoverTopNavProps {
 export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
-  updateQuery,
   textBasedLanguageModeErrors,
   textBasedLanguageModeWarning,
   onFieldEdited,
@@ -241,7 +235,7 @@ export const DiscoverTopNav = ({
       {...topNavProps}
       appName="discover"
       indexPatterns={[dataView]}
-      onQuerySubmit={updateQuery}
+      onQuerySubmit={stateContainer.actions.onUpdateQuery}
       onCancel={onCancelClick}
       isLoading={isLoading}
       onSavedQueryIdChange={updateSavedQueryId}

@@ -266,13 +266,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: ['field1', 'field2'],
-      });
-    });
-    replaceUrlState.mockReset();
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,

@@ -13,6 +13,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import { savedSearchMock, savedSearchMockWithESQL } from '../../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 
 describe('getStateDefaults', () => {
   test('data view with timefield', () => {
@@ -27,12 +28,15 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
+        "dataSource": Object {
+          "dataViewId": "index-pattern-with-timefield-id",
+          "type": "dataView",
+        },
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,
@@ -63,12 +67,15 @@ describe('getStateDefaults', () => {
         "columns": Array [
           "default_column",
         ],
+        "dataSource": Object {
+          "dataViewId": "the-data-view-id",
+          "type": "dataView",
+        },
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "index": "the-data-view-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,
@@ -108,7 +115,7 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-    expect(actualForTextBasedWithValidViewMode.index).toBe(undefined);
+    expect(actualForTextBasedWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
     const actualForWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -118,8 +125,32 @@ describe('getStateDefaults', () => {
       },
     });
     expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
-    expect(actualForWithValidViewMode.index).toBe(
-      savedSearchMock.searchSource.getField('index')?.id
+    expect(actualForWithValidViewMode.dataSource).toEqual(
+      createDataViewDataSource({
+        dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
+      })
     );
+  });
+
+  test('should return expected dataSource', () => {
+    const actualForTextBased = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchMockWithESQL,
+    });
+    expect(actualForTextBased.dataSource).toMatchInlineSnapshot(`
+      Object {
+        "type": "esql",
+      }
+    `);
+    const actualForDataView = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchMock,
+    });
+    expect(actualForDataView.dataSource).toMatchInlineSnapshot(`
+      Object {
+        "dataViewId": "the-data-view-id",
+        "type": "dataView",
+      }
+    `);
   });
 });

@@ -328,7 +328,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
-        updateQuery={stateContainer.actions.onUpdateQuery}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
