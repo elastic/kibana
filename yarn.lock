@@ -17478,7 +17478,7 @@ find-root@^1.1.0:
   resolved "https://registry.yarnpkg.com/find-root/-/find-root-1.1.0.tgz#abcfc8ba76f708c42a97b3d685b7e9450bfb9ce4"
   integrity sha512-NKfW6bec6GfKc0SGx1e07QZY9PE99u0Bft/0rzSD5k3sO/vwkVUpDUKVm5Gpp5Ue3YfShPFTX2070tDs5kB9Ng==
 
-find-test-names@1.28.18:
+find-test-names@1.28.18, find-test-names@^1.19.0:
   version "1.28.18"
   resolved "https://registry.yarnpkg.com/find-test-names/-/find-test-names-1.28.18.tgz#a10acba4ebd2e6db8e182e0fcc6f85d78fa29969"
   integrity sha512-hhnGdkWK+qEA5Z02Tu0OqGQIUjFZNyOCE4WaJpbhW4hAF1+NZ7OCr0Bss9RCaj7BBtjoIjkU93utobQ8pg2iVg==
