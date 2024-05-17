@@ -135,17 +135,19 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       getDefaultOutput(defaultOutputName),
       ...outputsRequest.data.items.map((item) => {
         const isInternalOutput = !!item.is_internal;
+        const hasMinimumLicense = licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
 
         return {
           value: item.id,
-          inputDisplay: item.name,
-          disabled: !isPolicyPerOutputAllowed || isInternalOutput,
-          helpText: isPolicyPerOutputAllowed ? undefined : (
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.outputOptionDisabledPolicyPerOutput"
-              defaultMessage="The current license does not allow defining output per policy."
-            />
-          )
+          inputDisplay: getOutputLabel(
+            item.name,
+            !hasMinimumLicense ? <FormattedMessage
+                                   id="xpack.fleet.agentPolicyForm.outputOptionDisabledPolicyPerOutput"
+                                   defaultMessage="The current license does not allow defining output per policy."
+                                 />
+            : undefined
+          ),
+          disabled: !hasMinimumLicense || isInternalOutput,
         };
       }),
     ];
