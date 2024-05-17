@@ -42,7 +42,7 @@ export const getCaseUserActions = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseID: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -61,7 +61,7 @@ export const findCaseUserActions = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseID: string;
   options?: UserActionFindRequest;
   expectedHttpCode?: number;
@@ -82,7 +82,7 @@ export const getCaseUserActionStats = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseID: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -101,7 +101,7 @@ export const getCaseUsers = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
