@@ -94,6 +94,11 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
     });
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_STREAM,
+      method: 'invokeStream',
+      schema: InvokeAIActionParamsSchema,
+    });
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
@@ -153,7 +158,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse> 
+    params: SubActionRequestParams<RunApiLatestResponse>
   ): Promise<RunActionResponse> {
 
     const response = await this.request(params);
@@ -180,13 +185,13 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       url: `${this.url}${path}`,
       method: 'post' as Method,
       data: data,
-      headers: { 
+      headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       timeout: 120000,
     };
-    
+
     return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
@@ -207,7 +212,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    const accessToken = this.secrets.accessToken;
    const data = JSON.stringify(JSON.parse(body)['messages']);
    const payload = formatGeminiPayload(data);
-   
+
    const requestArgs = {
      url: `${this.url}${path}`,
      method: 'post' as Method,
@@ -245,16 +250,19 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: RunActionParams): Promise<StreamingResponse> {
-    console.log('rohan test inside stream API')
+    console.log('rohan test inside stream API');
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent`;
     const accessToken = this.secrets.accessToken;
+    const data = formatGeminiPayload(body);
+
+    console.log("rohan test stream API payload= ", JSON.stringify(data))
 
     const response = await this.request({
       url: `${this.url}${path}`,
       method: 'post',
       responseSchema: StreamingResponseSchema,
-      data: body,
+      data: JSON.stringify(data),
       responseType: 'stream',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -301,8 +309,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     signal,
     timeout,
   }: InvokeAIActionParams): Promise<IncomingMessage> {
+    console.log("rohan test invokeStream API called")
+    console.log("rohan test invokeStream API got message ", messages)
     const res = (await this.streamAPI({
-      body: JSON.stringify(JSON.parse(messages)),
+      body: JSON.stringify(messages),
       model,
       stopSequences,
       temperature,
@@ -323,9 +333,9 @@ const formatGeminiPayload = (data: string): Payload => {
             maxOutputTokens: DEFAULT_TOKEN_LIMIT
         }
     };
-    
+    console.log("rohan test formatGeminiPayload input =", data)
     for (const row of JSON.parse(data)) {
-        payload.contents.push({
+      payload.contents.push({
             role: row.role,
             parts: [
                 {
@@ -334,6 +344,6 @@ const formatGeminiPayload = (data: string): Payload => {
             ]
         });
     }
-    
+
     return payload;
   };

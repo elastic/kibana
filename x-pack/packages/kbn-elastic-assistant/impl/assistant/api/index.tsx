@@ -52,12 +52,27 @@ export const fetchConnectorExecuteAction = async ({
   size,
   traceOptions,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
+  console.log("rohan test inside fetchConnectorExecuteAction apiConfig.actionTypeId=", apiConfig.actionTypeId)
+  console.log("rohan test temp")
+
+  console.log(
+    'rohan test inside fetchConnectorExecuteAction isStreamtemp=',
+    assistantStreamingEnabled &&
+  (apiConfig.actionTypeId === '.gen-ai' ||
+    apiConfig.actionTypeId === '.gemini' ||
+    // TODO add streaming support for bedrock with langchain on
+    // tracked here: https://github.com/elastic/security-team/issues/7363
+        (apiConfig.actionTypeId === '.bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase))
+  );
+
   const isStream =
     assistantStreamingEnabled &&
     (apiConfig.actionTypeId === '.gen-ai' ||
+      apiConfig.actionTypeId === '.gemini' ||
       // TODO add streaming support for bedrock with langchain on
       // tracked here: https://github.com/elastic/security-team/issues/7363
       (apiConfig.actionTypeId === '.bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
+  console.log("rohan test inside fetchConnectorExecuteAction isStream=", isStream)
 
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
