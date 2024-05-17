@@ -11,7 +11,6 @@ import './editor_menu.scss';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
-  EuiContextMenu,
   EuiContextMenuItemIcon,
   type EuiContextMenuPanelDescriptor,
   type EuiContextMenuPanelItemDescriptor,
@@ -21,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -32,6 +31,7 @@ import {
   getAddPanelActionMenuItems,
   type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
+import { gh } from './add_panel_flyout';
 
 export interface FactoryGroup {
   id: string;
@@ -156,6 +156,7 @@ export const EditorMenu = ({
       showNewVisModal,
     },
     uiActions,
+    overlays,
   } = pluginServices.getServices();
 
   const { euiTheme } = useEuiTheme();
@@ -374,28 +375,22 @@ export const EditorMenu = ({
     ];
   };
 
+  const openAddPanelFlyout = useMemo(() => gh({ overlays }), [overlays]);
+
   return (
-    <ToolbarPopover
-      zIndex={Number(euiTheme.levels.header) - 1}
-      repositionOnScroll
-      ownFocus
+    <ToolbarButton
+      data-test-subj="dashboardEditorMenuButton"
+      isDisabled={isDisabled}
+      iconType="plusInCircle"
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
         defaultMessage: 'Add panel',
       })}
-      isDisabled={isDisabled}
+      onClick={() =>
+        openAddPanelFlyout({
+          getPanels: getEditorMenuPanels,
+        })
+      }
       size="s"
-      iconType="plusInCircle"
-      panelPaddingSize="none"
-      data-test-subj="dashboardEditorMenuButton"
-    >
-      {({ closePopover }: { closePopover: () => void }) => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={getEditorMenuPanels(closePopover)}
-          className={`dshSolutionToolbar__editorContextMenu`}
-          data-test-subj="dashboardEditorContextMenu"
-        />
-      )}
-    </ToolbarPopover>
+    />
   );
 };

@@ -19,7 +19,6 @@ import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { AddPanelFlyout } from './add_panel_flyout';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
@@ -84,10 +83,6 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
    */
 
   const extraButtons = [
-     <AddPanelFlyout
-      createNewVisType={createNewVisType}
-      createNewEmbeddable={createNewEmbeddable}
-    />,
     <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} api={dashboard} />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}

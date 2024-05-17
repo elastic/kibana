@@ -6,307 +6,139 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiBadge,
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuItemIcon,
-  EuiContextMenuPanelItemDescriptor,
+  render as ReactDOMRender,
+  unmountComponentAtNode as ReactDOMUnmountComponentAtNode,
+} from 'react-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  EuiButtonEmpty,
+  type EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiTitle,
-  useEuiTheme,
+  EuiFieldSearch,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_APP_ID } from '../../dashboard_constants';
+import type { DashboardServices } from '../../services/types';
 
-interface Props {
-  /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-  /** Handler for creating a new embeddable of a specified type */
-  createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void;
+interface OpenAddPanelFlyoutArgs {
+  getPanels: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
 }
 
-interface FactoryGroup {
-  id: string;
-  appName: string;
-  icon: EuiContextMenuItemIcon;
-  panelId: number;
-  factories: EmbeddableFactory[];
+interface Props extends Pick<OpenAddPanelFlyoutArgs, 'getPanels'> {
+  /** Handler to close flyout */
+  close: () => void;
 }
 
-interface UnwrappedEmbeddableFactory {
-  factory: EmbeddableFactory;
-  isEditable: boolean;
-}
+export const gh = ({ overlays }: Pick<DashboardServices, 'overlays'>) =>
+  function openAddPanelFlyout({ getPanels }: OpenAddPanelFlyoutArgs) {
+    // eslint-disable-next-line prefer-const
+    let flyoutRef: ReturnType<DashboardServices['overlays']['openFlyout']>;
 
-export const AddPanelFlyout = ({ createNewVisType, createNewEmbeddable }: Props) => {
-  const {
-    embeddable,
-    visualizations: {
-      getAliases: getVisTypeAliases,
-      getByGroup: getVisTypesByGroup,
-      showNewVisModal,
-    },
-  } = pluginServices.getServices();
+    const closeFlyout = () => flyoutRef.close();
 
-  const { euiTheme } = useEuiTheme();
+    const mount = (element: HTMLElement) => {
+      const reactElement = <AddPanelFlyout close={closeFlyout} getPanels={getPanels} />;
 
-  const embeddableFactories = useMemo(
-    () => Array.from(embeddable.getEmbeddableFactories()),
-    [embeddable]
-  );
-  const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
-    UnwrappedEmbeddableFactory[]
-  >([]);
+      ReactDOMRender(reactElement, element);
+
+      return () => ReactDOMUnmountComponentAtNode(element);
+    };
+
+    flyoutRef = overlays.openFlyout(mount, { size: 'm', 'aria-labelledby': 'add-panels-flyout' });
+
+    return flyoutRef;
+  };
+
+export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
+  const panels = useRef(getPanels(close));
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [panelsSearchResult, setPanelsSearchResult] = useState(panels.current);
 
   useEffect(() => {
-    Promise.all(
-      embeddableFactories.map<Promise<UnwrappedEmbeddableFactory>>(async (factory) => ({
-        factory,
-        isEditable: await factory.isEditable(),
-      }))
-    ).then((factories) => {
-      setUnwrappedEmbeddableFactories(factories);
-    });
-  }, [embeddableFactories]);
-
-  const createNewAggsBasedVis = useCallback(
-    (visType?: BaseVisType) => () =>
-      showNewVisModal({
-        originatingApp: DASHBOARD_APP_ID,
-        outsideVisualizeApp: true,
-        showAggsSelection: true,
-        selectedVisType: visType,
-      }),
-    [showNewVisModal]
-  );
-
-  const getSortedVisTypesByGroup = (group: VisGroups) =>
-    getVisTypesByGroup(group)
-      .sort(({ name: a }: BaseVisType | VisTypeAlias, { name: b }: BaseVisType | VisTypeAlias) => {
-        if (a < b) {
-          return -1;
-        }
-        if (a > b) {
-          return 1;
-        }
-        return 0;
-      })
-      .filter(({ disableCreate, stage }: BaseVisType) => !disableCreate);
-
-  const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
-  const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
-  const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = getVisTypeAliases().sort(
-    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
-      a === b ? 0 : a ? -1 : 1
-  );
-
-  const factories = unwrappedEmbeddableFactories.filter(
-    ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
-      isEditable && !isContainerType && canCreateNew() && type !== 'visualization'
-  );
-
-  const factoryGroupMap: Record<string, FactoryGroup> = {};
-  const ungroupedFactories: EmbeddableFactory[] = [];
-  const aggBasedPanelID = 1;
-
-  let panelCount = 1 + aggBasedPanelID;
-
-  factories.forEach(({ factory }) => {
-    const { grouping } = factory;
-
-    if (grouping) {
-      grouping.forEach((group) => {
-        if (factoryGroupMap[group.id]) {
-          factoryGroupMap[group.id].factories.push(factory);
-        } else {
-          factoryGroupMap[group.id] = {
-            id: group.id,
-            appName: group.getDisplayName ? group.getDisplayName({ embeddable }) : group.id,
-            icon: (group.getIconType
-              ? group.getIconType({ embeddable })
-              : 'empty') as EuiContextMenuItemIcon,
-            factories: [factory],
-            panelId: panelCount,
-          };
-
-          panelCount++;
-        }
-      });
-    } else {
-      ungroupedFactories.push(factory);
+    if (!searchTerm) {
+      return setPanelsSearchResult(panels.current);
     }
-  });
 
-  const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
-    const {
-      name,
-      title,
-      titleInWizard,
-      description,
-      icon = 'empty',
-      group,
-      isDeprecated,
-    } = visType;
-    return {
-      name: !isDeprecated ? (
-        titleInWizard || title
-      ) : (
-        <EuiFlexGroup wrap responsive={false} gutterSize="s">
-          <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="warning">
-              {i18n.translate('dashboard.editorMenu.deprecatedTag', {
-                defaultMessage: 'Deprecated',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      icon: icon as string,
-      onClick:
-        // not all the agg-based visualizations need to be created via the wizard
-        group === VisGroups.AGGBASED && visType.options.showIndexSelection
-          ? createNewAggsBasedVis(visType)
-          : createNewVisType(visType),
-      'data-test-subj': `visType-${name}`,
-      toolTipContent: description,
-    };
-  };
+    // TODO: handle search
+  }, [searchTerm]);
 
-  const getVisTypeAliasMenuItem = (
-    visTypeAlias: VisTypeAlias
-  ): EuiContextMenuPanelItemDescriptor => {
-    const { name, title, description, icon = 'empty' } = visTypeAlias;
-
-    return {
-      name: title,
-      icon,
-      onClick: createNewVisType(visTypeAlias),
-      'data-test-subj': `visType-${name}`,
-      toolTipContent: description,
-    };
-  };
-
-  const getEmbeddableFactoryMenuItem = (
-    factory: EmbeddableFactory,
-    closePopover: () => void
-  ): EuiContextMenuPanelItemDescriptor => {
-    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
-
-    const toolTipContent = factory?.getDescription ? factory.getDescription() : undefined;
-
-    return {
-      name: factory.getDisplayName(),
-      icon,
-      toolTipContent,
-      onClick: async () => {
-        closePopover();
-        createNewEmbeddable(factory);
-      },
-      'data-test-subj': `createNew-${factory.type}`,
-    };
-  };
-
-  const aggsPanelTitle = i18n.translate('dashboard.editorMenu.aggBasedGroupTitle', {
-    defaultMessage: 'Aggregation based',
-  });
-
-  const getEditorMenuPanels = (closePopover: () => void) => {
-    const initialPanelItems = [
-      ...visTypeAliases.map(getVisTypeAliasMenuItem),
-      ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-        name: appName,
-        icon,
-        panel: panelId,
-        'data-test-subj': `dashboardEditorMenu-${id}Group`,
-      })),
-      ...ungroupedFactories.map((factory) => {
-        return getEmbeddableFactoryMenuItem(factory, closePopover);
-      }),
-      ...promotedVisTypes.map(getVisTypeMenuItem),
-    ];
-    if (aggsBasedVisTypes.length > 0) {
-      initialPanelItems.push({
-        name: aggsPanelTitle,
-        icon: 'visualizeApp',
-        panel: aggBasedPanelID,
-        'data-test-subj': `dashboardEditorAggBasedMenuItem`,
-      });
-    }
-    initialPanelItems.push(...toolVisTypes.map(getVisTypeMenuItem));
-
-    return [
-      {
-        id: 0,
-        items: initialPanelItems,
-      },
-      {
-        id: aggBasedPanelID,
-        title: aggsPanelTitle,
-        items: aggsBasedVisTypes.map(getVisTypeMenuItem),
-      },
-      ...Object.values(factoryGroupMap).map(
-        ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-          id: panelId,
-          title: appName,
-          items: groupFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-        })
-      ),
-    ];
-  };
   return (
     <>
-      <EuiFlyoutHeader>
-        <EuiTitle>
-          <h1>Add panel</h1>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h1>
+            {i18n.translate('dashboard.solutionToolbar.addPanelFlyout.headingText', {
+              defaultMessage: 'Add Panel',
+            })}
+          </h1>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="dashboardEditorMenuButton">
-        {({ closePopover }: { closePopover: () => void }) => (
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={getEditorMenuPanels(closePopover)}
-            className={`dshSolutionToolbar__editorContextMenu`}
-            data-test-subj="dashboardEditorContextMenu"
-          />
-        )}
+      <EuiFlyoutBody>
+        <EuiFlexGroup direction="column" responsive={false}>
+          <EuiFlexItem
+            grow={false}
+            css={{
+              position: 'sticky',
+              top: '24px',
+            }}
+          >
+            <EuiForm component="form" fullWidth>
+              <EuiFormRow>
+                <EuiFieldSearch
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                  }}
+                  aria-label="search field for panels"
+                />
+              </EuiFormRow>
+            </EuiForm>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              {Object.values(panelsSearchResult).map(({ id, title, items }) => (
+                <React.Fragment key={id}>
+                  <EuiFlexItem>
+                    <EuiText>
+                      <h3>{title}</h3>
+                    </EuiText>
+                    <EuiListGroup>
+                      {items?.map((item) => (
+                        <EuiListGroupItem
+                          label={item.name}
+                          iconType={item.icon!}
+                          data-test-subj={item['data-test-subj']}
+                        />
+                      ))}
+                    </EuiListGroup>
+                  </EuiFlexItem>
+                </React.Fragment>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton>Close</EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={close} flush="left">
+              {i18n.translate('dashboard.solutionToolbar.addPanelFlyout.cancelButtonText', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
   );
-  // return (
-  //   <ToolbarPopover
-  //     zIndex={Number(euiTheme.levels.header) - 1}
-  //     repositionOnScroll
-  //     ownFocus
-  //     label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-  //       defaultMessage: 'Select type',
-  //     })}
-  //     panelPaddingSize="none"
-  //     data-test-subj="dashboardEditorMenuButton"
-  //   >
-  //     {({ closePopover }: { closePopover: () => void }) => (
-  //       <EuiContextMenu
-  //         initialPanelId={0}
-  //         panels={getEditorMenuPanels(closePopover)}
-  //         className={`dshSolutionToolbar__editorContextMenu`}
-  //         data-test-subj="dashboardEditorContextMenu"
-  //       />
-  //     )}
-  //   </ToolbarPopover>
-  // );
 };
