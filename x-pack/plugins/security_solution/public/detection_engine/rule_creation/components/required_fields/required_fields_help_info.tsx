@@ -37,7 +37,7 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldRequiredFieldsHelpText"
-          defaultMessage="Choose the fields and data types needed for this rule to function. You can select the fields available in the rule's {source} index patterns or data view."
+          defaultMessage="Create an informational list of fields and data types this rule needs to function. Select fields in the rule's {source} index patterns or data view, or type in custom fields."
           values={{
             source: <strong>{defineRuleI18n.SOURCE}</strong>,
           }}
