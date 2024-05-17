@@ -33,7 +33,7 @@ export interface LatestAggResponseBucket {
   latest_doc: { hits: { hits: Array<{ _source: ResultDocument }> } };
 }
 
-export const getResultsRoute = (
+export const getResultsIndicesLatestRoute = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
