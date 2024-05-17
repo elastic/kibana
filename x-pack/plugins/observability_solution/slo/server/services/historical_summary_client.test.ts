@@ -46,7 +46,7 @@ const generateEsResponseForRollingSLO = (slo: SLODefinition, overridedRange?: Da
     ? rollingDurationInDays + overridedRangeInDays
     : rollingDurationInDays * 2;
   const numberOfBuckets = fullDuration * bucketsPerDay;
-  const startDay = moment().subtract(fullDuration, 'day').startOf('day');
+  const startDay = moment().subtract(fullDuration, 'day').startOf('minute');
   const bucketSizeInHour = moment
     .duration(
       fixedInterval.slice(0, -1),
