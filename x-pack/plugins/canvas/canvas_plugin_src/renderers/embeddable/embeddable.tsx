@@ -57,18 +57,15 @@ const renderReactEmbeddable = ({
   const RendererWrapper: FC<{ canvasApi: CanvasContainerApi }> = ({ canvasApi }) => {
     const getAppContext = useGetAppContext(core);
 
-    const parentApi = useMemo(() => {
-      return {
-        ...canvasApi,
-        getAppContext,
-      };
+    useMemo(() => {
+      canvasApi.getAppContext = getAppContext;
     }, [canvasApi, getAppContext]);
 
     return (
       <ReactEmbeddableRenderer
         type={type}
         maybeId={uuid}
-        parentApi={parentApi}
+        parentApi={canvasApi}
         key={`${type}_${uuid}`}
         state={{ rawState: input }}
         onAnyStateChange={(newState) => {

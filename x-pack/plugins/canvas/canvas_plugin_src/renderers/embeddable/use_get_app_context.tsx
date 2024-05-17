@@ -22,8 +22,6 @@ export function useGetAppContext(core: CoreStart) {
       },
       currentAppId: CANVAS_APP,
     });
-    // only run onMount. Memoized value is a function that will use current values when executed
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentAppId, core.application]);
   return getAppContext;
 }
