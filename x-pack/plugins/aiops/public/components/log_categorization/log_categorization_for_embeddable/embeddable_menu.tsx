@@ -19,8 +19,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useState, useMemo } from 'react';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,9 +30,6 @@ import { MINIMUM_TIME_RANGE } from './minimum_time_range';
 
 interface Props {
   randomSampler: RandomSampler;
-  fields: DataViewField[];
-  selectedField: DataViewField | null;
-  setSelectedField: (field: DataViewField) => void;
   minimumTimeRangeOption: MinimumTimeRangeOption;
   setMinimumTimeRangeOption: (w: MinimumTimeRangeOption) => void;
   categoryCount: number | undefined;
@@ -47,9 +43,6 @@ const minimumTimeRangeOptions = Object.keys(MINIMUM_TIME_RANGE).map((value) => (
 
 export const EmbeddableMenu: FC<Props> = ({
   randomSampler,
-  fields,
-  selectedField,
-  setSelectedField,
   minimumTimeRangeOption,
   setMinimumTimeRangeOption,
   categoryCount,
@@ -57,11 +50,6 @@ export const EmbeddableMenu: FC<Props> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const togglePopover = () => setShowMenu(!showMenu);
-
-  const fieldOptions = useMemo(
-    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
-    [fields]
-  );
 
   const button = (
     <EuiToolTip
@@ -102,24 +90,6 @@ export const EmbeddableMenu: FC<Props> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiFormRow
-          data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
-          label={i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
-            {
-              defaultMessage: 'Selected field',
-            }
-          )}
-        >
-          <EuiSuperSelect
-            aria-label="Select a field"
-            options={fieldOptions}
-            valueOfSelected={selectedField ?? undefined}
-            onChange={setSelectedField}
-          />
-        </EuiFormRow>
-
-        <EuiHorizontalRule margin="m" />
 
         <EuiFormRow
           data-test-subj="aiopsRandomSamplerOptionsFormRow"

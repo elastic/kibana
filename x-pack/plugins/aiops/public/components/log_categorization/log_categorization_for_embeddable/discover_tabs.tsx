@@ -20,6 +20,7 @@ import type { RandomSampler } from '../sampling_menu';
 import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { SelectedPatterns } from './selected_patterns';
 import { CreateCategorizationJobButton } from '../create_categorization_job';
+import { SelectedField } from './field_selector';
 
 interface Props {
   renderViewModeToggle: (patternCount?: number) => React.ReactElement;
@@ -75,14 +76,18 @@ export const DiscoverTabs: FC<Props> = ({
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem>
+                <SelectedField
+                  fields={fields}
+                  setSelectedField={setSelectedField}
+                  selectedField={selectedField}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
                 <div className="unifiedDataTableToolbarControlGroup" css={{ marginRight: '8px' }}>
                   <div className="unifiedDataTableToolbarControlIconButton">
                     <EmbeddableMenu
                       randomSampler={randomSampler}
                       reload={() => loadCategories()}
-                      fields={fields}
-                      setSelectedField={setSelectedField}
-                      selectedField={selectedField}
                       minimumTimeRangeOption={minimumTimeRangeOption}
                       setMinimumTimeRangeOption={setMinimumTimeRangeOption}
                       categoryCount={data?.totalCategories}

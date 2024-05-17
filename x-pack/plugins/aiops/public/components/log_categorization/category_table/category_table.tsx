@@ -124,15 +124,9 @@ export const CategoryTable: FC<Props> = ({
       width: '80px',
     },
     {
-      name:
-        fieldName === undefined
-          ? i18n.translate('xpack.aiops.logCategorization.column.examples', {
-              defaultMessage: 'Examples',
-            })
-          : i18n.translate('xpack.aiops.logCategorization.column.examplesWithFieldName', {
-              defaultMessage: 'Examples of {fieldName}',
-              values: { fieldName },
-            }),
+      name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
+        defaultMessage: 'Examples',
+      }),
       sortable: true,
       render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },
