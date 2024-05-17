@@ -1215,6 +1215,7 @@
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
     "@cfaester/enzyme-adapter-react-18": "^0.7.1",
+    "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.1",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/makelogs": "^6.1.1",
