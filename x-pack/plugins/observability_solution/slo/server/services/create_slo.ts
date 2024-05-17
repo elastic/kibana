@@ -90,7 +90,7 @@ export class CreateSLO {
         `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
       );
 
-      asyncForEach(rollbackOperations.reverse(), async (operation) => {
+      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {

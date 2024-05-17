@@ -145,7 +145,7 @@ export class UpdateSLO {
         `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back.`
       );
 
-      asyncForEach(rollbackOperations.reverse(), async (operation) => {
+      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
