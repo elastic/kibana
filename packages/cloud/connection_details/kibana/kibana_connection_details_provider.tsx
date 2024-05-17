@@ -73,7 +73,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
             try {
               return (await security.authz.getCurrentUserApiKeyPrivileges()).canManageOwnApiKeys;
             } catch (error) {
-              if (error instanceof errors.ResponseError && error.statusCode === 403) {
+              if (error instanceof Error && error.message === 'Forbidden') {
                 return false;
               }
               throw error;
