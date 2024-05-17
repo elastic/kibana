@@ -44,11 +44,10 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
 export const usePollingAgentCount = (
   policyId: string,
   opts?: UsePollingAgentCountOptions
-): { enrolledAgentIds: string[]; unprivilegedAgentIds: string[] } => {
+): { enrolledAgentIds: string[] } => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const [didPollInitially, setDidPollInitially] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
-  const [unprivilegedAgentIds, setUnpriviligedAgentIds] = useState<string[]>([]);
 
   const lowerTimeLimitKuery = opts?.noLowerTimeLimit
     ? ''
@@ -65,15 +64,7 @@ export const usePollingAgentCount = (
     if (newAgentIds.some((id) => !agentIds.includes(id))) {
       setAgentIds(newAgentIds);
     }
-
-    const newUnprivilegedAgentIds =
-      request.data?.items
-        .filter((i) => i.local_metadata?.elastic?.agent?.unprivileged || false)
-        .map((i) => i.id) ?? unprivilegedAgentIds;
-    if (newUnprivilegedAgentIds.some((id) => !unprivilegedAgentIds.includes(id))) {
-      setUnpriviligedAgentIds(newUnprivilegedAgentIds);
-    }
-  }, [agentIds, kuery, unprivilegedAgentIds]);
+  }, [agentIds, kuery]);
 
   // optionally poll once on first render
   if (!didPollInitially && opts?.pollImmediately) {
@@ -100,8 +91,8 @@ export const usePollingAgentCount = (
     return () => {
       isAborted = true;
     };
-  }, [agentIds, policyId, kuery, getNewAgentIds, unprivilegedAgentIds]);
-  return { enrolledAgentIds: agentIds, unprivilegedAgentIds };
+  }, [agentIds, policyId, kuery, getNewAgentIds]);
+  return { enrolledAgentIds: agentIds };
 };
 
 export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({

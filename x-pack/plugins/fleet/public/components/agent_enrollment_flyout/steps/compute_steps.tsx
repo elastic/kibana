@@ -169,6 +169,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         installCommand: standaloneInstallCommands,
         isK8s,
         cloudSecurityIntegration,
+        rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+        unprivilegedAgentsCount: selectedPolicy?.unprivileged_agents ?? 0,
       })
     );
 
@@ -226,7 +228,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const apiKeyData = apiKey?.data;
   const enrollToken = apiKey.data ? apiKey.data.item.api_key : '';
 
-  const { enrolledAgentIds, unprivilegedAgentIds } = usePollingAgentCount(selectedPolicy?.id || '');
+  const { enrolledAgentIds } = usePollingAgentCount(selectedPolicy?.id || '');
 
   const agentVersion = useAgentVersion();
 
@@ -310,15 +312,13 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudSecurityIntegration,
           fleetServerHost,
           enrollToken,
+          rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+          unprivilegedAgentsCount: selectedPolicy?.unprivileged_agents ?? 0,
         })
       );
     }
 
     if (selectedApiKeyId && apiKeyData) {
-      const unprivilegedAgentsCount = Math.max(
-        unprivilegedAgentIds.length,
-        selectedPolicy?.unprivileged_agents ?? 0
-      );
       steps.push(
         AgentEnrollmentConfirmationStep({
           selectedPolicyId: selectedPolicy?.id,
@@ -326,8 +326,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
           isLongEnrollment: cloudSecurityIntegration !== undefined,
-          rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
-          unprivilegedAgentsCount,
         })
       );
     }
@@ -364,7 +362,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     onClickViewAgents,
     link,
     enrolledAgentIds,
-    unprivilegedAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
     gcpProjectId,

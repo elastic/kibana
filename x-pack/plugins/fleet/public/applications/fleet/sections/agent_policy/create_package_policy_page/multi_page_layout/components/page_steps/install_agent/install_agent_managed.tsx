@@ -36,7 +36,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     fleetServerHost,
     fleetProxy,
     enrolledAgentIds,
-    unprivilegedAgentIds,
   } = props;
 
   const core = useStartServices();
@@ -83,6 +82,8 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       fullCopyButton: true,
       fleetServerHost,
       onCopy: () => setCommandCopied(true),
+      rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
+      unprivilegedAgentsCount: agentPolicy?.unprivileged_agents ?? 0,
     }),
   ];
 
@@ -96,11 +97,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     );
   }
 
-  const unprivilegedAgentsCount = Math.max(
-    unprivilegedAgentIds.length,
-    agentPolicy?.unprivileged_agents ?? 0
-  );
-
   steps.push(
     AgentEnrollmentConfirmationStep({
       selectedPolicyId: agentPolicy?.id,
@@ -108,8 +104,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       agentCount: enrolledAgentIds.length,
       showLoading: true,
       poll: commandCopied,
-      rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
-      unprivilegedAgentsCount,
     })
   );
 

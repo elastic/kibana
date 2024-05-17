@@ -18,13 +18,10 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
   const [localIsManaged, setLocalIsManaged] = useState(props.isManaged);
   const [useLocalState, setUseLocalState] = useState(false);
 
-  const { enrolledAgentIds, unprivilegedAgentIds } = usePollingAgentCount(
-    props.agentPolicy?.id || '',
-    {
-      noLowerTimeLimit: true,
-      pollImmediately: true,
-    }
-  );
+  const { enrolledAgentIds } = usePollingAgentCount(props.agentPolicy?.id || '', {
+    noLowerTimeLimit: true,
+    pollImmediately: true,
+  });
   const onNext = () => {
     props.setEnrolledAgentIds(enrolledAgentIds);
     props.onNext();
@@ -34,7 +31,6 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
     ...props,
     onNext,
     enrolledAgentIds,
-    unprivilegedAgentIds,
     setIsManaged: useLocalState ? setLocalIsManaged : props.setIsManaged,
   };
   if (localIsManaged) {
@@ -44,7 +40,6 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
     ...props,
     onNext,
     enrolledAgentIds,
-    unprivilegedAgentIds,
     setIsManaged: (newIsManaged: boolean) => {
       if (newIsManaged) {
         // once you are in the standalone set of steps and the package policy
