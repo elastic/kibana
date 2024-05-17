@@ -115,6 +115,7 @@ export const useHighlightedFields = ({
       return acc;
     }
 
+    // if the field is crowdstrike.event.DeviceId and the event is not a crowdstrike event we skip it
     if (
       field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
       !isAlertFromCrowdstrikeEvent({ data: dataFormattedForFieldBrowser })
