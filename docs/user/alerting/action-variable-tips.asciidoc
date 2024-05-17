@@ -1,16 +1,18 @@
 [[rule-action-variable-tips]]
-== Rule action variable tips and examples
+== Mustache tips and examples for rule actions
 :frontmatter-description: Examples of how to use Mustache templates in {kib} alerting rule actions.
 :frontmatter-tags-products: [alerting] 
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 ++++
-<titleabbrev>Tips and examples</titleabbrev>
+<titleabbrev>Mustache tips and examples</titleabbrev>
 ++++
 
-Rule actions pass variable values into alert notifications by using Mustache template syntax (`{{variable name}}`).
-For a list of common variables, go to <<rule-action-variables>>.
+When a rule generates an alert, it can pass context-specific details by using <<rule-action-variables,rule action variables>> in Mustache templates.
 For more information about Mustache, refer to https://github.com/mustache/spec or https://mustache.github.io/.
+
+Rules support a specific subset of <<rule-action-mustache-lambdas,Mustache lambdas>>.
+This page provides examples of their use as well as tips related to common syntax patterns.
 
 [discrete]
 === Escape characters
@@ -36,7 +38,7 @@ The following example makes use of an implicit iterator (`{{.}}`) and a section 
 {{#context}}{{.}}{{/context}}
 --------------------------------------------------
 
-TIP: The implicit iterator is typically used in this manner only for diagnostic or exploratory purposes.
+TIP: The implicit iterator is typically used in this manner for diagnostic or exploratory purposes only.
 
 The following example from a {transform} health rule demonstrates how to use sections to conditionally show content within a for-each loop:
 
@@ -52,7 +54,7 @@ The following example from a {transform} health rule demonstrates how to use sec
 {{/context.results}}
 --------------------------------------------------
 
-If the `context.results.description` is missing, for example, the text in that section is not displayed.
+If `context.results.description` is missing, for example, the text in that section is not displayed.
 
 [discrete]
 === Rendering objects as JSON
@@ -67,6 +69,7 @@ For example, if a Mustache variable `context.values` has the value `[1, 4, 9]`, 
 Alternatively, you can use the Mustache lambda <<parse-hjson-lambda,ParseHjson>>, which makes it easier to create JSON in your templates. It uses https://hjson.github.io/[Hjson], a syntax extension to JSON, rather than strict JSON.
 
 [discrete]
+[[rule-action-mustache-lambdas]]
 === Mustache lambdas
 
 preview::[]
@@ -247,7 +250,7 @@ formatted value: 62,84 €
 
 This example demonstrates a Mustache template for an email action.
 
-An {es} query rule collects data like this when an alert occurs:
+An <<rule-type-es-query,{es} query rule>> collects data like this when an alert occurs:
 
 [source,json]
 ----
@@ -281,15 +284,8 @@ An {es} query rule collects data like this when an alert occurs:
 }
 ----
 
-You can use a Mustache template in the email action for your rule to include the appropriate alert details. 
-The template references the following variables that are specific to the {es} query rule:
-
-- `context.title`
-- `context.conditions`
-- `context.link`
-- `context.hits[]._source.event.provider`
-- `context.hits[]._source.event.action`
-- `context.hits[]._source.event.duration`
+You can use a Mustache template in the email action for your rule to include the appropriate alert details.
+For example:
 
 [source,mustache]
 ----

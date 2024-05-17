@@ -7,9 +7,9 @@
 
 Rule actions use variables to customize the notifications for each alert.
 
-There is a set of common variables available in all rules, as well as some that are unique to each rule.
-This page covers only the common variables.
-To learn how to use these variables with Mustache templates in rules, go to <<rule-action-variable-tips>>.
+There is a set of common variables available in all rules, as well as some that are specific to each rule.
+This page covers only the common variables. For rule-specific details, refer to the appropriate <<rule-types,rule type>>.
+To learn how to use these variables in rules, go to <<rule-action-variable-tips>>.
 
 [float]
 [[general-rule-action-variables]]
@@ -18,17 +18,17 @@ To learn how to use these variables with Mustache templates in rules, go to <<ru
 All rule types pass the following variables:
 
 `alertActionGroup`::
-(string) deprecated:[8.10.0] Use `alert.actionGroup` instead.
+(string) deprecated:[8.10.0] Use <<alert-actiongroup-variable,`alert.actionGroup`>> instead.
 `alertActionGroupName`::
-(string) deprecated:[8.10.0] Use `alert.actionGroupName` instead.
+(string) deprecated:[8.10.0] Use <<alert-actiongroupname-variable,`alert.actionGroupName`>> instead.
 `alertActionSubgroup`::
-(string) deprecated:[8.10.0] Use `alert.actionSubgroup` instead.
+(string) deprecated:[8.10.0] Use <<alert-actionsubgroup,`alert.actionSubgroup`>> instead.
 `alertId`::
-(string) deprecated:[8.10.0] Use `rule.id` instead.
+(string) deprecated:[8.10.0] Use <<rule-id-variable,`rule.id`>> instead.
 `alertInstanceId`::
-(string) deprecated:[8.10.0] Use `alert.id` instead.
+(string) deprecated:[8.10.0] Use <<alert-id-variable,`alert.id`>> instead.
 `alertName`::
-(string) deprecated:[8.10.0] Use `rule.name` instead.
+(string) deprecated:[8.10.0] Use <<rule-name-variable,`rule.name`>> instead.
 `date`::
 (string) The date the rule scheduled the action, in ISO format. For example: `2024-04-30T00:55:42.839Z`
 `kibanaBaseUrl`::
@@ -37,25 +37,25 @@ All rule types pass the following variables:
 (object) deprecated:[8.10.0] Use `rule.params` instead.
 `rule`::
 (object) Details about the rule.
-`rule.id`::
+[[rule-id-variable]]`rule.id`::
 (string) The rule identifier. For example: `47754354-d894-49d3-87ec-05745a74e2b7`.
-`rule.name`::
+[[rule-name-variable]]`rule.name`::
 (string) The rule name.
 `rule.params`::
-(object) The rule parameters, which vary by rule type.
-`rule.spaceId`::
+(object) The rule parameters, which vary by <<rule-types,rule type>>.
+[[rule-spaceid-variable]]`rule.spaceId`::
 (string) The space identifier for the rule. For example, `default`.
-`rule.tags`::
+[[rule-tags-variable]]`rule.tags`::
 (array) The list of tags applied to the rule.
 `rule.type`::
 (string) The type of rule. For example, `.es-query`.
 `rule.url`::
 (string) The URL for the rule that generated the alert. This will be an empty string if the `server.publicBaseUrl` setting is not configured.
-//TBD Are KibaanBaseUrl in fact absent instead of empty?
+//TBD Is it an empty string or omitted (latter per my test)?
 `spaceId`::
-(string) deprecated:[8.10.0] Use `rule.spaceId` instead.
+(string) deprecated:[8.10.0] Use <<rule-spaceid-variable,`rule.spaceId`>> instead.
 `tags`::
-(array) deprecated:[8.10.0] Use `rule.tags` instead.
+(array) deprecated:[8.10.0] Use <<rule-tags-variable,`rule.tags`>> instead.
 
 [float]
 [role="child_attributes"]
@@ -200,23 +200,23 @@ include::action-variables.asciidoc[tag=alerts-data]
 
 If the rule's action frequency is not a summary of alerts, it passes the following variables:
 
-`alert.actionGroup`::
+[[alert-actiongroup-variable]]`alert.actionGroup`::
 (string) The ID of the action group of the alert that scheduled the action. For example, `query matched`.
-`alert.actionGroupName`::
+[[alert-actiongroupname-variable]]`alert.actionGroupName`::
 (string) The name of the action group of the alert that scheduled the action. For example, `Query matched`.
-`alert.actionSubgroup`::
+[[alert-actionsubgroup]]`alert.actionSubgroup`::
 (string) The action subgroup of the alert that scheduled the action.
 //TBD When does the subgroup appear? Is it related to the subcategory of ServiceNow connectors?
 `alert.consecutiveMatches`::
 (integer) The number of consecutive runs that meet the rule conditions.
 `alert.flapping`::
 (boolean) A flag on the alert that indicates whether the alert status is changing repeatedly.
-`alert.id`::
+[[alert-id-variable]]`alert.id`::
 (string) The ID of the alert that scheduled the action. For example, `query matched`.
 `alert.uuid`::
 (string) A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs. For example, `27ace796-1dfb-4db9-9ce1-7a10472fd461`. preview:[]
 `context`::
-(object) The context of the alert, which varies by rule type and typically contains multiple variables.
+(object) The context of the alert, which varies by <<rule-types,rule type>> and typically contains multiple variables.
 ////
 //TBD: Is there a reason these don't appear in the UI variable list?
 `state.dateEnd`::
