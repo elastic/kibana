@@ -7,10 +7,10 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/constants';
+import { INTERNAL_API_VERSION, RESULTS_INDICES_LATEST_ROUTE_PATH } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-import { GetResultQuery } from '../../schemas/result';
+import { GetResultParams } from '../../schemas/result';
 import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
@@ -33,20 +33,24 @@ export interface LatestAggResponseBucket {
   latest_doc: { hits: { hits: Array<{ _source: ResultDocument }> } };
 }
 
-export const getResultsRoute = (
+export const getResultsIndicesLatestRoute = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: RESULTS_ROUTE_PATH,
+      path: RESULTS_INDICES_LATEST_ROUTE_PATH,
       access: 'internal',
       options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
         version: INTERNAL_API_VERSION,
-        validate: { request: { query: buildRouteValidation(GetResultQuery) } },
+        validate: {
+          request: {
+            params: buildRouteValidation(GetResultParams),
+          },
+        },
       },
       async (context, request, response) => {
         const services = await context.resolve(['core', 'dataQualityDashboard']);
@@ -65,7 +69,7 @@ export const getResultsRoute = (
 
         try {
           const { client } = services.core.elasticsearch;
-          const { pattern } = request.query;
+          const { pattern } = request.params;
 
           // Discover all indices for the pattern using internal user
           const indicesResponse = await client.asInternalUser.indices.get({
