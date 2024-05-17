@@ -113,7 +113,7 @@ export const useResponderActionData = ({
     }
 
     if (!endpointId) {
-      return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
+      return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
     }
 
     // Still loading host info
