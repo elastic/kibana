@@ -16,7 +16,7 @@ import {
   useGetExternalAgentStatus,
 } from '../../../management/hooks/agents/use_get_agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { AgentType } from '../../../../server/endpoint/services';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('../../../common/hooks/use_experimental_features');
@@ -39,7 +39,7 @@ describe('useHostIsolationAction', () => {
       return wrapper;
     };
 
-    const render = (agentTypeAlert: AgentType) =>
+    const render = (agentTypeAlert: ResponseActionAgentType) =>
       renderHook(
         () =>
           useHostIsolationAction({
