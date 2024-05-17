@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('_existing_indices response', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
