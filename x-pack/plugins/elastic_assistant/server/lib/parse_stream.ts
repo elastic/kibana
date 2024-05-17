@@ -116,9 +116,10 @@ const parseOpenAIResponse = (responseBody: string) =>
     }, '');
 
 
-const parseGeminiResponse = (responseBody: string) =>
-  responseBody
-    .split('\n')
+const parseGeminiResponse = (responseBody: string) =>{
+  console.log("rohan test parseGeminiResponse in parse_stream responseBody=",responseBody );
+  return responseBody
+    .split('\r')
     .filter((line) => {
       return line.startsWith('data: ') && !line.endsWith('[DONE]');
     })
@@ -148,7 +149,7 @@ const parseGeminiResponse = (responseBody: string) =>
       const text = parts.map(part => part.text).join('');
       return prev + text;
     }, '');
-
+  }
 const parseBedrockStream: StreamParser = async (responseStream, logger, abortSignal) => {
   const responseBuffer: Uint8Array[] = [];
   if (abortSignal) {

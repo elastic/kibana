@@ -203,7 +203,7 @@ export const getStreamObservable = ({
                   }
 
                   const decoded = decoder.decode(value, { stream: true });
-                  const lines = decoded.split('\n');
+                  const lines = decoded.split('\r');
                   console.log("rohan test inside readGemini lines=",lines)
                   console.log("rohan test inside readGemini decoded=",decoded)
                   lines[0] = geminiBuffer + lines[0];
@@ -358,6 +358,7 @@ const getOpenAIChunks = (lines: string[]): string[] => {
       .filter((str) => !!str && str !== '[DONE]')
       .map((line) => {
           try {
+              line=line.replaceAll("data: ","");
               const geminiResponse: ResponseSchema = JSON.parse(line);
               console.log("rohan test inside getGeminiChunks geminiResponse=", geminiResponse);
         return geminiResponse.candidates[0]?.content.parts.map((part) => part.text).join('') ?? '';

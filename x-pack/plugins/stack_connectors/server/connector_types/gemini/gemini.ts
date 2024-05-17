@@ -252,7 +252,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }: RunActionParams): Promise<StreamingResponse> {
     console.log('rohan test inside stream API');
     const currentModel = reqModel ?? this.model;
-    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent`;
+    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
     const accessToken = this.secrets.accessToken;
     const data = formatGeminiPayload(body);
 
@@ -330,7 +330,8 @@ const formatGeminiPayload = (data: string): Payload => {
         contents: [],
         generation_config: {
             temperature: 0,
-            maxOutputTokens: DEFAULT_TOKEN_LIMIT
+            maxOutputTokens: DEFAULT_TOKEN_LIMIT,
+            // response_mime_type: "application/json",
         }
     };
     console.log("rohan test formatGeminiPayload input =", data)
