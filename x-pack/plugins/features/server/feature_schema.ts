@@ -63,7 +63,10 @@ const managementSchema = schema.recordOf(
   listOfCapabilitiesSchema
 );
 const catalogueSchema = listOfCapabilitiesSchema;
-const alertingSchema = schema.arrayOf(schema.string());
+const alertingSchema = schema.object({
+  ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
+  consumers: schema.maybe(schema.arrayOf(schema.string())),
+});
 const casesSchema = schema.arrayOf(schema.string());
 
 const appCategorySchema = schema.object({
@@ -274,7 +277,13 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   kibanaFeatureSchema.validate(feature);
 
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
-  const { app = [], management = {}, catalogue = [], alerting = [], cases = [] } = feature;
+  const {
+    app = [],
+    management = {},
+    catalogue = [],
+    alerting: { ruleTypeIds = [], consumers = [] } = {},
+    cases = [],
+  } = feature;
 
   const unseenApps = new Set(app);
 
@@ -287,7 +296,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   const unseenCatalogue = new Set(catalogue);
 
-  const unseenAlertTypes = new Set(alerting);
+  const unseenAlertTypes = new Set([...ruleTypeIds, ...consumers]);
 
   const unseenCasesTypes = new Set(cases);
 
@@ -318,13 +327,23 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   }
 
   function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
-    const all: string[] = [...(entry?.rule?.all ?? []), ...(entry?.alert?.all ?? [])];
-    const read: string[] = [...(entry?.rule?.read ?? []), ...(entry?.alert?.read ?? [])];
+    const all: string[] = [
+      ...(entry?.rule?.all?.consumers ?? []),
+      ...(entry?.rule?.all?.ruleTypeIds ?? []),
+      ...(entry?.alert?.all?.consumers ?? []),
+      ...(entry?.alert?.all?.ruleTypeIds ?? []),
+    ];
+    const read: string[] = [
+      ...(entry?.rule?.read?.consumers ?? []),
+      ...(entry?.rule?.read?.ruleTypeIds ?? []),
+      ...(entry?.alert?.read?.consumers ?? []),
+      ...(entry?.alert?.read?.ruleTypeIds ?? []),
+    ];
 
     all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
     read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
 
-    const unknownAlertingEntries = difference([...all, ...read], alerting);
+    const unknownAlertingEntries = difference([...all, ...read], [...ruleTypeIds, ...consumers]);
     if (unknownAlertingEntries.length > 0) {
       throw new Error(
         `Feature privilege ${

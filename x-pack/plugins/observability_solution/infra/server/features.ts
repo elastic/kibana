@@ -42,7 +42,7 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: metricRuleTypes,
+  alerting: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
@@ -54,10 +54,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: metricRuleTypes,
+          all: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
         },
         alert: {
-          all: metricRuleTypes,
+          all: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
         },
       },
       management: {
@@ -75,10 +75,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: metricRuleTypes,
+          read: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
         },
         alert: {
-          read: metricRuleTypes,
+          read: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
         },
       },
       management: {
@@ -108,7 +108,7 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: logsRuleTypes,
+  alerting: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
@@ -120,10 +120,10 @@ export const LOGS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: logsRuleTypes,
+          all: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
         },
         alert: {
-          all: logsRuleTypes,
+          all: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
         },
       },
       management: {
@@ -137,10 +137,10 @@ export const LOGS_FEATURE = {
       api: ['infra', 'rac'],
       alerting: {
         rule: {
-          read: logsRuleTypes,
+          read: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
         },
         alert: {
-          read: logsRuleTypes,
+          read: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
         },
       },
       management: {

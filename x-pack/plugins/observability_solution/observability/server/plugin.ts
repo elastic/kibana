@@ -234,7 +234,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         category: DEFAULT_APP_CATEGORIES.observability,
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
-        alerting: o11yRuleTypes,
+        alerting: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
         privileges: {
           all: {
             app: [observabilityFeatureId],
@@ -246,10 +246,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
             alerting: {
               rule: {
-                all: o11yRuleTypes,
+                all: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
               },
               alert: {
-                all: o11yRuleTypes,
+                all: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
               },
             },
             ui: ['read', 'write'],
@@ -264,10 +264,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
             alerting: {
               rule: {
-                read: o11yRuleTypes,
+                read: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
               },
               alert: {
-                read: o11yRuleTypes,
+                read: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
               },
             },
             ui: ['read'],

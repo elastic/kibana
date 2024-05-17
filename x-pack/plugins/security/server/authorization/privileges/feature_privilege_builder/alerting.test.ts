@@ -20,15 +20,14 @@ describe(`feature_privilege_builder`, () => {
       const privilege: FeatureKibanaPrivileges = {
         alerting: {
           rule: {
-            all: [],
-            read: [],
+            all: {},
+            read: {},
           },
           alert: {
-            all: [],
-            read: [],
+            all: {},
+            read: {},
           },
         },
-
         savedObject: {
           all: [],
           read: [],
@@ -58,11 +57,10 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: [],
-              read: ['alert-type'],
+              all: {},
+              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
             },
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -83,15 +81,15 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/rule/get",
-            "alerting:alert-type/my-feature/rule/getRuleState",
-            "alerting:alert-type/my-feature/rule/getAlertSummary",
-            "alerting:alert-type/my-feature/rule/getExecutionLog",
-            "alerting:alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:alert-type/my-feature/rule/find",
-            "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/getBackfill",
-            "alerting:alert-type/my-feature/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/getRuleState",
+            "alerting:alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-consumer/rule/getBackfill",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
           ]
         `);
       });
@@ -103,11 +101,10 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             alert: {
-              all: [],
-              read: ['alert-type'],
+              all: {},
+              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
             },
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -128,10 +125,10 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/alert/get",
-            "alerting:alert-type/my-feature/alert/find",
-            "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:alert-type/my-feature/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/alert/get",
+            "alerting:alert-type/my-consumer/alert/find",
+            "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:alert-type/my-consumer/alert/getAlertSummary",
           ]
         `);
       });
@@ -143,15 +140,14 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: [],
-              read: ['alert-type'],
+              all: {},
+              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
             },
             alert: {
-              all: [],
-              read: ['alert-type'],
+              all: {},
+              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
             },
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -172,19 +168,19 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/rule/get",
-            "alerting:alert-type/my-feature/rule/getRuleState",
-            "alerting:alert-type/my-feature/rule/getAlertSummary",
-            "alerting:alert-type/my-feature/rule/getExecutionLog",
-            "alerting:alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:alert-type/my-feature/rule/find",
-            "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/getBackfill",
-            "alerting:alert-type/my-feature/rule/findBackfill",
-            "alerting:alert-type/my-feature/alert/get",
-            "alerting:alert-type/my-feature/alert/find",
-            "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:alert-type/my-feature/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/getRuleState",
+            "alerting:alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-consumer/rule/getBackfill",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
+            "alerting:alert-type/my-consumer/alert/get",
+            "alerting:alert-type/my-consumer/alert/find",
+            "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:alert-type/my-consumer/alert/getAlertSummary",
           ]
         `);
       });
@@ -196,8 +192,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: ['alert-type'],
-              read: [],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: {},
             },
           },
 
@@ -221,34 +217,34 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/rule/get",
-            "alerting:alert-type/my-feature/rule/getRuleState",
-            "alerting:alert-type/my-feature/rule/getAlertSummary",
-            "alerting:alert-type/my-feature/rule/getExecutionLog",
-            "alerting:alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:alert-type/my-feature/rule/find",
-            "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/getBackfill",
-            "alerting:alert-type/my-feature/rule/findBackfill",
-            "alerting:alert-type/my-feature/rule/create",
-            "alerting:alert-type/my-feature/rule/delete",
-            "alerting:alert-type/my-feature/rule/update",
-            "alerting:alert-type/my-feature/rule/updateApiKey",
-            "alerting:alert-type/my-feature/rule/enable",
-            "alerting:alert-type/my-feature/rule/disable",
-            "alerting:alert-type/my-feature/rule/muteAll",
-            "alerting:alert-type/my-feature/rule/unmuteAll",
-            "alerting:alert-type/my-feature/rule/muteAlert",
-            "alerting:alert-type/my-feature/rule/unmuteAlert",
-            "alerting:alert-type/my-feature/rule/snooze",
-            "alerting:alert-type/my-feature/rule/bulkEdit",
-            "alerting:alert-type/my-feature/rule/bulkDelete",
-            "alerting:alert-type/my-feature/rule/bulkEnable",
-            "alerting:alert-type/my-feature/rule/bulkDisable",
-            "alerting:alert-type/my-feature/rule/unsnooze",
-            "alerting:alert-type/my-feature/rule/runSoon",
-            "alerting:alert-type/my-feature/rule/scheduleBackfill",
-            "alerting:alert-type/my-feature/rule/deleteBackfill",
+            "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/getRuleState",
+            "alerting:alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-consumer/rule/getBackfill",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/create",
+            "alerting:alert-type/my-consumer/rule/delete",
+            "alerting:alert-type/my-consumer/rule/update",
+            "alerting:alert-type/my-consumer/rule/updateApiKey",
+            "alerting:alert-type/my-consumer/rule/enable",
+            "alerting:alert-type/my-consumer/rule/disable",
+            "alerting:alert-type/my-consumer/rule/muteAll",
+            "alerting:alert-type/my-consumer/rule/unmuteAll",
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+            "alerting:alert-type/my-consumer/rule/snooze",
+            "alerting:alert-type/my-consumer/rule/bulkEdit",
+            "alerting:alert-type/my-consumer/rule/bulkDelete",
+            "alerting:alert-type/my-consumer/rule/bulkEnable",
+            "alerting:alert-type/my-consumer/rule/bulkDisable",
+            "alerting:alert-type/my-consumer/rule/unsnooze",
+            "alerting:alert-type/my-consumer/rule/runSoon",
+            "alerting:alert-type/my-consumer/rule/scheduleBackfill",
+            "alerting:alert-type/my-consumer/rule/deleteBackfill",
           ]
         `);
       });
@@ -260,11 +256,10 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             alert: {
-              all: ['alert-type'],
-              read: [],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: {},
             },
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -285,11 +280,11 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/alert/get",
-            "alerting:alert-type/my-feature/alert/find",
-            "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:alert-type/my-feature/alert/getAlertSummary",
-            "alerting:alert-type/my-feature/alert/update",
+            "alerting:alert-type/my-consumer/alert/get",
+            "alerting:alert-type/my-consumer/alert/find",
+            "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:alert-type/my-consumer/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/alert/update",
           ]
         `);
       });
@@ -301,15 +296,14 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: ['alert-type'],
-              read: [],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: {},
             },
             alert: {
-              all: ['alert-type'],
-              read: [],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: {},
             },
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -330,39 +324,39 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/rule/get",
-            "alerting:alert-type/my-feature/rule/getRuleState",
-            "alerting:alert-type/my-feature/rule/getAlertSummary",
-            "alerting:alert-type/my-feature/rule/getExecutionLog",
-            "alerting:alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:alert-type/my-feature/rule/find",
-            "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/getBackfill",
-            "alerting:alert-type/my-feature/rule/findBackfill",
-            "alerting:alert-type/my-feature/rule/create",
-            "alerting:alert-type/my-feature/rule/delete",
-            "alerting:alert-type/my-feature/rule/update",
-            "alerting:alert-type/my-feature/rule/updateApiKey",
-            "alerting:alert-type/my-feature/rule/enable",
-            "alerting:alert-type/my-feature/rule/disable",
-            "alerting:alert-type/my-feature/rule/muteAll",
-            "alerting:alert-type/my-feature/rule/unmuteAll",
-            "alerting:alert-type/my-feature/rule/muteAlert",
-            "alerting:alert-type/my-feature/rule/unmuteAlert",
-            "alerting:alert-type/my-feature/rule/snooze",
-            "alerting:alert-type/my-feature/rule/bulkEdit",
-            "alerting:alert-type/my-feature/rule/bulkDelete",
-            "alerting:alert-type/my-feature/rule/bulkEnable",
-            "alerting:alert-type/my-feature/rule/bulkDisable",
-            "alerting:alert-type/my-feature/rule/unsnooze",
-            "alerting:alert-type/my-feature/rule/runSoon",
-            "alerting:alert-type/my-feature/rule/scheduleBackfill",
-            "alerting:alert-type/my-feature/rule/deleteBackfill",
-            "alerting:alert-type/my-feature/alert/get",
-            "alerting:alert-type/my-feature/alert/find",
-            "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:alert-type/my-feature/alert/getAlertSummary",
-            "alerting:alert-type/my-feature/alert/update",
+            "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/getRuleState",
+            "alerting:alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-consumer/rule/getBackfill",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/create",
+            "alerting:alert-type/my-consumer/rule/delete",
+            "alerting:alert-type/my-consumer/rule/update",
+            "alerting:alert-type/my-consumer/rule/updateApiKey",
+            "alerting:alert-type/my-consumer/rule/enable",
+            "alerting:alert-type/my-consumer/rule/disable",
+            "alerting:alert-type/my-consumer/rule/muteAll",
+            "alerting:alert-type/my-consumer/rule/unmuteAll",
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+            "alerting:alert-type/my-consumer/rule/snooze",
+            "alerting:alert-type/my-consumer/rule/bulkEdit",
+            "alerting:alert-type/my-consumer/rule/bulkDelete",
+            "alerting:alert-type/my-consumer/rule/bulkEnable",
+            "alerting:alert-type/my-consumer/rule/bulkDisable",
+            "alerting:alert-type/my-consumer/rule/unsnooze",
+            "alerting:alert-type/my-consumer/rule/runSoon",
+            "alerting:alert-type/my-consumer/rule/scheduleBackfill",
+            "alerting:alert-type/my-consumer/rule/deleteBackfill",
+            "alerting:alert-type/my-consumer/alert/get",
+            "alerting:alert-type/my-consumer/alert/find",
+            "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:alert-type/my-consumer/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/alert/update",
           ]
         `);
       });
@@ -374,11 +368,10 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: ['alert-type'],
-              read: ['readonly-alert-type'],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
             },
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -399,43 +392,43 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/rule/get",
-            "alerting:alert-type/my-feature/rule/getRuleState",
-            "alerting:alert-type/my-feature/rule/getAlertSummary",
-            "alerting:alert-type/my-feature/rule/getExecutionLog",
-            "alerting:alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:alert-type/my-feature/rule/find",
-            "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/getBackfill",
-            "alerting:alert-type/my-feature/rule/findBackfill",
-            "alerting:alert-type/my-feature/rule/create",
-            "alerting:alert-type/my-feature/rule/delete",
-            "alerting:alert-type/my-feature/rule/update",
-            "alerting:alert-type/my-feature/rule/updateApiKey",
-            "alerting:alert-type/my-feature/rule/enable",
-            "alerting:alert-type/my-feature/rule/disable",
-            "alerting:alert-type/my-feature/rule/muteAll",
-            "alerting:alert-type/my-feature/rule/unmuteAll",
-            "alerting:alert-type/my-feature/rule/muteAlert",
-            "alerting:alert-type/my-feature/rule/unmuteAlert",
-            "alerting:alert-type/my-feature/rule/snooze",
-            "alerting:alert-type/my-feature/rule/bulkEdit",
-            "alerting:alert-type/my-feature/rule/bulkDelete",
-            "alerting:alert-type/my-feature/rule/bulkEnable",
-            "alerting:alert-type/my-feature/rule/bulkDisable",
-            "alerting:alert-type/my-feature/rule/unsnooze",
-            "alerting:alert-type/my-feature/rule/runSoon",
-            "alerting:alert-type/my-feature/rule/scheduleBackfill",
-            "alerting:alert-type/my-feature/rule/deleteBackfill",
-            "alerting:readonly-alert-type/my-feature/rule/get",
-            "alerting:readonly-alert-type/my-feature/rule/getRuleState",
-            "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
-            "alerting:readonly-alert-type/my-feature/rule/getExecutionLog",
-            "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:readonly-alert-type/my-feature/rule/find",
-            "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:readonly-alert-type/my-feature/rule/getBackfill",
-            "alerting:readonly-alert-type/my-feature/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/getRuleState",
+            "alerting:alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-consumer/rule/getBackfill",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/create",
+            "alerting:alert-type/my-consumer/rule/delete",
+            "alerting:alert-type/my-consumer/rule/update",
+            "alerting:alert-type/my-consumer/rule/updateApiKey",
+            "alerting:alert-type/my-consumer/rule/enable",
+            "alerting:alert-type/my-consumer/rule/disable",
+            "alerting:alert-type/my-consumer/rule/muteAll",
+            "alerting:alert-type/my-consumer/rule/unmuteAll",
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+            "alerting:alert-type/my-consumer/rule/snooze",
+            "alerting:alert-type/my-consumer/rule/bulkEdit",
+            "alerting:alert-type/my-consumer/rule/bulkDelete",
+            "alerting:alert-type/my-consumer/rule/bulkEnable",
+            "alerting:alert-type/my-consumer/rule/bulkDisable",
+            "alerting:alert-type/my-consumer/rule/unsnooze",
+            "alerting:alert-type/my-consumer/rule/runSoon",
+            "alerting:alert-type/my-consumer/rule/scheduleBackfill",
+            "alerting:alert-type/my-consumer/rule/deleteBackfill",
+            "alerting:readonly-alert-type/my-consumer/rule/get",
+            "alerting:readonly-alert-type/my-consumer/rule/getRuleState",
+            "alerting:readonly-alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:readonly-alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:readonly-alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:readonly-alert-type/my-consumer/rule/find",
+            "alerting:readonly-alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:readonly-alert-type/my-consumer/rule/getBackfill",
+            "alerting:readonly-alert-type/my-consumer/rule/findBackfill",
           ]
         `);
       });
@@ -447,8 +440,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             alert: {
-              all: ['alert-type'],
-              read: ['readonly-alert-type'],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
             },
           },
 
@@ -472,15 +465,15 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/alert/get",
-            "alerting:alert-type/my-feature/alert/find",
-            "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:alert-type/my-feature/alert/getAlertSummary",
-            "alerting:alert-type/my-feature/alert/update",
-            "alerting:readonly-alert-type/my-feature/alert/get",
-            "alerting:readonly-alert-type/my-feature/alert/find",
-            "alerting:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:readonly-alert-type/my-feature/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/alert/get",
+            "alerting:alert-type/my-consumer/alert/find",
+            "alerting:alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:alert-type/my-consumer/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/alert/update",
+            "alerting:readonly-alert-type/my-consumer/alert/get",
+            "alerting:readonly-alert-type/my-consumer/alert/find",
+            "alerting:readonly-alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:readonly-alert-type/my-consumer/alert/getAlertSummary",
           ]
         `);
       });
@@ -492,12 +485,12 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: ['alert-type'],
-              read: ['readonly-alert-type'],
+              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
             },
             alert: {
-              all: ['another-alert-type'],
-              read: ['readonly-alert-type'],
+              all: { ruleTypeIds: ['another-alert-type'], consumers: ['my-consumer'] },
+              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
             },
           },
 
@@ -521,52 +514,52 @@ describe(`feature_privilege_builder`, () => {
 
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "alerting:alert-type/my-feature/rule/get",
-            "alerting:alert-type/my-feature/rule/getRuleState",
-            "alerting:alert-type/my-feature/rule/getAlertSummary",
-            "alerting:alert-type/my-feature/rule/getExecutionLog",
-            "alerting:alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:alert-type/my-feature/rule/find",
-            "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:alert-type/my-feature/rule/getBackfill",
-            "alerting:alert-type/my-feature/rule/findBackfill",
-            "alerting:alert-type/my-feature/rule/create",
-            "alerting:alert-type/my-feature/rule/delete",
-            "alerting:alert-type/my-feature/rule/update",
-            "alerting:alert-type/my-feature/rule/updateApiKey",
-            "alerting:alert-type/my-feature/rule/enable",
-            "alerting:alert-type/my-feature/rule/disable",
-            "alerting:alert-type/my-feature/rule/muteAll",
-            "alerting:alert-type/my-feature/rule/unmuteAll",
-            "alerting:alert-type/my-feature/rule/muteAlert",
-            "alerting:alert-type/my-feature/rule/unmuteAlert",
-            "alerting:alert-type/my-feature/rule/snooze",
-            "alerting:alert-type/my-feature/rule/bulkEdit",
-            "alerting:alert-type/my-feature/rule/bulkDelete",
-            "alerting:alert-type/my-feature/rule/bulkEnable",
-            "alerting:alert-type/my-feature/rule/bulkDisable",
-            "alerting:alert-type/my-feature/rule/unsnooze",
-            "alerting:alert-type/my-feature/rule/runSoon",
-            "alerting:alert-type/my-feature/rule/scheduleBackfill",
-            "alerting:alert-type/my-feature/rule/deleteBackfill",
-            "alerting:readonly-alert-type/my-feature/rule/get",
-            "alerting:readonly-alert-type/my-feature/rule/getRuleState",
-            "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
-            "alerting:readonly-alert-type/my-feature/rule/getExecutionLog",
-            "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
-            "alerting:readonly-alert-type/my-feature/rule/find",
-            "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
-            "alerting:readonly-alert-type/my-feature/rule/getBackfill",
-            "alerting:readonly-alert-type/my-feature/rule/findBackfill",
-            "alerting:another-alert-type/my-feature/alert/get",
-            "alerting:another-alert-type/my-feature/alert/find",
-            "alerting:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:another-alert-type/my-feature/alert/getAlertSummary",
-            "alerting:another-alert-type/my-feature/alert/update",
-            "alerting:readonly-alert-type/my-feature/alert/get",
-            "alerting:readonly-alert-type/my-feature/alert/find",
-            "alerting:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
-            "alerting:readonly-alert-type/my-feature/alert/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/getRuleState",
+            "alerting:alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-consumer/rule/getBackfill",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/create",
+            "alerting:alert-type/my-consumer/rule/delete",
+            "alerting:alert-type/my-consumer/rule/update",
+            "alerting:alert-type/my-consumer/rule/updateApiKey",
+            "alerting:alert-type/my-consumer/rule/enable",
+            "alerting:alert-type/my-consumer/rule/disable",
+            "alerting:alert-type/my-consumer/rule/muteAll",
+            "alerting:alert-type/my-consumer/rule/unmuteAll",
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+            "alerting:alert-type/my-consumer/rule/snooze",
+            "alerting:alert-type/my-consumer/rule/bulkEdit",
+            "alerting:alert-type/my-consumer/rule/bulkDelete",
+            "alerting:alert-type/my-consumer/rule/bulkEnable",
+            "alerting:alert-type/my-consumer/rule/bulkDisable",
+            "alerting:alert-type/my-consumer/rule/unsnooze",
+            "alerting:alert-type/my-consumer/rule/runSoon",
+            "alerting:alert-type/my-consumer/rule/scheduleBackfill",
+            "alerting:alert-type/my-consumer/rule/deleteBackfill",
+            "alerting:readonly-alert-type/my-consumer/rule/get",
+            "alerting:readonly-alert-type/my-consumer/rule/getRuleState",
+            "alerting:readonly-alert-type/my-consumer/rule/getAlertSummary",
+            "alerting:readonly-alert-type/my-consumer/rule/getExecutionLog",
+            "alerting:readonly-alert-type/my-consumer/rule/getActionErrorLog",
+            "alerting:readonly-alert-type/my-consumer/rule/find",
+            "alerting:readonly-alert-type/my-consumer/rule/getRuleExecutionKPI",
+            "alerting:readonly-alert-type/my-consumer/rule/getBackfill",
+            "alerting:readonly-alert-type/my-consumer/rule/findBackfill",
+            "alerting:another-alert-type/my-consumer/alert/get",
+            "alerting:another-alert-type/my-consumer/alert/find",
+            "alerting:another-alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:another-alert-type/my-consumer/alert/getAlertSummary",
+            "alerting:another-alert-type/my-consumer/alert/update",
+            "alerting:readonly-alert-type/my-consumer/alert/get",
+            "alerting:readonly-alert-type/my-consumer/alert/find",
+            "alerting:readonly-alert-type/my-consumer/alert/getAuthorizedAlertsIndices",
+            "alerting:readonly-alert-type/my-consumer/alert/getAlertSummary",
           ]
         `);
       });

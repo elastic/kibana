@@ -88,7 +88,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: sloRuleTypes,
+      alerting: { ruleTypeIds: sloRuleTypes, consumers: [sloFeatureId] },
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -100,10 +100,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           },
           alerting: {
             rule: {
-              all: sloRuleTypes,
+              all: { ruleTypeIds: sloRuleTypes, consumers: [sloFeatureId] },
             },
             alert: {
-              all: sloRuleTypes,
+              all: { ruleTypeIds: sloRuleTypes, consumers: [sloFeatureId] },
             },
           },
           ui: ['read', 'write'],
@@ -118,10 +118,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           },
           alerting: {
             rule: {
-              read: sloRuleTypes,
+              read: { ruleTypeIds: sloRuleTypes, consumers: [sloFeatureId] },
             },
             alert: {
-              read: sloRuleTypes,
+              read: { ruleTypeIds: sloRuleTypes, consumers: [sloFeatureId] },
             },
           },
           ui: ['read'],

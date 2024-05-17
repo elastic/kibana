@@ -26,7 +26,10 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+  alerting: {
+    ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+    consumers: [STACK_ALERTS_FEATURE_ID],
+  },
   privileges: {
     all: {
       app: [],
@@ -36,10 +39,16 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          all: {
+            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+            consumers: [STACK_ALERTS_FEATURE_ID],
+          },
         },
         alert: {
-          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          all: {
+            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+            consumers: [STACK_ALERTS_FEATURE_ID],
+          },
         },
       },
       savedObject: {
@@ -57,10 +66,16 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          read: {
+            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+            consumers: [STACK_ALERTS_FEATURE_ID],
+          },
         },
         alert: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          read: {
+            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+            consumers: [STACK_ALERTS_FEATURE_ID],
+          },
         },
       },
       savedObject: {

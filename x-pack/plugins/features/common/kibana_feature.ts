@@ -101,7 +101,7 @@ export interface KibanaFeatureConfig {
    * Include both Alert Types registered by the feature and external Alert Types such as built-in
    * Alert Types and Alert Types provided by other features to which you wish to grant access.
    */
-  alerting?: readonly string[];
+  alerting?: { ruleTypeIds?: readonly string[]; consumers?: readonly string[] };
 
   /**
    * If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.

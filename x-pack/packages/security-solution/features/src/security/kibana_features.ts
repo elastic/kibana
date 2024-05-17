@@ -57,7 +57,7 @@ export const getSecurityBaseKibanaFeature = ({
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: SECURITY_RULE_TYPES,
+  alerting: { ruleTypeIds: SECURITY_RULE_TYPES, consumers: [SERVER_APP_ID] },
   privileges: {
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -79,10 +79,10 @@ export const getSecurityBaseKibanaFeature = ({
       },
       alerting: {
         rule: {
-          all: SECURITY_RULE_TYPES,
+          all: { ruleTypeIds: SECURITY_RULE_TYPES, consumers: [SERVER_APP_ID] },
         },
         alert: {
-          all: SECURITY_RULE_TYPES,
+          all: { ruleTypeIds: SECURITY_RULE_TYPES, consumers: [SERVER_APP_ID] },
         },
       },
       management: {
@@ -100,10 +100,10 @@ export const getSecurityBaseKibanaFeature = ({
       },
       alerting: {
         rule: {
-          read: SECURITY_RULE_TYPES,
+          read: { ruleTypeIds: SECURITY_RULE_TYPES, consumers: [SERVER_APP_ID] },
         },
         alert: {
-          all: SECURITY_RULE_TYPES,
+          all: { ruleTypeIds: SECURITY_RULE_TYPES, consumers: [SERVER_APP_ID] },
         },
       },
       management: {

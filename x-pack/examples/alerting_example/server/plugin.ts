@@ -41,15 +41,15 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         insightsAndAlerting: ['triggersActions'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
-      alerting: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+      alerting: {},
       privileges: {
         all: {
           alerting: {
             rule: {
-              all: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+              all: {},
             },
             alert: {
-              all: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+              all: {},
             },
           },
           savedObject: {
@@ -64,10 +64,80 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         read: {
           alerting: {
             rule: {
-              read: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+              read: {
+                ruleTypeIds: [],
+              },
             },
             alert: {
-              read: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+              read: {
+                ruleTypeIds: [],
+              },
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: [],
+        },
+      },
+    });
+
+    features.registerKibanaFeature({
+      id: 'alertingExampleRule',
+      name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
+        defaultMessage: 'Alerting Examples',
+      }),
+      app: [],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      category: DEFAULT_APP_CATEGORIES.management,
+      alerting: {
+        ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+        consumers: [ALERTING_EXAMPLE_APP_ID],
+      },
+      privileges: {
+        all: {
+          alerting: {
+            rule: {
+              all: {
+                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+                consumers: [ALERTING_EXAMPLE_APP_ID],
+              },
+            },
+            alert: {
+              all: {
+                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+                consumers: [ALERTING_EXAMPLE_APP_ID],
+              },
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: [],
+        },
+        read: {
+          alerting: {
+            rule: {
+              read: {
+                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+                consumers: [ALERTING_EXAMPLE_APP_ID],
+              },
+            },
+            alert: {
+              read: {
+                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
+                consumers: [ALERTING_EXAMPLE_APP_ID],
+              },
             },
           },
           savedObject: {

@@ -149,10 +149,10 @@ export function getPluginPrivileges() {
       },
       alerting: {
         rule: {
-          all: Object.values(ML_ALERT_TYPES),
+          all: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
         },
         alert: {
-          all: Object.values(ML_ALERT_TYPES),
+          all: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
         },
       },
     },
@@ -171,10 +171,10 @@ export function getPluginPrivileges() {
       },
       alerting: {
         rule: {
-          read: Object.values(ML_ALERT_TYPES),
+          read: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
         },
         alert: {
-          read: Object.values(ML_ALERT_TYPES),
+          read: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
         },
       },
     },

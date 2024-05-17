@@ -139,7 +139,7 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
-      alerting: Object.values(ML_ALERT_TYPES),
+      alerting: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
       privileges: {
         all: admin,
         read: user,

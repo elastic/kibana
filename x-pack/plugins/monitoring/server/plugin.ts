@@ -275,7 +275,7 @@ export class MonitoringPlugin
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
-      alerting: RULES,
+      alerting: { ruleTypeIds: RULES, consumers: ['monitoring'] },
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -292,10 +292,10 @@ export class MonitoringPlugin
               },
               alerting: {
                 rule: {
-                  all: RULES,
+                  all: { ruleTypeIds: RULES, consumers: ['monitoring'] },
                 },
                 alert: {
-                  all: RULES,
+                  all: { ruleTypeIds: RULES, consumers: ['monitoring'] },
                 },
               },
               ui: [],

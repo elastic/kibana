@@ -55,7 +55,7 @@ export const uptimeFeature = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: ruleTypes,
+  alerting: { ruleTypeIds: ruleTypes, consumers: [PLUGIN.ID] },
   privileges: {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
@@ -73,10 +73,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          all: ruleTypes,
+          all: { ruleTypeIds: ruleTypes, consumers: [PLUGIN.ID] },
         },
         alert: {
-          all: ruleTypes,
+          all: { ruleTypeIds: ruleTypes, consumers: [PLUGIN.ID] },
         },
       },
       management: {
@@ -100,10 +100,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          read: ruleTypes,
+          read: { ruleTypeIds: ruleTypes, consumers: [PLUGIN.ID] },
         },
         alert: {
-          read: ruleTypes,
+          read: { ruleTypeIds: ruleTypes, consumers: [PLUGIN.ID] },
         },
       },
       management: {

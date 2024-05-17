@@ -122,7 +122,8 @@ export class AlertingAuthorization {
                   // ignore features which are disabled in the user's space
                   !disabledFeatures.has(id) &&
                   // ignore features which don't grant privileges to alerting
-                  (alerting?.length ?? 0 > 0)
+                  ((alerting?.ruleTypeIds?.length ?? 0 > 0) ||
+                    (alerting?.consumers?.length ?? 0 > 0))
               )
               .map((feature) => feature.id)
           )
@@ -352,7 +353,7 @@ export class AlertingAuthorization {
         const featureDef = this.features
           .getKibanaFeatures()
           .find((kFeature) => kFeature.id === feature);
-        for (const ruleTypeId of featureDef?.alerting ?? []) {
+        for (const ruleTypeId of featureDef?.alerting?.ruleTypeIds ?? []) {
           const ruleTypeAuth = ruleTypesWithAuthorization.find((rtwa) => rtwa.id === ruleTypeId);
           if (ruleTypeAuth) {
             if (!ruleTypesAuthorized.has(ruleTypeId)) {

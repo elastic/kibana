@@ -31,7 +31,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: ruleTypes,
+  alerting: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -44,10 +44,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          all: ruleTypes,
+          all: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
         },
         rule: {
-          all: ruleTypes,
+          all: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
         },
       },
       management: {
@@ -65,10 +65,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          read: ruleTypes,
+          read: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
         },
         rule: {
-          read: ruleTypes,
+          read: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
         },
       },
       management: {
