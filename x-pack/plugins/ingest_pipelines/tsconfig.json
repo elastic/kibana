@@ -33,7 +33,8 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/console-plugin",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/unsaved-changes-prompt"
   ],
   "exclude": [
     "target/**/*",
