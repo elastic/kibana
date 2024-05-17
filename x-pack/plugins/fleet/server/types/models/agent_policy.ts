@@ -102,8 +102,9 @@ export const AgentPolicyBaseSchema = {
               duplicates.push(tag.name);
             }
           }
-
-          return `found duplicate tags: [${duplicates.join(', ')}], duplicate tags are not allowed`;
+          if (duplicates.length !== 0) {
+            return `found duplicate tags: [${duplicates.join(', ')}], duplicate tags are not allowed`;
+          }
         },
       }
     )
