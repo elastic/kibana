@@ -14,7 +14,7 @@ import {
 describe('useDashboardViewPromptState', () => {
   it('returns empty state', () => {
     const { result } = renderHook<
-    Partial<EuiEmptyPromptProps> | null,
+      Partial<EuiEmptyPromptProps> | null,
       DashboardViewPromptState | null
     >(() => useDashboardViewPromptState(null));
     expect(result.current).toBeNull();
@@ -22,7 +22,7 @@ describe('useDashboardViewPromptState', () => {
 
   it('returns NoReadPermission state', () => {
     const { result } = renderHook<
-    Partial<EuiEmptyPromptProps> | null,
+      Partial<EuiEmptyPromptProps> | null,
       DashboardViewPromptState | null
     >(() => useDashboardViewPromptState(DashboardViewPromptState.NoReadPermission));
     expect(result.current).toMatchInlineSnapshot(`

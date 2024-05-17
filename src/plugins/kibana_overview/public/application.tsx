@@ -46,8 +46,6 @@ export const renderApp = (
         <KibanaContextProvider services={{ ...core, ...deps }}>
           <KibanaOverviewApp
             basename={appBasePath}
-
-
             {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
           />
         </KibanaContextProvider>

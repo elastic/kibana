@@ -171,7 +171,7 @@ export const TitleField = ({
             label={field.label}
             labelAppend={field.labelAppend}
             // @ts-expect-error
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
+            helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
             error={errorMessage}
             isInvalid={isInvalid}
             fullWidth

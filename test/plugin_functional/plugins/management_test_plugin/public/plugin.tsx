@@ -45,7 +45,7 @@ export class ManagementTestPlugin
         );
 
         return () => {
-          root.unmount()
+          root.unmount();
         };
       },
     });

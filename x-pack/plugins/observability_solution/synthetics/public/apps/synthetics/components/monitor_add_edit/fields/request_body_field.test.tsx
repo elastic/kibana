@@ -28,7 +28,7 @@ describe('<RequestBodyField />', () => {
     });
 
     return (
-      (<RequestBodyField
+      <RequestBodyField
         value={{
           value: config.value,
           type: config.type,
@@ -38,7 +38,7 @@ describe('<RequestBodyField />', () => {
           [setConfig]
         )}
         readOnly={readOnly}
-      />)
+      />
     );
   };
 

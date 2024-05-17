@@ -251,12 +251,9 @@ describe('useCriticalAlerts', () => {
     );
     await act(async () => {
       let ourProps = props;
-      const { result, rerender } = renderHook(
-        () => useCriticalAlerts(ourProps),
-        {
-          wrapper: wrapperContainer,
-        }
-      );
+      const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
+        wrapper: wrapperContainer,
+      });
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({
@@ -305,12 +302,9 @@ describe('useCriticalAlerts', () => {
     );
     await act(async () => {
       let ourProps = props;
-      const { result, rerender } = renderHook(
-        () => useCriticalAlerts(ourProps),
-        {
-          wrapper: wrapperContainer,
-        }
-      );
+      const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
+        wrapper: wrapperContainer,
+      });
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({

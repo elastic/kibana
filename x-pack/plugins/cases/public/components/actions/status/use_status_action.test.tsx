@@ -7,7 +7,7 @@
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { act, renderHook, waitFor} from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 
 import * as api from '../../../containers/api';

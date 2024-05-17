@@ -462,7 +462,7 @@ export class OptionsListEmbeddable
     if (this.root) {
       this.root.unmount();
     }
-    this.root = createRoot(node)
+    this.root = createRoot(node);
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...pluginServices.getServices().core}>

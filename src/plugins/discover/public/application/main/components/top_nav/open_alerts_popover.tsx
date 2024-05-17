@@ -190,8 +190,6 @@ export function AlertsPopover({
   );
 }
 
-
-
 export function openAlertsPopover({
   anchorElement,
   stateContainer,

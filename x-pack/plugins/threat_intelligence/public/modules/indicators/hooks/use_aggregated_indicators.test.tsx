@@ -47,7 +47,7 @@ describe('useAggregatedIndicators()', () => {
   it('should create and call the aggregatedIndicatorsQuery correctly', async () => {
     aggregatedIndicatorsQuery.mockResolvedValue([]);
 
-    const { result, rerender, } = renderUseAggregatedIndicators();
+    const { result, rerender } = renderUseAggregatedIndicators();
 
     // indicators service and the query should be called just once
     expect(

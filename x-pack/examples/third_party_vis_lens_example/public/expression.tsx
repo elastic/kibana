@@ -32,7 +32,7 @@ export const getRotatingNumberRenderer = (
   ) => {
     const root = createRoot(domNode);
     root.render(
-      <RotatingNumberChart {...config} formatFactory={await formatFactory} />,
+      <RotatingNumberChart {...config} formatFactory={await formatFactory} />
       // domNode,
       // () => {
       //   handlers.done();

@@ -79,7 +79,11 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
             id="xpack.monitoring.expiredLicenseStatusDescription"
             defaultMessage="Your license expired on {expiryDate}"
             values={{
-              expiryDate: <strong><>{expiryDate}</></strong>,
+              expiryDate: (
+                <strong>
+                  <>{expiryDate}</>
+                </strong>
+              ),
             }}
           />
         </Fragment>
@@ -101,7 +105,11 @@ class LicenseStatus extends React.PureComponent<LicenseStatusProps> {
             id="xpack.monitoring.activeLicenseStatusDescription"
             defaultMessage="Your license will expire on {expiryDate}"
             values={{
-              expiryDate: <strong><>{expiryDate}</></strong>,
+              expiryDate: (
+                <strong>
+                  <>{expiryDate}</>
+                </strong>
+              ),
             }}
           />
         </Fragment>

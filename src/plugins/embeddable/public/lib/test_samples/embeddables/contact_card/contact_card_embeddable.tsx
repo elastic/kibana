@@ -82,7 +82,7 @@ export class ContactCardEmbeddable extends Embeddable<
     this.root = createRoot(node);
     this.root.render(<div data-test-subj="error">{error.message}</div>);
 
-    return () => this.root?.unmount()
+    return () => this.root?.unmount();
   }
 
   public destroy() {

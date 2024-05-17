@@ -75,7 +75,7 @@ describe('useEmailConfig', () => {
       throw new Error('no!');
     });
 
-    const { result, } = renderUseEmailConfigHook();
+    const { result } = renderUseEmailConfigHook();
 
     await act(async () => {
       result.current.getEmailServiceConfig('foo');

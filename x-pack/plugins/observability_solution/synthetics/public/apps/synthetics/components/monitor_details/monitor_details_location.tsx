@@ -32,7 +32,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
   const params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
 
   return (
-    (<MonitorLocationSelect
+    <MonitorLocationSelect
       isDisabled={isDisabled}
       monitorLocations={monitor?.locations}
       configId={monitorId}
@@ -55,6 +55,6 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
         },
         [isErrorsTab, isHistoryTab, monitorId, params, services.application]
       )}
-    />)
+    />
   );
 };

@@ -22,7 +22,7 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseConnector, CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
+import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
 import type { EditConnectorProps } from '../../edit_connector';

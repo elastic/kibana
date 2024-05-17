@@ -40,7 +40,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<
-  ReturnUseFetchOrCreateRuleExceptionList,
+    ReturnUseFetchOrCreateRuleExceptionList,
     UseFetchOrCreateRuleExceptionListProps
   >;
   const onError = jest.fn();
@@ -111,7 +111,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   });
 
   it('initializes hook', async () => {
-    const { result, } = render();
+    const { result } = render();
 
     // Should set isLoading to true while fetching
     expect(result.current).toEqual([true, null]);
@@ -200,7 +200,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     });
     it('should set the exception list to be the fetched list', async () => {
       await act(async () => {
-        const { result, } = render();
+        const { result } = render();
         // await waitFor();
         // await waitFor();
         expect(result.current[1]).toEqual(detectionExceptionList);
@@ -241,7 +241,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       });
       it('should set the exception list to be the newly created list', async () => {
         await act(async () => {
-          const { result, } = render();
+          const { result } = render();
           // await waitFor();
           // await waitFor();
           // await waitFor();
@@ -264,7 +264,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('fetches the exceptions lists', async () => {
       await act(async () => {
-        const { } = render(endpointListType);
+        const {} = render(endpointListType);
         // await waitFor();
         // await waitFor();
         expect(fetchExceptionListById).toHaveBeenCalledTimes(2);
@@ -272,21 +272,21 @@ describe('useFetchOrCreateRuleExceptionList', () => {
     });
     it('does not create a new exception list', async () => {
       await act(async () => {
-        const { } = render(endpointListType);
+        const {} = render(endpointListType);
         // await waitFor();
         expect(addExceptionList).not.toHaveBeenCalled();
       });
     });
     it('does not update the rule', async () => {
       await act(async () => {
-        const { } = render(endpointListType);
+        const {} = render(endpointListType);
         // await waitFor();
         expect(patchRule).not.toHaveBeenCalled();
       });
     });
     it('should set the exception list to be the fetched list', async () => {
       await act(async () => {
-        const { result, } = render(endpointListType);
+        const { result } = render(endpointListType);
         // await waitFor();
         // await waitFor();
         expect(result.current[1]).toEqual(endpointExceptionList);
@@ -302,7 +302,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
       it('should create a new exception list', async () => {
         await act(async () => {
-          const { } = render(endpointListType);
+          const {} = render(endpointListType);
           // await waitFor();
           // await waitFor();
           expect(addEndpointExceptionList).toHaveBeenCalledTimes(1);
@@ -310,7 +310,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       });
       it('should update the rule', async () => {
         await act(async () => {
-          const { } = render(endpointListType);
+          const {} = render(endpointListType);
           // await waitFor();
           // await waitFor();
           // await waitFor();
@@ -319,7 +319,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
       });
       it('should set the exception list to be the newly created list', async () => {
         await act(async () => {
-          const { result, } = render(endpointListType);
+          const { result } = render(endpointListType);
           // await waitFor();
           // await waitFor();
           // await waitFor();
@@ -336,7 +336,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('exception list should be null', async () => {
       await act(async () => {
-        const { result, } = render();
+        const { result } = render();
         // await waitFor();
         expect(result.current[1]).toBeNull();
       });
@@ -344,7 +344,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
 
     it('isLoading should be false', async () => {
       await act(async () => {
-        const { result, } = render();
+        const { result } = render();
         // await waitFor();
         expect(result.current[0]).toEqual(false);
       });

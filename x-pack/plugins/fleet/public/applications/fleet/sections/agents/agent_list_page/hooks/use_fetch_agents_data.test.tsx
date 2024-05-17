@@ -98,7 +98,7 @@ describe('useFetchAgentsData', () => {
 
   it('should fetch agents and agent policies data', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, } = renderer.renderHook(() => useFetchAgentsData());
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
     await act(async () => {
       // await waitFor();
     });
@@ -141,7 +141,7 @@ describe('useFetchAgentsData', () => {
 
   it('sync querystring kuery with current search', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, } = renderer.renderHook(() => useFetchAgentsData());
+    const { result } = renderer.renderHook(() => useFetchAgentsData());
     await act(async () => {
       // await waitFor();
     });

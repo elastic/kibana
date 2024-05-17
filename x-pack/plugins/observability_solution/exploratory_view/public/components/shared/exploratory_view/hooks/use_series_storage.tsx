@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback, PropsWithChildren } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  PropsWithChildren,
+} from 'react';
 import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -49,10 +56,7 @@ export function convertAllShortSeries(allShortSeries: AllShortSeries) {
 export const allSeriesKey = 'sr';
 export const reportTypeKey = 'reportType';
 
-export function UrlStorageContextProvider({
-  children,
-  storage,
-}: PropsWithChildren<ProviderProps>) {
+export function UrlStorageContextProvider({ children, storage }: PropsWithChildren<ProviderProps>) {
   const [allSeries, setAllSeries] = useState<AllSeries>(() =>
     convertAllShortSeries(storage.get(allSeriesKey) ?? [])
   );

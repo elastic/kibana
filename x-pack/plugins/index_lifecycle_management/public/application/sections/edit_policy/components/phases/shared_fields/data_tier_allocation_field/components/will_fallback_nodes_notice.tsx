@@ -41,7 +41,9 @@ export const WillUseFallbackTierUsingNodeAttributesNotice: FunctionComponent<Pro
         )}
       </p>
 
-      <p><>{nodeAllocationMigrationGuidance}</></p>
+      <p>
+        <>{nodeAllocationMigrationGuidance}</>
+      </p>
     </EuiCallOut>
   );
 };

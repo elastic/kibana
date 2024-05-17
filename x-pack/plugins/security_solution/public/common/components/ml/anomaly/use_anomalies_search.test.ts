@@ -71,12 +71,9 @@ describe('useAggregatedAnomaliesByJob', () => {
 
   it('refetch calls useSecurityJobs().refetch', async () => {
     await act(async () => {
-      const { result } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
 
       // await waitFor();
 
@@ -92,12 +89,9 @@ describe('useAggregatedAnomaliesByJob', () => {
       mockAnomaliesSearch.mockResolvedValue({
         aggregations: { number_of_anomalies: { buckets: [jobCount] } },
       });
-      const { result } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
       // await waitFor();
       // await waitFor();
 
@@ -150,12 +144,9 @@ describe('useAggregatedAnomaliesByJob', () => {
         refetch: useSecurityJobsRefetch,
       });
 
-      const { result } = renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      const { result } = renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
       // await waitFor();
       // await waitFor();
 
@@ -169,12 +160,9 @@ describe('useAggregatedAnomaliesByJob', () => {
   it('does not throw error when aggregations is undefined', async () => {
     await act(async () => {
       mockAnomaliesSearch.mockResolvedValue({});
-      renderHook(
-        () => useAggregatedAnomaliesByJob({ skip: false, from, to }),
-        {
-          wrapper: TestProviders,
-        }
-      );
+      renderHook(() => useAggregatedAnomaliesByJob({ skip: false, from, to }), {
+        wrapper: TestProviders,
+      });
       // await waitFor();
       // await waitFor();
 

@@ -31,9 +31,7 @@ export const renderApp = async (
   { element, history }: AppMountParameters
 ) => {
   const root = createRoot(element);
-  root.render(
-    <PortableDashboardsDemos data={data} history={history} dashboard={dashboard} />
-  );
+  root.render(<PortableDashboardsDemos data={data} history={history} dashboard={dashboard} />);
   return () => root.unmount();
 };
 

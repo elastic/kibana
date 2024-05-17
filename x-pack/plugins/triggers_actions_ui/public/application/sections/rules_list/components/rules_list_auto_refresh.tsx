@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAutoRefreshButton } from '@elastic/eui';
-import { ApplyRefreshInterval } from '@elastic/eui/src/components/date_picker/types';
 
 interface RulesListAutoRefreshProps {
   lastUpdate: string;

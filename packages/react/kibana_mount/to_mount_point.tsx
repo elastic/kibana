@@ -27,9 +27,7 @@ export type ToMountPointParams = Pick<
 export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams): MountPoint => {
   const mount = (element: HTMLElement) => {
     const root = createRoot(element);
-    root.render(
-      <KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>
-    );
+    root.render(<KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>);
     return () => root.unmount();
   };
 

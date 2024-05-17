@@ -195,7 +195,7 @@ export const EsQueryExpression: React.FC<
   ]);
 
   return (
-    (<Fragment>
+    <Fragment>
       <EuiFormRow
         fullWidth
         label={
@@ -356,6 +356,6 @@ export const EsQueryExpression: React.FC<
         sourceFields={sourceFields}
       />
       <EuiSpacer />
-    </Fragment>)
+    </Fragment>
   );
 };

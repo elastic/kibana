@@ -94,12 +94,9 @@ describe('useRecentlyViewedMonitors', () => {
         </WrappedHelper>
       );
     };
-    const { result,  rerender } = renderHook(
-      () => useRecentlyViewedMonitors(),
-      {
-        wrapper: WrapperWithState,
-      }
-    );
+    const { result, rerender } = renderHook(() => useRecentlyViewedMonitors(), {
+      wrapper: WrapperWithState,
+    });
     // await waitForValueToChange(() => persistedIds);
 
     // Sets the current monitor as well as updated information

@@ -66,9 +66,7 @@ describe('useKnowledgeBaseStatus', () => {
   });
   it('should call api to get knowledge base status with resource arg', async () => {
     await act(async () => {
-      renderHook(() =>
-        useKnowledgeBaseStatus({ ...defaultProps, resource: 'something' })
-      );
+      renderHook(() => useKnowledgeBaseStatus({ ...defaultProps, resource: 'something' }));
       // await waitFor();
 
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(

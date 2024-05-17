@@ -43,9 +43,7 @@ describe('useFetchCurrentUserConversations', () => {
     });
 
     await act(async () => {
-      renderHook(() =>
-        useFetchCurrentUserConversations(defaultProps)
-      );
+      renderHook(() => useFetchCurrentUserConversations(defaultProps));
       // await waitFor();
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/api/elastic_assistant/current_user/conversations/_find',

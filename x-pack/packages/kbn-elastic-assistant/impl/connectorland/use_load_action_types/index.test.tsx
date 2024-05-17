@@ -58,9 +58,7 @@ describe('useLoadActionTypes', () => {
       const mockHttp = {
         get: jest.fn().mockRejectedValue(new Error('this is an error')),
       } as unknown as Props['http'];
-      renderHook(() =>
-        useLoadActionTypes({ ...defaultProps, http: mockHttp })
-      );
+      renderHook(() => useLoadActionTypes({ ...defaultProps, http: mockHttp }));
       // await waitFor();
 
       expect(toasts.addError).toHaveBeenCalled();

@@ -70,12 +70,7 @@ export const renderApp = (
 ) => {
   const root = createRoot(element);
   root.render(
-    <FooApp
-      appId={appId}
-      targetAppId={targetAppId}
-      basePath={basePath}
-      application={application}
-    />
+    <FooApp appId={appId} targetAppId={targetAppId} basePath={basePath} application={application} />
   );
   return () => root.unmount();
 };

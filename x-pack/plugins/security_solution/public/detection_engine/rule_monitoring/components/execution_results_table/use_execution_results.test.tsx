@@ -55,7 +55,7 @@ describe('useExecutionResults', () => {
   });
 
   it('fetches data from the API', async () => {
-    const { result, } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -103,7 +103,7 @@ describe('useExecutionResults', () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchRuleExecutionResults').mockRejectedValue(exception);
 
-    const { result, } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);

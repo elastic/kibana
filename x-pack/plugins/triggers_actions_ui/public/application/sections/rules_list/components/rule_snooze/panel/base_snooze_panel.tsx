@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
-import React, { useState, useCallback, useMemo, ChangeEvent } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { parseInterval } from '../../../../../../../common';
 
 import { SnoozeSchedule } from '../../../../../../types';

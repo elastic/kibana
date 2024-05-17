@@ -84,12 +84,12 @@ describe('source/index.tsx', () => {
     });
     it('sets field data for data view', async () => {
       await act(async () => {
-        const { result } = renderHook<
-        { indexFieldsSearch: IndexFieldSearch },
-          string
-        >(() => useDataView(), {
-          wrapper: TestProviders,
-        });
+        const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
+          () => useDataView(),
+          {
+            wrapper: TestProviders,
+          }
+        );
         // await waitFor();
         await result.current.indexFieldsSearch({ dataViewId: 'neato' });
       });
@@ -106,12 +106,12 @@ describe('source/index.tsx', () => {
     it('should reuse the result for dataView info when cleanCache not passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
-        const { result } = renderHook<
-        { indexFieldsSearch: IndexFieldSearch },
-          string
-        >(() => useDataView(), {
-          wrapper: TestProviders,
-        });
+        const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
+          () => useDataView(),
+          {
+            wrapper: TestProviders,
+          }
+        );
         // await waitFor();
         indexFieldsSearch = result.current.indexFieldsSearch;
       });
@@ -135,12 +135,12 @@ describe('source/index.tsx', () => {
     it('should not reuse the result for dataView info when cleanCache passed', async () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
-        const { result } = renderHook<
-        { indexFieldsSearch: IndexFieldSearch },
-          string
-        >(() => useDataView(), {
-          wrapper: TestProviders,
-        });
+        const { result } = renderHook<{ indexFieldsSearch: IndexFieldSearch }, string>(
+          () => useDataView(),
+          {
+            wrapper: TestProviders,
+          }
+        );
         // await waitFor();
         indexFieldsSearch = result.current.indexFieldsSearch;
       });

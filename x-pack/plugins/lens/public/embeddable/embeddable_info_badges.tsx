@@ -103,7 +103,9 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
-                <ul className="lnsEmbeddablePanelFeatureList"><>{longMessage}</></ul>
+                <ul className="lnsEmbeddablePanelFeatureList">
+                  <>{longMessage}</>
+                </ul>
               </aside>
             </Fragment>
           );
@@ -129,7 +131,9 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 </EuiTitle>
                 <ul className="lnsEmbeddablePanelFeatureList">
                   {messagesByUniqueId.map(({ longMessage }, i) => (
-                    <Fragment key={`${uniqueId}-${i}`}><>{longMessage}</></Fragment>
+                    <Fragment key={`${uniqueId}-${i}`}>
+                      <>{longMessage}</>
+                    </Fragment>
                   ))}
                 </ul>
               </aside>

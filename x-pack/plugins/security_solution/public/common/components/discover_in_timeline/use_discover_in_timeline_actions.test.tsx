@@ -148,7 +148,7 @@ describe('useDiscoverInTimelineActions', () => {
   });
   describe('getAppStateFromSavedSearch', () => {
     it('should reach out to discover to convert app state from saved search', async () => {
-      const { result, } = renderTestHook();
+      const { result } = renderTestHook();
       const { appState } = result.current.getAppStateFromSavedSearch(savedSearchMock);
       await waitFor(() => {
         expect(appState).toMatchObject(
@@ -178,7 +178,7 @@ describe('useDiscoverInTimelineActions', () => {
 
   describe('resetDiscoverAppState', () => {
     it('should reset Discover AppState to a default state', async () => {
-      const { result, } = renderTestHook();
+      const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const appState = mockDiscoverStateContainerRef.current.appState.getState();
@@ -186,7 +186,7 @@ describe('useDiscoverInTimelineActions', () => {
       });
     });
     it('should reset Discover time to a default state', async () => {
-      const { result, } = renderTestHook();
+      const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
         const globalState = mockDiscoverStateContainerRef.current.globalState.get();

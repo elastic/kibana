@@ -43,10 +43,9 @@ describe('useCreateListIndex', () => {
     const onError = jest.fn();
     jest.spyOn(Api, 'createListIndex').mockRejectedValue(new Error('Mocked error'));
 
-    const { result } = renderHook(
-      () => useCreateListIndex({ http: httpMock, onError }),
-      { wrapper: queryWrapper }
-    );
+    const { result } = renderHook(() => useCreateListIndex({ http: httpMock, onError }), {
+      wrapper: queryWrapper,
+    });
 
     act(() => {
       result.current.start();

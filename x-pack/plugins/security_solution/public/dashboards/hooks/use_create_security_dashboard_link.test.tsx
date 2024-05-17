@@ -84,7 +84,7 @@ describe('useCreateSecurityDashboardLink', () => {
     });
 
     it('should return isLoading while requesting', async () => {
-      const { result, } = renderUseCreateSecurityDashboardLink();
+      const { result } = renderUseCreateSecurityDashboardLink();
 
       expect(result.current.isLoading).toEqual(true);
       expect(result.current.url).toEqual('/app/security/dashboards/create');

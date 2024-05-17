@@ -80,12 +80,12 @@ describe('useCasesByStatus', () => {
   });
 
   test('fetch data', async () => {
-    const { result } = renderHook<
-    UseCasesByStatusResults,
-      UseCasesByStatusProps
-    >(() => useCasesByStatus({ skip: false }), {
-      wrapper: TestProviders,
-    });
+    const { result } = renderHook<UseCasesByStatusResults, UseCasesByStatusProps>(
+      () => useCasesByStatus({ skip: false }),
+      {
+        wrapper: TestProviders,
+      }
+    );
     // await waitFor();
     expect(result.current).toEqual({
       closed: 3,
@@ -109,12 +109,12 @@ describe('useCasesByStatus', () => {
   });
 
   test('it should call deleteQuery when unmounting', async () => {
-    const { unmount } = renderHook<
-
-      UseCasesByStatusResults,      UseCasesByStatusProps
-    >(() => useCasesByStatus({ skip: false }), {
-      wrapper: TestProviders,
-    });
+    const { unmount } = renderHook<UseCasesByStatusResults, UseCasesByStatusProps>(
+      () => useCasesByStatus({ skip: false }),
+      {
+        wrapper: TestProviders,
+      }
+    );
     // await waitFor();
 
     unmount();
@@ -126,12 +126,12 @@ describe('useCasesByStatus', () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
     const localProps = { skip: false };
 
-    const { rerender } = renderHook<
-
-      UseCasesByStatusResults,      UseCasesByStatusProps
-    >(() => useCasesByStatus(localProps), {
-      wrapper: TestProviders,
-    });
+    const { rerender } = renderHook<UseCasesByStatusResults, UseCasesByStatusProps>(
+      () => useCasesByStatus(localProps),
+      {
+        wrapper: TestProviders,
+      }
+    );
     // await waitFor();
 
     localProps.skip = true;

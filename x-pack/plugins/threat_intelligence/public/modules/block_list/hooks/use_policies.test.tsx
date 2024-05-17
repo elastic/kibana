@@ -24,7 +24,7 @@ const renderUseQuery = (result: { items: any[] }) =>
 describe('usePolicies', () => {
   it('should have undefined data during loading state', async () => {
     const mockPolicies = { items: [] };
-    const { result, } = renderUseQuery(mockPolicies);
+    const { result } = renderUseQuery(mockPolicies);
 
     await waitFor(() => result.current.isLoading);
 
@@ -41,7 +41,7 @@ describe('usePolicies', () => {
         },
       ],
     };
-    const { result, } = renderUseQuery(mockPolicies);
+    const { result } = renderUseQuery(mockPolicies);
 
     await waitFor(() => result.current.isSuccess);
 

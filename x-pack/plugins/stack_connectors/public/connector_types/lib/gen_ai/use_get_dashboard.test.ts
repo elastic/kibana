@@ -57,9 +57,7 @@ describe('useGetDashboard', () => {
   ])(
     'fetches the %p dashboard and sets the dashboard URL with %p',
     async (selectedProvider, urlKey) => {
-      const { result } = renderHook(() =>
-        useGetDashboard({ ...defaultArgs, selectedProvider })
-      );
+      const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, selectedProvider }));
       // await waitFor();
       expect(mockDashboard).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -110,9 +108,7 @@ describe('useGetDashboard', () => {
   });
 
   it('handles the case where connectorId is empty string', async () => {
-    const { result } = renderHook(() =>
-      useGetDashboard({ ...defaultArgs, connectorId: '' })
-    );
+    const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, connectorId: '' }));
     // await waitFor();
     expect(mockDashboard).not.toHaveBeenCalled();
     expect(mockGetRedirectUrl).not.toHaveBeenCalled();

@@ -234,7 +234,7 @@ jest.mock('../../../../../../hooks/use_request', () => ({
 describe('usePackagePolicy', () => {
   it('should load the package policy if this is a not an upgrade', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, } = renderer.renderHook(() =>
+    const { result } = renderer.renderHook(() =>
       usePackagePolicyWithRelatedData('package-policy-1', {})
     );
     // await waitFor();
@@ -244,7 +244,7 @@ describe('usePackagePolicy', () => {
 
   it('should load the package policy if this is an upgrade', async () => {
     const renderer = createFleetTestRendererMock();
-    const { result, } = renderer.renderHook(() =>
+    const { result } = renderer.renderHook(() =>
       usePackagePolicyWithRelatedData('package-policy-1', {
         forceUpgrade: true,
       })
