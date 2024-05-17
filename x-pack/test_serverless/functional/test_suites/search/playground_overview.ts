@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { testHasEmbeddedConsole } from './embedded_console';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials } from '../../../shared/services';
 
@@ -145,6 +146,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('show edit context', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
       });
+    });
+
+    it('has embedded console', async () => {
+      await testHasEmbeddedConsole(pageObjects);
     });
   });
 }

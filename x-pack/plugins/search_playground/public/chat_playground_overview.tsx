@@ -14,8 +14,18 @@ import { PlaygroundProvider } from './providers/playground_provider';
 import { App } from './components/app';
 import { PlaygroundToolbar } from './embeddable';
 import { PlaygroundHeaderDocs } from './components/playground_header_docs';
+import { useKibana } from './hooks/use_kibana';
 
 export const ChatPlaygroundOverview: React.FC = () => {
+  const {
+    services: { console: consolePlugin },
+  } = useKibana();
+
+  const embeddableConsole = useMemo(
+    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
+    [consolePlugin]
+  );
+
   return (
     <PlaygroundProvider
       defaultValues={{
@@ -59,6 +69,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
           rightSideItems={[<PlaygroundHeaderDocs />, <PlaygroundToolbar />]}
         />
         <App />
+        {embeddableConsole}
       </EuiPageTemplate>
     </PlaygroundProvider>
   );
