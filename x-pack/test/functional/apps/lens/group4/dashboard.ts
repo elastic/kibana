@@ -324,6 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should work in lens with by-value charts', async () => {
       // create a new dashboard, then a new visualization in Lens.
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await testSubjects.click('dashboardEditorMenuButton');
       await testSubjects.click('visType-lens');
