@@ -137,7 +137,6 @@ export const schema: FormSchema<TemplateFormProps> = {
     },
     syncAlerts: {
       helpText: i18n.SYNC_ALERTS_HELP,
-      defaultValue: true,
       labelAppend: OptionalFieldLabel,
     },
   },

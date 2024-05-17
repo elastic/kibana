@@ -56,7 +56,7 @@ const CaseFormFieldsComponent: React.FC = () => {
       </div>
       {isSyncAlertsEnabled ? (
         <div>
-          <SyncAlertsToggle isLoading={isSubmitting} path="caseFields.settings" />
+          <SyncAlertsToggle isLoading={isSubmitting} path="caseFields.syncAlerts" />
         </div>
       ) : null}
       <div css={containerCss(euiTheme)}>

@@ -351,6 +351,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           connectorId,
           fields,
           customFields: templateCustomFields,
+          syncAlerts = false,
           ...otherCaseFields
         } = caseFields ?? {};
         const transformedCustomFields = templateCustomFields
@@ -368,6 +369,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             ...otherCaseFields,
             connector: transformedConnector,
             customFields: transformedCustomFields,
+            settings: { syncAlerts },
           },
         };
         const updatedTemplates = addOrReplaceField(templates, transformedData);
