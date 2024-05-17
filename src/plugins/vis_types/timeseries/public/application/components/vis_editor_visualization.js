@@ -35,9 +35,6 @@ class VisEditorVisualizationUI extends Component {
       dragging: false,
     };
 
-    this._visEl = React.createRef();
-    this._subscription = null;
-
     this._parentApi = {
       timeRange$: new BehaviorSubject(props.timeRange),
       query$: new BehaviorSubject(props.query),
@@ -96,23 +93,10 @@ class VisEditorVisualizationUI extends Component {
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
     window.removeEventListener('mouseup', this.handleMouseUp);
-    if (this._handler) {
-      this._handler.destroy();
-    }
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
   }
 
   componentDidMount() {
     window.addEventListener('mousemove', this.handleMouseMove);
-  }
-
-  componentDidUpdate() {
-    if (this._handler) {
-      const { timeRange, filters, query } = this.props;
-      this._handler.updateInput({ timeRange, filters, query });
-    }
   }
 
   render() {

@@ -8,7 +8,6 @@
 import { Reference } from '@kbn/content-management-utils';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
-import { Observer } from 'rxjs';
 import { HasVisualizeConfig } from '../embeddable';
 import type { VisParams } from '../types';
 import type { SerializedVis } from '../vis';
@@ -36,5 +35,5 @@ export type VisualizeApi = HasEditCapabilities &
   HasVisualizeConfig &
   DefaultEmbeddableApi<VisualizeSerializedState> & {
     setVis: (vis: SerializedVis<VisParams>) => void;
-    subscribeToInitialRender: (listener: Observer<boolean>) => void;
+    subscribeToInitialRender: (listener: () => void) => void;
   };

@@ -6,22 +6,29 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
 import 'brace/mode/json';
+import './index.scss';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { EventEmitter } from 'events';
 import { EuiResizableContainer } from '@elastic/eui';
+import { EventEmitter } from 'events';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import {
-  Vis,
-  VisualizeEmbeddableContract,
-  EditorRenderProps,
-} from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import {
+  EditorRenderProps,
+  Vis,
+  VisualizeEmbeddableContract,
+  VISUALIZE_EMBEDDABLE_TYPE,
+} from '@kbn/visualizations-plugin/public';
 
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import {
+  VisualizeApi,
+  VisualizeSerializedState,
+} from '@kbn/visualizations-plugin/public/react_embeddable/types';
+import { BehaviorSubject } from 'rxjs';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
 
@@ -44,8 +51,12 @@ function DefaultEditor({
   eventEmitter: EventEmitter;
   embeddableHandler: VisualizeEmbeddableContract;
 }) {
-  const visRef = useRef<HTMLDivElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [parentApi] = useState({
+    timeRange$: new BehaviorSubject(timeRange),
+    query$: new BehaviorSubject(query),
+    filters$: new BehaviorSubject(filters),
+  });
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
@@ -60,25 +71,14 @@ function DefaultEditor({
   const onEditorMouseLeave = useCallback(() => {}, []);
 
   useEffect(() => {
-    if (!visRef.current) {
-      return;
-    }
-    embeddableHandler.render(visRef.current).then(() => {
-      setTimeout(async () => {
-        eventEmitter.emit('embeddableRendered');
-      });
-    });
-
-    return () => embeddableHandler.destroy();
-  }, [embeddableHandler, eventEmitter]);
-
+    parentApi.timeRange$.next(timeRange);
+  }, [parentApi, timeRange]);
   useEffect(() => {
-    embeddableHandler.updateInput({
-      timeRange,
-      filters,
-      query,
-    });
-  }, [embeddableHandler, timeRange, filters, query]);
+    parentApi.query$.next(query);
+  }, [parentApi, query]);
+  useEffect(() => {
+    parentApi.filters$.next(filters);
+  }, [parentApi, filters]);
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
@@ -106,7 +106,20 @@ function DefaultEditor({
                   }`,
                 }}
               >
-                <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
+                <ReactEmbeddableRenderer<VisualizeSerializedState, VisualizeApi>
+                  type={VISUALIZE_EMBEDDABLE_TYPE}
+                  state={{
+                    rawState: {
+                      id: '',
+                      savedVis: vis.serialize(),
+                    },
+                    references: [],
+                  }}
+                  parentApi={parentApi}
+                  onApiAvailable={(api) => {
+                    api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
+                  }}
+                />
               </EuiResizablePanel>
 
               <EuiResizableButton
