@@ -23,18 +23,18 @@ const findTestUtils = (
   kbnServer: KbnClient
 ) => {
   describe(describeType, () => {
-    beforeEach(async () => {
-      await deleteAllAlertingData({ kbnServer });
-    });
-
-    afterEach(async () => {
-      await objectRemover.removeAll();
-      await deleteAllAlertingData({ kbnServer });
-    });
-
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
+        beforeEach(async () => {
+          await deleteAllAlertingData({ kbnServer });
+        });
+
+        afterEach(async () => {
+          await objectRemover.removeAll();
+          await deleteAllAlertingData({ kbnServer });
+        });
+
         it('should handle find alert request appropriately', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
