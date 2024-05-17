@@ -36,7 +36,7 @@ describe('get_basic_auth_header', () => {
       });
     });
 
-    it('overrides the auth header if provided', () => {
+    it('does not overrides the auth header if provided', () => {
       expect(
         combineHeadersWithBasicAuthHeader({
           username: 'test',
