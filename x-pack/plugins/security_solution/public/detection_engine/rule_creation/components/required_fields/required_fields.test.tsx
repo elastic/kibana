@@ -121,6 +121,7 @@ describe('RequiredFields form part', () => {
     });
 
     expect(screen.getByDisplayValue('customType')).toBeVisible();
+    expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
   });
 
   it('field type dropdown allows to choose from options if multiple types are available', async () => {
