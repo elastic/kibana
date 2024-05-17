@@ -9,8 +9,9 @@ import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
-import { useForm, Form, FormConfig } from '../../../shared_imports';
+import { UnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { Pipeline, Processor } from '../../../../common/types';
+import { useForm, Form, FormConfig, useFormIsModified } from '../../../shared_imports';
 
 import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
@@ -85,6 +86,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     onSubmit: handleSave,
   });
 
+  const isFormDirty = useFormIsModified({ form });
+
   const onEditorFlyoutOpen = useCallback(() => {
     setIsRequestVisible(false);
   }, [setIsRequestVisible]);
@@ -113,6 +116,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   return (
     <>
+      <UnsavedChangesPrompt hasUnsavedChanges={isFormDirty} />
+
       <Form
         form={form}
         data-test-subj="pipelineForm"
