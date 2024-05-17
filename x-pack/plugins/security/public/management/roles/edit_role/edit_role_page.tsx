@@ -69,7 +69,7 @@ import {
   prepareRoleClone,
 } from '../../../../common/model';
 import { useCapabilities } from '../../../components/use_capabilities';
-import type { CheckRoleMappingFeaturesResponse } from '../../role_mappings/role_mappings_api_client';
+import type { CheckSecurityFeaturesResponse } from '../../security_features';
 import type { UserAPIClient } from '../../users';
 import type { IndicesAPIClient } from '../indices_api_client';
 import { KibanaPrivileges } from '../model';
@@ -101,25 +101,23 @@ function useRemoteClusters(http: HttpStart) {
   return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
 }
 
-interface CheckRoleMappingFeaturesResponseWhenServerless {
+interface CheckSecurityFeaturesResponseWhenServerless {
   value: boolean;
 }
 function useFeatureCheck(
   http: HttpStart,
   buildFlavor: 'serverless'
-): AsyncState<CheckRoleMappingFeaturesResponseWhenServerless>;
+): AsyncState<CheckSecurityFeaturesResponseWhenServerless>;
 
 function useFeatureCheck(
   http: HttpStart,
   buildFlavor: BuildFlavor
-): AsyncState<CheckRoleMappingFeaturesResponse>;
+): AsyncState<CheckSecurityFeaturesResponse>;
 
 function useFeatureCheck(http: HttpStart, buildFlavor?: BuildFlavor) {
   return useAsync(async () => {
     if (buildFlavor !== 'serverless') {
-      return http.get<CheckRoleMappingFeaturesResponse>(
-        '/internal/security/_check_role_mapping_features'
-      );
+      return http.get<CheckSecurityFeaturesResponse>('/internal/security/_check_security_features');
     }
     return { value: true };
   }, [http, buildFlavor]);
