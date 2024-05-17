@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
-import { getMergedAccessor, Profile } from './composable_profile';
+import { getMergedAccessor } from './composable_profile';
 import { recordHasProfile } from './profiles';
 import { useProfiles } from './profiles_provider';
+import type { Profile } from './types';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
   key: TKey,

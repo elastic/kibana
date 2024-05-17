@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, FC, useContext, useMemo } from 'react';
-import { ComposableProfile } from './composable_profile';
+import type { ComposableProfile } from './composable_profile';
 
 const profilesContext = createContext<ComposableProfile[]>([]);
 

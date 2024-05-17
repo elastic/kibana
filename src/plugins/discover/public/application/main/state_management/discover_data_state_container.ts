@@ -19,7 +19,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getEsqlDataView } from './utils/get_esql_data_view';
-import { DiscoverAppState } from './discover_app_state_container';
+import { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
@@ -28,8 +28,11 @@ import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { InternalState } from './discover_internal_state_container';
-import { ComposableProfile } from '../../../context_awareness/composable_profile';
-import { dataSourceProfileService } from '../../../context_awareness';
+import {
+  ComposableProfile,
+  dataSourceProfileService,
+  getMergedAccessor,
+} from '../../../context_awareness';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -147,6 +150,7 @@ export function getDataStateContainer({
   getSavedSearch,
   setDataView,
   setDataSourceProfile,
+  uppdateAppState,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -155,6 +159,7 @@ export function getDataStateContainer({
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
   setDataSourceProfile: (profile: ComposableProfile) => void;
+  uppdateAppState: DiscoverAppStateContainer['update'];
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -305,6 +310,25 @@ export function getDataStateContainer({
     });
 
     setDataSourceProfile(dataSourceProfile);
+
+    const defaultColumns = getMergedAccessor(
+      [dataSourceProfile],
+      'getDefaultColumns',
+      () => undefined
+    )();
+
+    if (defaultColumns) {
+      uppdateAppState(
+        {
+          columns: defaultColumns.columns,
+          grid: {
+            ...getAppState().grid,
+            columns: defaultColumns.settings,
+          },
+        },
+        true
+      );
+    }
 
     if (resetQuery) {
       refetch$.next('reset');

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Profile } from '../composable_profile';
+import type { Profile } from '../types';
 import { AsyncProfileService } from '../profile_service';
 
 export enum SolutionType {
