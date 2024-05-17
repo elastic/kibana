@@ -67,6 +67,7 @@ import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 
 const containerStyles = css`
   position: relative;
@@ -108,38 +109,20 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
-  const [
-    query,
-    sort,
-    rowHeight,
-    headerRowHeight,
-    rowsPerPage,
-    grid,
-    columns,
-    index,
-    sampleSizeState,
-  ] = useAppStateSelector((state) => {
-    return [
-      state.query,
-      state.sort,
-      state.rowHeight,
-      state.headerRowHeight,
-      state.rowsPerPage,
-      state.grid,
-      state.columns,
-      state.index,
-      state.sampleSize,
-    ];
-  });
-  const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined) => {
-      stateContainer.internalState.transitions.setExpandedDoc(doc);
-    },
-    [stateContainer]
-  );
-
+  const [query, sort, rowHeight, headerRowHeight, rowsPerPage, grid, columns, sampleSizeState] =
+    useAppStateSelector((state) => {
+      return [
+        state.query,
+        state.sort,
+        state.rowHeight,
+        state.headerRowHeight,
+        state.rowsPerPage,
+        state.grid,
+        state.columns,
+        state.sampleSize,
+      ];
+    });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
-
   const isTextBasedQuery = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
@@ -147,7 +130,6 @@ function DiscoverDocumentsComponent({
     () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
     [uiSettings, isTextBasedQuery]
   );
-
   const documentState = useDataState(documents$);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
@@ -162,7 +144,8 @@ function DiscoverDocumentsComponent({
   // 4. since the new sort by field isn't available in currentColumns EuiDataGrid is emitting a 'onSort', which is unsorting the grid
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
-  const isDataViewLoading = !isTextBasedQuery && dataView.id && index !== dataView.id;
+  const isDataViewLoading =
+    useInternalStateSelector((state) => state.isDataViewLoading) && !isTextBasedQuery;
   const isEmptyDataResult =
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
@@ -188,6 +171,13 @@ function DiscoverDocumentsComponent({
     columns,
     sort,
   });
+
+  const setExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined) => {
+      stateContainer.internalState.transitions.setExpandedDoc(doc);
+    },
+    [stateContainer]
+  );
 
   const onResizeDataGrid = useCallback(
     (colSettings) => onResize(colSettings, stateContainer),
@@ -269,11 +259,9 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const {
-    customCellRenderer: externalCustomRenderers,
-    customGridColumnsConfiguration,
-    customControlColumnsConfiguration,
-  } = useDiscoverCustomization('data_table') || {};
+  const { customControlColumnsConfiguration } = useDiscoverCustomization('data_table') || {};
+  const { customCellRenderer, customGridColumnsConfiguration } =
+    useContextualGridCustomisations() || {};
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -443,7 +431,7 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
-                  externalCustomRenderers={externalCustomRenderers}
+                  externalCustomRenderers={customCellRenderer}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
                   customControlColumnsConfiguration={customControlColumnsConfiguration}
                 />

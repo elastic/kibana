@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
+  const testSubjects = getService('testSubjects');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -27,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visualize',
     'visEditor',
+    'share',
   ]);
 
   describe('Visualize Reporting Screenshots', function () {
@@ -67,13 +69,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       it('is available if new', async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.visualize.clickNewVisualization();
         await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
@@ -82,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();
         await PageObjects.visualize.saveVisualization('my viz');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openExportTab();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -113,6 +119,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
+      afterEach(async () => {
+        await PageObjects.share.closeShareModal();
+      });
+
       it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await PageObjects.visualize.loadSavedVisualization(
@@ -121,14 +131,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         log.debug('open png reporting panel');
-        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.openExportTab();
+        await testSubjects.click('pngV2-radioOption');
         log.debug('click generate report button');
         await PageObjects.reporting.clickGenerateReportButton();
 
         log.debug('get the report download URL');
         const url = await PageObjects.reporting.getReportURL(60000);
         log.debug('download the report');
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        const reportData = await PageObjects.reporting.getRawReportData(url ?? '');
         const sessionReportPath = await PageObjects.reporting.writeSessionReport(
           reportFileName,
           'png',
