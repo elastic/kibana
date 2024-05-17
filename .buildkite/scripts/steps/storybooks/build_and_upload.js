@@ -67,6 +67,8 @@ const build = () => {
   }
 };
 
+const kibanaRoot = execSync('git rev-parse --show-toplevel').toString().trim();
+
 const upload = () => {
   const originalDirectory = process.cwd();
   try {
@@ -97,8 +99,12 @@ const upload = () => {
 
     fs.writeFileSync('index.html', html);
 
-    console.log('--- Uploading Storybooks');
+    const activateScript = path.relative(
+      process.cwd(),
+      path.join(kibanaRoot, '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
+    );
     exec(`
+      ${activateScript} gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
