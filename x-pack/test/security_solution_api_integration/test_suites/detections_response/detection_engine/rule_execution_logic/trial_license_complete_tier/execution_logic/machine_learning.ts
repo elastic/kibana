@@ -121,10 +121,12 @@ export default ({ getService }: FtrProviderContext) => {
         supertest,
       });
       // Thought: is there a race condition where the datafeed and es_archiver are both attempting to create an index?
-      console.log('datafeed set up', JSON.stringify(datafeedResponse), null, 2));
-      const loadResp = await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      console.log('datafeed set up', JSON.stringify(datafeedResponse, null, 2));
+      const loadResp = await esArchiver.load(
+        'x-pack/test/functional/es_archives/security_solution/anomalies'
+      );
       console.log('anomalies loaded', JSON.stringify(loadResp, null, 2));
-      console.log('/BEFORE MACHINE LEARNING RULES')
+      console.log('/BEFORE MACHINE LEARNING RULES');
     });
 
     after(async () => {
@@ -141,7 +143,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
-      console.log('STARTING TEST')
+      console.log('STARTING TEST');
       const createdRule = await createRule(supertest, log, rule);
       console.log('created rule', JSON.stringify(createdRule, null, 2));
       const alerts = await getAlerts(supertest, log, es, createdRule);
@@ -219,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]),
         })
       );
-      console.log('ENDING TEST')
+      console.log('ENDING TEST');
     });
 
     it('classifies ml job missing errors as user errors', async () => {
