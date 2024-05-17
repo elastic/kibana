@@ -121,16 +121,13 @@ describe(
           clickAutomaticUpdatesToggle();
           cy.getByTestSubj('protection-updates-manifest-note').type(testNote);
 
-          cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`, (req) => {
-            // Parse the date from the request and subtract one day
-            const date = moment(
-              req.body.inputs[0].config.policy.value.global_manifest_version,
-              'YYYY-MM-DD'
-            ).subtract(1, 'days');
-            // Format the date back to 'YYYY-MM-DD' format and set it in the request
-            req.body.inputs[0].config.policy.value.global_manifest_version =
-              date.format('YYYY-MM-DD');
-          }).as('policy');
+          cy.getByTestSubj('protection-updates-version-to-deploy-picker').find('input').clear();
+
+          cy.getByTestSubj('protection-updates-version-to-deploy-picker')
+            .find('input')
+            .type(todayMinusTwoDays.format('MMMM DD, YYYY'));
+
+          cy.intercept('PUT', `/api/fleet/package_policies/${policy.id}`).as('policy');
           cy.intercept('POST', `/api/endpoint/protection_updates_note/${policy.id}`).as('note');
           clickProtectionUpdatesSaveButton();
           cy.wait('@policy').then(({ request, response }) => {
@@ -150,7 +147,7 @@ describe(
             todayMinusTwoDays.format('MMMM DD, YYYY')
           );
           cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
-          expectSavedButtonToBeEnabled();
+          expectSavedButtonToBeDisabled();
 
           // Reload page, make sure the changes are persisted
           loadProtectionUpdatesUrl(policy.id);
