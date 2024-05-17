@@ -23,6 +23,10 @@ import { getKbResource } from './get_kb_resource';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
+// Since we're awaiting on ELSER setup, this could take a bit (especially if ML needs to autoscale)
+// Consider just returning if attempt was successful, and switch to client polling
+const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+
 /**
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
  * @param router
@@ -38,6 +42,9 @@ export const postKnowledgeBaseRoute = (
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
       options: {
         tags: ['access:elasticAssistant'],
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
       },
     })
     .addVersion(

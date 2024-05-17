@@ -24,10 +24,11 @@ export const InstallKnowledgeBaseButton: React.FC = React.memo(() => {
   const {
     assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
     http,
+    toasts,
   } = useAssistantContext();
 
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, resource: ESQL_RESOURCE });
-  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http });
+  const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
   const isSetupComplete =

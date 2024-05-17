@@ -35,7 +35,8 @@ import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
 import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
 
 const ESQL_RESOURCE = 'esql';
-const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-kb';
+const KNOWLEDGE_BASE_INDEX_PATTERN_OLD = '.kibana-elastic-ai-assistant-kb';
+const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-(SPACE)';
 
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
@@ -63,9 +64,11 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isElserEnabled = kbStatus?.elser_exists ?? false;
     const isKnowledgeBaseEnabled = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
     const isESQLEnabled = kbStatus?.esql_exists ?? false;
+    const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
 
     // Resource availability state
-    const isLoadingKb = isLoading || isFetching || isSettingUpKB || isDeletingUpKB;
+    const isLoadingKb =
+      isLoading || isFetching || isSettingUpKB || isDeletingUpKB || isSetupInProgress;
     const isKnowledgeBaseAvailable = knowledgeBase.isEnabledKnowledgeBase && kbStatus?.elser_exists;
     const isESQLAvailable =
       knowledgeBase.isEnabledKnowledgeBase && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
@@ -160,7 +163,11 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const knowledgeBaseDescription = useMemo(() => {
       return isKnowledgeBaseEnabled ? (
         <span data-test-subj="kb-installed">
-          {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(KNOWLEDGE_BASE_INDEX_PATTERN)}{' '}
+          {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(
+            enableKnowledgeBaseByDefault
+              ? KNOWLEDGE_BASE_INDEX_PATTERN
+              : KNOWLEDGE_BASE_INDEX_PATTERN_OLD
+          )}{' '}
           {knowledgeBaseActionButton}
         </span>
       ) : (
@@ -168,7 +175,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
           {i18n.KNOWLEDGE_BASE_DESCRIPTION} {knowledgeBaseActionButton}
         </span>
       );
-    }, [isKnowledgeBaseEnabled, knowledgeBaseActionButton]);
+    }, [enableKnowledgeBaseByDefault, isKnowledgeBaseEnabled, knowledgeBaseActionButton]);
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // ESQL Resource

@@ -70,7 +70,7 @@ export class AIAssistantService {
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
-  private _isKBSetupInProgress: boolean = false;
+  private isKBSetupInProgress: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -109,11 +109,11 @@ export class AIAssistantService {
     return this.initialized;
   }
 
-  public get isKBSetupInProgress() {
-    return this._isKBSetupInProgress;
+  public getIsKBSetupInProgress() {
+    return this.isKBSetupInProgress;
   }
-  public set isKBSetupInProgress(inProgress: boolean) {
-    this._isKBSetupInProgress = inProgress;
+  public setIsKBSetupInProgress(isInProgress: boolean) {
+    this.isKBSetupInProgress = isInProgress;
   }
 
   private createDataStream: CreateDataStream = ({ resource, kibanaVersion, fieldMap }) => {
@@ -324,15 +324,16 @@ export class AIAssistantService {
     }
 
     return new AIAssistantKnowledgeBaseDataClient({
-      assistantService: this,
       logger: this.options.logger.get('knowledgeBase'),
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
       indexPatternsResourceName: this.resourceNames.aliases.knowledgeBase,
       ingestPipelineResourceName: this.resourceNames.pipelines.knowledgeBase,
       getElserId: this.getElserId,
+      getIsKBSetupInProgress: this.getIsKBSetupInProgress.bind(this),
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
+      setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
     });
   }

@@ -24,13 +24,13 @@ import { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 import { ESQL_DOCS_LOADED_QUERY } from '../../routes/knowledge_base/constants';
 import { isModelAlreadyExistsError } from './helpers';
-import { AIAssistantService } from '../../ai_assistant_service';
 
 interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
-  assistantService: AIAssistantService;
   ml: MlPluginSetup;
   getElserId: GetElser;
+  getIsKBSetupInProgress: () => boolean;
   ingestPipelineResourceName: string;
+  setIsKBSetupInProgress: (isInProgress: boolean) => void;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -38,7 +38,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }
 
   public get isSetupInProgress() {
-    return this.options.assistantService.isKBSetupInProgress;
+    return this.options.getIsKBSetupInProgress();
   }
 
   /**
@@ -160,13 +160,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     esStore: ElasticsearchStore;
     soClient: SavedObjectsClientContract;
   }): Promise<void> => {
-    if (this.options.assistantService.isKBSetupInProgress) {
+    if (this.options.getIsKBSetupInProgress()) {
       this.options.logger.debug('Knowledge Base setup already in progress');
       return;
     }
 
     this.options.logger.debug('Starting Knowledge Base setup...');
-    this.options.assistantService.isKBSetupInProgress = true;
+    this.options.setIsKBSetupInProgress(true);
     const elserId = await this.options.getElserId();
 
     try {
@@ -211,7 +211,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     } catch (e) {
       this.options.logger.error(`Error setting up Knowledge Base: ${e.message}`);
     }
-    this.options.assistantService.isKBSetupInProgress = false;
+    this.options.setIsKBSetupInProgress(false);
   };
 
   /**
