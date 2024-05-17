@@ -74,12 +74,9 @@ describe('useUnallowedValues', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockUnallowedValuesResponse);
 
-      const { result } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
-      );
+      const { result } = renderHook(() => useUnallowedValues({ indexName, requestItems }), {
+        wrapper: ContextWrapper,
+      });
       // await waitFor();
       unallowedValuesResult = await result.current;
     });
@@ -112,12 +109,9 @@ describe('useUnallowedValues', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result } = renderHook(
-        () => useUnallowedValues({ indexName, requestItems }),
-        {
-          wrapper: ContextWrapper,
-        }
-      );
+      const { result } = renderHook(() => useUnallowedValues({ indexName, requestItems }), {
+        wrapper: ContextWrapper,
+      });
       // await waitFor();
       unallowedValuesResult = await result.current;
     });

@@ -61,12 +61,9 @@ describe('useStorage', () => {
   });
 
   test('updates the storage value', async () => {
-    const { result } = renderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     const [value, setValue] = result.current;
 
@@ -82,12 +79,9 @@ describe('useStorage', () => {
   });
 
   test('removes the storage value', async () => {
-    const { result } = renderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     const [value, setValue] = result.current;
 
@@ -103,12 +97,9 @@ describe('useStorage', () => {
   });
 
   test('updates the value on storage event', async () => {
-    const { result } = renderHook(
-      () => useStorage('ml.gettingStarted.isDismissed'),
-      {
-        wrapper: Provider,
-      }
-    );
+    const { result } = renderHook(() => useStorage('ml.gettingStarted.isDismissed'), {
+      wrapper: Provider,
+    });
 
     expect(result.current[0]).toBe(true);
 

@@ -189,9 +189,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
     // await waitFor();
@@ -317,9 +315,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => false,
     } as unknown as LicenseService);
     mockApiCallsWithOutputs(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
     // await waitFor();
@@ -445,9 +441,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithLogstashOutputs(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
     // await waitFor();
@@ -497,7 +491,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithLogstashOutputs(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
+    const { result } = testRenderer.renderHook(() =>
       useOutputOptions({
         package_policies: [
           {
@@ -601,9 +595,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithRemoteESOutputs(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
     // await waitFor();
@@ -619,9 +611,7 @@ describe('useOutputOptions', () => {
       hasAtLeast: () => true,
     } as unknown as LicenseService);
     mockApiCallsWithInternalOutputs(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
-      useOutputOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useOutputOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
     // await waitFor();
@@ -670,9 +660,7 @@ describe('useFleetServerHostsOptions', () => {
   it('should not enable internal fleet server hosts', async () => {
     const testRenderer = createFleetTestRendererMock();
     mockApiCallsWithInternalFleetServerHost(testRenderer.startServices.http);
-    const { result, } = testRenderer.renderHook(() =>
-      useFleetServerHostsOptions({} as AgentPolicy)
-    );
+    const { result } = testRenderer.renderHook(() => useFleetServerHostsOptions({} as AgentPolicy));
     expect(result.current.isLoading).toBeTruthy();
 
     // await waitFor();

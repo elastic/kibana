@@ -28,7 +28,7 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
   const reportTelemetry = useCallback(
     async ({
       fn,
-      params: { conversationId, ...rest }
+      params: { conversationId, ...rest },
     }: any): Promise<{
       fn: keyof AssistantTelemetry;
       params: AssistantTelemetry[keyof AssistantTelemetry];

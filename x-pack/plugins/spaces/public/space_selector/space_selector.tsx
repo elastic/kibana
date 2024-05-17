@@ -258,7 +258,7 @@ export const renderSpaceSelectorApp = (
   root.render(
     <KibanaRenderContextProvider {...services}>
       <SpaceSelector {...props} />
-    </KibanaRenderContextProvider>,
+    </KibanaRenderContextProvider>
   );
   return () => root.unmount();
 };

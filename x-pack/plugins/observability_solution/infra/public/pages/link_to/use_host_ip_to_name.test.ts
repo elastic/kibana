@@ -32,7 +32,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 describe('useHostIpToName Hook', () => {
   it('should basically work', async () => {
     mockedFetch.mockResolvedValue({ host: 'example-01' } as any);
-    const { result, } = renderUseHostIpToNameHook();
+    const { result } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
     // await waitFor();
@@ -44,7 +44,7 @@ describe('useHostIpToName Hook', () => {
   it('should handle errors', async () => {
     const error = new Error('Host not found');
     mockedFetch.mockRejectedValue(error);
-    const { result, } = renderUseHostIpToNameHook();
+    const { result } = renderUseHostIpToNameHook();
     expect(result.current.name).toBe(null);
     expect(result.current.loading).toBe(true);
     // await waitFor();

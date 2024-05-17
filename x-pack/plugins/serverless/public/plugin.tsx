@@ -148,7 +148,7 @@ export class ServerlessPlugin
         <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
           <ProjectSwitcher {...{ currentProjectType }} />
         </ProjectSwitcherKibanaProvider>
-      </KibanaRenderContextProvider>,
+      </KibanaRenderContextProvider>
     );
 
     return () => root.unmount();

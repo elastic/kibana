@@ -189,7 +189,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   }, [jobConfigs, advancedSettings]);
 
   return (
-    (<EuiForm data-test-subj={'mlAnomalyAlertForm'}>
+    <EuiForm data-test-subj={'mlAnomalyAlertForm'}>
       <JobSelectorControl
         createJobUrl={newJobUrl}
         jobsAndGroupIds={jobsAndGroupIds}
@@ -235,7 +235,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <EuiSpacer size="m" />
       <PreviewAlertCondition alertingApiService={alertingApiService} alertParams={ruleParams} />
       <EuiSpacer size="m" />
-    </EuiForm>)
+    </EuiForm>
   );
 };
 

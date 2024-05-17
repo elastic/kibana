@@ -20,10 +20,9 @@ describe('Transform: Transform List Actions', () => {
     const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    const { result } = renderHook(
-      () => useActions({ forceDisable: false, transformNodes: 1 }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useActions({ forceDisable: false, transformNodes: 1 }), {
+      wrapper,
+    });
 
     // await waitFor();
 

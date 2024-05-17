@@ -35,7 +35,7 @@ export const advancedFilterFactory: StartInitializer<RendererFactory<{}>> =
       );
 
       handlers.onDestroy(() => {
-        root.unmount()
+        root.unmount();
       });
     },
   });

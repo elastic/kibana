@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { createRoot } from 'react-dom/client';
+import type { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject, Subscription, type BehaviorSubject } from 'rxjs';

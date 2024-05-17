@@ -30,7 +30,9 @@ export const NoTiersAvailableUsingNodeAttributesNotice: FunctionComponent = () =
         )}
       </p>
 
-      <p><>{nodeAllocationMigrationGuidance}</></p>
+      <p>
+        <>{nodeAllocationMigrationGuidance}</>
+      </p>
     </EuiCallOut>
   );
 };

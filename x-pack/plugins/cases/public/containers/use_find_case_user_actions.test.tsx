@@ -43,10 +43,9 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('returns proper state on findCaseUserActions', async () => {
-    const { result } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
-      { wrapper: appMockRender.AppWrapper }
-    );
+    const { result } = renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     // await waitFor();
 
@@ -120,12 +119,9 @@ describe('UseFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     // await waitFor();
 

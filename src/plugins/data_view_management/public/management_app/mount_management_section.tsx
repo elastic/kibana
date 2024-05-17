@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 

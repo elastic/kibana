@@ -107,7 +107,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
   );
 
   return (
-    (<WaterfallProvider
+    <WaterfallProvider
       activeStep={activeStep}
       markerItems={markerItems}
       totalNetworkRequests={total}
@@ -149,6 +149,6 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
         renderLegendItem={renderLegendItem}
         renderFlyout={renderFlyout}
       />
-    </WaterfallProvider>)
+    </WaterfallProvider>
   );
 };

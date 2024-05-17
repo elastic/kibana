@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

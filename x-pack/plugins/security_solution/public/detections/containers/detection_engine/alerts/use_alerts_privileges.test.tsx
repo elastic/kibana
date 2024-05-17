@@ -91,9 +91,7 @@ describe('useAlertsPrivileges', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
       // await waitFor();
       expect(result.current).toEqual({
         hasEncryptionKey: null,
@@ -116,9 +114,7 @@ describe('useAlertsPrivileges', () => {
     });
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
     await act(async () => {
-      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({
@@ -146,9 +142,7 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({
@@ -173,9 +167,7 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({
@@ -201,9 +193,7 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({
@@ -229,9 +219,7 @@ describe('useAlertsPrivileges', () => {
     useUserPrivilegesMock.mockReturnValue(userPrivileges);
 
     await act(async () => {
-      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() =>
-        useAlertsPrivileges()
-      );
+      const { result } = renderHook<void, UseAlertsPrivelegesReturn>(() => useAlertsPrivileges());
       // await waitFor();
       // await waitFor();
       expect(result.current).toEqual({

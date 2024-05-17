@@ -161,21 +161,21 @@ describe('application-level user messages', () => {
         mountWithIntl(
           <div>
             <>
-            {
-              getApplicationUserMessages({
-                visualizationType: '123',
-                activeDatasource: {
-                  checkIntegrity: jest.fn(() => ['missing_pattern']),
-                } as unknown as Datasource,
-                activeDatasourceState: { isLoading: false, state: {} },
-                // user can go to management, but indexPatterns management is not accessible
-                core: createCoreStartWithPermissions({
-                  navLinks: { management: true },
-                  management: { kibana: { indexPatterns: false } },
-                }),
-                ...irrelevantProps,
-              })[0].longMessage
-            }
+              {
+                getApplicationUserMessages({
+                  visualizationType: '123',
+                  activeDatasource: {
+                    checkIntegrity: jest.fn(() => ['missing_pattern']),
+                  } as unknown as Datasource,
+                  activeDatasourceState: { isLoading: false, state: {} },
+                  // user can go to management, but indexPatterns management is not accessible
+                  core: createCoreStartWithPermissions({
+                    navLinks: { management: true },
+                    management: { kibana: { indexPatterns: false } },
+                  }),
+                  ...irrelevantProps,
+                })[0].longMessage
+              }
             </>
           </div>
         ).exists(RedirectAppLinks)
@@ -185,21 +185,21 @@ describe('application-level user messages', () => {
         shallow(
           <div>
             <>
-            {
-              getApplicationUserMessages({
-                visualizationType: '123',
-                activeDatasource: {
-                  checkIntegrity: jest.fn(() => ['missing_pattern']),
-                } as unknown as Datasource,
-                activeDatasourceState: { isLoading: false, state: {} },
-                // user can't go to management at all
-                core: createCoreStartWithPermissions({
-                  navLinks: { management: false },
-                  management: { kibana: { indexPatterns: true } },
-                }),
-                ...irrelevantProps,
-              })[0].longMessage
-            }
+              {
+                getApplicationUserMessages({
+                  visualizationType: '123',
+                  activeDatasource: {
+                    checkIntegrity: jest.fn(() => ['missing_pattern']),
+                  } as unknown as Datasource,
+                  activeDatasourceState: { isLoading: false, state: {} },
+                  // user can't go to management at all
+                  core: createCoreStartWithPermissions({
+                    navLinks: { management: false },
+                    management: { kibana: { indexPatterns: true } },
+                  }),
+                  ...irrelevantProps,
+                })[0].longMessage
+              }
             </>
           </div>
         ).exists(RedirectAppLinks)

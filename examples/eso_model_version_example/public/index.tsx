@@ -38,7 +38,7 @@ export class EsoModelVersionExample implements Plugin<void, void, SetupDeps, Sta
             <KibanaContextProvider services={{ ...coreStart, ...deps }}>
               <MyPluginComponent />
             </KibanaContextProvider>
-          </KibanaPageTemplate>,
+          </KibanaPageTemplate>
         );
         return () => root.unmount();
       },

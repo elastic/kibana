@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSwitch, EuiSpacer } from '@elastic/eui';
 import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import deepEqual from 'fast-deep-equal';
-import { AlertsSearchBar, AlertsSearchBarProps } from '../alerts_search_bar';
+import { AlertsSearchBar } from '../alerts_search_bar';
 
 interface ActionAlertsFilterQueryProps {
   state?: AlertsFilter['query'];

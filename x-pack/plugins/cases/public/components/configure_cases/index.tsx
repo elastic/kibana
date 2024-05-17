@@ -129,25 +129,25 @@ export const ConfigureCases: React.FC = React.memo(() => {
     async (createdConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
-        await persistCaseConfigureAsync({
-          connector: caseConnector,
-          closureType,
-          customFields,
-          id: configurationId,
-          version: configurationVersion,
-        });
-
-        onConnectorUpdated(createdConnector);
-      },
-      [
-        persistCaseConfigureAsync,
+      await persistCaseConfigureAsync({
+        connector: caseConnector,
         closureType,
         customFields,
-        configurationId,
-        configurationVersion,
-        onConnectorUpdated,
-      ]
-    );
+        id: configurationId,
+        version: configurationVersion,
+      });
+
+      onConnectorUpdated(createdConnector);
+    },
+    [
+      persistCaseConfigureAsync,
+      closureType,
+      customFields,
+      configurationId,
+      configurationVersion,
+      onConnectorUpdated,
+    ]
+  );
 
   const isLoadingAny =
     isLoadingConnectors ||

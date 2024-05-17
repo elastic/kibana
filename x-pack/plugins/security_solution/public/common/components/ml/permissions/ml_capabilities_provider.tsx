@@ -38,30 +38,27 @@ export const MlCapabilitiesProvider = React.memo<PropsWithChildren<unknown>>(({ 
   const { addError } = useAppToasts();
   const { start, result, error } = useGetMlCapabilities();
 
-    useEffect(() => {
-      start({ http });
-    }, [http, start]);
+  useEffect(() => {
+    start({ http });
+  }, [http, start]);
 
-    useEffect(() => {
-      if (result) {
-        setCapabilities({ ...result, capabilitiesFetched: true });
-      }
-    }, [result]);
+  useEffect(() => {
+    if (result) {
+      setCapabilities({ ...result, capabilitiesFetched: true });
+    }
+  }, [result]);
 
-    useEffect(() => {
-      if (error) {
-        addError(error, {
-          title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
-        });
-      }
-    }, [addError, error]);
+  useEffect(() => {
+    if (error) {
+      addError(error, {
+        title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
+      });
+    }
+  }, [addError, error]);
 
-    return (
-      <MlCapabilitiesContext.Provider value={capabilities}>
-        {children}
-      </MlCapabilitiesContext.Provider>
-    );
-  }
-);
+  return (
+    <MlCapabilitiesContext.Provider value={capabilities}>{children}</MlCapabilitiesContext.Provider>
+  );
+});
 
 MlCapabilitiesProvider.displayName = 'MlCapabilitiesProvider';

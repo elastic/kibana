@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';

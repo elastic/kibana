@@ -55,7 +55,7 @@ describe('useFetch', () => {
   });
 
   it('should call fetch', async () => {
-    const { result, } = renderUseFetch();
+    const { result } = renderUseFetch();
 
     expect(result.current.data).toEqual(undefined);
     expect(result.current.isLoading).toEqual(false);
@@ -73,7 +73,7 @@ describe('useFetch', () => {
   });
 
   it('should call fetch if initialParameters option defined', async () => {
-    const { result, } = renderUseFetch({ initialParameters: parameters });
+    const { result } = renderUseFetch({ initialParameters: parameters });
 
     expect(result.current.data).toEqual(undefined);
     expect(result.current.isLoading).toEqual(true);
@@ -91,7 +91,7 @@ describe('useFetch', () => {
   });
 
   it('should refetch with same parameters', async () => {
-    const { result, } = renderUseFetch({ initialParameters: parameters });
+    const { result } = renderUseFetch({ initialParameters: parameters });
 
     expect(mockFetchFn).toHaveBeenCalledTimes(1);
     expect(mockFetchFn).toHaveBeenCalledWith(parameters, abortController.signal);
@@ -106,7 +106,7 @@ describe('useFetch', () => {
   });
 
   it('should not call fetch if disabled option defined', async () => {
-    const { result, } = renderUseFetch({
+    const { result } = renderUseFetch({
       initialParameters: parameters,
       disabled: true,
     });
@@ -168,7 +168,7 @@ describe('useFetch', () => {
     const firstAbortCtrl = new AbortController();
     const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
-    const { result, } = renderUseFetch({ initialParameters: parameters });
+    const { result } = renderUseFetch({ initialParameters: parameters });
 
     mockFetchFn.mockImplementationOnce(async () => {
       result.current.fetch(parameters);
@@ -188,7 +188,7 @@ describe('useFetch', () => {
     const firstAbortCtrl = new AbortController();
     const abortSpy = jest.spyOn(window, 'AbortController').mockReturnValueOnce(firstAbortCtrl);
 
-    const { result, } = renderUseFetch();
+    const { result } = renderUseFetch();
 
     mockFetchFn.mockImplementationOnce(async () => {
       result.current.fetch(parameters);
@@ -207,7 +207,7 @@ describe('useFetch', () => {
 
   describe('APM tracking', () => {
     it('should track with request name', async () => {
-      const { result, } = renderUseFetch();
+      const { result } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
@@ -219,7 +219,7 @@ describe('useFetch', () => {
     });
 
     it('should track each request', async () => {
-      const { result, } = renderUseFetch({
+      const { result } = renderUseFetch({
         initialParameters: parameters,
       });
 
@@ -243,7 +243,7 @@ describe('useFetch', () => {
     });
 
     it('should end success', async () => {
-      const { result, } = renderUseFetch();
+      const { result } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
@@ -263,7 +263,7 @@ describe('useFetch', () => {
         throw Error('request aborted');
       });
 
-      const { result, } = renderUseFetch();
+      const { result } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);
@@ -281,7 +281,7 @@ describe('useFetch', () => {
         throw Error('request error');
       });
 
-      const { result, } = renderUseFetch();
+      const { result } = renderUseFetch();
 
       await act(async () => {
         result.current.fetch(parameters);

@@ -124,12 +124,12 @@ describe('useTimelineEvents', () => {
 
   test('init', async () => {
     await act(async () => {
-      const { result } = renderHook<
-        [DataLoadingState, TimelineArgs],
-        UseTimelineEventsProps
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { result } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
       // useEffect on params request
       // await waitFor();
@@ -184,7 +184,6 @@ describe('useTimelineEvents', () => {
   test('Mock cache for active timeline when switching page', async () => {
     await act(async () => {
       const { result, rerender } = renderHook<
-
         [DataLoadingState, TimelineArgs],
         UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
@@ -228,7 +227,6 @@ describe('useTimelineEvents', () => {
   test('Correlation pagination is calling search strategy when switching page', async () => {
     await act(async () => {
       const { result, rerender } = renderHook<
-
         [DataLoadingState, TimelineArgs],
         UseTimelineEventsProps
       >((args) => useTimelineEvents(args), {
@@ -271,12 +269,12 @@ describe('useTimelineEvents', () => {
 
   test('should query again when a new field is added', async () => {
     await act(async () => {
-      const { rerender } = renderHook<
-        [DataLoadingState, TimelineArgs],
-        UseTimelineEventsProps
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
       // useEffect on params request
       // await waitFor();
@@ -302,13 +300,12 @@ describe('useTimelineEvents', () => {
 
   test('should not query again when a field is removed', async () => {
     await act(async () => {
-      const { rerender } = renderHook<
-
-        [DataLoadingState, TimelineArgs],
-        UseTimelineEventsProps
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
       // useEffect on params request
       // await waitFor();
@@ -329,12 +326,12 @@ describe('useTimelineEvents', () => {
   });
   test('should not query again when a removed field is added back', async () => {
     await act(async () => {
-      const { rerender } = renderHook<
-        [DataLoadingState, TimelineArgs],
-        UseTimelineEventsProps
-      >((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
-      });
+      const { rerender } = renderHook<[DataLoadingState, TimelineArgs], UseTimelineEventsProps>(
+        (args) => useTimelineEvents(args),
+        {
+          initialProps: { ...props },
+        }
+      );
 
       // useEffect on params request
       // await waitFor();

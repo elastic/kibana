@@ -618,7 +618,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
           {showCharts ? (
             // @ts-ignore inferred js types are incorrect
-            (<ExplorerChartsContainer
+            <ExplorerChartsContainer
               {...{
                 ...chartsData,
                 severity,
@@ -628,7 +628,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                 onSelectEntity: applyFilter,
                 chartsService,
               }}
-            />)
+            />
           ) : null}
 
           <EuiSpacer size="m" />

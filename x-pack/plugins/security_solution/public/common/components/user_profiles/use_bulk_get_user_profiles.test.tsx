@@ -39,12 +39,9 @@ describe('useBulkGetUserProfiles hook', () => {
     const userProfiles = useKibana().services.security.userProfiles;
     const spyOnUserProfiles = jest.spyOn(userProfiles, 'bulkGet');
     const assigneesIds = new Set(['user1']);
-    const { result } = renderHook(
-      () => useBulkGetUserProfiles({ uids: assigneesIds }),
-      {
-        wrapper: TestProviders,
-      }
-    );
+    const { result } = renderHook(() => useBulkGetUserProfiles({ uids: assigneesIds }), {
+      wrapper: TestProviders,
+    });
     // await waitFor();
 
     expect(spyOnUserProfiles).toHaveBeenCalledTimes(1);

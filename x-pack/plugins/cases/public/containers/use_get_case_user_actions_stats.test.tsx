@@ -31,10 +31,9 @@ describe('useGetCaseUserActionsStats', () => {
   });
 
   it('returns proper state on getCaseUserActionsStats', async () => {
-    const { result } = renderHook(
-      () => useGetCaseUserActionsStats(basicCase.id),
-      { wrapper: appMockRender.AppWrapper }
-    );
+    const { result } = renderHook(() => useGetCaseUserActionsStats(basicCase.id), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     // await waitFor();
 

@@ -115,12 +115,9 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result } = renderHook(
-      () => useLoadRuleAggregations(params),
-      {
-        wrapper,
-      }
-    );
+    const { rerender, result } = renderHook(() => useLoadRuleAggregations(params), {
+      wrapper,
+    });
 
     rerender();
     // await waitFor();

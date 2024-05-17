@@ -176,7 +176,7 @@ function DetailedFlyoutHeader({
   const selectedLocation = allLocations.find((ll) => ll.label === currentLocation);
 
   return (
-    (<EuiFlexGroup wrap={true} responsive={false}>
+    <EuiFlexGroup wrap={true} responsive={false}>
       <EuiFlexItem grow={false}>
         <MonitorStatus status={status} monitor={monitor} />
       </EuiFlexItem>
@@ -202,7 +202,7 @@ function DetailedFlyoutHeader({
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
-    </EuiFlexGroup>)
+    </EuiFlexGroup>
   );
 }
 

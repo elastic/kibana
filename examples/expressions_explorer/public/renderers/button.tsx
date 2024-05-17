@@ -44,7 +44,8 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
 
     const root = createRoot(domNode);
 
-    root.render(renderDebug(),
+    root.render(
+      renderDebug()
 
       // () => handlers.done()
     );

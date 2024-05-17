@@ -70,7 +70,11 @@ function getPropertyValue({ val, truncated = false }: Partial<IStickyProperty>) 
     );
   }
 
-  return <PropertyValue><>{val}</></PropertyValue>;
+  return (
+    <PropertyValue>
+      <>{val}</>
+    </PropertyValue>
+  );
 }
 
 export function StickyProperties({ stickyProperties }: { stickyProperties: IStickyProperty[] }) {

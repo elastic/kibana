@@ -63,7 +63,7 @@ describe('useCaseItems', () => {
   });
 
   it('should return default values', async () => {
-    const { result, } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
     // await waitFor();
 
@@ -86,7 +86,7 @@ describe('useCaseItems', () => {
 
   it('should return parsed items', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const { result, } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
     // await waitFor();
 
@@ -99,7 +99,7 @@ describe('useCaseItems', () => {
 
   test('it should call setQuery when fetching', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const { } = renderUseCaseItems();
+    const {} = renderUseCaseItems();
 
     // await waitFor();
 
@@ -124,7 +124,7 @@ describe('useCaseItems', () => {
     mockDateNow.mockReturnValueOnce(dateNow);
     mockCasesApi.mockReturnValue(mockCasesResult);
 
-    const { result, } = renderUseCaseItems();
+    const { result } = renderUseCaseItems();
 
     // await waitFor();
 

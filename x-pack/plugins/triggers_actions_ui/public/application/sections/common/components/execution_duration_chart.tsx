@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,

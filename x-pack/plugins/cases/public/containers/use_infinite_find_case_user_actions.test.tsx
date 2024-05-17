@@ -122,12 +122,9 @@ describe('UseInfiniteFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    renderHook(
-      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
     // await waitFor();
 

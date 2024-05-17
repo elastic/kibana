@@ -20,7 +20,6 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { SnoozeSchedule } from '../../../../types';
 import { RuleStatusDropdown } from '../..';
 import {
   ComponentOpts as RuleApis,

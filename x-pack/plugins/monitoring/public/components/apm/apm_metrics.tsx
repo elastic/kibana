@@ -102,7 +102,9 @@ export const ApmMetrics = ({
     <EuiPage>
       <EuiPageBody>
         <EuiScreenReaderOnly>
-          <h1><>{titles.heading as FormattedMessage}</></h1>
+          <h1>
+            <>{titles.heading as FormattedMessage}</>
+          </h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
           <StatusComponent stats={stats} />

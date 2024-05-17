@@ -93,9 +93,7 @@ describe('useLoadConnectors', () => {
       const mockHttp = {
         get: jest.fn().mockRejectedValue(new Error('this is an error')),
       } as unknown as Props['http'];
-      renderHook(() =>
-        useLoadConnectors({ ...defaultProps, http: mockHttp })
-      );
+      renderHook(() => useLoadConnectors({ ...defaultProps, http: mockHttp }));
       // await waitFor();
 
       expect(toasts.addError).toHaveBeenCalled();

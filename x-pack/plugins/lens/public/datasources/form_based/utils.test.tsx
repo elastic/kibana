@@ -128,7 +128,11 @@ describe('indexpattern_datasource utils', () => {
 
         expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
 
-        const instance = mountWithIntl(<div><>{warningMessages[0].longMessage}</></div>);
+        const instance = mountWithIntl(
+          <div>
+            <>{warningMessages[0].longMessage}</>
+          </div>
+        );
 
         const enableAccuracyButton = instance.find(enableAccuracyButtonSelector);
 
@@ -155,7 +159,11 @@ describe('indexpattern_datasource utils', () => {
 
         expect({ ...warningMessages[0], longMessage: '' }).toMatchSnapshot();
 
-        const instance = shallow(<div><>{warningMessages[0].longMessage}</></div>);
+        const instance = shallow(
+          <div>
+            <>{warningMessages[0].longMessage}</>
+          </div>
+        );
 
         expect(instance.exists(enableAccuracyButtonSelector)).toBeFalsy();
 

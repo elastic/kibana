@@ -6,7 +6,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import {  renderHook, RenderHookResult } from '@testing-library/react';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../../../hooks/use_kibana';
 import { useCaseDisabled } from './use_case_permission';

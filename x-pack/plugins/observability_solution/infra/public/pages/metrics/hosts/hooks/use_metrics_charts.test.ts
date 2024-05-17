@@ -12,9 +12,7 @@ import { useMetricsCharts } from './use_metrics_charts';
 
 describe('useMetricsCharts', () => {
   it('should return an array of charts with breakdown config', async () => {
-    const { result } = renderHook(() =>
-      useMetricsCharts({ dataViewId: 'dataViewId' })
-    );
+    const { result } = renderHook(() => useMetricsCharts({ dataViewId: 'dataViewId' }));
     // await waitFor();
 
     expect(result.current).toHaveLength(11);
@@ -29,9 +27,7 @@ describe('useMetricsCharts', () => {
   });
 
   it('should return an array of charts with correct order', async () => {
-    const { result } = renderHook(() =>
-      useMetricsCharts({ dataViewId: 'dataViewId' })
-    );
+    const { result } = renderHook(() => useMetricsCharts({ dataViewId: 'dataViewId' }));
     // await waitFor();
 
     const expectedOrder = [

@@ -3195,7 +3195,11 @@ describe('XYChart component', () => {
       // styles are passed because they are shared, dataValues is rounded to the interval
       expect(groupedAnnotation).toMatchSnapshot();
       // renders numeric icon for grouped annotations
-      const marker = mount(<div><>{groupedAnnotation.prop('marker')}</></div>);
+      const marker = mount(
+        <div>
+          <>{groupedAnnotation.prop('marker')}</>
+        </div>
+      );
       const numberIcon = marker.find('NumberIcon');
       expect(numberIcon.length).toEqual(1);
       expect(numberIcon.text()).toEqual('3');

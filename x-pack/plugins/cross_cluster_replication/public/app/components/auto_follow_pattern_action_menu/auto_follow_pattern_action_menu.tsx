@@ -171,7 +171,10 @@ export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollow
     {
       // @ts-expect-error
       (deleteAutoFollowPattern: (ids: string[]) => void) => (
-        <AutoFollowPatternActionMenuUI {...props} deleteAutoFollowPattern={deleteAutoFollowPattern} />
+        <AutoFollowPatternActionMenuUI
+          {...props}
+          deleteAutoFollowPattern={deleteAutoFollowPattern}
+        />
       )
     }
   </AutoFollowPatternDeleteProvider>

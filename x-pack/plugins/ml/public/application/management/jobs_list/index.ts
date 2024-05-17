@@ -43,7 +43,7 @@ const renderApp = (
       fieldFormats,
       isServerless,
       mlFeatures,
-    }),
+    })
   );
   return () => {
     root.unmount();

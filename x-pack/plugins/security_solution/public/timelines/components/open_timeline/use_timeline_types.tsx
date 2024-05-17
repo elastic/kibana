@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SyntheticEvent } from 'react';
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';

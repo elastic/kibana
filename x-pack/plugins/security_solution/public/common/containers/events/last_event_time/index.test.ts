@@ -60,10 +60,7 @@ describe('useTimelineLastEventTime', () => {
 
   it('should init', async () => {
     await act(async () => {
-      const { result } = renderHook<
-      [boolean, UseTimelineLastEventTimeArgs],
-        string
-      >(() =>
+      const { result } = renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},
@@ -80,13 +77,12 @@ describe('useTimelineLastEventTime', () => {
 
   it('should call search strategy', async () => {
     await act(async () => {
-      renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(
-        () =>
-          useTimelineLastEventTime({
-            indexKey: LastEventIndexKey.hostDetails,
-            details: {},
-            indexNames: [],
-          })
+      renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
+        useTimelineLastEventTime({
+          indexKey: LastEventIndexKey.hostDetails,
+          details: {},
+          indexNames: [],
+        })
       );
       // await waitFor();
       // await waitFor();
@@ -101,10 +97,7 @@ describe('useTimelineLastEventTime', () => {
 
   it('should set response', async () => {
     await act(async () => {
-      const { result } = renderHook<
-      [boolean, UseTimelineLastEventTimeArgs],
-        string
-      >(() =>
+      const { result } = renderHook<[boolean, UseTimelineLastEventTimeArgs], string>(() =>
         useTimelineLastEventTime({
           indexKey: LastEventIndexKey.hostDetails,
           details: {},

@@ -110,7 +110,7 @@ describe('Security links', () => {
     });
 
     it('should filter not allowed links', async () => {
-      const { result, } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       // this link should not be excluded, the test checks all conditions are passed
       const networkLinkItem = {
         id: SecurityPageName.network,
@@ -192,7 +192,7 @@ describe('Security links', () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
 
-      const { result, } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const networkLinkItem = {
         id: SecurityPageName.network,
         title: 'Network',
@@ -258,7 +258,7 @@ describe('Security links', () => {
     it('should return unauthorized page when page has upselling (ESS)', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
-      const { result, } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
         title: 'Hosts',
@@ -289,7 +289,7 @@ describe('Security links', () => {
     it('should filter out experimental page even if it has upselling', async () => {
       const upselling = new UpsellingService();
       upselling.setPages({ [SecurityPageName.network]: () => <span /> });
-      const { result, } = renderUseAppLinks();
+      const { result } = renderUseAppLinks();
       const hostLinkItem = {
         id: SecurityPageName.hosts,
         title: 'Hosts',
@@ -331,7 +331,7 @@ describe('Security links', () => {
     });
 
     it('should update if the links are removed', async () => {
-      const { result, } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
       expect(result.current).toBe(true);
       await act(async () => {
         updateAppLinks(
@@ -356,7 +356,7 @@ describe('Security links', () => {
     });
 
     it('should update if the links are added', async () => {
-      const { result, } = renderUseLinkExists(SecurityPageName.rules);
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
       expect(result.current).toBe(false);
       await act(async () => {
         updateAppLinks(

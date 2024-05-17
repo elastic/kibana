@@ -91,7 +91,7 @@ export class UserBannerService {
                   />
                 </EuiButton>
               </EuiCallOut>
-            </KibanaRenderContextProvider>,
+            </KibanaRenderContextProvider>
           );
 
           timeout = setTimeout(dismiss, lifetime);

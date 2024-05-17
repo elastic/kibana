@@ -32,7 +32,7 @@ export class FeatureControlsPluginExample implements Plugin<void, void, SetupDep
       title: 'FeatureControlExamples',
       async mount({ element }: AppMountParameters) {
         const [coreStart] = await coreSetup.getStartServices();
-        const root = createRoot(element)
+        const root = createRoot(element);
         root.render(
           <KibanaPageTemplate>
             <KibanaContextProvider services={{ ...coreStart, ...deps }}>
