@@ -28,7 +28,7 @@ import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
 
 const getCollectorConfig = (
-  host: string = 'https://CHANGEME.elastic.cloud',
+  host: string[] = ['https://CHANGEME.elastic.cloud'],
   apikey: string = 'CHANGEME'
 ) => `receivers:
   filelog:
@@ -63,7 +63,7 @@ const getCollectorConfig = (
       # - C:/Users/*/AppData/Local/MyApp/Logs/**/*.log  # Per-user application logs on Windows
 exporters:
   elasticsearch:
-    endpoints: [${host}]
+    endpoints: ${JSON.stringify(host)}
     api_key: "${apikey}"
     # Configure your Elasticsearch endpoint and API key for exporting data.
 
@@ -110,7 +110,7 @@ export const OtelLogsPanel: React.FC = () => {
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
 
-  const configureAgentYaml = getCollectorConfig(setup?.apiEndpoint, apiKeyData?.apiKeyEncoded);
+  const configureAgentYaml = getCollectorConfig(setup?.elasticsearchUrl, apiKeyData?.apiKeyEncoded);
 
   return (
     <EuiPanel hasBorder>

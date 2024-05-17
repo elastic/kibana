@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
-import { getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
+import { getFallbackESUrl, getFallbackKibanaUrl } from '../../lib/get_fallback_urls';
 import { hasLogMonitoringPrivileges } from './api_key/has_log_monitoring_privileges';
 import { saveObservabilityOnboardingFlow } from '../../lib/state';
 import { createShipperApiKey } from './api_key/create_shipper_api_key';
@@ -37,8 +37,14 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     apiEndpoint: string;
     scriptDownloadUrl: string;
     elasticAgentVersion: string;
+    elasticsearchUrl: string[];
   }> {
-    const { core, plugins, kibanaVersion } = resources;
+    const {
+      core,
+      plugins,
+      kibanaVersion,
+      services: { esLegacyConfigService },
+    } = resources;
     const coreStart = await core.start();
 
     const fleetPluginStart = await plugins.fleet.start();
@@ -65,8 +71,13 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
 
     const apiEndpoint = new URL(`${kibanaUrl}/internal/observability_onboarding`).toString();
 
+    const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
+      ? [plugins.cloud?.setup?.elasticsearchUrl]
+      : await getFallbackESUrl(esLegacyConfigService);
+
     return {
       apiEndpoint,
+      elasticsearchUrl,
       scriptDownloadUrl,
       elasticAgentVersion,
     };
