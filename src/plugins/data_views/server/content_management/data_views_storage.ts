@@ -36,6 +36,7 @@ export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
         'fieldAttrs',
         'runtimeFieldMap',
         'allowNoIndex',
+        'failureStoreMode',
         'name',
         'allowHidden',
       ],

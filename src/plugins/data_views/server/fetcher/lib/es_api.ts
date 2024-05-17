@@ -45,6 +45,7 @@ interface FieldCapsApiParams {
   indices: string[] | string;
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
+  failureStore?: string;
   fields?: string[];
   expandWildcards?: ExpandWildcard;
   fieldTypes?: string[];
@@ -68,6 +69,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     callCluster,
     indices,
     indexFilter,
+    failureStore,
     fieldCapsOptions = {
       allow_no_indices: false,
       include_unmapped: false,
@@ -77,6 +79,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     fieldTypes,
     includeEmptyFields,
   } = params;
+  console.log(`XXXXX ${failureStore} XXXXXXX`);
   try {
     return await callCluster.fieldCaps(
       {
@@ -87,6 +90,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         expand_wildcards: expandWildcards,
         types: fieldTypes,
         include_empty_fields: includeEmptyFields ?? true,
+        failure_store: failureStore || 'exclude',
         ...fieldCapsOptions,
       },
       { meta: true }

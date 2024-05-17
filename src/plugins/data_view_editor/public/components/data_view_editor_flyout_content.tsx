@@ -110,6 +110,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             title: editData.getIndexPattern(),
             id: editData.id,
             name: editData.name,
+            failureStoreMode: editData.failureStoreMode,
             allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
@@ -133,6 +134,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         id: formData.id,
         name: formData.name,
         allowHidden: formData.allowHidden,
+        failureStoreMode: formData.failureStoreMode,
       };
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
@@ -167,6 +169,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       title = schema.title.defaultValue,
       allowHidden = schema.allowHidden.defaultValue,
       type = schema.type.defaultValue,
+      failureStoreMode = schema.failureStoreMode.defaultValue,
     },
   ] = useFormData<FormInternal>({
     form,

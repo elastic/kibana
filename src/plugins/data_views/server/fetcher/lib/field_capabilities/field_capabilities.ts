@@ -23,6 +23,7 @@ interface FieldCapabilitiesParams {
   uiSettingsClient?: IUiSettingsClient;
   indices: string | string[];
   metaFields: string[];
+  failureStore?: string;
   fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
   indexFilter?: QueryDslQueryContainer;
   fields?: string[];
@@ -49,6 +50,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     fieldCapsOptions,
     indexFilter,
     metaFields = [],
+    failureStore,
     fields,
     expandWildcards,
     fieldTypes,
@@ -60,6 +62,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
     callCluster,
     indices,
     fieldCapsOptions,
+    failureStore,
     indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
     fields,
     expandWildcards,

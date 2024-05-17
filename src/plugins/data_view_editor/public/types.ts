@@ -126,6 +126,7 @@ export interface IndexPatternConfig {
   type: INDEX_PATTERN_TYPE;
   name?: string;
   isAdHoc: boolean;
+  failureStoreMode: string;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {

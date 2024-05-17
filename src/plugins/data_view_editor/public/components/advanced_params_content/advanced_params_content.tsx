@@ -72,5 +72,20 @@ export const AdvancedParamsContent = ({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <UseField<string, IndexPatternConfig>
+          path={'failureStoreMode'}
+          component={TextField}
+          data-test-subj="failureStoreMode"
+          componentProps={{
+            euiFieldProps: {
+              'aria-label': 'Failure store mode',
+              disabled: disableId,
+            },
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </AdvancedParamsSection>
 );

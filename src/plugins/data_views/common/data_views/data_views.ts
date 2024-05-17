@@ -568,6 +568,7 @@ export class DataViewsService {
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
+      failureStore: indexPattern?.failureStoreMode,
       allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
@@ -586,6 +587,7 @@ export class DataViewsService {
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: true,
+      failureStore: dataView.failureStoreMode,
       pattern: dataView.getIndexPattern(),
       metaFields,
       forceRefresh,
@@ -600,6 +602,7 @@ export class DataViewsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
+      failureStore: options.failureStore,
       allowNoIndex: true,
       indexFilter: options.indexFilter,
       allowHidden: options.allowHidden,
@@ -774,6 +777,7 @@ export class DataViewsService {
         allowNoIndex,
         name,
         allowHidden,
+        failureStoreMode,
       },
     } = savedObject;
 
@@ -792,6 +796,7 @@ export class DataViewsService {
       namespaces,
       title,
       timeFieldName,
+      failureStoreMode,
       sourceFilters: parsedSourceFilters,
       fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
       typeMeta: parsedTypeMeta,
@@ -823,7 +828,7 @@ export class DataViewsService {
     spec: DataViewSpec;
     displayErrors?: boolean;
   }) => {
-    const { title, type, typeMeta, runtimeFieldMap } = spec;
+    const { title, type, typeMeta, runtimeFieldMap, failureStoreMode } = spec;
     const { fields, indices, etag } = await this.refreshFieldSpecMap(
       spec.fields || {},
       savedObjectId,
@@ -831,6 +836,7 @@ export class DataViewsService {
       {
         pattern: title as string,
         metaFields: await this.getMetaFields(),
+        failureStore: failureStoreMode,
         type,
         rollupIndex: typeMeta?.params?.rollup_index,
         allowNoIndex: spec.allowNoIndex,
