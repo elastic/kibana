@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { keyBy, merge } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 
@@ -20,12 +19,12 @@ import {
 import { stringify } from '../../../../utils/stringify';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
-import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import {
   CROWDSTRIKE_NETWORK_STATUS,
   CROWDSTRIKE_STATUS_RESPONSE,
 } from './crowdstrike_agent_status_client';
 import type { GetAgentStatusOptions } from '../lib/types';
+import { NormalizedExternalConnectorClient } from '../../../actions/clients/lib/normalized_external_connector_client';
 
 export const getCrowdstrikeAgentStatus = async ({
   agentType,
@@ -33,34 +32,14 @@ export const getCrowdstrikeAgentStatus = async ({
   connectorActionsClient,
   logger,
 }: GetAgentStatusOptions): Promise<AgentStatusInfo> => {
-  let connectorList: ConnectorWithExtraFindData[] = [];
+  const connectorActions = new NormalizedExternalConnectorClient(connectorActionsClient, logger);
+  connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
 
-  try {
-    connectorList = await connectorActionsClient.getAll();
-  } catch (err) {
-    throw new CustomHttpRequestError(
-      `Unable to retrieve list of stack connectors: ${err.message}`,
-      // failure here is likely due to Authz, but because we don't have a good way to determine that,
-      // the `statusCode` below is set to `400` instead of `401`.
-      400,
-      err
-    );
-  }
-  const connector = connectorList.find(({ actionTypeId, isDeprecated, isMissingSecrets }) => {
-    return actionTypeId === CROWDSTRIKE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
-  });
-
-  if (!connector) {
-    throw new CustomHttpRequestError(`No Crowdstrike stack connector found`, 400, connectorList);
-  }
-
-  logger.debug(`Using Crowdstrike stack connector: ${connector.name} (${connector.id})`);
   let agentDetailsResponse;
   let agentOnlineStatus;
   try {
     // HOST DETAILS provide information about containment status
-    agentDetailsResponse = (await connectorActionsClient.execute({
-      actionId: connector.id,
+    agentDetailsResponse = (await connectorActions.execute({
       params: {
         subAction: SUB_ACTION.GET_AGENT_DETAILS,
         subActionParams: {
@@ -70,8 +49,7 @@ export const getCrowdstrikeAgentStatus = async ({
     })) as ActionTypeExecutorResult<CrowdstrikeGetAgentsResponse>;
 
     // AGENT STATUS provides information about the online status
-    agentOnlineStatus = (await connectorActionsClient.execute({
-      actionId: connector.id,
+    agentOnlineStatus = (await connectorActions.execute({
       params: {
         subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
         subActionParams: {
@@ -85,8 +63,6 @@ export const getCrowdstrikeAgentStatus = async ({
 
   const agentDetailsById = keyBy(agentDetailsResponse.data?.resources, 'device_id');
   const agentOnlineStatusById = keyBy(agentOnlineStatus.data?.resources, 'id');
-
-  logger.debug(`Response from Crowdstrike API:\n${stringify(agentDetailsById)}`);
 
   return agentIds.reduce<AgentStatusInfo>((acc, agentId) => {
     const thisAgentDetails = agentDetailsById[agentId];
@@ -117,8 +93,6 @@ export const getCrowdstrikeAgentStatus = async ({
         found: true,
         lastSeen: thisAgentDetails.last_seen,
         // TODO TC: Does uninstall mean unenrolled / unprovisioned? This is hard to figure out from the Crowdstrike DOCS ;/
-        // isPendingUninstall: thisAgentDetails.isPendingUninstall,
-        // isUninstalled: thisAgentDetails.isUninstalled,
         isolated: thisAgentDetails.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
         status:
           thisAgentOnlineStatusById.state === CROWDSTRIKE_STATUS_RESPONSE.ONLINE
