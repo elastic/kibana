@@ -8,7 +8,7 @@
 import { mapValues } from 'lodash';
 import { createTestConfig, CreateTestConfig } from '../common/config';
 
-export const MOCKED_PUBLIC_BASE_URL = 'http://mockedPublicBaseUrl';
+export const MOCKED_PUBLIC_BASE_URL = 'http://mockedpublicbaseurl';
 // my.mocked.domain$myMockedEsUr$myKibanaMockedUrl
 export const MOCKED_ENCODED_CLOUD_ID =
   'bXkubW9ja2VkLmRvbWFpbiRteU1vY2tlZEVzVXJsJG15TW9ja2VkS2liYW5hVXJs';
