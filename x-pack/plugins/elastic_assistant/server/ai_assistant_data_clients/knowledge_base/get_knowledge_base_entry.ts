@@ -71,10 +71,10 @@ export const getKnowledgeBaseEntry = async ({
       index: knowledgeBaseIndex,
       seq_no_primary_term: true,
     });
-    const conversation = transformESSearchToKnowledgeBaseEntry(response);
-    return conversation[0] ?? null;
+    const knowledgeBaseEntry = transformESSearchToKnowledgeBaseEntry(response);
+    return knowledgeBaseEntry[0] ?? null;
   } catch (err) {
-    logger.error(`Error fetching conversation: ${err} with id: ${id}`);
+    logger.error(`Error fetching knowledge base entry: ${err} with id: ${id}`);
     throw err;
   }
 };
