@@ -36,7 +36,7 @@ export const UnprivilegedCallout: React.FC<{
           />
         ) : (
           <FormattedMessage
-            id="xpack.fleet.agentEnrollmentCallout.unprivilegedAgentsMessage"
+            id="xpack.fleet.agentEnrollmentCallout.noUnprivilegedAgentsMessage"
             defaultMessage="This agent policy has integrations that require Elastic Agents to have root privileges: {rootIntegrationsText}. To ensure that all data required by the integration can be collected, enroll agents using an account with root privileges."
             values={{
               rootIntegrationsText,

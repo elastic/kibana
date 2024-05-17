@@ -272,7 +272,9 @@ export function useOnSubmit({
       if (
         packageInfo &&
         isRootPrivilegesRequired(packageInfo) &&
-        (agentPolicy?.unprivileged_agents ?? 0) > 0
+        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
+        formState !== 'CONFIRM' &&
+        formState !== 'CONFIRM_UNPRIVILEGED'
       ) {
         setFormState('CONFIRM_UNPRIVILEGED');
         return;
