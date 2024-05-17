@@ -17,6 +17,7 @@ import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,
+  SAMLResponseValueParams,
   UserProfile,
 } from './types';
 
@@ -166,17 +167,12 @@ export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log:
   return { location, sid: cookie.value };
 };
 
-export const createSAMLResponse = async (
-  url: string,
-  ecSession: string,
-  email: string,
-  kbnHost: string,
-  log: ToolingLog
-) => {
+export const createSAMLResponse = async (params: SAMLResponseValueParams) => {
+  const { location, ecSession, email, kbnHost, log } = params;
   let samlResponse: AxiosResponse;
   let value: string | undefined;
   try {
-    samlResponse = await axios.get(url, {
+    samlResponse = await axios.get(location, {
       headers: {
         Cookie: `ec_session=${ecSession}`,
       },
@@ -193,9 +189,10 @@ export const createSAMLResponse = async (
   }
 
   if (!value) {
+    const hostname = new URL(location).hostname;
     throw new Error(
       `Failed to parse SAML response value.\nMost likely the '${email}' user has no access to the cloud deployment.
-Login to ${new URL(url).hostname} with the user from '.ftr/role_users.json' file and try to load
+Login to ${hostname} with the user from '.ftr/role_users.json' file and try to load
 ${kbnHost} in the same window.`
     );
   }
@@ -273,9 +270,9 @@ const getSecurityProfile = async ({
 export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => {
   const { email, password, kbnHost, kbnVersion, log } = params;
   const hostname = getCloudHostName();
-  const token = await createCloudSession({ hostname, email, password, log });
+  const ecSession = await createCloudSession({ hostname, email, password, log });
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
-  const samlResponse = await createSAMLResponse(location, token, email, kbnHost, log);
+  const samlResponse = await createSAMLResponse({ location, ecSession, email, kbnHost, log });
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
   const userProfile = await getSecurityProfile({ kbnHost, cookie, log });
   return new Session(cookie, email, userProfile.full_name);

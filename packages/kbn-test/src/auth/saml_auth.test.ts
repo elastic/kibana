@@ -130,37 +130,30 @@ describe('saml_auth', () => {
   });
 
   describe('createSAMLResponse', () => {
+    const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
+    const createSAMLResponseParams = {
+      location,
+      ecSession: 'mocked_token',
+      email: 'viewer@elastic.co',
+      kbnHost: 'https://kbn.test.co',
+      log,
+    };
+
     test('returns valid saml response', async () => {
-      const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
       mockGetOnce(location, {
         data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body><input type="hidden" name="SAMLResponse" value="PD94bWluc2U+"></body></html>`,
       });
 
-      const actualResponse = await createSAMLResponse(
-        location,
-        'mocked_token',
-        'viewer@elastic.co',
-        'https://kbn.test.co',
-        log
-      );
+      const actualResponse = await createSAMLResponse(createSAMLResponseParams);
       expect(actualResponse).toBe('PD94bWluc2U+');
     });
 
     test('throws error when failed to parse SAML response value', async () => {
-      const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
       mockGetOnce(location, {
         data: `<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body></body></html>`,
       });
 
-      await expect(
-        createSAMLResponse(
-          location,
-          'mocked_token',
-          'viewer@elastic.co',
-          'https://kbn.test.co',
-          log
-        )
-      ).rejects
+      await expect(createSAMLResponse(createSAMLResponseParams)).rejects
         .toThrowError(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
 Login to ${
         new URL(location).hostname
