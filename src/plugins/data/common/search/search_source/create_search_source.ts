@@ -68,7 +68,7 @@ export const createSearchSource = (
 
   const createSearchSourceFn = async (
     searchSourceFields: SerializedSearchSourceFields = {},
-    useDataViewLazy: boolean
+    useDataViewLazy?: boolean
   ) => {
     const fields = await createFields(searchSourceFields, useDataViewLazy);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
