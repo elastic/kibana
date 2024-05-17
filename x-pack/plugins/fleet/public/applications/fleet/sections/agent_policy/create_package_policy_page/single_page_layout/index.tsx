@@ -130,7 +130,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [packageInfoData]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
-  const [isUnprivilegedModalOpen, setIsUnprivilegedModalOpen] = useState<boolean>(false);
 
   const integrationInfo = useMemo(
     () =>
@@ -439,18 +438,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  const onClickSave = () => {
-    if (
-      packageInfo &&
-      isRootPrivilegesRequired(packageInfo) &&
-      (agentPolicy?.unprivileged_agents ?? 0) > 0
-    ) {
-      setIsUnprivilegedModalOpen(true);
-    } else {
-      onSubmit();
-    }
-  };
-
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -460,15 +447,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicy={agentPolicy}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
+            showUnprivilegedAgentsCallout={Boolean(
+              packageInfo &&
+                isRootPrivilegesRequired(packageInfo) &&
+                (agentPolicy?.unprivileged_agents ?? 0) > 0
+            )}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
           />
         )}
-        {isUnprivilegedModalOpen && !(formState === 'CONFIRM' && agentPolicy) ? (
+        {formState === 'CONFIRM_UNPRIVILEGED' && agentPolicy ? (
           <UnprivilegedConfirmModal
-            onCancel={() => setIsUnprivilegedModalOpen(false)}
-            onConfirm={() => {
-              setIsUnprivilegedModalOpen(false);
-              onSubmit();
-            }}
+            onCancel={() => setFormState('VALID')}
+            onConfirm={onSubmit}
             unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
             agentPolicyName={agentPolicy?.name ?? ''}
           />
@@ -614,7 +604,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    onClick={onClickSave}
+                    onClick={() => onSubmit()}
                     isLoading={formState === 'LOADING'}
                     disabled={formState !== 'VALID' || hasAgentPolicyError || !validationResults}
                     iconType="save"

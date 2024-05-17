@@ -47,25 +47,35 @@ export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> =
       }
       buttonColor="warning"
     >
-      {
-        <EuiCallOut
-          color="warning"
-          iconType="warning"
-          title={i18n.translate('xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsTitle', {
-            defaultMessage: 'Unprivileged agents enrolled to the selected policy',
-          })}
-          data-test-subj="unprivilegedAgentsCallout"
-        >
-          <FormattedMessage
-            id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsMessage"
-            defaultMessage="This integration requires Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using {agentPolicyName}. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
-            values={{
-              unprivilegedAgentsCount,
-              agentPolicyName,
-            }}
-          />
-        </EuiCallOut>
-      }
+      <UnprivilegedAgentsCallout
+        unprivilegedAgentsCount={unprivilegedAgentsCount}
+        agentPolicyName={agentPolicyName}
+      />
     </EuiConfirmModal>
+  );
+};
+
+export const UnprivilegedAgentsCallout: React.FC<{
+  agentPolicyName: string;
+  unprivilegedAgentsCount: number;
+}> = ({ agentPolicyName, unprivilegedAgentsCount }) => {
+  return (
+    <EuiCallOut
+      color="warning"
+      iconType="warning"
+      title={i18n.translate('xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsTitle', {
+        defaultMessage: 'Unprivileged agents enrolled to the selected policy',
+      })}
+      data-test-subj="unprivilegedAgentsCallout"
+    >
+      <FormattedMessage
+        id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsMessage"
+        defaultMessage="This integration requires Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using {agentPolicyName}. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
+        values={{
+          unprivilegedAgentsCount,
+          agentPolicyName,
+        }}
+      />
+    </EuiCallOut>
   );
 };
