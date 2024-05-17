@@ -1352,7 +1352,7 @@ const executeConnectorAndVerifyCorrectness = async ({
   connectorId,
   req,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   connectorId: string;
   req: Record<string, unknown>;
 }) => {
