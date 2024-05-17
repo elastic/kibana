@@ -77,22 +77,22 @@ The following object properties are examples; it is not a comprehensive list.
 //# tag::alerts-data[]
 `_id`::
 (string) For example, `27ace796-1dfb-4db9-9ce1-7a10472fd461`.
-// Description TBD
+// TBD: Is this the same as the alert.uuid?
 `_index`::
 (string) For example, `.internal.alerts-stack.alerts-default-000001`.
-// Description TBD
+// TBD: The index that contains the alert data.
 `@timestamp`::
 (string) For example, `2024-04-30T02:30:11.254Z`.
-// Description TBD
+// TBD: The timestamp that the alert was added to the index?
 `event.action`::
 (string) For example: `active`.
-// Description TBD
+// TBD: Is this the same as the alert.status?
 `event.kind`::
 (string) For example: `signal`.
 // TBD: The type of event (are there types other than signal?)
 `kibana.alert.action_group`::
 (string) The ID of the action group of the alert that scheduled the action. For example, `query matched`.
-// TBD: How is this different than alert.actionGroup?
+// TBD: Is this a repeat of alert.actionGroup?
 `kibana.alert.consecutive_matches`::
 (integer)
 // TBD: The number of consecutive runs that generated the alert?
@@ -102,7 +102,7 @@ The following object properties are examples; it is not a comprehensive list.
 // TBD: The duration of the alert in microseconds?
 `kibana.alert.end`::
 (string) Datetime stamp of alert end. preview:[]
-// TBD: This presumably does not exist unless the alert recovers?
+// TBD: Is this when the alert recovered?
 `kibana.alert.evaluation`::
 (object)
 // TBD: The conditions that were met to generate the alert?
@@ -114,8 +114,7 @@ The following object properties are examples; it is not a comprehensive list.
 `kibana.alert.instance.id`::
 (string) Identifier for the source that generates the alert. For example, `query matched`. preview:[]
 `kibana.alert.maintenance_window_ids`::
-(array) The identifiers for maintenance windows that affect the alert.
-//TBD: Is it an array of integers or strings? 
+(array of strings) The identifiers for maintenance windows that affect the alert.
 `kibana.alert.reason`::
 (string) The reason for the alert (generated with the rule conditions). preview:[]
 `kibana.alert.rule`::
@@ -125,7 +124,7 @@ The following object properties are examples; it is not a comprehensive list.
 (string) Datetime stamp of alert start. For example, `2024-04-30T00:55:40.664Z`. preview:[]
 `kibana.alert.status`::
 (string) The alert status. For example, `active` or `OK`. preview:[]
-// TBD: What is the meaning of "OK" here?
+// TBD: What is the meaning of "OK" here? Should it be active, recovered, and untracked?
 `kibana.alert.time_range.gte`::
 (string) For example `2024-04-30T00:55:40.664Z`.
 //TBD This is presumably "greater than or equal to" but what's the purpose?
@@ -134,20 +133,20 @@ The following object properties are examples; it is not a comprehensive list.
 //TBD Ditto "less than or equal to" but why?
 `kibana.alert.title`::
 (string) For example, `Document count is 3 in the last 5d. Alert when greater than 0`.
-// Description TBD
+// TBD: A generated title for the alert?
 `kibana.alert.url`::
 (string) The URL for the alert. For example, `/app/management/insightsAndAlerting/triggersActions/rule/47754354-d894-49d3-87ec-05745a74e2b7`.
 `kibana.alert.uuid`::
 (string) A universally unique identifier for the alert. While the alert is active, the UUID value remains unchanged each time the rule runs. For example, `27ace796-1dfb-4db9-9ce1-7a10472fd461`. preview:[]
 `kibana.alert.workflow_status`::
 (string) For example, `open`.
-// Description TBD
+// TBD: Unclear how this differs from the alert.status
 `kibana.space_ids`::
 (array of strings) For example, `["default"]`.
-// Description TBD
+// TBD: Identifiers for the spaces that the alert exists in?
 `kibana.title`::
 (string) For example, `rule 'my-esql-query-rule' matched query`.
-// Description TBD
+// TBD: A generated title for the alert?
 `kibana.version`::
 (string) The {kib} version identifier. For example, `8.14.0`.
 `tags`::
@@ -155,10 +154,11 @@ The following object properties are examples; it is not a comprehensive list.
 //# end::alerts-data[]
 =====
 
-`alerts.new.count`:: The count of new alerts.
+`alerts.new.count`::
+(integer) The count of new alerts.
 
 `alerts.new.data`::
-An array of objects for new alerts. The following object properties are examples; it is not a comprehensive list.
+(array of objects) Data about new alerts. The following object properties are examples; it is not a comprehensive list.
 +
 .Properties of the alerts.new.data objects
 [%collapsible]
@@ -166,10 +166,11 @@ An array of objects for new alerts. The following object properties are examples
 include::action-variables.asciidoc[tag=alerts-data]
 =====
 
-`alerts.ongoing.count`:: The count of ongoing alerts.
+`alerts.ongoing.count`::
+(integer) The count of ongoing alerts.
 
 `alerts.ongoing.data`::
-An array of objects for ongoing alerts. The following object properties are examples; it is not a comprehensive list.
+(array of objects) Data about ongoing alerts. The following object properties are examples; it is not a comprehensive list.
 +
 .Properties of the alerts.ongoing.data objects
 [%collapsible]
@@ -177,10 +178,11 @@ An array of objects for ongoing alerts. The following object properties are exam
 include::action-variables.asciidoc[tag=alerts-data]
 =====
 
-`alerts.recovered.count`:: The count of recovered alerts.
+`alerts.recovered.count`::
+(integer) The count of recovered alerts.
 
 `alerts.recovered.data`::
-An array of objects for recovered alerts. The following object properties are examples; it is not a comprehensive list.
+(array of objects) Data about recovered alerts. The following object properties are examples; it is not a comprehensive list.
 +
 .Properties of the alerts.recovered.data objects
 [%collapsible]
@@ -190,7 +192,7 @@ include::action-variables.asciidoc[tag=alerts-data]
 
 `state.signals_count`::
 (integer)
-//TBD: Description
+//TBD: Is this the same as alerts.all.count?
 
 [float]
 [[alert-action-variables]]
@@ -202,9 +204,11 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 (string) The ID of the action group of the alert that scheduled the action. For example, `query matched`.
 `alert.actionGroupName`::
 (string) The name of the action group of the alert that scheduled the action. For example, `Query matched`.
-`alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
+`alert.actionSubgroup`::
+(string) The action subgroup of the alert that scheduled the action.
 //TBD When does the subgroup appear? Is it related to the subcategory of ServiceNow connectors?
-`alert.consecutiveMatches`:: The number of consecutive runs that meet the rule conditions.
+`alert.consecutiveMatches`::
+(integer) The number of consecutive runs that meet the rule conditions.
 `alert.flapping`::
 (boolean) A flag on the alert that indicates whether the alert status is changing repeatedly.
 `alert.id`::
@@ -217,15 +221,14 @@ If the rule's action frequency is not a summary of alerts, it passes the followi
 //TBD: Is there a reason these don't appear in the UI variable list?
 `state.dateEnd`::
 (string) For example: `2024-04-30T00:55:42.766Z`.
-//TBD: Needs description
+//TBD: What does this date represent?
 `state.dateStart`::
 (string) For example: `2024-04-25T00:55:42.766Z`.
-//TBD: Needs description
+//TBD: The timestamp that the current alert state began?
 `state.duration`::
-(integer)
-//TBD: Needs description
+//TBD: The duration of time (in what microseconds?) for the current state?
 `state.start`::
 (string) For example: `2024-04-30T00:55:40.664Z`.
-//TBD: Needs description
-//TBD: Is these state ones general variables or only in some?
+//TBD: How is this different than state.dateStart?
+//TBD: Are these state ones general variables or only in some rules?
 ////
