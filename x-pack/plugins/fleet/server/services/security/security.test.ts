@@ -6,7 +6,7 @@
  */
 
 import { deepFreeze } from '@kbn/std';
-import type { SecurityPluginStart, CheckPrivilegesDynamically } from '@kbn/security-plugin/server';
+import type { CheckPrivilegesDynamically, SecurityPluginStart } from '@kbn/security-plugin/server';
 
 import { appContextService } from '../app_context';
 import type { FleetAuthz } from '../../../common';
@@ -99,6 +99,10 @@ describe('When using calculateRouteAuthz()', () => {
           writeExecuteOperations: {
             executePackageAction: false,
           },
+          // TODO:  for API changes in a subsequent PR
+          // writeScanOperations: {
+          //   executePackageAction: false,
+          // },
         },
       },
 

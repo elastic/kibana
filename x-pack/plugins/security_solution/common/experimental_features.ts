@@ -103,6 +103,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
