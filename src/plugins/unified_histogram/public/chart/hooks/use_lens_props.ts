@@ -19,19 +19,20 @@ import type {
 } from '../../types';
 import { useStableCallback } from '../../hooks/use_stable_callback';
 
+export interface UseLensProps {
+  request?: UnifiedHistogramRequestContext;
+  getTimeRange: () => TimeRange;
+  refetch$: Observable<UnifiedHistogramInputMessage>;
+  visContext: UnifiedHistogramVisContext;
+  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+}
 export const useLensProps = ({
   request,
   getTimeRange,
   refetch$,
   visContext,
   onLoad,
-}: {
-  request?: UnifiedHistogramRequestContext;
-  getTimeRange: () => TimeRange;
-  refetch$: Observable<UnifiedHistogramInputMessage>;
-  visContext: UnifiedHistogramVisContext;
-  onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
-}) => {
+}: UseLensProps) => {
   const buildLensProps = useCallback(() => {
     const { attributes, requestData } = visContext;
     return {

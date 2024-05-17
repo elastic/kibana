@@ -43,7 +43,7 @@ function RangeOption<ParamName extends string>({
     values: { min, max },
   });
 
-  const onChangeHandler: EuiRangeProps['onChange'] = (event, isValid) => {
+  const onChangeHandler: NonNullable<EuiRangeProps['onChange']> = (event, isValid) => {
     const { valueAsNumber } = event.target as HTMLInputElement; // since we don't show ticks on EuiRange, the target will definitely be HTMLInputElement type, so we can cast it directly.
 
     setStateValue(valueAsNumber);

@@ -81,6 +81,7 @@ describe('SlackParamsFields renders', () => {
   test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
     const editAction = jest.fn();
     const { rerender } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionParams={{
@@ -99,6 +100,7 @@ describe('SlackParamsFields renders', () => {
     expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
     expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
     rerender(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionParams={{
@@ -124,6 +126,7 @@ describe('SlackParamsFields renders', () => {
   test('when useDefaultMessage is set to false and the default message changes, the underlying message is not changed, Web API', () => {
     const editAction = jest.fn();
     const { rerender } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionParams={{
@@ -143,6 +146,7 @@ describe('SlackParamsFields renders', () => {
     expect(screen.getByTestId('webApiTextTextArea')).toHaveValue('some text');
 
     rerender(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionParams={{
@@ -163,6 +167,7 @@ describe('SlackParamsFields renders', () => {
 
   test('default to text field when no existing subaction params', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionParams={{}}
@@ -181,6 +186,7 @@ describe('SlackParamsFields renders', () => {
 
   test('correctly renders params fields for postMessage subaction', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionConnector={
@@ -210,6 +216,7 @@ describe('SlackParamsFields renders', () => {
 
   test('correctly renders params fields for postBlockkit subaction', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionConnector={
@@ -239,6 +246,7 @@ describe('SlackParamsFields renders', () => {
   test('should toggle subaction when button group clicked', async () => {
     const mockEditFunc = jest.fn();
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionConnector={
@@ -272,6 +280,7 @@ describe('SlackParamsFields renders', () => {
     const mockEditFunc = jest.fn();
     const WrappedComponent = () => {
       return (
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SlackParamsFields
             actionParams={{
@@ -304,6 +313,7 @@ describe('SlackParamsFields renders', () => {
     const mockEditFunc = jest.fn();
     const WrappedComponent: React.FunctionComponent = () => {
       return (
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SlackParamsFields
             actionParams={{
@@ -349,6 +359,7 @@ describe('SlackParamsFields renders', () => {
     }));
     const WrappedComponent = () => {
       return (
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SlackParamsFields
             actionParams={{
@@ -402,6 +413,7 @@ describe('SlackParamsFields renders', () => {
     const mockEditFunc = jest.fn();
     const WrappedComponent = () => {
       return (
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SlackParamsFields
             actionParams={{
@@ -481,6 +493,7 @@ describe('SlackParamsFields renders', () => {
 
   test('show error message when no channel is selected', async () => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SlackParamsFields
           actionParams={{

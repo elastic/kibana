@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import type { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { from, mockAlertsData, alertsByStatusQuery, parsedMockAlertsData, to } from './mock_data';
@@ -42,7 +43,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 
 // helper function to render the hook
 const renderUseAlertsByStatus = (props: Partial<UseAlertsByStatusProps> = {}) =>
-  renderHook<UseAlertsByStatusProps, ReturnType<UseAlertsByStatus>>(
+  renderHook<PropsWithChildren<UseAlertsByStatusProps>, ReturnType<UseAlertsByStatus>>(
     () =>
       useAlertsByStatus({
         queryId: 'test',

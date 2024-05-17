@@ -323,7 +323,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
       fieldNotices={renderInfoCallout()}
       fullWidth
     >
-      {isDisabledDueToLicense ? <div /> : renderField}
+      {isDisabledDueToLicense ? <div /> : renderField()}
     </DescribedFormRow>
   );
 };

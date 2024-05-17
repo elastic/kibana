@@ -131,7 +131,7 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const updateParams = useCallback(
-    (id, e: InventoryMetricConditions) => {
+    (id: any, e: InventoryMetricConditions) => {
       const exp = ruleParams.criteria ? ruleParams.criteria.slice() : [];
       exp[id] = e;
       setRuleParams('criteria', exp);
@@ -498,7 +498,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const updateThreshold = useCallback(
-    (t) => {
+    (t: any) => {
       if (t.join() !== expression.threshold.join()) {
         setRuleParams(expressionId, { ...expression, threshold: t });
       }
@@ -507,7 +507,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const updateWarningThreshold = useCallback(
-    (t) => {
+    (t: any) => {
       if (t.join() !== expression.warningThreshold?.join()) {
         setRuleParams(expressionId, { ...expression, warningThreshold: t });
       }

@@ -25,6 +25,7 @@ const dependencyProps: DependencyProps = {
 describe('AlertSummaryWidgetFullSize', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetFullSizeProps> = {}) =>
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <AlertSummaryWidgetFullSize
           chartProps={mockedChartProps}

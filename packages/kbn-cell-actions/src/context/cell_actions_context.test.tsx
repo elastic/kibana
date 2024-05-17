@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React, { type PropsWithChildren } from 'react';
 import { makeAction, makeActionContext } from '../mocks/helpers';
 import { CellActionsProvider, useCellActionsContext } from './cell_actions_context';

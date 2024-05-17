@@ -6,7 +6,7 @@
  */
 
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useToolbarOptions } from './use_toolbar_options';
 
 describe('useToolbarOptions()', () => {

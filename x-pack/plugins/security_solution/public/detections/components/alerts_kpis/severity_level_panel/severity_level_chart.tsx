@@ -43,8 +43,8 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
       : 0;
   }, [data]);
 
-  const fillColor: FillColor = useCallback((dataName) => {
-    return getSeverityColor(dataName);
+  const fillColor = useCallback((dataName: FillColor) => {
+    return getSeverityColor(dataName as string);
   }, []);
 
   const sorting: { sort: { field: keyof SeverityData; direction: SortOrder } } = {

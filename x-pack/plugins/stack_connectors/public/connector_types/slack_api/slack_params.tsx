@@ -225,7 +225,7 @@ const SlackParamsFields: React.FunctionComponent<
   }, [editAction, index, tempChannelId, text]);
 
   const onChangeTextField = useCallback(
-    (evt) => {
+    (evt: any) => {
       editAction('subActionParams', { channels: undefined, channelIds: [], text }, index);
       setTempChannelId(evt.target.value);
     },
@@ -283,8 +283,8 @@ const SlackParamsFields: React.FunctionComponent<
               })
         }
         fullWidth
-        error={channelValidError.length > 0 ? channelValidError : errors.channels}
-        isInvalid={errors.channels?.length > 0 || channelValidError.length > 0}
+        error={!!channelValidError.length ? channelValidError : (errors.channels as string)}
+        isInvalid={!!errors.channels?.length || !!channelValidError.length}
         helpText={
           channelIds.length > 0 && channelValidInfo
             ? `${channelValidInfo.id} - ${channelValidInfo.name}`

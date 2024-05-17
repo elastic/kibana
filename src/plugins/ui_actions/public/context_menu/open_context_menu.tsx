@@ -173,7 +173,7 @@ export function openContextMenu(
     <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
-        button={container}
+        button={<>{container}</>}
         isOpen={true}
         closePopover={onClose}
         panelPaddingSize="none"

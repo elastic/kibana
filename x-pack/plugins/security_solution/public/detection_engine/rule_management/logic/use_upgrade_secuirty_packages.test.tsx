@@ -6,7 +6,7 @@
  */
 
 import { epmRouteService } from '@kbn/fleet-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useKibana, KibanaServices } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useUpgradeSecurityPackages } from './use_upgrade_security_packages';

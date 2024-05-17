@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { Router, Route } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';

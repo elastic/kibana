@@ -44,7 +44,7 @@ export const OperatorComponent: React.FC<OperatorState> = ({
   selectedField,
   'aria-label': ariaLabel,
 }): JSX.Element => {
-  const getLabel = useCallback(({ message }): string => message, []);
+  const getLabel = useCallback(({ message }: OperatorOption): string => message, []);
   const optionsMemo = useMemo(
     (): OperatorOption[] =>
       operatorOptions != null && operatorOptions.length > 0

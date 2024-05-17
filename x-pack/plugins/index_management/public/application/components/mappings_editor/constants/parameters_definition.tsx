@@ -73,7 +73,7 @@ const indexOptionsConfig = {
   label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
     defaultMessage: 'Index options',
   }),
-  helpText: () => (
+  helpText: (
     <FormattedMessage
       id="xpack.idxMgmt.mappingsEditor.indexOptionsHelpText"
       defaultMessage="Information to store in the index. {docsLink}"
@@ -344,7 +344,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
-      helpText: () => (
+      helpText: (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.geoPointNullValueHelpText"
           defaultMessage="Geo-points can be expressed as an object, string, geohash, array or {docsLink} POINT."
@@ -388,7 +388,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: '',
       label: nullValueLabel,
-      helpText: () => (
+      helpText: (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.pointNullValueHelpText"
           defaultMessage="Points can be expressed as an object, string, array or {docsLink} POINT."
@@ -572,7 +572,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.localeLabel', {
         defaultMessage: 'Locale',
       }),
-      helpText: () => (
+      helpText: (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.parameters.localeHelpText"
           defaultMessage="Separate the language, country, and variant, use {hyphen} or {underscore}. A maximum of 2 separators is allowed. Example: {locale}."

@@ -12,6 +12,7 @@ import React, {
   FunctionComponent,
   isValidElement,
   useContext,
+  PropsWithChildren,
 } from 'react';
 
 import { SideNavContext, SubNavItem } from '../lib/side_nav_context';
@@ -22,7 +23,7 @@ type SectionProps = LayoutProps & {
   sectionLabel: string;
 };
 
-export const Section: FunctionComponent<SectionProps> = ({
+export const Section: FunctionComponent<PropsWithChildren<SectionProps>> = ({
   children,
   metrics,
   navLabel,

@@ -92,7 +92,7 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   const dropOntoWorkspace = useCallback(
-    (field) => {
+    (field: DragDropIdentifier) => {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiCounterEvents('drop_onto_workspace');
@@ -123,7 +123,9 @@ export function EditorFrame(props: EditorFrameProps) {
         bannerMessages={
           bannerMessages.length ? (
             <ErrorBoundary onError={onError}>
-              <BannerWrapper nodes={bannerMessages.map(({ longMessage }) => longMessage)} />
+              <BannerWrapper
+                nodes={bannerMessages.map(({ longMessage }) => longMessage as React.ReactNode)}
+              />
             </ErrorBoundary>
           ) : undefined
         }

@@ -22,6 +22,7 @@ const DEFAULT_PLACEHOLDER = i18n.translate('xpack.apm.selectPlaceholder', {
  */
 // eslint-disable-next-line react/function-component-definition
 export const SelectWithPlaceholder: typeof EuiSelect = (props) => {
+  // @ts-expect-error
   const placeholder = props.placeholder || DEFAULT_PLACEHOLDER;
   return (
     <EuiSelect

@@ -87,6 +87,7 @@ describe('AlertDetailsAppSection', () => {
     alertFields: Partial<ParsedTechnicalFields & CustomThresholdAlertFields> = {}
   ) => {
     return render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <AlertDetailsAppSection

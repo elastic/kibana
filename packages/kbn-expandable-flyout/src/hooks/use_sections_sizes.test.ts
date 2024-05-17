@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
+import type { RenderHookResult } from '@testing-library/react';
 import type { UserSectionsSizesParams, UserSectionsSizesResult } from './use_sections_sizes';
 import { useSectionSizes } from './use_sections_sizes';
 

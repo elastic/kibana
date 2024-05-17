@@ -71,7 +71,7 @@ export const ConfirmModalProvider: React.FunctionComponent<{ children?: React.Re
     onConfirm: () => {},
   });
 
-  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }) => {
+  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }: any) => {
     setIsVisible(true);
     setModal({
       title,

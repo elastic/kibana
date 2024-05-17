@@ -14,6 +14,7 @@ import { FLYOUT_ERROR_TEST_ID } from './test_ids';
 describe('<FlyoutError />', () => {
   it('should render error title and body', () => {
     const { getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <FlyoutError />
       </IntlProvider>

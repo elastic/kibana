@@ -28,6 +28,7 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(CORRELATIONS_RELATED_ALERTS_
 
 const renderRelatedAlertsBySession = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
     </IntlProvider>

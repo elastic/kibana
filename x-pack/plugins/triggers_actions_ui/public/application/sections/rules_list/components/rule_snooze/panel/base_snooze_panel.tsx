@@ -78,11 +78,11 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   const { euiTheme } = useEuiTheme();
 
   const onChangeValue = useCallback(
-    ({ target }) => setIntervalValue(target.value),
+    ({ target }: any) => setIntervalValue(target.value),
     [setIntervalValue]
   );
   const onChangeUnit = useCallback(
-    ({ target }) => setIntervalUnit(target.value),
+    ({ target }: any) => setIntervalUnit(target.value),
     [setIntervalUnit]
   );
 

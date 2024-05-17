@@ -31,6 +31,7 @@ describe('SelectSeverity', () => {
   it('updates the severity option correctly on click', async () => {
     // arrange
     const { getByText, getAllByText, queryByText, getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <SelectSeverity />
       </IntlProvider>

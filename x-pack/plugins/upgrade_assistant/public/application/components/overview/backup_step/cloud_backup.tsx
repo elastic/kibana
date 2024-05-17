@@ -82,7 +82,9 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
         data-test-subj="cloudBackupErrorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          <>
+            {error.statusCode} - {error.message}
+          </>
         </p>
         <EuiButton color="danger" onClick={resendRequest} data-test-subj="cloudBackupRetryButton">
           {i18n.translate('xpack.upgradeAssistant.overview.cloudBackup.retryButton', {

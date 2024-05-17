@@ -6,7 +6,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useRefreshHelper } from './use_refresh_helper';
 import { WorkpadRoutingContext, WorkpadRoutingContextType } from '../workpad_routing_context';
 
@@ -71,12 +71,15 @@ describe('useRefreshHelper', () => {
     };
 
     mockGetState.mockReturnValue(state);
-    const { rerender } = renderHook(useRefreshHelper, { wrapper: getContextWrapper(context) });
+    const { rerender } = renderHook(() => useRefreshHelper(), {
+      wrapper: getContextWrapper(context),
+    });
 
     jest.advanceTimersByTime(context.refreshInterval - 1);
     expect(mockDispatch).not.toHaveBeenCalledWith(refreshAction);
 
     state.transient.inFlight = true;
+    // @ts-expect-error
     rerender(useRefreshHelper);
 
     jest.runAllTimers();

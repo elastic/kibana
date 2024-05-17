@@ -7,7 +7,7 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getUseCellActionsHook } from './use_cell_actions';
 import { columns as mockColumns, data as mockData } from './mock/data';
 import type {

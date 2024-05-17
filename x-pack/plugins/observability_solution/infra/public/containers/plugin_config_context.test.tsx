@@ -6,8 +6,8 @@
  */
 
 import type { InfraConfig } from '../../common/plugin_config_types';
-import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import { renderHook } from '@testing-library/react';
+import React, { PropsWithChildren } from 'react';
 import { PluginConfigProvider, usePluginConfig } from './plugin_config_context';
 
 describe('usePluginConfig()', () => {
@@ -33,7 +33,7 @@ describe('usePluginConfig()', () => {
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {
-      wrapper: ({ children }) => {
+      wrapper: ({ children }: PropsWithChildren) => {
         return (
           <PluginConfigProvider value={config as InfraConfig}>{children}</PluginConfigProvider>
         );

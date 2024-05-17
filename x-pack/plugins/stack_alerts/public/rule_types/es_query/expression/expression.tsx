@@ -62,7 +62,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   );
 
   const errorParam = ALL_EXPRESSION_ERROR_KEYS.find((errorKey) => {
-    return errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined;
+    return !!errors[errorKey]?.length && ruleParams[errorKey] !== undefined;
   });
 
   const expressionError = !!errorParam && (
@@ -73,7 +73,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         data-test-subj="esQueryAlertExpressionError"
         title={
           ['index', 'searchType', 'timeField'].includes(errorParam)
-            ? errors[errorParam]
+            ? (errors[errorParam] as string)
             : expressionGenericErrorMessage
         }
       />

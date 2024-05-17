@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { TimeseriesVisData } from '../../../../common/types';
 import { FieldSelect } from '../aggs/field_select';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
@@ -141,7 +142,7 @@ export class TablePanelConfig extends Component<
                     value={model.pivot_id}
                     indexPattern={model.index_pattern}
                     onChange={this.handlePivotChange}
-                    uiRestrictions={this.context.uiRestrictions}
+                    uiRestrictions={(this.context as TimeseriesVisData).uiRestrictions}
                     type={BUCKET_TYPES.TERMS}
                     allowMultiSelect={true}
                     fullWidth={true}

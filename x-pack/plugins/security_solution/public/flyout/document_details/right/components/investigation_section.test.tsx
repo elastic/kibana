@@ -34,6 +34,7 @@ const panelContextValue = {
 
 const renderInvestigationSection = (contextValue = panelContextValue) =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <TestProvider>
         <RightPanelContext.Provider value={contextValue}>

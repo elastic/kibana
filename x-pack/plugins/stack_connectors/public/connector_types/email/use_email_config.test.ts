@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useEmailConfig } from './use_email_config';
 
 const http = httpServiceMock.createStartContract();

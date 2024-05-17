@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
 import * as api from './api';
 import { waitFor } from '@testing-library/react';

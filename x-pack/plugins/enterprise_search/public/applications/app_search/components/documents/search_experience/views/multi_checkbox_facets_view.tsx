@@ -80,6 +80,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
         data-test-subj="checkbox-group"
         className="documentsSearchExperience__facet"
         legend={{ children: label }}
+        // @ts-expect-error
         options={checkboxGroupOptions}
         idToSelectedMap={idToSelectedMap}
         onChange={onChange}

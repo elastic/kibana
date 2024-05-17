@@ -32,6 +32,7 @@ const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.'
 
 const renderInvestigationGuide = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RightPanelContext.Provider value={mockContextValue}>
         <InvestigationGuide />
@@ -108,6 +109,7 @@ describe('<InvestigationGuide />', () => {
 
   it('should render preview message when flyout is in preview', () => {
     const { queryByTestId, getByTestId } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
           <InvestigationGuide />

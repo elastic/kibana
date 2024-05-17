@@ -104,7 +104,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
     [sortDirection, sortField]
   );
 
-  const onTableChange = useCallback(({ page, sort = DEFAULT_SORTING }) => {
+  const onTableChange = useCallback(({ page, sort = DEFAULT_SORTING }: any) => {
     const { index, size } = page;
     const { field, direction } = sort;
 

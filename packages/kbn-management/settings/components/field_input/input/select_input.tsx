@@ -48,7 +48,7 @@ export const SelectInput = ({
     [optionsProp, optionLabels]
   );
 
-  const onChange: EuiSelectProps['onChange'] = (event) => {
+  const onChange: NonNullable<EuiSelectProps['onChange']> = (event) => {
     const inputValue = event.target.value;
     onUpdate({ type: field.type, unsavedValue: inputValue });
   };

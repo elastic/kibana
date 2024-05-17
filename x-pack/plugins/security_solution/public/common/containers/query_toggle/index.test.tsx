@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import type { RenderResult, WaitForNextUpdate } from '@testing-library/react';
+import { renderHook, act, cleanup } from '@testing-library/react';
 import type { QueryToggle } from '.';
 import { useQueryToggle } from '.';
 import type { RouteSpyState } from '../../utils/route/types';

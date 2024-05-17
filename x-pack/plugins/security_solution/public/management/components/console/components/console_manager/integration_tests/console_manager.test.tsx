@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook as _renderHook, act } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook as _renderHook, act } from '@testing-library/react';
 import { useConsoleManager } from '../console_manager';
 import React from 'react';
 import type {

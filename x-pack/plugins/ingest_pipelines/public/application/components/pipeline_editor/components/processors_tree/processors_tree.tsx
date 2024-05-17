@@ -61,7 +61,7 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
         onAction({ type: 'cancelMove' });
       }
     };
-    const cancelMoveClickListener = (ev: any) => {
+    const cancelMoveClickListener = () => {
       onAction({ type: 'cancelMove' });
     };
     // Give the browser a chance to flush any click events including the click

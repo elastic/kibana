@@ -33,6 +33,18 @@ export const defaultFilter: Query = {
   language: 'kuery',
 };
 
+export interface FilterQueryInputProps {
+  inputFilter: Query | undefined;
+  onChange: (query: Query) => void;
+  dataView: DataViewBase;
+  helpMessage?: string | null;
+  label?: string;
+  initiallyOpen?: boolean;
+  ['data-test-subj']?: string;
+  queryInputServices: QueryInputServices;
+  appName: string;
+}
+
 export function FilterQueryInput({
   inputFilter,
   onChange,
@@ -43,17 +55,7 @@ export function FilterQueryInput({
   ['data-test-subj']: dataTestSubj,
   queryInputServices,
   appName,
-}: {
-  inputFilter: Query | undefined;
-  onChange: (query: Query) => void;
-  dataView: DataViewBase;
-  helpMessage?: string | null;
-  label?: string;
-  initiallyOpen?: boolean;
-  ['data-test-subj']?: string;
-  queryInputServices: QueryInputServices;
-  appName: string;
-}) {
+}: FilterQueryInputProps) {
   const [filterPopoverOpen, setFilterPopoverOpen] = useState(Boolean(initiallyOpen));
 
   const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
@@ -118,13 +120,15 @@ export function FilterQueryInput({
                         }
                       )}
                     >
-                      {inputFilter?.query ||
-                        i18n.translate(
-                          'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
-                          {
-                            defaultMessage: '(empty)',
-                          }
-                        )}
+                      <>
+                        {inputFilter?.query ||
+                          i18n.translate(
+                            'visualizationUiComponents.filterQueryInput.emptyFilterQuery',
+                            {
+                              defaultMessage: '(empty)',
+                            }
+                          )}
+                      </>
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>

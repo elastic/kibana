@@ -60,34 +60,36 @@ const primaryButtonConfigs = {
       iconType="plusInCircle"
       panelPaddingSize="none"
     >
-      {() => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: 'Open editor',
-              items: [
-                {
-                  name: 'Lens',
-                  icon: 'lensApp',
-                  onClick: action('Lens'),
-                },
-                {
-                  name: 'Maps',
-                  icon: 'logoMaps',
-                  onClick: action('Maps'),
-                },
-                {
-                  name: 'TSVB',
-                  icon: 'visVisualBuilder',
-                  onClick: action('TSVB'),
-                },
-              ],
-            },
-          ]}
-        />
-      )}
+      {() =>
+        (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[
+              {
+                id: 0,
+                title: 'Open editor',
+                items: [
+                  {
+                    name: 'Lens',
+                    icon: 'lensApp',
+                    onClick: action('Lens'),
+                  },
+                  {
+                    name: 'Maps',
+                    icon: 'logoMaps',
+                    onClick: action('Maps'),
+                  },
+                  {
+                    name: 'TSVB',
+                    icon: 'visVisualBuilder',
+                    onClick: action('TSVB'),
+                  },
+                ],
+              },
+            ]}
+          />
+        ) as React.ReactNode
+      }
     </ToolbarPopover>
   ),
   Dashboard: (

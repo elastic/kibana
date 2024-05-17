@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 
@@ -49,6 +49,7 @@ describe('useGrouping', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       const { getByTestId, queryByTestId } = render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           {result.current.getGrouping({
             ...groupingArgs,
@@ -100,6 +101,7 @@ describe('useGrouping', () => {
       await waitForNextUpdate();
       await waitForNextUpdate();
       const { getByTestId } = render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           {result.current.getGrouping({
             ...groupingArgs,

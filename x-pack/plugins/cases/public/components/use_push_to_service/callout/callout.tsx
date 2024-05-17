@@ -36,7 +36,7 @@ const CallOutComponent = ({
   const { permissions } = useCasesContext();
 
   const handleCallOut = useCallback(
-    (e) => handleButtonClick(e, id, type),
+    (e: React.MouseEvent) => handleButtonClick(e, id, type),
     [handleButtonClick, id, type]
   );
 

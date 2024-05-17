@@ -54,6 +54,7 @@ const mockKibana = (permissionType: unknown = defaultPermissions) => {
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(
+    // @ts-expect-error update
     <IntlProvider locale={'en'}>
       <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
     </IntlProvider>

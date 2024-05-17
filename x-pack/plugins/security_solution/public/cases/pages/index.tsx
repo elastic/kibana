@@ -66,7 +66,8 @@ const CaseContainerComponent: React.FC = () => {
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   const getDetectionsRuleDetailsHref = useCallback(
-    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
+    (ruleId: string | null | undefined) =>
+      detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
     [detectionsFormatUrl, detectionsUrlSearch]
   );
 

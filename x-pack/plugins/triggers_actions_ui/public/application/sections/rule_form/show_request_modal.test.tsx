@@ -102,6 +102,7 @@ const editRule: Rule<RuleTypeParams> = {
 };
 
 const ShowRequestModalWithProviders: React.FunctionComponent<ShowRequestModalProps> = (props) => (
+  // @ts-expect-error
   <IntlProvider locale="en">
     <ShowRequestModal {...props} />
   </IntlProvider>

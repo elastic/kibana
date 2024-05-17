@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import type { Store } from 'redux';
@@ -16,8 +17,8 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { TestProviders } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
@@ -45,7 +46,10 @@ const runAllPromises = () => new Promise(setImmediate);
 const renderUseFieldBrowserOptions = (
   props: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}
 ) =>
-  renderHook<UseFieldBrowserOptionsProps & { store?: Store }, ReturnType<UseFieldBrowserOptions>>(
+  renderHook<
+    UseFieldBrowserOptionsProps & PropsWithChildren<{ store?: Store }>,
+    ReturnType<UseFieldBrowserOptions>
+  >(
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,

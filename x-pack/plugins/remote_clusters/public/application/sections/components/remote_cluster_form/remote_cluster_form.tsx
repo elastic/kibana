@@ -123,7 +123,7 @@ export class RemoteClusterForm extends Component<Props, State> {
   };
 
   onFieldsChange = (changedFields: Partial<FormFields>) => {
-    const { isCloudEnabled } = this.context;
+    const { isCloudEnabled } = this.context as Context;
 
     // when cloud remote address changes, fill proxy address and server name
     const { cloudRemoteAddress, cloudAdvancedOptionsEnabled } = changedFields;

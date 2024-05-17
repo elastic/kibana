@@ -11,7 +11,7 @@ import {
   EuiFormLabel,
   EuiResizeObserver,
 } from '@elastic/eui';
-import React, { createContext, useState, useContext, ReactChild, ReactChildren } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 export const PrependWidthContext = createContext<{
   minWidth: number;
@@ -21,7 +21,7 @@ export const PrependWidthContext = createContext<{
   onResize: () => {},
 });
 
-export const PrependWidthProvider = ({ children }: { children: ReactChild | ReactChildren }) => {
+export const PrependWidthProvider = ({ children }: { children: ReactNode }) => {
   const [minPrependWidth, setMinPrependWidth] = useState(0);
 
   const prependResizeObserver = ({ width }: { width: number }) => {
@@ -39,7 +39,7 @@ export const PrependWidthProvider = ({ children }: { children: ReactChild | Reac
   );
 };
 
-export const Prepend = ({ children }: { children: ReactChild | ReactChildren }) => {
+export const Prepend = ({ children }: { children: ReactNode }) => {
   const { minWidth, onResize } = useContext(PrependWidthContext);
 
   const { euiTheme } = useEuiTheme();

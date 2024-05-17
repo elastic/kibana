@@ -6,7 +6,7 @@
  */
 
 import { EMPTY_VALUE } from '../../../constants/common';
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { Renderer, renderHook, RenderHookResult } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,

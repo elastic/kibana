@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useAttackDiscoveryTelemetry } from '.';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 

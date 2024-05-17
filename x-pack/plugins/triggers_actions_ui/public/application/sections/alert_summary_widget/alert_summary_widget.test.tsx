@@ -51,6 +51,7 @@ describe('AlertSummaryWidget', () => {
 
   const renderComponent = (props: Partial<AlertSummaryWidgetProps> = {}) =>
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <AlertSummaryWidget
           chartProps={mockedChartProps}

@@ -20,7 +20,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  ActionConnectorTableItem,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
@@ -107,9 +111,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated = useCallback(
+  const onConnectorUpdated = useCallback<
+    NonNullable<EditConnectorFlyoutProps['onConnectorUpdated']>
+  >(
     async (updatedConnector) => {
-      setEditedConnectorItem(updatedConnector);
+      setEditedConnectorItem(updatedConnector as ActionConnectorTableItem);
       refetchConnectors();
       refetchActionTypes();
       refetchCaseConfigure();
@@ -117,7 +123,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
 
-  const onConnectorCreated = useCallback(
+  const onConnectorCreated = useCallback<
+    NonNullable<CreateConnectorFlyoutProps['onConnectorCreated']>
+  >(
     async (createdConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 

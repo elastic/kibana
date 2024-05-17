@@ -191,6 +191,8 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                       }}
                     >
                       <EuiContextMenuPanel
+                        // size xs doesnt exists
+                        // @ts-expect-error
                         size="xs"
                         items={[
                           <EuiContextMenuItem

@@ -24,6 +24,7 @@ const mockIsAlertFromSentinelOneEvent = isAlertFromSentinelOneEvent as jest.Mock
 
 const renderPanelHeader = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <PanelHeader />
     </IntlProvider>

@@ -56,7 +56,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   );
 
   const editOptionalSubAction = useCallback(
-    (key, value) => {
+    (key: any, value: any) => {
       if (isEmpty(value)) {
         const paramsCopy = cloneDeep(subActionParams);
         unset(paramsCopy, key);
@@ -70,7 +70,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   );
 
   const editSubAction = useCallback(
-    (key, value) => {
+    (key: any, value: any) => {
       editAction('subActionParams', { ...subActionParams, [key]: value }, index);
     },
     [editAction, index, subActionParams]

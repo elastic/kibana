@@ -12,6 +12,7 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { SelectAnomalySeverity } from './select_anomaly_severity';
 
 function Wrapper({ children }: { children?: ReactNode }) {
+  // @ts-expect-error
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
 

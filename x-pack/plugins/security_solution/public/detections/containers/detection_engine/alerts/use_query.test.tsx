@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import type { ReturnQueryAlerts } from './use_query';
 import { useQueryAlerts } from './use_query';
 import { ALERTS_QUERY_NAMES } from './constants';

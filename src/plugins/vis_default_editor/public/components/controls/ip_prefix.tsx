@@ -73,7 +73,7 @@ function IpPrefixParamEditor({
 
   useValidation(setValidity, isValid);
 
-  const onPrefixLengthChange: EuiFieldNumberProps['onChange'] = useCallback(
+  const onPrefixLengthChange: NonNullable<EuiFieldNumberProps['onChange']> = useCallback(
     (ev: ChangeEvent<HTMLInputElement>) => {
       setValue({ ...value, prefixLength: ev.target.valueAsNumber });
     },

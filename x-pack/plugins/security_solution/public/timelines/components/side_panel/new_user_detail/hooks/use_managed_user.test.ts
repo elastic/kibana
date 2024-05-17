@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { Integration } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { TestProviders } from '../../../../../common/mock';
 import { ENTRA_ID_PACKAGE_NAME } from '../constants';

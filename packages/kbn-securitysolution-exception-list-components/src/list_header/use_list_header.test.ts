@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useExceptionListHeader } from './use_list_header';
 
 describe('useExceptionListHeader', () => {

@@ -203,17 +203,18 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     () => core.uiSettings.get(FIELDS_LIMIT_SETTING),
     [core.uiSettings]
   );
-  const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
-    useCallback(
-      (field) => {
-        return shouldShowField(
-          field,
-          searchMode,
-          stateService.creationOptions.disableMultiFieldsGroupingByParent
-        );
-      },
-      [searchMode, stateService.creationOptions.disableMultiFieldsGroupingByParent]
-    );
+  const onSupportedFieldFilter: NonNullable<
+    GroupedFieldsParams<DataViewField>['onSupportedFieldFilter']
+  > = useCallback(
+    (field) => {
+      return shouldShowField(
+        field,
+        searchMode,
+        stateService.creationOptions.disableMultiFieldsGroupingByParent
+      );
+    },
+    [searchMode, stateService.creationOptions.disableMultiFieldsGroupingByParent]
+  );
 
   const { fieldListFiltersProps, fieldListGroupedProps, allFieldsModified } =
     useGroupedFields<DataViewField>({

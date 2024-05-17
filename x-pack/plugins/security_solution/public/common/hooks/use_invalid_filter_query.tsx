@@ -20,7 +20,7 @@ export const genHash = (message: string) =>
     .reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
     .toString();
 
-interface UseInvalidFilterQueryProps {
+export interface UseInvalidFilterQueryProps {
   id: string;
   filterQuery?: string;
   kqlError?: Error;

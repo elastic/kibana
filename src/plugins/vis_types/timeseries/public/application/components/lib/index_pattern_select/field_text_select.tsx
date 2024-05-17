@@ -28,7 +28,7 @@ export const FieldTextSelect = ({
   const [inputValue, setInputValue] = useState<string>();
   const { indexPatternString } = fetchedIndex;
 
-  const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback((e) => {
+  const onFieldTextChange: NonNullable<EuiFieldTextProps['onChange']> = useCallback((e) => {
     setInputValue(e.target.value);
   }, []);
 

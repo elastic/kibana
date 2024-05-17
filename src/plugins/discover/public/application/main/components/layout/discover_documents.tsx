@@ -27,6 +27,7 @@ import {
   type DataTableColumnsMeta,
   getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
+  UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -179,7 +180,7 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const onResizeDataGrid = useCallback(
+  const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
     (colSettings) => onResize(colSettings, stateContainer),
     [stateContainer]
   );

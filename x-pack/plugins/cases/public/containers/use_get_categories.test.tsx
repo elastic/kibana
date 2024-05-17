@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -25,7 +26,7 @@ describe('useGetCategories', () => {
   it('calls getCategories api', async () => {
     const spyOnGetCategories = jest.spyOn(api, 'getCategories');
     const { waitForNextUpdate } = renderHook(() => useGetCategories(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     await waitForNextUpdate();
@@ -46,7 +47,7 @@ describe('useGetCategories', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const { waitForNextUpdate } = renderHook(() => useGetCategories(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     await waitForNextUpdate();

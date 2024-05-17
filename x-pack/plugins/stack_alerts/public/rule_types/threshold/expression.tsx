@@ -105,12 +105,12 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
-      errors[errorKey].length >= 1 &&
+      !!errors[errorKey].length &&
       ruleParams[errorKey as keyof IndexThresholdRuleParams] !== undefined
   );
 
   const cannotShowVisualization = !!Object.keys(errors).find(
-    (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
+    (errorKey) => expressionFieldsWithValidation.includes(errorKey) && !!errors[errorKey].length
   );
 
   const expressionErrorMessage = i18n.translate(
@@ -297,15 +297,15 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         })}
         fullWidth
         display="rowCompressed"
-        isInvalid={errors.filterKuery.length > 0}
-        error={errors.filterKuery}
+        isInvalid={!!errors.filterKuery.length}
+        error={errors.filterKuery as string}
       >
         <EuiFieldSearch
           data-test-subj="filterKuery"
           onChange={handleFilterChange}
           value={filterKuery}
           fullWidth
-          isInvalid={errors.filterKuery.length > 0}
+          isInvalid={!!errors.filterKuery.length}
         />
       </EuiFormRow>
       <EuiSpacer />

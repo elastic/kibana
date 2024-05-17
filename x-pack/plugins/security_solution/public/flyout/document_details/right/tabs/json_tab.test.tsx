@@ -26,6 +26,7 @@ const contextValue = {
 
 const renderJsonTab = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RightPanelContext.Provider value={contextValue}>
         <JsonTab />

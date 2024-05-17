@@ -71,7 +71,7 @@ export const LinkCard: FC<LinkCardProps> = ({
             {typeof icon === 'string' ? (
               <EuiIcon size="m" type={icon} aria-label={iconAreaLabel} />
             ) : (
-              icon
+              <>{icon}</>
             )}
           </EuiFlexItem>
           <EuiFlexItem>

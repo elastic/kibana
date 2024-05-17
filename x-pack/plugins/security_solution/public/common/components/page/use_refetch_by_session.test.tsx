@@ -6,8 +6,8 @@
  */
 import type { MutableRefObject } from 'react';
 import React from 'react';
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { useKibana } from '../../lib/kibana';
 import { InputsModelId } from '../../store/inputs/constants';

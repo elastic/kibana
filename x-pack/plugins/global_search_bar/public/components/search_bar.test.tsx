@@ -103,6 +103,7 @@ describe('SearchBar', () => {
         .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -131,6 +132,7 @@ describe('SearchBar', () => {
 
     it('supports keyboard shortcuts', async () => {
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -163,6 +165,7 @@ describe('SearchBar', () => {
       searchService.find.mockReturnValueOnce(firstSearch).mockReturnValueOnce(secondSearch);
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -194,6 +197,7 @@ describe('SearchBar', () => {
 
     it('supports keyboard shortcuts', async () => {
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -217,6 +221,7 @@ describe('SearchBar', () => {
 
     it('supports show/hide', async () => {
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}

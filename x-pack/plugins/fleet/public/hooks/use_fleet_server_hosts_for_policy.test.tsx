@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
 import { useGetEnrollmentSettings } from './use_request/settings';

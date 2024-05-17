@@ -34,15 +34,15 @@ export interface TabMenuItem {
   onClick?: () => void;
   prepend?: React.ReactNode;
 }
-export interface PageTemplateProps {
+export type PageTemplateProps = PropsWithChildren<{
   title: string;
   pageTitle?: string;
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
-}
+}>;
 
-export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
+export const PageTemplate: FC<PageTemplateProps> = ({
   title,
   pageTitle,
   tabs,

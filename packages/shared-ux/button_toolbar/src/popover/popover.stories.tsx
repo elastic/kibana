@@ -50,31 +50,33 @@ export const Popover = ({ showIcon, buttonType }: Params) => {
       iconType={showIcon ? 'plusInCircle' : undefined}
       panelPaddingSize="none"
     >
-      {() => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[
-            {
-              id: 0,
-              title: 'Open editor',
-              items: [
-                {
-                  name: 'Lens',
-                  icon: 'lensApp',
-                },
-                {
-                  name: 'Maps',
-                  icon: 'logoMaps',
-                },
-                {
-                  name: 'TSVB',
-                  icon: 'visVisualBuilder',
-                },
-              ],
-            },
-          ]}
-        />
-      )}
+      {() =>
+        (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[
+              {
+                id: 0,
+                title: 'Open editor',
+                items: [
+                  {
+                    name: 'Lens',
+                    icon: 'lensApp',
+                  },
+                  {
+                    name: 'Maps',
+                    icon: 'logoMaps',
+                  },
+                  {
+                    name: 'TSVB',
+                    icon: 'visVisualBuilder',
+                  },
+                ],
+              },
+            ]}
+          />
+        ) as React.ReactNode
+      }
     </Component>
   );
 };

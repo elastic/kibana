@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useAgentVersion } from './use_agent_version';
 import { useKibanaVersion } from './use_kibana_version';

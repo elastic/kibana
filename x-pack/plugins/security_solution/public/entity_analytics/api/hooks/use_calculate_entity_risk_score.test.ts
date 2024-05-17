@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';

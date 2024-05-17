@@ -27,11 +27,7 @@ import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
-/**
- * Renders a header title, a tooltip button, and a popover with
- * information about the assistant feature and access to documentation.
- */
-export const AssistantTitle: React.FC<{
+export interface AssistantTitleProps {
   isDisabled?: boolean;
   title?: string;
   docLinks: Omit<DocLinksStart, 'links'>;
@@ -39,7 +35,13 @@ export const AssistantTitle: React.FC<{
   isFlyoutMode: boolean;
   onChange: (updatedConversation: Conversation) => void;
   refetchConversationsState: () => Promise<void>;
-}> = ({
+}
+
+/**
+ * Renders a header title, a tooltip button, and a popover with
+ * information about the assistant feature and access to documentation.
+ */
+export const AssistantTitle: React.FC<AssistantTitleProps> = ({
   isDisabled = false,
   title,
   docLinks,

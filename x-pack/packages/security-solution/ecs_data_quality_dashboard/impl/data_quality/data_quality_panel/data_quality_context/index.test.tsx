@@ -6,7 +6,7 @@
  */
 
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider, useDataQualityContext } from '.';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 const getUseRequestParams = async () => {

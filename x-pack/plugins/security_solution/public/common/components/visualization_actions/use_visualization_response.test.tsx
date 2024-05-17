@@ -7,7 +7,8 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { useVisualizationResponse } from './use_visualization_response';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { parseVisualizationData } from './utils';
 
@@ -45,7 +46,9 @@ describe('useVisualizationResponse', () => {
   });
   it('should get result by visualization id', () => {
     const { result } = renderHook(() => useVisualizationResponse({ visualizationId }), {
-      wrapper: ({ children }) => <TestProviders store={mockStore}>{children}</TestProviders>,
+      wrapper: ({ children }: PropsWithChildren) => (
+        <TestProviders store={mockStore}>{children}</TestProviders>
+      ),
     });
     expect(result.current.responses).toEqual(
       parseVisualizationData(mockState.inputs.global.queries[0].inspect.response)

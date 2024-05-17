@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import moment from 'moment-timezone';
 import { render, waitFor, screen, within } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
@@ -267,7 +268,7 @@ describe('AllCasesListGeneric', () => {
       expect(column[key].querySelector('span')).toHaveTextContent(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
+    const { result } = renderHook<PropsWithChildren<GetCasesColumn>, UseCasesColumnsReturnValue>(
       () => useCasesColumns(defaultColumnArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,

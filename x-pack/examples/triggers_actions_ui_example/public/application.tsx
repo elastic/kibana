@@ -165,14 +165,17 @@ export const renderApp = (
         actionTypeRegistry,
       }}
     >
-      <IntlProvider locale="en">
-        <TriggersActionsUiExampleApp
-          basename={appBasePath}
-          http={http}
-          triggersActionsUi={deps.triggersActionsUi}
-          data={deps.data}
-        />
-      </IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">
+          <TriggersActionsUiExampleApp
+            basename={appBasePath}
+            http={http}
+            triggersActionsUi={deps.triggersActionsUi}
+            data={deps.data}
+          />
+        </IntlProvider>
+      }
     </KibanaContextProvider>,
     element
   );

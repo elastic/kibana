@@ -48,9 +48,13 @@ const RuleSourceFilterComponent = ({
 
   const numActiveFilters = useMemo(() => selected.length, [selected]);
 
-  const options = populateSelected(ruleSourceFilterDefaultOptions, selected);
+  const options = populateSelected(
+    ruleSourceFilterDefaultOptions,
+    selected
+  ) as EuiSelectableOption[];
 
   const handleSelectableOnChange = useCallback(
+    // @ts-expect-error
     (newOptions) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleSource>(newOptions);
       onChange(formattedOptions);

@@ -65,6 +65,7 @@ function FormRow({
     case 'select': {
       return (
         <SelectWithPlaceholder
+          // @ts-expect-error
           placeholder={setting.placeholder}
           options={setting.options}
           value={value}
@@ -76,6 +77,7 @@ function FormRow({
     case 'boolean': {
       return (
         <SelectWithPlaceholder
+          // @ts-expect-error
           placeholder={setting.placeholder}
           options={[
             { text: 'true', value: 'true' },
@@ -111,6 +113,7 @@ function FormRow({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SelectWithPlaceholder
+              // @ts-expect-error
               placeholder={i18n.translate('xpack.apm.unitLabel', {
                 defaultMessage: 'Select unit',
               })}

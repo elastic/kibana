@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';

@@ -51,7 +51,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   }, []);
 
   const updateConfig = useCallback(
-    (update) => {
+    (update: any) => {
       onChange({
         config: {
           ...config,

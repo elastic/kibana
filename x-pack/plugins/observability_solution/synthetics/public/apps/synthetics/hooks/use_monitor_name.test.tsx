@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { fetchMonitorManagementList } from '../state';
 import { useMonitorName } from './use_monitor_name';
 

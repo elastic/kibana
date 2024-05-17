@@ -43,6 +43,7 @@ timeFilter.getRefreshInterval.mockImplementation(() => refreshInterval$.getValue
 const tourDisabled = false;
 
 function Container({ children }: { children?: ReactNode }) {
+  // @ts-expect-error
   return <IntlProvider locale="en">{children}</IntlProvider>;
 }
 

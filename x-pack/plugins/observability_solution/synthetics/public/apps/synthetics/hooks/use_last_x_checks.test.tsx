@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getTimeRangeFilter, useLastXChecks } from './use_last_x_checks';
 import { WrappedHelper } from '../utils/testing';
 import * as searchHooks from './use_redux_es_search';

@@ -11,7 +11,7 @@ import React from 'react';
 import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
 import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
 import { render, waitFor, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { makeAction } from '../mocks/helpers';
 import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
 import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';

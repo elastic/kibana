@@ -9,8 +9,9 @@ import type { IndexFieldSearch } from './use_data_view';
 import { useDataView } from './use_data_view';
 import { mocksSource } from './mock';
 import { mockGlobalState, TestProviders } from '../../mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../lib/kibana';
+import type { PropsWithChildren } from 'react';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -85,7 +86,7 @@ describe('source/index.tsx', () => {
     it('sets field data for data view', async () => {
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -107,7 +108,7 @@ describe('source/index.tsx', () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,
@@ -136,7 +137,7 @@ describe('source/index.tsx', () => {
       let indexFieldsSearch: IndexFieldSearch;
       await act(async () => {
         const { waitForNextUpdate, result } = renderHook<
-          string,
+          PropsWithChildren,
           { indexFieldsSearch: IndexFieldSearch }
         >(() => useDataView(), {
           wrapper: TestProviders,

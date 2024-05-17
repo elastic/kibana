@@ -33,7 +33,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
     () =>
-      new Promise((resolve) =>
+      new Promise<void>((resolve) =>
         setTimeout(async () => {
           await action();
           resolve();

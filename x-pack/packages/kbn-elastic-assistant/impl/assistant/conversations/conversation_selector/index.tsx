@@ -25,7 +25,6 @@ import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
-import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 interface Props {
   defaultConnector?: AIConnector;
@@ -83,7 +82,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
-      async (searchValue, flattenedOptions = []) => {
+      async (searchValue: string, flattenedOptions: ConversationSelectorOption[] = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -94,8 +93,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         );
         const optionExists =
           flattenedOptions.findIndex(
-            (option: SystemPromptSelectorOption) =>
-              option.label.trim().toLowerCase() === normalizedSearchValue
+            (option) => option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
         let createdConversation;

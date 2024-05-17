@@ -57,6 +57,7 @@ describe('EditContextFlyout component tests', () => {
 
   beforeEach(() => {
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <MockFormProvider>
           <EditContextFlyout onClose={onCloseMock} />

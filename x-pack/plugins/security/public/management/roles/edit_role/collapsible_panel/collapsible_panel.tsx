@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import type { ReactNode } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,7 +32,7 @@ interface State {
   collapsed: boolean;
 }
 
-export class CollapsiblePanel extends Component<Props, State> {
+export class CollapsiblePanel extends Component<PropsWithChildren<Props>, State> {
   public state = {
     collapsed: false,
   };

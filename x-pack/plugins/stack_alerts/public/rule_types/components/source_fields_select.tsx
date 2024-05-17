@@ -75,8 +75,8 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
   return sourceFieldsOptions.length > 0 ? (
     <EuiFormRow
       fullWidth
-      isInvalid={errors.length > 0 && sourceFields !== undefined}
-      error={errors}
+      isInvalid={!!errors.length && sourceFields !== undefined}
+      error={errors as string}
       label={
         <FormattedMessage
           id="xpack.stackAlerts.components.ui.sourceFieldsSelect.title"
@@ -93,7 +93,7 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
           }
         )}
         data-test-subj="sourceFields"
-        isInvalid={errors.length > 0 && sourceFields !== undefined}
+        isInvalid={!!errors.length && sourceFields !== undefined}
         selectedOptions={(sourceFields || []).map((f) => ({
           label: f.label,
           value: f.searchPath,

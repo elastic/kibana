@@ -219,7 +219,7 @@ export const ConnectorDetail: React.FC = () => {
   };
 
   interface TabMenuItem {
-    content: JSX.Element;
+    content: React.ReactNode;
     disabled?: boolean;
     id: string;
     label: string;
@@ -251,6 +251,7 @@ export const ConnectorDetail: React.FC = () => {
           wrap: false,
         },
         rightSideItems: getHeaderActions(index, connector),
+        // @ts-expect-error
         tabs,
       }}
     >

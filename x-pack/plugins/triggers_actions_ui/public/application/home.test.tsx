@@ -67,6 +67,7 @@ describe('home', () => {
     };
 
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <Router history={props.history}>
           <QueryClientProvider client={queryClient}>

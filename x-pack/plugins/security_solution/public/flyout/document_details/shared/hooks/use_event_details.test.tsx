@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
 import { useEventDetails } from './use_event_details';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';

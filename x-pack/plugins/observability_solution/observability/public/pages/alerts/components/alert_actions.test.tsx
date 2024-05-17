@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';

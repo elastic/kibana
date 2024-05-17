@@ -6,7 +6,7 @@
  */
 
 import * as reactRedux from 'react-redux';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { WrappedHelper } from '../../../../utils/testing';
 
 import { useLocationMonitors } from './use_location_monitors';

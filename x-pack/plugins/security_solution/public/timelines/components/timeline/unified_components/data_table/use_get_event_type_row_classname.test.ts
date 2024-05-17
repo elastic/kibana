@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 const mockOddEqlEvent = {
   _id: 'test-eql-alert',

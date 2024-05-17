@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useLastPage } from './use_last_page';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';

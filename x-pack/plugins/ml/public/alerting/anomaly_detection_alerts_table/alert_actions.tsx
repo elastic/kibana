@@ -123,7 +123,7 @@ export function AlertActions(props: AlertActionsProps) {
           </EuiContextMenuItem>,
         ]
       : []),
-    DefaultAlertActions,
+    DefaultAlertActions as React.ReactElement,
   ];
 
   const actionsToolTip =
