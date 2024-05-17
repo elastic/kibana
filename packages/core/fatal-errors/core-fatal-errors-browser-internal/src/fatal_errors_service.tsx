@@ -108,7 +108,7 @@ export class FatalErrorsService {
           kibanaVersion={injectedMetadata.getKibanaVersion()}
           errorInfo$={this.errorInfo$}
         />
-      </KibanaRootContextProvider>,
+      </KibanaRootContextProvider>
     );
   }
 

@@ -450,7 +450,7 @@ export class VisualizeEmbeddable
         <div className="visChart__spinner">
           <EuiLoadingChart mono size="l" />
         </div>
-      </KibanaRenderContextProvider>,
+      </KibanaRenderContextProvider>
     );
 
     const expressions = getExpressions();
