@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';

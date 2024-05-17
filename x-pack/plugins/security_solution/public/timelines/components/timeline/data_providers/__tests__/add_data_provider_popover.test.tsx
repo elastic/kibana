@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, waitForEuiPopoverClose } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverClose } from '@elastic/eui/lib/test/rtl';
 import { AddDataProviderPopover } from '../add_data_provider_popover';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mock/test_providers';
