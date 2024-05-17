@@ -185,7 +185,7 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
           </IndexOverviewPanel>
         </EuiFlexItem>
         {indexData.count > 0 && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="serverlessSearchIndexDetailOverviewStorageCard">
             <IndexOverviewPanel
               title={
                 <FormattedMessage
@@ -199,7 +199,11 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
                     <EuiIcon size="s" type="documents" />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText color="subdued" size="xs">
+                    <EuiText
+                      color="subdued"
+                      size="xs"
+                      data-test-subj="serverlessSearchIndexDetailOverviewDeletedDocs"
+                    >
                       <FormattedMessage
                         id="xpack.serverlessSearch.indexManagement.indexDetails.overview.storagePanel.documentCount"
                         defaultMessage="{documentCount} Documents / {deletedCount} Deleted"
@@ -216,7 +220,10 @@ export const IndexDetailOverview: FunctionComponent<IndexDetailOverviewProps> = 
               }
             >
               <EuiFlexGroup alignItems="baseline" gutterSize="s">
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj="serverlessSearchIndexDetailOverviewTotalStoreSize"
+                >
                   <IndexOverviewPanelStat>
                     {indexData?.indexStorage.totalStoreSize}
                   </IndexOverviewPanelStat>

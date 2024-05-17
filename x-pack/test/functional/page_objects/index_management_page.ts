@@ -129,6 +129,35 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
         });
       },
+      async expectIndexDetailsPageIsLoaded() {
+        await testSubjects.existOrFail('indexDetailsTab-overview')
+        await testSubjects.existOrFail('indexDetailsContent')
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewHowToManageDataStreamsButton');
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewViewAllAliasesButton');
+        await testSubjects.existOrFail('indexDetailsBackToIndicesButton')
+      },
+      async storageCardExist() {
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewStorageCard')
+      },
+      async expectTotalDatasetSizeToMatch(storageSize: string){
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewTotalStoreSize')
+        const totalStorageSize = await testSubjects.getVisibleText('serverlessSearchIndexDetailOverviewTotalStoreSize')
+        expect(totalStorageSize).to.be(storageSize)
+      },
+      async expectDeletedDocsToMatch(deletedDocs:string){
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewDeletedDocs')
+        const totalDeletedDocs = await testSubjects.getVisibleText('serverlessSearchIndexDetailOverviewDeletedDocs')
+        expect(totalDeletedDocs).to.be(deletedDocs)
+      },
+      async storageCardDoesNotExist() {
+        await testSubjects.missingOrFail('serverlessSearchIndexDetailOverviewTotalStoreSize')
+      },
+      async expectStartIngestingDataSectionToExist(){
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAPICallsLink')
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaApiButton')
+        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaConnectorButton')
+
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
@@ -153,5 +182,42 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       );
       expect(indexNames.some((i) => i === indexName)).to.be(true);
     },
+
+    async selectIndex(indexName:string){
+      const id = `checkboxSelectIndex-${indexName}`
+      const checkbox =  await find.byCssSelector(`input[id="${id}"]`);
+      if (!(await checkbox.isSelected())) {
+        await find.clickByCssSelector(`input[id="${id}"]`);
+      }
+    },
+    async clickManageButton(){
+      await testSubjects.existOrFail('indexActionsContextMenuButton');
+      await testSubjects.click('indexActionsContextMenuButton');
+    },
+    async contextMenuIsVisible(){
+      await testSubjects.existOrFail('indexContextMenu')
+      await testSubjects.existOrFail('deleteIndexMenuButton')
+      await testSubjects.click('deleteIndexMenuButton');
+    },
+    async confirmDeleteModalIsVisible(){
+      await testSubjects.existOrFail('confirmModalTitleText')
+      const modalText:string = await testSubjects.getVisibleText('confirmModalTitleText')
+      expect(modalText).to.be('Delete index')
+      await testSubjects.existOrFail('confirmModalConfirmButton')
+      await testSubjects.click('confirmModalConfirmButton')
+      // wait for index to be deleted
+      await testSubjects.missingOrFail('confirmModalConfirmButton');
+    },
+
+    async expectIndexIsDeleted(indexName:string) {
+      const table = await find.byCssSelector('table');
+      const rows = await table.findAllByTestSubject('indexTableRow');
+      const indexNames: string[] = await Promise.all(
+        rows.map(async (row) => {
+          return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
+        })
+      );
+      expect(indexNames.includes(indexName)).to.be(false)
+    }
   };
 }
