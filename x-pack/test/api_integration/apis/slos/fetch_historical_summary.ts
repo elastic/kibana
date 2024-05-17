@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const sloApi = getService('slo');
 
   const SLO_ID = 'slo-fake-1';
-  describe('fetch historical summary', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/183750
+  describe.skip('fetch historical summary', () => {
     before(async () => {
       const now = moment().startOf('minute');
       const curr = now.clone().subtract(30, 'days');
