@@ -111,6 +111,13 @@ export default ({ getService }: FtrProviderContext): void => {
               transform_id: 'risk_score_latest_transform_default',
             });
 
+            expect(transformStats.transforms.length).to.eql(1);
+            const latestTransform = transformStats.transforms[0];
+            if (latestTransform.state !== 'started') {
+              log.warn('Transform state is not started, logging the transform');
+              log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
+            }
+
             expect(transformStats.transforms[0].state).to.eql('started');
           });
 
