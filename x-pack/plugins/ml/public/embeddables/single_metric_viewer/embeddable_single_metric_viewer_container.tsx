@@ -229,6 +229,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
                 zoom={zoom}
                 functionDescription={functionDescription}
                 selectedJob={selectedJob}
+                onRenderComplete={onRenderComplete}
               />
             )}
         </div>

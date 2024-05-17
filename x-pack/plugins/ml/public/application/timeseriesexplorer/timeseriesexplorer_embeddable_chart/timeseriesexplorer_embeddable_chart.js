@@ -89,6 +89,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
     dataViewsService: PropTypes.object,
+    onRenderComplete: PropTypes.func.isRequired,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -432,8 +433,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 to: focusRange[1],
               });
             }
-
             this.setState(stateUpdate);
+            this.props.onRenderComplete();
           }
         };
 
