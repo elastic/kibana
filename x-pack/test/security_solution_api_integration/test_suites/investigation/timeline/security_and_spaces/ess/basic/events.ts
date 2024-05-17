@@ -15,8 +15,8 @@ import {
   TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { User } from '../../../../../rule_registry/common/lib/authentication/types';
-import { getSpaceUrlPrefix } from '../../../../../rule_registry/common/lib/authentication/spaces';
+import { User } from '../../../../../../../rule_registry/common/lib/authentication/types';
+import { getSpaceUrlPrefix } from '../../../../../../../rule_registry/common/lib/authentication/spaces';
 
 import {
   superUser,

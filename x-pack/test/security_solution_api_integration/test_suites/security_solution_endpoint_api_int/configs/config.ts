@@ -11,7 +11,7 @@ import { services } from '../services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(
-    require.resolve('../../../api_integration/config.ts')
+    require.resolve('../../../../api_integration/config.ts')
   );
 
   return generateConfig({

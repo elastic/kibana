@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../configs/ftr_provider_context';
+import { FtrProviderContextWithSpaces } from '../../../../../../ftr_provider_context_with_spaces';
 import {
   createSpacesAndUsers,
   deleteSpacesAndUsers,
-} from '../../../../../rule_registry/common/lib/authentication';
+} from '../../../../../../../rule_registry/common/lib/authentication';
 
-export default ({ loadTestFile, getService }: FtrProviderContext): void => {
+export default ({ loadTestFile, getService }: FtrProviderContextWithSpaces): void => {
   describe('@ess timeline security and spaces enabled: basic', function () {
     before(async () => {
       await createSpacesAndUsers(getService);

@@ -11,7 +11,7 @@ import { svlServices } from '../services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const serverlessTestsConfig = await readConfigFile(
-    require.resolve('../../../../test_serverless/shared/config.base.ts')
+    require.resolve('../../../../../test_serverless/shared/config.base.ts')
   );
 
   return generateConfig({

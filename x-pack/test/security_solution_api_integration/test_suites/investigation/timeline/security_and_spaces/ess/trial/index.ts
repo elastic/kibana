@@ -11,7 +11,7 @@ import {
   createUsersAndRoles,
   deleteSpaces,
   deleteUsersAndRoles,
-} from '../../../../../rule_registry/common/lib/authentication';
+} from '../../../../../../../rule_registry/common/lib/authentication';
 
 import {
   observabilityMinReadAlertsRead,
@@ -22,7 +22,7 @@ import {
   observabilityMinReadAlertsAllSpacesAll,
   observabilityMinimalAll,
   observabilityMinimalAllSpacesAll,
-} from '../../../../../rule_registry/common/lib/authentication/roles';
+} from '../../../../../../../rule_registry/common/lib/authentication/roles';
 import {
   obsMinReadAlertsRead,
   obsMinReadAlertsReadSpacesAll,
@@ -33,7 +33,7 @@ import {
   obsMinReadAlertsAllSpacesAll,
   obsMinAll,
   obsMinAllSpacesAll,
-} from '../../../../../rule_registry/common/lib/authentication/users';
+} from '../../../../../../../rule_registry/common/lib/authentication/users';
 
 export default ({ loadTestFile, getService }: FtrProviderContextWithSpaces): void => {
   describe('@ess timeline security and spaces enabled: trial', function () {
