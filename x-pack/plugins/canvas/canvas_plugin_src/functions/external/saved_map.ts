@@ -8,7 +8,6 @@
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { MapSerializedState } from '@kbn/maps-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
-import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
@@ -72,30 +71,19 @@ export function savedMap(): ExpressionFunctionDefinition<
     },
     type: EmbeddableExpressionType,
     fn: (input, args) => {
-      const filters = input ? input.and : [];
-
-      const center = args.center
-        ? {
-            lat: args.center.lat,
-            lon: args.center.lon,
-            zoom: args.center.zoom,
-          }
-        : undefined;
-
       return {
         type: EmbeddableExpressionType,
         input: {
           id: args.id,
-          attributes: { title: '' },
           savedObjectId: args.id,
-          filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
-          refreshConfig: {
-            pause: false,
-            value: 0,
-          },
-
-          mapCenter: center,
+          mapCenter: args.center
+            ? {
+                lat: args.center.lat,
+                lon: args.center.lon,
+                zoom: args.center.zoom,
+              }
+            : undefined,
           hideFilterActions: true,
           title: args.title === null ? undefined : args.title,
           isLayerTOCOpen: false,
