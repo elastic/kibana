@@ -141,7 +141,7 @@ export const randomSamplerText = (randomSamplerPreference: RandomSamplerOption) 
           'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.message',
           {
             defaultMessage:
-              'Random sampling can be turned on to increase the speed of analysis, although some accuracy will be lost.',
+              'Random sampling can be turned on to increase analysis speed. Accuracy will slightly decrease.',
           }
         ),
         buttonText: i18n.translate(
