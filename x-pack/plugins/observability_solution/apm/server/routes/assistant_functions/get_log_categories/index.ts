@@ -9,25 +9,32 @@ import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   SERVICE_NAME,
   CONTAINER_ID,
   HOST_NAME,
   KUBERNETES_POD_NAME,
+  PROCESSOR_EVENT,
+  TRACE_ID,
 } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
+import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
 
 export interface LogCategory {
   errorCategory: string;
   docCount: number;
   sampleMessage: string;
+  downstreamServiceResource?: string;
 }
 
 export async function getLogCategories({
+  apmEventClient,
   esClient,
   coreContext,
   arguments: args,
 }: {
+  apmEventClient: APMEventClient;
   esClient: ElasticsearchClient;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
   arguments: {
@@ -55,6 +62,10 @@ export async function getLogCategories({
 
   const query = {
     bool: {
+      must_not: [
+        // exclude APM errors
+        { term: { [PROCESSOR_EVENT]: 'error' } },
+      ],
       filter: [
         ...keyValueFilters,
         { exists: { field: 'message' } },
@@ -101,7 +112,7 @@ export async function getLogCategories({
                 top_hits: {
                   sort: { '@timestamp': 'desc' as const },
                   size: 1,
-                  _source: ['message'],
+                  _source: ['message', TRACE_ID],
                 },
               },
             },
@@ -111,12 +122,29 @@ export async function getLogCategories({
     },
   });
 
-  return categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
-    ({ doc_count: docCount, key, sample }) => {
-      const sampleMessage = (sample.hits.hits[0]._source as { message: string }).message;
-      return { errorCategory: key as string, docCount, sampleMessage };
+  const promises = categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
+    async ({ doc_count: docCount, key, sample }) => {
+      const hit = sample.hits.hits[0]._source as { message: string; trace?: { id: string } };
+      const sampleMessage = hit?.message;
+      const sampleTraceId = hit?.trace?.id;
+      const errorCategory = key as string;
+
+      if (!sampleTraceId) {
+        return { errorCategory, docCount, sampleMessage };
+      }
+
+      const downstreamServiceResource = await getDownstreamServiceResource({
+        traceId: sampleTraceId,
+        start,
+        end,
+        apmEventClient,
+      });
+
+      return { errorCategory, docCount, sampleMessage, downstreamServiceResource };
     }
   );
+
+  return Promise.all(promises ?? []);
 }
 
 // field/value pairs should match, or the field should not exist

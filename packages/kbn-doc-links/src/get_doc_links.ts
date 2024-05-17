@@ -479,6 +479,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
+      createDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -961,6 +962,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     playground: {
       chatPlayground: `${KIBANA_DOCS}playground.html`,
+      retrievalOptimize: `${KIBANA_DOCS}playground-query.html#playground-query-relevance`,
+      retrieval: `${KIBANA_DOCS}playground-query.html`,
+      context: `${KIBANA_DOCS}playground-context.html`,
+      hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
     },
   });
 };

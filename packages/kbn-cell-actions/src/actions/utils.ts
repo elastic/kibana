@@ -8,8 +8,8 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
-import { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
-import { DefaultActionsSupportedValue, NonNullableSerializable } from './types';
+import type { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
+import type { DefaultActionsSupportedValue, NonNullableSerializable } from './types';
 
 export const SUPPORTED_KBN_TYPES = [
   KBN_FIELD_TYPES.DATE,
