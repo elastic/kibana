@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import './field_name.scss';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
-import { FieldDescriptionIconButton, getFieldTypeName } from '@kbn/field-utils';
+import { getFieldTypeName } from '@kbn/field-utils';
 
 interface Props {
   fieldName: string;
@@ -41,12 +41,12 @@ export function FieldName({
   const isMultiField = !!subTypeMulti?.multi;
 
   return (
-    <Fragment>
+    <EuiFlexGroup responsive={false} gutterSize="s">
       <EuiFlexItem grow={false} className="kbnDocViewer__fieldIcon">
         <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
 
-      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart" direction="row">
+      <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
         <EuiFlexItem
           className="kbnDocViewer__fieldName eui-textBreakAll"
           grow={false}
@@ -61,12 +61,6 @@ export function FieldName({
             <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
           </EuiToolTip>
         </EuiFlexItem>
-
-        {fieldMapping?.customDescription ? (
-          <EuiFlexItem grow={false}>
-            <FieldDescriptionIconButton field={fieldMapping} />
-          </EuiFlexItem>
-        ) : null}
 
         {isMultiField && (
           <EuiToolTip
@@ -93,6 +87,6 @@ export function FieldName({
           </EuiToolTip>
         )}
       </EuiFlexGroup>
-    </Fragment>
+    </EuiFlexGroup>
   );
 }

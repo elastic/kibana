@@ -32,6 +32,7 @@ import {
   usePager,
 } from '@kbn/discover-utils';
 import {
+  FieldDescription,
   fieldNameWildcardMatcher,
   getFieldSearchMatchingHighlight,
   getTextBasedColumnIconType,
@@ -345,8 +346,8 @@ export const DocViewerTable = ({
     [fieldCellActions, fieldValueCellActions]
   );
 
-  const renderCellValue = useCallback(
-    ({ rowIndex, columnId }) => {
+  const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
+    ({ rowIndex, columnId, isDetails }) => {
       const row = rows[rowIndex];
 
       if (!row) {
@@ -361,7 +362,7 @@ export const DocViewerTable = ({
 
       if (columnId === 'name') {
         return (
-          <EuiFlexGroup responsive={false} gutterSize="s">
+          <div>
             <FieldName
               fieldName={field}
               fieldType={fieldType}
@@ -373,7 +374,13 @@ export const DocViewerTable = ({
               )}
             />
             {/* TODO: how to highlight pinned fields? */}
-          </EuiFlexGroup>
+
+            {isDetails && fieldMapping?.customDescription ? (
+              <div>
+                <FieldDescription field={fieldMapping} truncate={false} />
+              </div>
+            ) : null}
+          </div>
         );
       }
 
