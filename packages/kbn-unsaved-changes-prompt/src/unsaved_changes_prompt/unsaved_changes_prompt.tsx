@@ -26,22 +26,17 @@ export const UnsavedChangesPrompt: React.FC<Props> = ({
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
-        // These 2 lines of code are the recommendation from MDN for triggering
-        // a browser prompt for confirming whether or not a user wants to leave
-        // the current site.
+        // Prevent event from bubbling
         event.preventDefault();
+        // For legacy support, e.g. Chrome/Edge < 119
         event.returnValue = '';
       }
     };
 
-    // Adding this handler will prompt users if they are navigating to a new page,
-    // outside of the Kibana SPA.
     window.addEventListener('beforeunload', handler);
 
     return () => window.removeEventListener('beforeunload', handler);
   }, [hasUnsavedChanges]);
 
-  // Adding this Prompt will prompt users if they are navigating to a new page,
-  // within the Kibana SPA.
   return <Prompt when={hasUnsavedChanges} message={messageText} />;
 };
