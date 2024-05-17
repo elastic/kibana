@@ -82,6 +82,7 @@ import {
   MITRE_TACTIC,
   QUERY_BAR,
   REFERENCE_URLS_INPUT,
+  REQUIRED_FIELD_COMBO_BOX_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -478,6 +479,18 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
     cy.get(LOOK_BACK_TIME_TYPE).select(additionalLookbackType);
   }
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
+};
+
+export const fillRequiredFields = (): void => {
+  addRequiredField();
+  addRequiredField();
+};
+
+const addRequiredField = (): void => {
+  cy.contains('button', 'Add required field').should('be.enabled').click();
+
+  cy.get(REQUIRED_FIELD_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(COMBO_BOX_OPTION).first().click();
 };
 
 /**
