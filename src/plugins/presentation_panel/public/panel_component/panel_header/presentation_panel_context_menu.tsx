@@ -154,26 +154,28 @@ export const PresentationPanelContextMenu = ({
       {api && (
         <>
           {viewMode === 'edit' && (
-            <div
-              data-test-subj={`embPanel__floatingActions__${api?.uuid}__left`}
-              className={classNames(
-                'embPanel__floatingActions',
-                'embPanel__floatingActionsLeft',
-                className,
-                {
-                  'embPanel__floatingActions--openContextMenu': isContextMenuOpen,
-                }
-              )}
-            >
-              <EuiIcon
-                // type={moveSVG}
-                type="grabOmnidirectional"
-                className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-                aria-label={i18n.translate('presentationPanel.dragHandle', {
-                  defaultMessage: 'Move panel',
-                })}
-              />
-            </div>
+            <>
+              <div
+                data-test-subj={`embPanel__floatingActions__${api?.uuid}__left`}
+                className={classNames(
+                  'embPanel__floatingActions',
+                  'embPanel__floatingActionsLeft',
+                  className,
+                  {
+                    'embPanel__floatingActions--openContextMenu': isContextMenuOpen,
+                  }
+                )}
+              >
+                <EuiIcon
+                  type="grabOmnidirectional"
+                  color="text"
+                  className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
+                  aria-label={i18n.translate('presentationPanel.dragHandle', {
+                    defaultMessage: 'Move panel',
+                  })}
+                />
+              </div>
+            </>
           )}
           <div
             data-test-subj={`embPanel__floatingActions__${api?.uuid}__right`}
