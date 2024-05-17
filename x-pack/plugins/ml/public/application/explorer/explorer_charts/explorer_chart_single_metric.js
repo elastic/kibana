@@ -40,13 +40,15 @@ import {
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 import { TRANSPARENT_BACKGROUND } from './constants';
+import { filter } from 'rxjs';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
+const CHART_HEIGHT = 170;
+
 export class ExplorerChartSingleMetric extends React.Component {
   static contextType = context;
-
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
@@ -55,15 +57,75 @@ export class ExplorerChartSingleMetric extends React.Component {
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
-    cursor: PropTypes.object,
+    cursor$: PropTypes.object,
+    id: PropTypes.string.isRequired,
   };
 
+  constructor(props) {
+    super(props);
+    this.chartScales = undefined;
+  }
   componentDidMount() {
-    this.renderChart();
+    const chartScales = this.renderChart();
+    this.updateChartScales(chartScales);
+
+    this.cursor = this.props.cursor$.pipe(filter((c) => c.isDateHistogram)).subscribe((cursor) => {
+      this.drawCursor(cursor.cursor);
+    });
+  }
+
+  componentWillUnmount() {
+    this.cursor?.unsubscribe();
   }
 
   componentDidUpdate() {
-    this.renderChart();
+    const chartScales = this.renderChart();
+    this.updateChartScales(chartScales);
+  }
+
+  updateChartScales(chartScales) {
+    this.chartScales = chartScales;
+  }
+
+  drawCursor(cursor) {
+    if (!this.chartScales) return;
+    const { lineChartXScale, margin: updatedMargin } = this.chartScales;
+    const { id: chartId, seriesConfig: config } = this.props;
+
+    const element = this.rootNode;
+    const chartElement = d3.select(element).select('#ml-explorer-chart-svg' + chartId);
+    if (!chartElement || !lineChartXScale) return;
+    const { chartTheme } = this.props;
+    chartElement.select('.ml-anomaly-chart-cursor-line').remove();
+
+    const cursorData =
+      cursor &&
+      cursor.type === 'Over' &&
+      cursor.x >= config.plotEarliest &&
+      cursor.x <= config.plotLatest
+        ? [cursor.x]
+        : [];
+
+    const cursorMouseLine = chartElement
+      .append('g')
+      .attr('class', 'ml-anomaly-chart-cursor')
+      .selectAll('.ml-anomaly-chart-cursor-line')
+      .data(cursorData);
+
+    cursorMouseLine
+      .enter()
+      .append('path')
+      .attr('class', 'ml-anomaly-chart-cursor-line')
+      .attr('d', (ts) => {
+        const xPosition = lineChartXScale(ts);
+        return `M${xPosition},${CHART_HEIGHT} ${xPosition},0`;
+      })
+      // Use elastic chart's cursor line style if possible
+      .style('stroke', chartTheme.crosshair.line.stroke)
+      .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
+      .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4')
+      .attr('transform', 'translate(' + updatedMargin.left + ',' + updatedMargin.top + ')');
+    cursorMouseLine.exit().remove();
   }
 
   renderChart() {
@@ -73,8 +135,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
-      chartTheme,
-      cursor,
+      id: chartId,
     } = this.props;
 
     const element = this.rootNode;
@@ -92,7 +153,6 @@ export class ExplorerChartSingleMetric extends React.Component {
     );
 
     let vizWidth = 0;
-    const chartHeight = 170;
 
     // Left margin is adjusted later for longest y-axis label.
     const margin = { top: 10, right: 0, bottom: 30, left: 60 };
@@ -112,18 +172,19 @@ export class ExplorerChartSingleMetric extends React.Component {
       chartElement.select('svg').remove();
 
       const svgWidth = element.clientWidth;
-      const svgHeight = chartHeight + margin.top + margin.bottom;
+      const svgHeight = CHART_HEIGHT + margin.top + margin.bottom;
 
       const svg = chartElement
         .append('svg')
         .classed('ml-explorer-chart-svg', true)
+        .attr('id', 'ml-explorer-chart-svg' + chartId)
         .attr('width', svgWidth)
         .attr('height', svgHeight);
 
       // Set the size of the left margin according to the width of the largest y axis tick label.
       lineChartYScale = d3.scale
         .linear()
-        .range([chartHeight, 0])
+        .range([CHART_HEIGHT, 0])
         .domain([chartLimits.min, chartLimits.max])
         .nice();
 
@@ -188,7 +249,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .append('rect')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('height', chartHeight)
+        .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
         .style('stroke', '#cccccc')
         .style('fill', 'none')
@@ -196,18 +257,18 @@ export class ExplorerChartSingleMetric extends React.Component {
 
       drawLineChartAxes();
       drawLineChartHighlightedSpan();
-      drawSyncedCursorLine(lineChartGroup);
+      drawCursorListener(lineChartGroup);
       drawLineChartPaths(data);
       drawLineChartDots(data, lineChartGroup, lineChartValuesLine);
       drawLineChartMarkers(data);
     }
 
-    function drawSyncedCursorLine(lineChartGroup) {
+    function drawCursorListener(lineChartGroup) {
       lineChartGroup
         .append('rect')
         .attr('x', 0)
         .attr('y', 0)
-        .attr('height', chartHeight)
+        .attr('height', CHART_HEIGHT)
         .attr('width', vizWidth)
         .on('mouseout', function () {
           onPointerUpdate({
@@ -235,35 +296,6 @@ export class ExplorerChartSingleMetric extends React.Component {
           }
         })
         .style('fill', TRANSPARENT_BACKGROUND);
-
-      const cursorData =
-        cursor &&
-        cursor.type === 'Over' &&
-        cursor.x >= config.plotEarliest &&
-        cursor.x <= config.plotLatest
-          ? [cursor.x]
-          : [];
-
-      const cursorMouseLine = lineChartGroup
-        .append('g')
-        .attr('class', 'ml-anomaly-chart-cursor')
-        .selectAll('.ml-anomaly-chart-cursor-line')
-        .data(cursorData);
-
-      cursorMouseLine
-        .enter()
-        .append('path')
-        .attr('class', 'ml-anomaly-chart-cursor-line')
-        .attr('d', (ts) => {
-          const xPosition = lineChartXScale(ts);
-          return `M${xPosition},${chartHeight} ${xPosition},0`;
-        })
-        // Use elastic chart's cursor line style if possible
-        .style('stroke', chartTheme.crosshair.line.stroke)
-        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4');
-
-      cursorMouseLine.exit().remove();
     }
 
     function drawLineChartAxes() {
@@ -281,7 +313,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .axis()
         .scale(lineChartXScale)
         .orient('bottom')
-        .innerTickSize(-chartHeight)
+        .innerTickSize(-CHART_HEIGHT)
         .outerTickSize(0)
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
@@ -320,7 +352,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       const gAxis = axes
         .append('g')
         .attr('class', 'x axis')
-        .attr('transform', 'translate(0,' + chartHeight + ')')
+        .attr('transform', 'translate(0,' + CHART_HEIGHT + ')')
         .call(xAxis);
 
       axes.append('g').attr('class', 'y axis').call(yAxis);
@@ -348,7 +380,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr('rx', 3)
         .attr('ry', 3)
         .attr('width', rectWidth - 4)
-        .attr('height', chartHeight - 4);
+        .attr('height', CHART_HEIGHT - 4);
     }
 
     function drawLineChartPaths(data) {
@@ -583,6 +615,8 @@ export class ExplorerChartSingleMetric extends React.Component {
         y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
+
+    return { lineChartXScale, margin };
   }
 
   shouldComponentUpdate() {
