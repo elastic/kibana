@@ -420,7 +420,7 @@ function getDateRange(
     const now = moment();
     return {
       range: {
-        from: now.clone().subtract(timeWindow.duration.value, unit).startOf('day').toDate(),
+        from: now.clone().subtract(timeWindow.duration.value, unit).startOf('minute').toDate(),
         to: now.clone().startOf('minute').toDate(),
       },
       queryRange: {
