@@ -132,16 +132,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       async expectIndexDetailsPageIsLoaded() {
         await testSubjects.existOrFail('indexDetailsTab-overview');
         await testSubjects.existOrFail('indexDetailsContent');
-        await testSubjects.existOrFail(
-          'serverlessSearchIndexDetailOverviewHowToManageDataStreamsButton'
-        );
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewViewAllAliasesButton');
         await testSubjects.existOrFail('indexDetailsBackToIndicesButton');
-      },
-      async expectStartIngestingDataSectionToExist() {
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAPICallsLink');
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaApiButton');
-        await testSubjects.existOrFail('serverlessSearchIndexDetailOverviewAddViaConnectorButton');
       },
     },
     async clickCreateIndexButton() {

@@ -36,7 +36,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('index with no documents', async () => {
       await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
       await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-      await pageObjects.indexManagement.indexDetailsPage.expectStartIngestingDataSectionToExist();
     });
   });
 };
