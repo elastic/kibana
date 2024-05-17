@@ -23,6 +23,7 @@ interface UseRowHeightProps {
   key: string;
   configRowHeight: number;
   rowHeightState?: number;
+  modeHasChanged: boolean;
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
@@ -32,12 +33,11 @@ export const useRowHeight = ({
   key,
   configRowHeight,
   rowHeightState,
+  modeHasChanged,
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
   const rowHeightLines = useMemo(() => {
     const rowHeightFromLS = getStoredRowHeight(storage, consumer, key);
-
-    // need to understand when there is a transition from ESQL to DSL and vice versa
 
     const configHasNotChanged = (
       localStorageRecord: DataGridOptionsRecord | null
@@ -45,7 +45,7 @@ export const useRowHeight = ({
       localStorageRecord !== null && configRowHeight === localStorageRecord.previousConfigRowHeight;
 
     let currentRowLines: number;
-    if (isValidRowHeight(rowHeightState)) {
+    if (isValidRowHeight(rowHeightState) && !modeHasChanged) {
       currentRowLines = rowHeightState;
     } else if (configHasNotChanged(rowHeightFromLS)) {
       currentRowLines = rowHeightFromLS.previousRowHeight;
@@ -54,7 +54,7 @@ export const useRowHeight = ({
     }
 
     return currentRowLines;
-  }, [configRowHeight, consumer, key, rowHeightState, storage]);
+  }, [configRowHeight, consumer, key, modeHasChanged, rowHeightState, storage]);
 
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
     switch (rowHeightLines) {
