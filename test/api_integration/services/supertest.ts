@@ -13,13 +13,15 @@ import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
+export function KibanaSupertestProvider({ getService }: FtrProviderContext): supertest.Agent {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
   return supertest(kibanaServerUrl);
 }
 
-export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
+export function ElasticsearchSupertestProvider({
+  getService,
+}: FtrProviderContext): supertest.Agent {
   const config = getService('config');
   const esServerConfig = config.get('servers.elasticsearch');
 
