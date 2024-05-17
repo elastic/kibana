@@ -169,11 +169,11 @@ export const getAgentData = async (
           },
           privileges: {
             filters: {
-              other_bucket_key: 'unprivileged',
+              other_bucket_key: 'root',
               filters: {
-                root: {
+                unprivileged: {
                   match: {
-                    'local_metadata.elastic.agent.unprivileged': false,
+                    'local_metadata.elastic.agent.unprivileged': true,
                   },
                 },
               },

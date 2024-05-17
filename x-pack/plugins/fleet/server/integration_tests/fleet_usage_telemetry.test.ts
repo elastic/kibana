@@ -135,6 +135,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '22.04.2 LTS (Jammy Jellyfish)',
             },
+            elastic: { agent: { unprivileged: false } }, // Root agent
           },
           components: [
             {
@@ -172,6 +173,7 @@ describe('fleet usage telemetry', () => {
               name: 'Ubuntu',
               version: '20.04.5 LTS (Focal Fossa)',
             },
+            elastic: { agent: { unprivileged: true } }, // Non root agent
           },
           components: [
             {
@@ -483,8 +485,8 @@ describe('fleet usage telemetry', () => {
         },
         packages: [],
         agents_per_privileges: {
-          root: 0,
-          unprivileged: 4,
+          root: 3,
+          unprivileged: 1,
         },
         agents_per_version: [
           {
