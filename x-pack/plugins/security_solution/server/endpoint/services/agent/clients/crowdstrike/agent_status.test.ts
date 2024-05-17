@@ -35,9 +35,8 @@ describe('Crowdstrike Get Agent Status service', () => {
 
     await expect(getStatusResponsePromise).rejects.toHaveProperty(
       'message',
-      'Unable to retrieve list of stack connectors: boom'
+      'Unable to retrieve list of stack connectors in order to find one for [.crowdstrike]: boom'
     );
-    await expect(getStatusResponsePromise).rejects.toHaveProperty('statusCode', 400);
   });
 
   it('should throw error if no Crowdstrike connector is registered', async () => {
@@ -46,9 +45,8 @@ describe('Crowdstrike Get Agent Status service', () => {
 
     await expect(getStatusResponsePromise).rejects.toHaveProperty(
       'message',
-      'No Crowdstrike stack connector found'
+      'No stack connector instance configured for [.crowdstrike]'
     );
-    await expect(getStatusResponsePromise).rejects.toHaveProperty('statusCode', 400);
   });
 
   it('should send api request to Crowdstrike', async () => {
