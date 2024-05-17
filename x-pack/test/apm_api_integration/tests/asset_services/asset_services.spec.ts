@@ -21,15 +21,20 @@ import {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const assetsSynthtraceClient = getService('assetsSynthtraceEsClient');
+  const apmSynthtraceClient = getService('apmSynthtraceEsClient');
+  const logSynthtraceClient = getService('logSynthtraceEsClient');
 
-  const start = new Date(moment().subtract(10, 'minutes').valueOf()).toISOString();
-  const end = new Date(moment().valueOf()).toISOString();
+  const now = new Date();
+  const start = new Date(moment(now).subtract(10, 'minutes').valueOf()).toISOString();
+  const end = new Date(moment(now).valueOf()).toISOString();
   const range = timerange(start, end);
 
   async function getServiceAssets(
@@ -44,6 +49,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start,
           end,
           kuery: '',
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+          useDurationSummary: false,
           ...overrides?.query,
         },
       },
@@ -65,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Asset services when data is loaded', { config: 'basic', archives: [] }, () => {
-    before(async () => {
+    before(() => {
       const transactionName = '240rpm/75% 1000ms';
 
       const successfulTimestamps = range.interval('1m').rate(1);
@@ -167,16 +175,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       function* createGeneratorFromArray(arr: Array<Serializable<any>>) {
         yield* arr;
       }
+
+      const logsValuesArray = [...logEvents];
+      const logsGen = createGeneratorFromArray(logsValuesArray);
+      const logsGenAssets = createGeneratorFromArray(logsValuesArray);
+
       const traces = instances.flatMap((instance) => instanceSpans(instance));
+      const tracesGen = createGeneratorFromArray(traces);
       const tracesGenAssets = createGeneratorFromArray(traces);
 
-      //
-      return await assetsSynthtraceClient.index(
-        Readable.from(Array.from(logEvents).concat(Array.from(tracesGenAssets)))
-      );
+      return Promise.all([
+        assetsSynthtraceClient.index(
+          Readable.from(Array.from(logsGenAssets).concat(Array.from(tracesGenAssets)))
+        ),
+        logSynthtraceClient.index(logsGen),
+        apmSynthtraceClient.index(tracesGen),
+      ]);
     });
 
     after(async () => {
+      await logSynthtraceClient.clean();
+      await apmSynthtraceClient.clean();
       await assetsSynthtraceClient.clean();
     });
 
@@ -215,6 +234,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(logsOnly?.asset.signalTypes).to.eql({ 'asset.logs': true });
         expect(logsOnly?.service.environment).not.to.be('testing');
       });
+
+      it('return traces and logs metrics for services when multi-signals', () => {
+        const multiSignalService = response.body.services.find(
+          (item) => item.service.name === 'multisignal-service'
+        );
+
+        expect(multiSignalService?.metrics.latency).to.be(1000 * 1000); // microseconds
+        expect(multiSignalService?.metrics.throughput).to.be(2);
+        expect(multiSignalService?.metrics.transactionErrorRate).to.be(0.5);
+        expect(multiSignalService?.metrics.logRatePerMinute).to.be(1);
+        expect(multiSignalService?.metrics.logErrorRate).to.be(1);
+      });
+
+      it('return traces only metrics', () => {
+        const apmService = response.body.services.find(
+          (item) => item.service.name === 'apm-only-service'
+        );
+
+        expect(apmService?.metrics.latency).to.be(1000 * 1000); // microseconds
+        expect(apmService?.metrics.throughput).to.be(2);
+        expect(apmService?.metrics.transactionErrorRate).to.be(0.5);
+        expect(apmService?.metrics.logRatePerMinute).to.be(undefined);
+        expect(apmService?.metrics.logErrorRate).to.be(undefined);
+      });
+
+      it('return logs only metrics', () => {
+        const logsService = response.body.services.find(
+          (item) => item.service.name === 'logs-only-service'
+        );
+
+        expect(logsService?.metrics.latency).to.be(undefined);
+        expect(logsService?.metrics.throughput).to.be(undefined);
+        expect(logsService?.metrics.transactionErrorRate).to.be(undefined);
+        expect(logsService?.metrics.logRatePerMinute).to.be(1);
+        expect(logsService?.metrics.logErrorRate).to.be(1);
+      });
     });
 
     describe('when additional filters are applied', () => {
@@ -229,8 +284,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns services when the time range is within the data range', async () => {
         response = await getServiceAssets({
           query: {
-            start: new Date(moment().subtract(2, 'days').valueOf()).toISOString(),
-            end: new Date(moment().add(1, 'days').valueOf()).toISOString(),
+            start: new Date(moment(now).subtract(2, 'days').valueOf()).toISOString(),
+            end: new Date(moment(now).add(1, 'days').valueOf()).toISOString(),
           },
         });
 
@@ -246,6 +301,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const service = response.body.services[0];
         expect(service.service.name).to.be('logs-only-service');
         expect(service.asset.signalTypes['asset.logs']).to.be(true);
+        expect(service.metrics.latency).to.be(undefined);
+        expect(service.metrics.throughput).to.be(undefined);
+        expect(service.metrics.transactionErrorRate).to.be(undefined);
+        expect(service.metrics.logRatePerMinute).to.be(1);
+        expect(service.metrics.logErrorRate).to.be(1);
       });
 
       it('returns not services when filtering by a field that does not exist in assets', async () => {
