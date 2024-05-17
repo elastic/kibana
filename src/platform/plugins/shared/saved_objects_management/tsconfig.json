@@ -33,7 +33,6 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-table-persist",
-    "@kbn/core-di-common",
   ],
   "exclude": [
     "target/**/*",
