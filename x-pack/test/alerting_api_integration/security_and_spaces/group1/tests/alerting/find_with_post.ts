@@ -19,14 +19,12 @@ const findTestUtils = (
   supertest: SuperTestAgent,
   supertestWithoutAuth: any
 ) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/182314
-  describe.skip(describeType, () => {
+  describe(describeType, () => {
     afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      // FLAKY: https://github.com/elastic/kibana/issues/182314
-      describe.skip(scenario.id, () => {
+      describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
