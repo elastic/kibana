@@ -19,7 +19,12 @@ import {
   fetchEndpointActionResponses,
 } from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
-import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
+import {
+  getActionCompletionInfo,
+  getActionRequestExpiration,
+  mapResponsesByActionId,
+  mapToNormalizedActionRequest,
+} from '../../utils';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
@@ -70,7 +75,6 @@ import type {
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
-import { ActivityLogItemTypes } from '../../../../../../common/endpoint/types';
 
 const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
@@ -152,6 +156,15 @@ export interface FetchActionResponseEsDocsResponse<
   TMeta extends {} = {}
 > {
   [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
+}
+
+export interface ResponseActionsClientPendingAction<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  action: LogsEndpointAction<TParameters, TOutputContent, TMeta>;
+  pendingAgentIds: string[];
 }
 
 /**
@@ -548,7 +561,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     return validateActionId(this.options.esClient, actionId, this.agentType);
   }
 
-  protected fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+  protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = {
       bool: {
@@ -574,62 +587,42 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         sort: '@timestamp',
         query,
       },
-      resultsMapper: async (data): Promise<LogsEndpointAction[]> => {
+      resultsMapper: async (data): Promise<ResponseActionsClientPendingAction[]> => {
         const actionRequests = data.hits.hits.map((hit) => hit._source as LogsEndpointAction);
-        const pendingRequests: LogsEndpointAction[] = [];
+        const pendingRequests: ResponseActionsClientPendingAction[] = [];
 
         if (actionRequests.length > 0) {
-          const actionResults = (
-            await fetchActionResponses({
-              esClient,
-              actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
-            })
-          ).data;
-          const categorizedResults = categorizeResponseResults({ results: actionResults });
-
-          // An object whose keys are the Action ID and values are an array of agent IDs that have sent their responses
-          // ex: { uuid-1: [ agentA, agentB ] }
-          const agentResponsesForActionId = categorizedResults.reduce((acc, categoriezedResult) => {
-            let actionId = '';
-            let agentId = '';
-
-            if (categoriezedResult.type === ActivityLogItemTypes.RESPONSE) {
-              actionId = categoriezedResult.item.data.EndpointActions.action_id;
-              agentId = Array.isArray(categoriezedResult.item.data.agent.id)
-                ? categoriezedResult.item.data.agent.id[0]
-                : categoriezedResult.item.data.agent.id;
-            } else {
-              actionId = categoriezedResult.item.data.action_id;
-              agentId = categoriezedResult.item.data.agent_id;
-            }
-
-            if (!acc[actionId]) {
-              acc[actionId] = [];
-            }
-
-            acc[actionId].push(agentId);
-
-            return acc;
-          }, {} as Record<string, string[]>);
+          const actionResults = await fetchActionResponses({
+            esClient,
+            actionIds: actionRequests.map((action) => action.EndpointActions.action_id),
+          });
+          const responsesByActionId = mapResponsesByActionId(actionResults);
 
           // Determine what actions are still pending
           for (const actionRequest of actionRequests) {
-            const thisActionAgentResponses =
-              agentResponsesForActionId[actionRequest.EndpointActions.action_id];
-
-            if (!thisActionAgentResponses) {
-              pendingRequests.push(actionRequest);
-            } else {
-              const thisActionAgentIds = Array.isArray(actionRequest.agent.id)
-                ? actionRequest.agent.id
-                : [actionRequest.agent.id];
-
-              // If at least one Agent has not yet sent a response, then this action is still pending
-              if (
-                !thisActionAgentIds.every((agentId) => thisActionAgentResponses.includes(agentId))
-              ) {
-                pendingRequests.push(actionRequest);
+            const actionCompleteInfo = getActionCompletionInfo(
+              mapToNormalizedActionRequest(actionRequest),
+              responsesByActionId[actionRequest.EndpointActions.action_id] ?? {
+                endpointResponses: [],
+                fleetResponses: [],
               }
+            );
+
+            // If not completed, add action to the pending list and calculate the list of agent IDs
+            // whose response we are still waiting on
+            if (!actionCompleteInfo.isCompleted) {
+              const pendingActionData: ResponseActionsClientPendingAction = {
+                action: actionRequest,
+                pendingAgentIds: [],
+              };
+
+              for (const [agentId, agentIdState] of Object.entries(actionCompleteInfo.agentState)) {
+                if (!agentIdState.isCompleted) {
+                  pendingActionData.pendingAgentIds.push(agentId);
+                }
+              }
+
+              pendingRequests.push(pendingActionData);
             }
           }
         }
