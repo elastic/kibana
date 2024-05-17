@@ -16,7 +16,7 @@ import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
 
-const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
+export const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
   const { http, docLinks } = start.core;
   const locator = start.plugins?.share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
