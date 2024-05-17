@@ -318,10 +318,6 @@ export function claimAvailableTasks(
       })
       .subscribe(
         (claimResult) => {
-          if (isOk(claimResult)) {
-            // eslint-disable-next-line no-console
-            console.log('Claim result:', JSON.stringify(claimResult.value.stats));
-          }
           observer.next(claimResult);
         },
         (ex) => {

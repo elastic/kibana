@@ -172,7 +172,7 @@ async function markAvailableTasksAsClaimed({
 }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
   const partitions = await taskPartitioner.getPartitions();
   // eslint-disable-next-line no-console
-  console.log('Running claiming on partitions:', JSON.stringify(partitions));
+  // console.log('Running claiming on partitions:', JSON.stringify(partitions));
 
   const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
     definitions.getAllTypes(),

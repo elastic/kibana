@@ -135,15 +135,15 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       }
     }
 
-    for (const doc of missingTasks) {
-      // eslint-disable-next-line no-console
-      console.log(`Task ${doc.id} is missing from the task store or something`);
-    }
+    // for (const doc of missingTasks) {
+    //   // eslint-disable-next-line no-console
+    //   console.log(`Task ${doc.id} is missing from the task store or something`);
+    // }
 
-    for (const doc of staleTasks) {
-      // eslint-disable-next-line no-console
-      console.log(`Task ${doc.id} is stale`);
-    }
+    // for (const doc of staleTasks) {
+    //   // eslint-disable-next-line no-console
+    //   console.log(`Task ${doc.id} is stale`);
+    // }
 
     const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
     const now = new Date();
@@ -232,7 +232,7 @@ async function searchAvailableTasks({
   // );
   const partitions = await taskPartitioner.getPartitions();
   // eslint-disable-next-line no-console
-  console.log('Running claiming on partitions:', JSON.stringify(partitions));
+  // console.log('Running claiming on partitions:', JSON.stringify(partitions));
   const queryForScheduledTasks = mustBeAllOf(
     // Task must be enabled
     EnabledTask,
