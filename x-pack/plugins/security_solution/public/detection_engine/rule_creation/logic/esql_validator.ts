@@ -94,7 +94,7 @@ export const esqlValidator = async (
 
 /**
  * check if esql query valid for Security rule:
- * - it it's non aggregation query it must have metadata operator
+ * - if it's non aggregation query it must have metadata operator
  */
 export const parseEsqlQuery = (query: string) => {
   const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
