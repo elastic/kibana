@@ -116,7 +116,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   return (
     <>
-      <UnsavedChangesPrompt hasUnsavedChanges={isFormDirty} />
+      <UnsavedChangesPrompt hasUnsavedChanges={isFormDirty && !form.isValid} />
 
       <Form
         form={form}
