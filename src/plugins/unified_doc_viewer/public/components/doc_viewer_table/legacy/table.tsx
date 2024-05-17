@@ -37,19 +37,26 @@ export const DocViewerLegacyTable = ({
   const tableColumns = useMemo(() => {
     return !hideActionsColumn ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
   }, [hideActionsColumn]);
-  const onToggleColumn = useCallback(
+
+  const isAddedAsColumn = useCallback(
     (field: string) => {
-      if (!onRemoveColumn || !onAddColumn || !columns) {
-        return;
-      }
+      return columns?.includes(field) ?? false;
+    },
+    [columns]
+  );
+
+  const onToggleColumn = useMemo(() => {
+    if (!onRemoveColumn || !onAddColumn || !columns) {
+      return undefined;
+    }
+    return (field: string) => {
       if (columns.includes(field)) {
         onRemoveColumn(field);
       } else {
         onAddColumn(field);
       }
-    },
-    [onRemoveColumn, onAddColumn, columns]
-  );
+    };
+  }, [onRemoveColumn, onAddColumn, columns]);
 
   const onSetRowProps = useCallback(({ field: { field } }: FieldRecordLegacy) => {
     return {
@@ -88,6 +95,7 @@ export const DocViewerLegacyTable = ({
           onFilter: filter,
           isActive: !!columns?.includes(field),
           flattenedField: hit.flattened[field],
+          isAddedAsColumn,
         },
         field: {
           field,
