@@ -13,7 +13,7 @@ import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/
 import { GEMINI_TITLE, GEMINI_CONNECTOR_ID } from '../../../../common/gemini/constants';
 
 
-const getDashboardTitle = (title: string) => `${title} Token Usage`;
+export const getDashboardTitle = (title: string) => `${title} Token Usage`;
 
 export const getDashboard = (
   genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini',
