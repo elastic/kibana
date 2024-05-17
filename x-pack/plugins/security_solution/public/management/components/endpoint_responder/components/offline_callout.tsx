@@ -26,6 +26,7 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
   const isSentinelOneAgent = agentType === 'sentinel_one';
   const isCrowdstrikeAgent = agentType === 'crowdstrike';
   const getAgentStatus = useAgentStatusHook();
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
@@ -39,13 +40,14 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
 
   const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
     refetchInterval: 10000,
-    enabled: isEndpointAgent,
+    enabled: isEndpointAgent && !agentStatusClientEnabled,
   });
 
   const { data } = getAgentStatus([endpointId], agentType, {
     enabled:
       (sentinelOneManualHostActionsEnabled && isSentinelOneAgent) ||
-      (crowdstrikeManualHostActionsEnabled && isSentinelOneAgent),
+      (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAgent) ||
+      (isEndpointAgent && agentStatusClientEnabled),
   });
   // TODO: simplify this to use the yet to be implemented agentStatus API hook
   const showOfflineCallout = useMemo(

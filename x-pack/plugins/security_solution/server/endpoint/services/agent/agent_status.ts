@@ -5,21 +5,29 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-
+import type { Logger } from '@kbn/core/server';
 import { keyBy, merge } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import { stringify } from '../../../../utils/stringify';
-import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
-import { HostStatus } from '../../../../../../common/endpoint/types';
-import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
-import type { GetAgentStatusOptions } from '../lib/types';
+import { stringify } from '../../utils/stringify';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import type { AgentStatusInfo } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
+export interface GetAgentStatusOptions {
+  // NOTE: only sentinel_one currently supported
+  agentType: ResponseActionAgentType;
+  agentIds: string[];
+  connectorActionsClient: ActionsClient;
+  logger: Logger;
+}
 export const getSentinelOneAgentStatus = async ({
   agentType,
   agentIds,

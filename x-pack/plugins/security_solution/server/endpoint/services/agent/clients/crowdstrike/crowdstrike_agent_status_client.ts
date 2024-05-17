@@ -10,17 +10,15 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { keyBy } from 'lodash';
 import type { RawCrowdstrikeInfo } from './types';
 import { catchAndWrapError } from '../../../../utils';
-import { getPendingActionsSummary } from '../../..';
+import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { AgentStatusClientError } from '../errors';
-import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 
 const CROWDSTRIKE_AGENT_INDEX_PATTERN = `logs-crowdstrike.host-*`;
 
@@ -40,31 +38,13 @@ export enum CROWDSTRIKE_STATUS_RESPONSE {
 export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
   private async getAgentStatusFromConnectorAction(agentIds: string[]) {
-    const connectorActionsClient = this.options.connectorActionsClient;
+    const connectorActions = new NormalizedExternalConnectorClient(
+      this.options.connectorActionsClient,
+      this.log
+    );
+    connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
 
-    let connectorList: ConnectorWithExtraFindData[] = [];
-
-    try {
-      connectorList = await connectorActionsClient.getAll();
-    } catch (err) {
-      throw new CustomHttpRequestError(
-        `Unable to retrieve list of stack connectors: ${err.message}`,
-        // failure here is likely due to Authz, but because we don't have a good way to determine that,
-        // the `statusCode` below is set to `400` instead of `401`.
-        400,
-        err
-      );
-    }
-    const connector = connectorList.find(({ actionTypeId, isDeprecated, isMissingSecrets }) => {
-      return actionTypeId === CROWDSTRIKE_CONNECTOR_ID && !isDeprecated && !isMissingSecrets;
-    });
-
-    if (!connector) {
-      throw new CustomHttpRequestError(`No Crowdstrike stack connector found`, 400, connectorList);
-    }
-
-    const agentStatusResponse = (await connectorActionsClient.execute({
-      actionId: connector.id,
+    const agentStatusResponse = (await connectorActions.execute({
       params: {
         subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
         subActionParams: {

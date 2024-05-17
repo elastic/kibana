@@ -7,7 +7,6 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import { getSentinelOneAgentStatus } from '../../services/agent/clients/sentinel_one/agent_status';
-import { getCrowdstrikeAgentStatus } from '../../services/agent/clients/crowdstrike/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -85,28 +84,15 @@ export const getAgentStatusRouteHandler = (
       connectorActionsClient: (await context.actions).getActionsClient(),
     });
 
-    const getAgentStatusByType = async () => {
-      if (agentType === 'sentinel_one') {
-        return getSentinelOneAgentStatus({
-          agentType,
-          agentIds,
-          logger,
-          connectorActionsClient: (await context.actions).getActionsClient(),
-        });
-      }
-      if (agentType === 'crowdstrike') {
-        return getCrowdstrikeAgentStatus({
-          agentType,
-          agentIds,
-          logger,
-          connectorActionsClient: (await context.actions).getActionsClient(),
-        });
-      }
-    };
     // 8.15: use the new `agentStatusClientEnabled` FF enabled
     const getAgentStatus = endpointContext.experimentalFeatures.agentStatusClientEnabled
       ? await agentStatusClient.getAgentStatuses(agentIds)
-      : await getAgentStatusByType();
+      : await getSentinelOneAgentStatus({
+          agentType,
+          agentIds,
+          logger,
+          connectorActionsClient: (await context.actions).getActionsClient(),
+        });
 
     logger.debug(
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`

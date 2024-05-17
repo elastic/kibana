@@ -16,7 +16,6 @@ import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoin
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { getAgentStatusText } from '../agent_status_text';
 import { AgentResponseActionsStatus } from './agent_response_action_status';
-import { HostStatus } from '../../../../../common/endpoint/types';
 export enum SENTINEL_ONE_NETWORK_STATUS {
   CONNECTING = 'connecting',
   CONNECTED = 'connected',
@@ -75,23 +74,19 @@ export const AgentStatus = React.memo(
         data-test-subj={dataTestSubj}
       >
         <EuiFlexItem grow={false} />
-        {isFetched && !isLoading && agentStatus ? (
-          <EuiBadge
-            color={HOST_STATUS_TO_BADGE_COLOR[agentStatus.status]}
-            className="eui-textTruncate"
-            data-test-subj={getTestId('agentStatus')}
-          >
-            {getAgentStatusText(agentStatus.status)}
-          </EuiBadge>
-        ) : (
-          <EuiBadge
-            color={HOST_STATUS_TO_BADGE_COLOR[HostStatus.UNENROLLED]}
-            className="eui-textTruncate"
-            data-test-subj={getTestId('agentStatus')}
-          >
-            {getAgentStatusText(HostStatus.UNKNOWN)}
-          </EuiBadge>
-        )}
+        <EuiFlexItem grow={false}>
+          {isFetched && !isLoading && agentStatus ? (
+            <EuiBadge
+              color={HOST_STATUS_TO_BADGE_COLOR[agentStatus.status]}
+              className="eui-textTruncate"
+              data-test-subj={getTestId('agentStatus')}
+            >
+              {getAgentStatusText(agentStatus.status)}
+            </EuiBadge>
+          ) : (
+            '-'
+          )}
+        </EuiFlexItem>
         {(isCurrentlyIsolated || hasPendingActions) && (
           <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
             <AgentResponseActionsStatus

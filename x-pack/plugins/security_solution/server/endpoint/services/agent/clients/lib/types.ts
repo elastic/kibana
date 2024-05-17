@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { AgentStatusRecords } from '../../../../../../common/endpoint/types';
 
-import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 export interface AgentStatusClientInterface {
   getAgentStatuses: (agentIds: string[]) => Promise<AgentStatusRecords>;
-}
-
-export interface GetAgentStatusOptions {
-  agentType: ResponseActionAgentType;
-  agentIds: string[];
-  connectorActionsClient: ActionsClient;
-  logger: Logger;
 }
