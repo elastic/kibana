@@ -117,13 +117,11 @@ export const TableFieldValue = ({
 
   return (
     <Fragment>
-      {(isCollapsible || ignoreReason) && (
+      {ignoreReason && (
         <EuiFlexGroup gutterSize="s">
-          {ignoreReason && (
-            <EuiFlexItem grow={false}>
-              <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <IgnoreWarning reason={ignoreReason} rawValue={rawValue} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       <div
