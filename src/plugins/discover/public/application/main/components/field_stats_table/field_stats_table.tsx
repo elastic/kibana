@@ -31,7 +31,7 @@ const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
-    isPlainRecord,
+    isEsqlMode,
     dataView,
     savedSearch,
     query,
@@ -113,7 +113,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter={onAddFilter}
         showPreviewByDefault={showPreviewByDefault}
         onTableUpdate={updateState}
-        esql={isPlainRecord}
+        esql={isEsqlMode}
         overridableServices={overridableServices}
       />
     </EuiFlexItem>

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
 import { chunk } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -114,7 +114,7 @@ const getESQLOverallStatsInChunk = async ({
     };
 
     try {
-      const esqlResults = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
+      const esqlResults = await runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY });
       const stats = {
         aggregatableExistsFields: [] as AggregatableField[],
         aggregatableNotExistsFields: [] as AggregatableField[],

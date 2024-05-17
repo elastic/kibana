@@ -165,8 +165,7 @@ export interface FieldStatisticsTableProps {
    */
   searchSessionId?: string;
   /**
-   * If table should should accept text based query
-   * isPlainRecord is true when in ES|QL mode
+   * If table should query using ES|QL
    */
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
 }
