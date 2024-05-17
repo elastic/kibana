@@ -170,7 +170,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         cloudSecurityIntegration,
         rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
-        unprivilegedAgentsCount: selectedPolicy?.unprivileged_agents ?? 0,
       })
     );
 
@@ -313,7 +312,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           fleetServerHost,
           enrollToken,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
-          unprivilegedAgentsCount: selectedPolicy?.unprivileged_agents ?? 0,
         })
       );
     }

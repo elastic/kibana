@@ -83,7 +83,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       fleetServerHost,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
-      unprivilegedAgentsCount: agentPolicy?.unprivileged_agents ?? 0,
     }),
   ];
 

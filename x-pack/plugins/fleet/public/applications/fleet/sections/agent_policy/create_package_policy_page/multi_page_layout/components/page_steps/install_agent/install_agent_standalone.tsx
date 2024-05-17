@@ -114,7 +114,6 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
-      unprivilegedAgentsCount: agentPolicy?.unprivileged_agents ?? 0,
     }),
   ];
 
