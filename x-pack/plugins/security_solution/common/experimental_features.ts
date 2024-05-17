@@ -255,7 +255,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  malwareOnWriteScanOptionAvailable: false,
+  malwareOnWriteScanOptionAvailable: true,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
