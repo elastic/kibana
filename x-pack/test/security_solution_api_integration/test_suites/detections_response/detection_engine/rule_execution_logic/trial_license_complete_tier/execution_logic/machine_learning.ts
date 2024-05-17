@@ -104,7 +104,8 @@ export default ({ getService }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/171426
   describe('@ess @serverless @serverlessQA Machine learning type rules', () => {
     before(async () => {
-      console.log('BEFORE MACHINE LEARNING RULES')
+      logAnomalyDebugData();
+      console.log('BEFORE MACHINE LEARNING RULES');
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load(auditPath);
@@ -126,6 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/es_archives/security_solution/anomalies'
       );
       console.log('anomalies loaded', JSON.stringify(loadResp, null, 2));
+      logAnomalyDebugData();
       console.log('/BEFORE MACHINE LEARNING RULES');
     });
 
@@ -144,6 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
       console.log('STARTING TEST');
+      logAnomalyDebugData();
       const createdRule = await createRule(supertest, log, rule);
       console.log('created rule', JSON.stringify(createdRule, null, 2));
       const alerts = await getAlerts(supertest, log, es, createdRule);
