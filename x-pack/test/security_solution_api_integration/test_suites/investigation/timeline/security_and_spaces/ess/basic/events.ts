@@ -37,7 +37,7 @@ import {
   obsSecSpacesAll,
   secOnlySpacesAll,
   noKibanaPrivileges,
-} from '../../../../../rule_registry/common/lib/authentication/users';
+} from '../../../../../../../rule_registry/common/lib/authentication/users';
 import type { FtrProviderContextWithSpaces } from '../../../../../../ftr_provider_context_with_spaces';
 
 interface TestCase {
