@@ -94,16 +94,30 @@ export const AgentPolicyBaseSchema = {
         validate: (tags) => {
           const seen = new Set<string>([]);
           const duplicates: string[] = [];
+          const namesWithSpaces: string[] = [];
+          const errors: string[] = [];
 
           for (const tag of tags) {
-            if (!seen.has(tag.name)) {
-              seen.add(tag.name);
+            if (/\s/.test(tag.name)) {
+              namesWithSpaces.push(`'${tag.name}'`);
+            }
+
+            if (!seen.has(tag.name.trim())) {
+              seen.add(tag.name.trim());
             } else {
-              duplicates.push(tag.name);
+              duplicates.push(`'${tag.name.trim()}'`);
             }
           }
+
           if (duplicates.length !== 0) {
-            return `found duplicate tags: [${duplicates.join(', ')}], duplicate tags are not allowed`;
+            errors.push(`Found duplicate tag names: [${duplicates.join(', ')}], duplicate tag names are not allowed.`);
+          }
+          if (namesWithSpaces.length !== 0) {
+            errors.push(`Found tag names with spaces: [${namesWithSpaces.join(', ')}], tag names with spaces are not allowed.`);
+          }
+
+          if (errors.length !== 0) {
+            return errors.join(' ');
           }
         },
       }
