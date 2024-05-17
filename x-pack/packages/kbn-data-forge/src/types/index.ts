@@ -159,7 +159,7 @@ export interface Point {
 }
 
 export interface CliOptions {
-  config: string;
+  config?: string;
   lookback: string;
   eventsPerCycle: number;
   payloadSize: number;

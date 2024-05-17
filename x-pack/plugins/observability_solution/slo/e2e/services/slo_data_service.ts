@@ -33,7 +33,6 @@ export class SLoDataService {
       elasticsearchHost: this.elasticsearchUrl,
       lookback: DEFAULTS.LOOKBACK,
       eventsPerCycle: DEFAULTS.EVENTS_PER_CYCLE,
-      config: null,
       payloadSize: DEFAULTS.PAYLOAD_SIZE,
       concurrency: DEFAULTS.CONCURRENCY,
       indexInterval: 10_000,
