@@ -34,7 +34,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-table-persist",
     "@kbn/css-utils",
-    "@kbn/core-di-common",
   ],
   "exclude": [
     "target/**/*",
