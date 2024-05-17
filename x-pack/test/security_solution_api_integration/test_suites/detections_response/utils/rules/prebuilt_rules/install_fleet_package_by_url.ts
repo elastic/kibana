@@ -26,7 +26,7 @@ const ATTEMPT_TIMEOUT = 120000;
 
 export const installPrebuiltRulesPackageViaFleetAPI = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
@@ -66,7 +66,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
 export const installPrebuiltRulesPackageByVersion = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   version: string,
   retryService: RetryService
 ): Promise<InstallPackageResponse> => {
