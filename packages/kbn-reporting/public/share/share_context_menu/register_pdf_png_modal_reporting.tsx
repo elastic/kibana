@@ -330,10 +330,13 @@ export const reportingExportModalProvider = ({
     };
 
     const generateReportPNG = ({ intl }: { intl: InjectedIntl }) => {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      const dimensions = { height, width };
-
+      const { layout: outerLayout } = getJobParams(jobProviderOptions, 'pngV2')();
+      let dimensions = outerLayout?.dimensions;
+      if (!dimensions) {
+        const el = document.querySelector('[data-shared-items-container]');
+        const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+        dimensions = { height, width };
+      }
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
         layout: { id: 'preserve_layout', dimensions },
@@ -393,20 +396,19 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PDF' as const,
-      generateReport: generateReportPDF,
+      generateExport: generateReportPDF,
       reportType: 'printablePdfV2',
       requiresSavedState,
       helpText: (
         <FormattedMessage
           id="reporting.printablePdfV2.helpText"
-          defaultMessage="Exports can take a few minutes to generate."
+          defaultMessage="Select the file type you would like to export for this visualization."
         />
       ),
-      generateReportButton: (
+      generateExportButton: (
         <FormattedMessage
           id="reporting.printablePdfV2.generateButtonLabel"
-          data-test-subj="generateReportButton"
-          defaultMessage="Generate export"
+          defaultMessage="Export file"
         />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
@@ -425,21 +427,17 @@ export const reportingExportModalProvider = ({
         ['data-test-subj']: 'imageExports',
       },
       label: 'PNG' as const,
-      generateReport: generateReportPNG,
+      generateExport: generateReportPNG,
       reportType: 'pngV2',
       requiresSavedState,
       helpText: (
         <FormattedMessage
           id="reporting.pngV2.helpText"
-          defaultMessage="Exports can take a few minutes to generate."
+          defaultMessage="Select the file type you would like to export for this visualization."
         />
       ),
-      generateReportButton: (
-        <FormattedMessage
-          id="reporting.pngV2.generateButtonLabel"
-          defaultMessage="Generate export"
-          data-test-subj="generateReportButton"
-        />
+      generateExportButton: (
+        <FormattedMessage id="reporting.pngV2.generateButtonLabel" defaultMessage="Export file" />
       ),
       layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
       renderCopyURLButton: true,
