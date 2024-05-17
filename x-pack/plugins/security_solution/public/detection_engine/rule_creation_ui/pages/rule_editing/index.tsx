@@ -208,7 +208,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const invalidSteps = ruleStepsOrder.filter((step) => {
     return !stepIsValid(step);
   });
-
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
   const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
