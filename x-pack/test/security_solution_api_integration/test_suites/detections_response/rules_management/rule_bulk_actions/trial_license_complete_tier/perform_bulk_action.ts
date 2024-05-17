@@ -18,7 +18,7 @@ import {
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
+import { AuthType as WebhookAuthType } from '@kbn/stack-connectors-plugin/common/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   binaryToString,
