@@ -22,6 +22,7 @@ export const embeddableServiceFactory: EmbeddableServiceFactory = ({ startPlugin
 
   return pick(embeddable, [
     'reactEmbeddableRegistryHasKey',
+    'getReactEmbeddableFactory',
     'getEmbeddableFactory',
     'getEmbeddableFactories',
     'getStateTransfer',
