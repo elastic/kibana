@@ -24,6 +24,9 @@ import { getUnifiedDocViewerServices } from '../../plugin';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
+// Keep in memory what field values were expanded by the user and restore this state when the user opens DocViewer again
+const expandedFieldValuesSet = new Set<string>();
+
 interface IgnoreWarningProps {
   reason: IgnoredReason;
   rawValue: unknown;
@@ -108,7 +111,7 @@ export const TableFieldValue = ({
   const valueRef = useRef<HTMLDivElement>(null);
   const [collapsedScrollHeight, setCollapsedScrollHeight] = useState<number>(0);
 
-  const [isValueExpanded, setIsValueExpanded] = useState(false);
+  const [isValueExpanded, setIsValueExpanded] = useState(expandedFieldValuesSet.has(field));
   const isCollapsible =
     truncateMaxHeight > 0 &&
     String(rawValue).length > COLLAPSE_LINE_LENGTH &&
@@ -123,8 +126,17 @@ export const TableFieldValue = ({
   });
 
   const onToggleCollapse = useCallback(
-    () => setIsValueExpanded((fieldOpenPrev) => !fieldOpenPrev),
-    [setIsValueExpanded]
+    () =>
+      setIsValueExpanded((isExpandedPrev) => {
+        const isExpandedNext = !isExpandedPrev;
+        if (isExpandedNext) {
+          expandedFieldValuesSet.add(field);
+        } else {
+          expandedFieldValuesSet.delete(field);
+        }
+        return isExpandedNext;
+      }),
+    [field, setIsValueExpanded]
   );
 
   useEffect(() => {
