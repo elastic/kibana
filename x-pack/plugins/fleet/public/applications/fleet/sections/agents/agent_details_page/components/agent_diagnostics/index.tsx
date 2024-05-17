@@ -290,7 +290,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
           />
         </EuiPortal>
       )}
-      <EuiText>
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="xpack.fleet.requestDiagnostics.calloutText"
