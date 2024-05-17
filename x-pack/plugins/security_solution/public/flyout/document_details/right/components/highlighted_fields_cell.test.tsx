@@ -22,7 +22,7 @@ import { useGetEndpointDetails } from '../../../../management/hooks';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-  useGetExternalAgentStatus,
+  useGetSentinelOneAgentStatus,
 } from '../../../../management/hooks/agents/use_get_agent_status';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
@@ -34,11 +34,11 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const useGetExternalAgentStatusMock = useGetExternalAgentStatus as jest.Mock;
+const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 const hooksToMock: Record<string, jest.Mock> = {
-  useGetExternalAgentStatus: useGetExternalAgentStatusMock,
+  useGetSentinelOneAgentStatus: useGetSentinelOneAgentStatusMock,
   useGetAgentStatus: useGetAgentStatusMock,
 };
 

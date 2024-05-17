@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-  useGetExternalAgentStatus,
+  useGetSentinelOneAgentStatus,
 } from '../../../management/hooks/agents/use_get_agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
@@ -22,7 +22,7 @@ jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('../../../common/hooks/use_experimental_features');
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-const useGetSentinelOneAgentStatusMock = useGetExternalAgentStatus as jest.Mock;
+const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 

@@ -14,7 +14,7 @@ import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
   useAgentStatusHook,
   useGetAgentStatus,
-  useGetExternalAgentStatus,
+  useGetSentinelOneAgentStatus,
 } from '../../../hooks/agents/use_get_agent_status';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
@@ -24,14 +24,14 @@ jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
 jest.mock('../../../hooks/agents/use_get_agent_status');
 
 const getEndpointDetails = useGetEndpointDetails as jest.Mock;
-const getSentinelOneAgentStatus = useGetExternalAgentStatus as jest.Mock;
+const getSentinelOneAgentStatus = useGetSentinelOneAgentStatus as jest.Mock;
 const getAgentStatus = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
 describe('Responder offline callout', () => {
   // TODO: 8.15 remove the sentinelOneAgentStatus hook when `agentStatusClientEnabled` is enabled and removed
   describe.each([
-    [useGetExternalAgentStatus, getSentinelOneAgentStatus],
+    [useGetSentinelOneAgentStatus, getSentinelOneAgentStatus],
     [useGetAgentStatus, getAgentStatus],
   ])('works with %s hook', (hook, mockHook) => {
     let render: (agentType?: ResponseActionAgentType) => ReturnType<AppContextTestRender['render']>;
