@@ -22,7 +22,7 @@ export const waitFor = async (
     if (await functionToTest()) {
       found = true;
     } else {
-      log.debug(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
+      log.error(`Try number ${numberOfTries} out of ${maxTries} for function ${functionName}`);
       numberOfTries++;
     }
 
