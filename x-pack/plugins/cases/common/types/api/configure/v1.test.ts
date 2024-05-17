@@ -621,6 +621,12 @@ describe('configure', () => {
       ).toContain(`The length of the template's tag is too long. The maximum length is 50.`);
     });
 
+    it(`throws an error when the a tag is empty string`, async () => {
+      expect(
+        PathReporter.report(TemplateConfigurationRt.decode({ ...defaultRequest, tags: [''] }))
+      ).toContain(`The template's tag field cannot be an empty string.`);
+    });
+
     describe('caseFields', () => {
       it('removes foo:bar attributes from caseFields', () => {
         const query = TemplateConfigurationRt.decode({

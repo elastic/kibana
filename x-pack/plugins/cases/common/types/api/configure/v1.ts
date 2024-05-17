@@ -106,7 +106,7 @@ export const TemplateConfigurationRt = rt.intersection([
       tags: limitedArraySchema({
         codec: limitedStringSchema({
           fieldName: `template's tag`,
-          min: 0,
+          min: 1,
           max: MAX_TEMPLATE_TAG_LENGTH,
         }),
         min: 0,
