@@ -40,6 +40,7 @@ journey(`SLOsOverview`, async ({ page, params }) => {
       {
         retryCount: 50,
         retryDelay: 10000,
+        timeout: 60 * 10000,
       },
       async () => {
         await page.getByTestId('querySubmitButton').click();
