@@ -53,7 +53,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   telemetry,
   traceOptions,
 }) => {
-  const llmClass = llmType === 'openai' ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const isOpenAI = llmType === 'openai';
+  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
     actions,
@@ -126,8 +127,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     verbose: false,
     handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
   };
-  // isStream check is not on agentType alone because typescript doesn't like
-  const executor = isStream
+  // isOpenAI check is not on agentType alone because typescript doesn't like
+  const executor = isOpenAI
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         ...executorArgs,

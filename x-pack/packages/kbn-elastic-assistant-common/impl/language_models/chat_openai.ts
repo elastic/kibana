@@ -165,6 +165,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
           );
         }
 
+        // format the response back to what we got from OpenAI as this is
+        // what LangChain is expecting
         const chatCompletion: ChatCompletion = {
           id: 'doesntmatter',
           created: Date.now(),
