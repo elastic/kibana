@@ -157,7 +157,6 @@ describe('<Findings />', () => {
       await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
     });
   });
-  // describe('Flyout', () => {
   //   it('Opens the findings flyout', async () => {
   //     server.use(cspmStatusIndexed);
   //     server.use(bsearchFindingsPageDefault);
