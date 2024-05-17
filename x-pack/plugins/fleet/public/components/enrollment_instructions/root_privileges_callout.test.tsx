@@ -23,7 +23,7 @@ describe('RootPrivilegesCallout', () => {
   }
 
   it('should render callout requiring root privileges', async () => {
-    const renderResult = render([{ name: 'auditd_manager', title: 'Auditd Manager' }], 0);
+    const renderResult = render([{ name: 'auditd_manager', title: 'Auditd Manager' }]);
 
     await waitFor(() => {
       expect(renderResult.getByText('Root privileges required')).toBeInTheDocument();
