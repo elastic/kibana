@@ -236,7 +236,7 @@ For example: +
 `Document count is 100 in the last 1h. Alert when greater than 50.`
 
 `context.sourceFields`::
-(object)
+(array of strings)
 // TBD: When and what type of information is returned here?
 
 `context.title`::
@@ -244,11 +244,11 @@ For example: +
 `rule 'my-query-rule' matched query`.
 
 `context.value`::
-(integer) The value of the rule that met the condition.
-//TBD: Is it correct that this is always a number?
+(integer) The value that met the rule threshold condition.
 
 `rule.params`::
-(object) The rule parameters. For the definitive list, refer to the API documentation.
+(object) The rule parameters, such as `searchType`, `timeWindowSize`, and `timeWindowUnit`.
+For the definitive list of parameters for this rule, refer to the API documentation.
 
 [float]
 === Handling multiple matches of the same document
