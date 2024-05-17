@@ -50,4 +50,4 @@ Use {esql} to retrieve important information for investigation by using lookups.
 
 The main documentation for {esql} lives in the {ref}/esql.html[{es} docs].
 
-We also have a short tutorial available in the **Discover** docs: <<try-esql,Using {esql}>>.
+We also have a short tutorial in the **Discover** docs: <<try-esql,Using {esql}>>.
