@@ -55,8 +55,8 @@ export const Node = ({
   const value = formatter(rawValue);
 
   const toggleAssetPopover = () => {
-    if (nodeType === 'host') {
-      setFlyoutUrlState({ detailsItemId: node.name });
+    if (nodeType === 'host' || nodeType === 'container') {
+      setFlyoutUrlState({ detailsItemId: node.id, assetType: nodeType });
     } else {
       togglePopover();
     }
@@ -71,7 +71,7 @@ export const Node = ({
       color={color}
       nodeName={node.name}
       value={value}
-      showBorder={detailsItemId === node.name || isPopoverOpen}
+      showBorder={detailsItemId === node.id || isPopoverOpen}
     />
   );
 
