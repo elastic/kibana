@@ -212,7 +212,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.timePicker.setDefaultDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, { operation: 'update' });
-        // await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2013 @ 06:31:44.000',
           'Sep 19, 2013 @ 06:31:44.000'
