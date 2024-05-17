@@ -20,7 +20,7 @@ describe('navTabsHostDetails', () => {
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).not.toHaveProperty(HostsTableType.anomalies);
     expect(tabs).toHaveProperty(HostsTableType.events);
-    expect(tabs).not.toHaveProperty(HostsTableType.risk);
+    expect(tabs).toHaveProperty(HostsTableType.risk);
   });
 
   test('it should display anomalies tab if with mlUserPermission', () => {
@@ -33,7 +33,7 @@ describe('navTabsHostDetails', () => {
     expect(tabs).toHaveProperty(HostsTableType.uncommonProcesses);
     expect(tabs).toHaveProperty(HostsTableType.anomalies);
     expect(tabs).toHaveProperty(HostsTableType.events);
-    expect(tabs).not.toHaveProperty(HostsTableType.risk);
+    expect(tabs).toHaveProperty(HostsTableType.risk);
   });
 
   test('it should display sessions tab when users are on Enterprise and above license', () => {
