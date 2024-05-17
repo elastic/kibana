@@ -12,12 +12,13 @@ import {
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
+  fetchHistoricalSummaryResponseSchema,
+  fetchSLOHealthParamsSchema,
   findSloDefinitionsParamsSchema,
   findSLOGroupsParamsSchema,
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
-  fetchSLOHealthParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -44,7 +45,6 @@ import {
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
 } from '../../services';
-import { FetchHistoricalSummary } from '../../services/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/find_slo_definitions';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { getGlobalDiagnosis } from '../../services/get_diagnosis';
@@ -513,9 +513,10 @@ const fetchHistoricalSummary = createSloServerRoute({
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
-    const fetchSummaryData = new FetchHistoricalSummary(historicalSummaryClient);
 
-    return await fetchSummaryData.execute(params.body);
+    const historicalSummary = await historicalSummaryClient.fetch(params.body);
+
+    return fetchHistoricalSummaryResponseSchema.encode(historicalSummary);
   },
 });
 
