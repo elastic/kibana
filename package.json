@@ -1214,6 +1214,7 @@
     "@babel/types": "7.21.2",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
+    "@biomejs/biome": "^1.7.3",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.1",
     "@elastic/eslint-plugin-eui": "0.0.2",
