@@ -18,15 +18,15 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onCancel: () => void;
   agentCount: number;
   agentPolicy: AgentPolicy;
-  showUnprivilegedAgentsCallout: boolean;
-  unprivilegedAgentsCount: number;
+  showUnprivilegedAgentsCallout?: boolean;
+  unprivilegedAgentsCount?: number;
 }> = ({
   onConfirm,
   onCancel,
   agentCount,
   agentPolicy,
-  showUnprivilegedAgentsCallout,
-  unprivilegedAgentsCount,
+  showUnprivilegedAgentsCallout = false,
+  unprivilegedAgentsCount = 0,
 }) => {
   return (
     <EuiConfirmModal
