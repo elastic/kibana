@@ -44,7 +44,7 @@ import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import { RulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
+import type { IRulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -84,6 +84,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           ]);
           const rulesClient = ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const { items } = request.body;
           const { id: ruleId } = request.params;
@@ -107,6 +108,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             rule,
             listsClient,
             rulesClient,
+            rulesManagementClient,
           });
 
           const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
@@ -131,10 +133,12 @@ export const createRuleExceptions = async ({
   rule,
   listsClient,
   rulesClient,
+  rulesManagementClient,
 }: {
   items: CreateRuleExceptionListItemSchemaDecoded[];
   listsClient: ExceptionListClient | null;
   rulesClient: RulesClient;
+  rulesManagementClient: IRulesManagementClient;
   rule: SanitizedRule<RuleParams>;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
@@ -170,6 +174,7 @@ export const createRuleExceptions = async ({
         rule,
         rulesClient,
         listsClient,
+        rulesManagementClient,
         removeOldAssociation: true,
       });
 
@@ -180,6 +185,7 @@ export const createRuleExceptions = async ({
       rule,
       rulesClient,
       listsClient,
+      rulesManagementClient,
       removeOldAssociation: false,
     });
 
@@ -273,15 +279,15 @@ export const createAndAssociateDefaultExceptionList = async ({
   rule,
   listsClient,
   rulesClient,
+  rulesManagementClient,
   removeOldAssociation,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
   rulesClient: RulesClient;
+  rulesManagementClient: IRulesManagementClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {
-  const rulesManagementClient = new RulesManagementClient(rulesClient);
-
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
 
   if (exceptionListToAssociate == null) {

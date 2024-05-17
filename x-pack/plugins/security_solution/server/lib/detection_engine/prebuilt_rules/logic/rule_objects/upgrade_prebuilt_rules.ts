@@ -9,7 +9,7 @@ import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/consta
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import type { RulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
+import type { IRulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 /**
  * Upgrades existing prebuilt rules given a set of rules and output index.
@@ -19,7 +19,7 @@ import type { RulesManagementClient } from '../../../rule_management/logic/crud/
  * @param rules The rules to apply the update for
  */
 export const upgradePrebuiltRules = async (
-  rulesManagementClient: RulesManagementClient,
+  rulesManagementClient: IRulesManagementClient,
   rules: PrebuiltRuleAsset[]
 ) =>
   withSecuritySpan('upgradePrebuiltRules', async () => {

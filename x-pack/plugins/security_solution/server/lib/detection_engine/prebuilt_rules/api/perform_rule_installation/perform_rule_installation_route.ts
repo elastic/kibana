@@ -29,7 +29,6 @@ import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_ver
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
-import { RulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
 
 export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -60,7 +59,7 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           const config = ctx.securitySolution.getConfig();
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = new RulesManagementClient(rulesClient);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
