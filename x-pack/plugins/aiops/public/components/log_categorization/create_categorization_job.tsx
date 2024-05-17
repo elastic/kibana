@@ -65,7 +65,7 @@ export const CreateCategorizationJobButton: FC<Props> = ({
     return (
       <EuiToolTip
         content={i18n.translate('xpack.aiops.categorizeFlyout.findAnomalies.tooltip', {
-          defaultMessage: 'Create Anomaly Detection job to find anomalies in patterns',
+          defaultMessage: 'Create anomaly detection job to find anomalies in patterns',
         })}
       >
         <EuiButtonIcon
