@@ -7,7 +7,6 @@
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '../../helpers/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -16,9 +15,7 @@ import {
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey('OverviewScrolling', async ({ page, params }) => {
-  recordVideo(page);
-
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
   const retry: RetryService = params.getService('retry');
 
   const listOfRequests: string[] = [];
