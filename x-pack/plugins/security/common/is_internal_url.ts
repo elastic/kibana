@@ -39,4 +39,3 @@ export function isInternalURL(url: string, basePath = '') {
 
   return true;
 }
-
