@@ -21,10 +21,10 @@ interface ErrorType {
   meta: ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 }
 
-// TODO: 8.15: Remove `useGetExternalAgentStatus` function when `agentStatusClientEnabled` is removed
-export const useGetExternalAgentStatus = (
+// TODO: 8.15: Remove `useGetSentinelOneAgentStatus` function when `agentStatusClientEnabled` is enabled/removed
+export const useGetSentinelOneAgentStatus = (
   agentIds: string[],
-  agentType: string,
+  agentType?: string,
   options: UseQueryOptions<AgentStatusInfo, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<AgentStatusInfo, IHttpFetchError<ErrorType>> => {
   const http = useHttp();
@@ -39,7 +39,8 @@ export const useGetExternalAgentStatus = (
           version: '1',
           query: {
             agentIds,
-            agentType,
+            // 8.13 sentinel_one support via internal API
+            agentType: agentType ? agentType : 'sentinel_one',
           },
         })
         .then((response) => response.data),
@@ -74,8 +75,8 @@ export const useGetAgentStatus = (
 
 export const useAgentStatusHook = ():
   | typeof useGetAgentStatus
-  | typeof useGetExternalAgentStatus => {
+  | typeof useGetSentinelOneAgentStatus => {
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   // 8.15 use agent status client hook if `agentStatusClientEnabled` FF enabled
-  return !agentStatusClientEnabled ? useGetExternalAgentStatus : useGetAgentStatus;
+  return !agentStatusClientEnabled ? useGetSentinelOneAgentStatus : useGetAgentStatus;
 };
