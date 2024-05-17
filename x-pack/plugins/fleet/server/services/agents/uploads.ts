@@ -27,6 +27,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../constants';
 import { updateFilesStatus } from '../files';
+import { FleetError } from '../../errors';
 
 export async function getAgentUploads(
   esClient: ElasticsearchClient,
@@ -242,6 +243,7 @@ export async function deleteAgentUploadFile(
     // Delete the file from the file storage data stream
     const filesDeleteResponse = await esClient.deleteByQuery({
       index: FILE_STORAGE_DATA_AGENT_INDEX,
+      refresh: true,
       body: {
         query: {
           match: {
@@ -268,7 +270,7 @@ export async function deleteAgentUploadFile(
       )[0];
 
       if (updateMetadataStatusResponse.total === 0) {
-        throw new Error(`Failed to update file ${id} metadata`);
+        throw new FleetError(`Failed to update file ${id} metadata`);
       }
 
       return {
@@ -276,7 +278,7 @@ export async function deleteAgentUploadFile(
         deleted: true,
       };
     } else {
-      throw new Error(`Failed to delete file ${id} from file storage data stream`);
+      throw new FleetError(`Failed to delete file ${id} from file storage data stream`);
     }
   } catch (error) {
     appContextService.getLogger().error(error);
