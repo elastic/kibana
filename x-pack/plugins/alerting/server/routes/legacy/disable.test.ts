@@ -1,3 +1,4 @@
+import { httpServiceMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { disableAlertRoute } from './disable';
-import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../lib/license_state.mock';
-import { mockHandlerArguments } from '../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { licenseStateMock } from '../../lib/license_state.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { rulesClientMock } from '../../rules_client.mock';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { disableAlertRoute } from './disable';
 
 const rulesClient = rulesClientMock.create();
 

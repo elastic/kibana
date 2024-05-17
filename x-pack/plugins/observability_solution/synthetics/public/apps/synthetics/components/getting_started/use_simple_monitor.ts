@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSyntheticsRefreshContext } from '../../contexts';
-import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
-import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
-import { createGettingStartedMonitor, UpsertMonitorResponse } from '../../state';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import {
-  MonitorTypeEnum,
   EncryptedSyntheticsSavedMonitor,
+  MonitorTypeEnum,
   ServiceLocationErrors,
 } from '../../../../../common/runtime_types';
+import { kibanaService } from '../../../../utils/kibana_service';
+import { useSyntheticsRefreshContext } from '../../contexts';
+import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
+import { UpsertMonitorResponse, createGettingStartedMonitor } from '../../state';
+import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
 import {
-  MONITOR_SUCCESS_LABEL,
   MONITOR_FAILURE_LABEL,
+  MONITOR_SUCCESS_LABEL,
   SimpleFormData,
 } from './simple_monitor_form';
-import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
   const { application } = useKibana().services;

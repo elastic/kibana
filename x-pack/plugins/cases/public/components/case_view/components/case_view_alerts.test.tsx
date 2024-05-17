@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import type { CaseUI } from '../../../../common';
 import { OBSERVABILITY_OWNER } from '../../../../common/constants';
-import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import type { CaseUI } from '../../../../common';
-import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
+import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { FeatureIdsResponse } from '../../../containers/types';
+import { CaseViewAlerts } from './case_view_alerts';
 
 jest.mock('../../../containers/api');
 

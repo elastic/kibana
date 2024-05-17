@@ -1,3 +1,4 @@
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import React, { useState, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
-import * as i18n from './translations';
+import { OnChangeDeps, SettingsDeps } from '../../types';
 import { ControlGeneralView } from '../control_general_view';
 import { ControlYamlView } from '../control_yaml_view';
-import { SettingsDeps, OnChangeDeps } from '../../types';
+import * as i18n from './translations';
 
 const VIEW_MODE_GENERAL = 'general';
 const VIEW_MODE_YAML = 'yaml';

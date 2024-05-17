@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,

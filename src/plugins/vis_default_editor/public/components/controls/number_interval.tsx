@@ -11,17 +11,17 @@ import React, { useEffect, useCallback } from 'react';
 
 import {
   EuiFieldNumber,
+  EuiFieldNumberProps,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
   EuiSwitchProps,
-  EuiFieldNumberProps,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
 

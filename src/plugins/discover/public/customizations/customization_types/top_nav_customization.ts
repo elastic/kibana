@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TopNavMenuData, TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuBadgeProps, TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 export interface TopNavDefaultItem {
   disabled?: boolean;

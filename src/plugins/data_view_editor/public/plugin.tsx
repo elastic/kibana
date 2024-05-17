@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import React from 'react';
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
-import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
-import { getEditorOpener } from './open_editor';
 import { DataViewEditor } from './components/data_view_editor';
+import { getEditorOpener } from './open_editor';
+import { DataViewEditorProps, PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 
 export class DataViewEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>

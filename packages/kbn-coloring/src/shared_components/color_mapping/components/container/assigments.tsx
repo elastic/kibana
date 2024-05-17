@@ -23,22 +23,22 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { useDispatch, useSelector } from 'react-redux';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { findLast } from 'lodash';
-import { Assignment } from '../assignment/assignment';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { ColorMappingInputData } from '../../categorical_color_mapping';
+import { ruleMatch } from '../../color/rule_matching';
+import { ColorMapping } from '../../config';
+import { NeutralPalette, getPalette } from '../../palettes';
 import {
   addNewAssignment,
   addNewAssignments,
   removeAllAssignments,
 } from '../../state/color_mapping';
 import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
-import { ColorMapping } from '../../config';
-import { getPalette, NeutralPalette } from '../../palettes';
-import { ruleMatch } from '../../color/rule_matching';
+import { Assignment } from '../assignment/assignment';
 
 export function AssignmentsConfig({
   data,

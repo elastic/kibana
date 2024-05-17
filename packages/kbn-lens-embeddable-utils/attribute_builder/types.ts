@@ -9,14 +9,14 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
+  FillStyle,
   FormBasedPersistedState,
+  FormulaPublicApi,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
   TypedLensByValueInput,
-  XYState,
-  FormulaPublicApi,
   XYLayerConfig,
-  FillStyle,
+  XYState,
 } from '@kbn/lens-plugin/public';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
@@ -73,7 +73,7 @@ export interface Chart<TVisualizationState extends LensVisualizationState> {
 
 // Chart
 export interface ChartConfig<
-  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
+  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>,
 > {
   formulaAPI: FormulaPublicApi;
   dataView: DataView;

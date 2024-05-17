@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { useLinkedSearchUpdates } from './use_linked_search_updates';
-import { VisualizeServices, SavedVisInstance, VisualizeAppStateContainer } from '../../types';
+import { SavedVisInstance, VisualizeAppStateContainer, VisualizeServices } from '../../types';
 import { createVisualizeServicesMock } from '../mocks';
+import { useLinkedSearchUpdates } from './use_linked_search_updates';
 
 describe('useLinkedSearchUpdates', () => {
   let mockServices: jest.Mocked<VisualizeServices>;

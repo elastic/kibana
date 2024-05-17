@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { performance } from 'perf_hooks';
+import { DataViewBase } from '../../..';
+import { fields } from '../../filters/stubs';
+import { nodeTypes } from '../node_types';
+import { KueryNode } from '../types';
 import {
   fromKueryExpression,
   fromLiteralExpression,
   toElasticsearchQuery,
   toKqlExpression,
 } from './ast';
-import { nodeTypes } from '../node_types';
-import { DataViewBase } from '../../..';
-import { KueryNode } from '../types';
-import { fields } from '../../filters/stubs';
-import { performance } from 'perf_hooks';
 
 describe('kuery AST API', () => {
   let indexPattern: DataViewBase;

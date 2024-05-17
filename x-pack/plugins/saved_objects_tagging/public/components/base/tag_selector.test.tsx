@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { TagSelector, type TagSelectorProps } from './tag_selector';
-import { I18nProvider } from '@kbn/i18n-react';
 
 describe('tag selector', () => {
   const defaultProps: TagSelectorProps = {

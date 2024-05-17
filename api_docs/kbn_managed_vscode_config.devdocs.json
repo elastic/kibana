@@ -43,13 +43,8 @@
             "type": "Array",
             "tags": [],
             "label": "keys",
-            "description": [
-              "The config keys which are managed"
-            ],
-            "signature": [
-              "ManagedConfigKey",
-              "[]"
-            ],
+            "description": ["The config keys which are managed"],
+            "signature": ["ManagedConfigKey", "[]"],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,9 +59,7 @@
             "description": [
               "The text which should be written to the top of the file to educate users how to customize the settings"
             ],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -78,12 +71,8 @@
             "type": "string",
             "tags": [],
             "label": "json",
-            "description": [
-              "The settings file as a string"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The settings file as a string"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -104,9 +93,7 @@
         "tags": [],
         "label": "MANAGED_CONFIG_FILES",
         "description": [],
-        "signature": [
-          "{ name: string; content: string; }[]"
-        ],
+        "signature": ["{ name: string; content: string; }[]"],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -121,10 +108,7 @@
         "description": [
           "\nDefines the keys which we overrite in user's vscode config for the workspace. We currently\nonly support object values because that's all we needed to support, but support for non object\nvalues should be easy to add."
         ],
-        "signature": [
-          "ManagedConfigKey",
-          "[]"
-        ],
+        "signature": ["ManagedConfigKey", "[]"],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
         "deprecated": false,
         "trackAdoption": false,

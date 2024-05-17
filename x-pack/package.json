@@ -15,9 +15,7 @@
       "oss": false
     },
     "clean": {
-      "extraPatterns": [
-        "plugins/*/target"
-      ]
+      "extraPatterns": ["plugins/*/target"]
     }
   },
   "engines": {

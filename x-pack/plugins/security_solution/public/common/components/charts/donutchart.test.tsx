@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { LEGACY_LIGHT_THEME, Partition, Settings } from '@elastic/charts';
-import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
+import { parsedMockAlertsData } from '../../../overview/components/detection_response/alerts_by_status/mock_data';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import type { DonutChartProps } from './donutchart';
 import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
-import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { v4 as uuidv4 } from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');

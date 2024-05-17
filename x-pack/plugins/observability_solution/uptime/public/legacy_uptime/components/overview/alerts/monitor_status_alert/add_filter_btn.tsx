@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import * as labels from '../translations';
+import React, { useState } from 'react';
 import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
+import * as labels from '../translations';
 
 interface Props {
   newFilters: string[];

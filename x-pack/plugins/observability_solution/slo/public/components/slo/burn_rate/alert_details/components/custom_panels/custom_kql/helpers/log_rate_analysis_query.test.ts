@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getESQueryForLogRateAnalysis } from './log_rate_analysis_query';
 import { KQLCustomIndicator } from '@kbn/slo-schema';
+import { getESQueryForLogRateAnalysis } from './log_rate_analysis_query';
 
 describe('buildEsQuery', () => {
   const testData = [

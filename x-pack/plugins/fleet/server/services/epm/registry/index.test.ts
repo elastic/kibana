@@ -11,13 +11,13 @@ import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
 import * as Archive from '../archive';
 
 import {
-  splitPkgKey,
-  fetchFindLatestPackageOrUndefined,
-  fetchFindLatestPackageOrThrow,
-  fetchInfo,
-  getLicensePath,
   fetchCategories,
+  fetchFindLatestPackageOrThrow,
+  fetchFindLatestPackageOrUndefined,
+  fetchInfo,
   fetchList,
+  getLicensePath,
+  splitPkgKey,
 } from '.';
 
 const mockLoggerFactory = loggingSystemMock.create();

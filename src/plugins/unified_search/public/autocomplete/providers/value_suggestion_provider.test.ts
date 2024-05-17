@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
-import { stubIndexPattern, stubFields } from '@kbn/data-plugin/public/stubs';
-import type { TimefilterSetup } from '@kbn/data-plugin/public';
+import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { TimefilterSetup } from '@kbn/data-plugin/public';
+import { stubFields, stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { setupValueSuggestionProvider } from './value_suggestion_provider';
 import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;

@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import React, { useCallback, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
-  EuiForm,
-  EuiIcon,
-  EuiTitle,
   EuiButton,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFieldText,
-  EuiFocusTrap,
-  EuiFlexGroup,
-  EuiRadioGroup,
-  EuiFlyoutBody,
   EuiButtonEmpty,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFocusTrap,
+  EuiForm,
+  EuiFormRow,
+  EuiIcon,
+  EuiRadioGroup,
   EuiRadioGroupOption,
+  EuiTitle,
 } from '@elastic/eui';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  LinkType,
-  EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,
-  LinkOptions,
+  EXTERNAL_LINK_TYPE,
   Link,
+  LinkOptions,
+  LinkType,
 } from '../../../common/content_management';
-import { LinksStrings } from '../links_strings';
-import { LinkInfo } from '../../embeddable/types';
-import { LinkOptionsComponent } from './link_options';
 import { UnorderedLink } from '../../editor/open_link_editor_flyout';
+import { LinkInfo } from '../../embeddable/types';
+import { LinksStrings } from '../links_strings';
 import { LinkDestination } from './link_destination';
+import { LinkOptionsComponent } from './link_options';
 
 export const LinkEditor = ({
   link,

@@ -1,3 +1,10 @@
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { includes } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,14 +12,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { includes } from 'lodash';
-import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { formatMsg } from '../../lib/format_msg';
 import { MonitoringStartServices } from '../../types';
 

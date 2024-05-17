@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useMemo, useCallback, useEffect, useState } from 'react';
-import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Filter } from '@kbn/es-query';
-import { isActiveTimeline } from '../../../../helpers';
-import type { DataProvider } from '../../../../../common/types';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import { getDataProvider } from '../table/use_action_cell_data_provider';
+import type { DataProvider } from '../../../../../common/types';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { isActiveTimeline } from '../../../../helpers';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
+import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
+import { getDataProvider } from '../table/use_action_cell_data_provider';
 import { InsightAccordion } from './insight_accordion';
 import { SimpleAlertTable } from './simple_alert_table';
-import { InvestigateInTimelineButton } from '../table/investigate_in_timeline_button';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import {
   PROCESS_ANCESTRY,
   PROCESS_ANCESTRY_COUNT,

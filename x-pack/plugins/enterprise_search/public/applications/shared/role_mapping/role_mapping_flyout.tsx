@@ -17,19 +17,19 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiPortal,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { CANCEL_BUTTON_LABEL } from '../constants/actions';
 
 import {
-  ROLE_MAPPING_FLYOUT_CREATE_TITLE,
-  ROLE_MAPPING_FLYOUT_UPDATE_TITLE,
-  ROLE_MAPPING_FLYOUT_DESCRIPTION,
   ROLE_MAPPING_FLYOUT_CREATE_BUTTON,
+  ROLE_MAPPING_FLYOUT_CREATE_TITLE,
+  ROLE_MAPPING_FLYOUT_DESCRIPTION,
   ROLE_MAPPING_FLYOUT_UPDATE_BUTTON,
+  ROLE_MAPPING_FLYOUT_UPDATE_TITLE,
 } from './constants';
 
 interface Props {

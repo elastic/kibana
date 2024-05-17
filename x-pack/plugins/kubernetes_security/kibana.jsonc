@@ -6,14 +6,7 @@
     "id": "kubernetesSecurity",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "timelines",
-      "ruleRegistry",
-      "sessionView"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredPlugins": ["data", "timelines", "ruleRegistry", "sessionView"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

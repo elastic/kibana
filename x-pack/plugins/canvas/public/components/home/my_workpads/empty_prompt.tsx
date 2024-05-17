@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { Fragment } from 'react';
 
 import { CANVAS, JSON } from '../../../../i18n/constants';
 

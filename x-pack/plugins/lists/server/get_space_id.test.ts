@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
 import { CoreKibanaRequest } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 
 import { getSpaceId } from './get_space_id';

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { get } from 'lodash';
 import { Query } from '@elastic/eui';
-import { parse } from 'query-string';
-import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
-import type { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { get } from 'lodash';
+import { parse } from 'query-string';
+import React, { useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
   SavedObjectsManagementActionServiceStart,

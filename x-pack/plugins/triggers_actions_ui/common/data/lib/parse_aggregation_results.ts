@@ -6,10 +6,10 @@
  */
 
 import {
-  SearchResponse,
+  AggregationsSingleMetricAggregateBase,
   SearchHit,
   SearchHitsMetadata,
-  AggregationsSingleMetricAggregateBase,
+  SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export const UngroupedGroupId = 'all documents';

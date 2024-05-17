@@ -8,7 +8,7 @@
 
 import { format } from 'url';
 
-import { buildKibanaPath, REPORTING_REDIRECT_APP } from '@kbn/reporting-common';
+import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '.';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { MlCoreSetup } from '../plugin';
 import type { EditAnomalyChartsPanelContext } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
+import type { MlCoreSetup } from '../plugin';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 

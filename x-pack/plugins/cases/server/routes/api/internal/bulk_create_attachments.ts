@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
+import type { attachmentApiV1 } from '../../../../common/types/api';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
-import type { attachmentApiV1 } from '../../../../common/types/api';
-import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const bulkCreateAttachmentsRoute = createCasesRoute({
   method: 'post',

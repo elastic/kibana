@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
@@ -50,12 +50,7 @@ export const phpDefinition: LanguageDefinition = {
 $response = $client->bulk($params);
 echo $response->getStatusCode();
 echo (string) $response->getBody();`,
-  ingestDataIndex: ({
-    apiKey,
-    url,
-    indexName,
-    ingestPipeline,
-  }) => `$client = ClientBuilder::create()
+  ingestDataIndex: ({ apiKey, url, indexName, ingestPipeline }) => `$client = ClientBuilder::create()
   ->setEndpoint('${url}')
   ->setApiKey('${apiKey}')
   ->build();

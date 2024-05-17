@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import isSemverValid from 'semver/functions/valid';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { validateProvider, isProviderValid } from './helpers';
+import isSemverValid from 'semver/functions/valid';
+import { isProviderValid, validateProvider } from './helpers';
 import type { Provider } from './use_insight_data_providers';
 
 const mockDataViewFieldSpec = {

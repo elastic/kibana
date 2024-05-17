@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPopover,
-  EuiPopoverTitle,
   EuiExpression,
   EuiFormErrorText,
   EuiFormHelpText,
+  EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Component } from 'react';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
 import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descriptor_types';
+import { MetricsEditor } from '../../../../components/metrics_editor';
 
 interface Props {
   metrics: AggDescriptor[];

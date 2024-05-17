@@ -9,8 +9,8 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ExampleContext } from '../../test/context_example';
 
-import { Page, PageComponent } from '../page';
 import { sharedWorkpads } from '../../test';
+import { Page, PageComponent } from '../page';
 const { austin } = sharedWorkpads;
 
 storiesOf('shareables/Page', module)

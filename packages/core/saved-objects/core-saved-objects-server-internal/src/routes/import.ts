@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
 import { extname } from 'path';
+import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';

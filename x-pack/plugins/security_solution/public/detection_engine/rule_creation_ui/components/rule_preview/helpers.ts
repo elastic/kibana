@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
-import type { FieldValueQueryBar } from '../query_bar';
+import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
+import type { FieldValueQueryBar } from '../query_bar';
 
 /**
  * Determines whether or not to display noise warning.

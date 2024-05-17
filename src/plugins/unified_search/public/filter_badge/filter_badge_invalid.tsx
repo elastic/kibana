@@ -1,3 +1,5 @@
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiBadge, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export const FilterBadgeInvalidPlaceholder = () => {
   const { euiTheme } = useEuiTheme();

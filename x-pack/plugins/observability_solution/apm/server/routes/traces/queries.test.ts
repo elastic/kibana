@@ -6,8 +6,8 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { getTraceItems } from './get_trace_items';
 import { SearchParamsMock, inspectSearchParams } from '../../utils/test_helpers';
+import { getTraceItems } from './get_trace_items';
 
 describe('trace queries', () => {
   let mock: SearchParamsMock;

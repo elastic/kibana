@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import { generatePath } from 'react-router-dom';
-import type { NavigateToAppOptions } from '@kbn/core/public';
-import { useKibana } from '../utils/kibana_react';
 import {
+  MAINTENANCE_WINDOWS_APP_ID,
   MAINTENANCE_WINDOW_PATHS,
   MANAGEMENT_APP_ID,
-  MAINTENANCE_WINDOWS_APP_ID,
 } from '../../common';
+import { useKibana } from '../utils/kibana_react';
 
 export const useNavigation = (appId: string) => {
   const { navigateToApp, getUrlForApp } = useKibana().services.application;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 
 const strings = {
   getUnknownArgumentTypeErrorMessage: (expressionType: string) =>

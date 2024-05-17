@@ -6,8 +6,6 @@
     "id": "eventLogFixture",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
-      "eventLog"
-    ]
+    "requiredPlugins": ["eventLog"]
   }
 }

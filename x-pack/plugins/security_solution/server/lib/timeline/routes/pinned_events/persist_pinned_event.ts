@@ -10,15 +10,15 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { PINNED_EVENT_URL } from '../../../../../common/constants';
 
+import type { ConfigType } from '../../../..';
 import type { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
-import { buildFrameworkRequest } from '../../utils/common';
 import { persistPinnedEventSchema } from '../../../../../common/api/timeline';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
+import { buildFrameworkRequest } from '../../utils/common';
 
 export const persistPinnedEventRoute = (
   router: SecuritySolutionPluginRouter,

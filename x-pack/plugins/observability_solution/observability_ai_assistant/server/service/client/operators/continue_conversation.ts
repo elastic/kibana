@@ -9,23 +9,23 @@ import { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { pick, take } from 'lodash';
 import {
+  EMPTY,
+  Observable,
+  OperatorFunction,
   catchError,
   concat,
-  EMPTY,
   from,
   identity,
   isObservable,
-  Observable,
   of,
-  OperatorFunction,
   shareReplay,
   switchMap,
   throwError,
 } from 'rxjs';
-import { createFunctionNotFoundError, Message, MessageRole } from '../../../../common';
+import { Message, MessageRole, createFunctionNotFoundError } from '../../../../common';
 import {
-  createFunctionLimitExceededError,
   MessageOrChatEvent,
+  createFunctionLimitExceededError,
 } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
 import { UserInstruction } from '../../../../common/types';

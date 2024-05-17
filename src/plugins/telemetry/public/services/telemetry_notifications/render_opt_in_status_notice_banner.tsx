@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { CoreStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import React from 'react';
 import { TelemetryService } from '..';
 import type { TelemetryConstants } from '../..';
 

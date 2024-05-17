@@ -6,9 +6,9 @@
  */
 
 import { map, uniqBy } from 'lodash';
-import { getState, getValue } from '../../../public/lib/resolved_arg';
-import { legendOptions } from '../../../public/lib/legend_options';
 import { ViewStrings } from '../../../i18n';
+import { legendOptions } from '../../../public/lib/legend_options';
+import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 const { Plot: strings } = ViewStrings;
 const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];

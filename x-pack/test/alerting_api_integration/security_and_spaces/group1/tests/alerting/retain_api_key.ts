@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { AlertUtils, ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function retainAPIKeyTests({ getService }: FtrProviderContext) {

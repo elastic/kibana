@@ -10,8 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from './services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

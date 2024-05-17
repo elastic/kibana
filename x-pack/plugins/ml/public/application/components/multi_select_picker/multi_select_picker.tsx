@@ -10,15 +10,15 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
-  EuiSelectableMessage,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSelectableMessage,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Option {
   name?: string | ReactNode;

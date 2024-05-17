@@ -5,25 +5,33 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { getNewRule } from '../../../../objects/rule';
 import {
-  closeFlyout,
-  collapseDocumentDetailsExpandableFlyoutLeftSection,
-} from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
+  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
+  DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
 import {
-  createNewCaseFromExpandableFlyout,
-  expandAlertAtIndexExpandableFlyout,
-} from '../../../../tasks/expandable_flyout/common';
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
 import {
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_CONTAINER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_ANCESTRY,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SESSION,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_CASES,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_ENTITIES_HEADER,
@@ -35,47 +43,39 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INVESTIGATION_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_DETAILS,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_REASON_TITLE,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_FIELD_CELL,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_RESPONSE_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_CORRELATIONS_VALUES_RELATED_ALERTS_BY_SAME_SOURCE_EVENT,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_SESSION_PREVIEW_CONTAINER,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
-  navigateToCorrelationsDetails,
+  closeFlyout,
+  collapseDocumentDetailsExpandableFlyoutLeftSection,
+} from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import {
   clickInvestigationGuideButton,
+  navigateToCorrelationsDetails,
+  navigateToEntitiesDetails,
   navigateToPrevalenceDetails,
+  navigateToResponseDetails,
+  navigateToThreatIntelligenceDetails,
   toggleOverviewTabAboutSection,
   toggleOverviewTabInsightsSection,
   toggleOverviewTabInvestigationSection,
   toggleOverviewTabResponseSection,
   toggleOverviewTabVisualizationsSection,
-  navigateToEntitiesDetails,
-  navigateToThreatIntelligenceDetails,
-  navigateToResponseDetails,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
+import {
+  createNewCaseFromExpandableFlyout,
+  expandAlertAtIndexExpandableFlyout,
+} from '../../../../tasks/expandable_flyout/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import {
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_ENTITIES_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_HOST_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_USER_DETAILS,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel_entities_tab';
-import {
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
-  DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB,
-  DOCUMENT_DETAILS_FLYOUT_RESPONSE_TAB,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
-import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
 
 describe(
   'Alert details expandable flyout right panel overview tab',

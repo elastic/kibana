@@ -1,3 +1,15 @@
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  EuiPageSection,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,30 +17,18 @@
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useMemo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  EuiPageSection,
-  EuiFlexGrid,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
+import { AlertsCallout } from '../../../alerts/callout';
+import { AlertsByName } from '../../../alerts/types';
+import { MonitoringTimeseriesContainer } from '../../../components/chart';
+import { DetailStatus } from '../../../components/logstash/detail_status';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useCharts } from '../../hooks/use_charts';
 import { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
-import { DetailStatus } from '../../../components/logstash/detail_status';
-import { MonitoringTimeseriesContainer } from '../../../components/chart';
-import { AlertsCallout } from '../../../alerts/callout';
-import { useCharts } from '../../hooks/use_charts';
-import { AlertsByName } from '../../../alerts/types';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ uuid: string | undefined }>();

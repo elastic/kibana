@@ -12,8 +12,8 @@
  * midnight, into a human-readable date/time format.
  */
 
-import moment from 'moment';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import moment from 'moment';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 

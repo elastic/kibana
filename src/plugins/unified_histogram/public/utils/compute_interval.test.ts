@@ -1,3 +1,4 @@
+import { calculateBounds } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { calculateBounds } from '@kbn/data-plugin/public';
 import { computeInterval } from './compute_interval';
 
 describe('computeInterval', () => {

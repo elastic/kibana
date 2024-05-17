@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
+import * as t from 'io-ts';
 import { ALERT_STATUS_ALL } from './constants';
 
 export type Maybe<T> = T | null | undefined;

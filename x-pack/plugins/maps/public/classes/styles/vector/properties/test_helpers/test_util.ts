@@ -7,9 +7,9 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
-import { StyleMeta } from '../../style_meta';
 import { AbstractField, IField } from '../../../../fields/field';
 import { IStyle } from '../../../style';
+import { StyleMeta } from '../../style_meta';
 
 export class MockField extends AbstractField {
   private readonly _dataType: string;

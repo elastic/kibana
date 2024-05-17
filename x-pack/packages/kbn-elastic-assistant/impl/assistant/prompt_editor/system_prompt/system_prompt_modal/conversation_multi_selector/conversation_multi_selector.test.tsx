@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
+import { alertConvo, customConvo, welcomeConvo } from '../../../../../mock/conversation';
 import { ConversationMultiSelector } from './conversation_multi_selector';
-import { alertConvo, welcomeConvo, customConvo } from '../../../../../mock/conversation';
 
 const onConversationSelectionChange = jest.fn();
 const testProps = {

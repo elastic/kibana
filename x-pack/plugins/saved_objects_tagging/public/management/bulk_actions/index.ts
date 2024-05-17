@@ -6,11 +6,11 @@
  */
 
 import { TagsCapabilities } from '../../../common';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
+import { ITagAssignmentService, ITagInternalClient, ITagsCache } from '../../services';
 import { StartServices } from '../../types';
 import { TagBulkAction } from '../types';
-import { getBulkDeleteAction } from './bulk_delete';
 import { getBulkAssignAction } from './bulk_assign';
+import { getBulkDeleteAction } from './bulk_delete';
 import { getClearSelectionAction } from './clear_selection';
 
 interface GetBulkActionOptions {

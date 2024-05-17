@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect, journey, Page, step } from '@elastic/synthetics';
+import { Page, expect, journey, step } from '@elastic/synthetics';
 import { FormMonitorType } from '../../../common/runtime_types';
 import { recordVideo } from '../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import {
-  isEuiFormFieldInValid,
-  clearAndType,
-  typeViaKeyboard,
-  clickAndBlur,
   assertShouldNotExist,
+  clearAndType,
+  clickAndBlur,
+  isEuiFormFieldInValid,
+  typeViaKeyboard,
 } from '../page_objects/utils';
 
 const customLocation = process.env.SYNTHETICS_TEST_LOCATION;

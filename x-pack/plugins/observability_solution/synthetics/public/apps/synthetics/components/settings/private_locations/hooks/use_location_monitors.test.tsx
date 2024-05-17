@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as reactRedux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
+import * as reactRedux from 'react-redux';
 import { WrappedHelper } from '../../../../utils/testing';
 
 import { useLocationMonitors } from './use_location_monitors';

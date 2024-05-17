@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { analyzeMarkdown, getDefaultSystemPrompt } from './helpers';
 import { Conversation, Prompt } from '../../..';
+import { analyzeMarkdown, getDefaultSystemPrompt } from './helpers';
 
 const tilde = '`';
 const codeDelimiter = '```';

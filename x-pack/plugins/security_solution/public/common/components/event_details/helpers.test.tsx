@@ -7,8 +7,8 @@
 
 import { mockDetailItemData } from '../../mock/mock_detail_item';
 
-import { getExampleText, getIconFromType } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
+import { getExampleText, getIconFromType } from './helpers';
 
 const aField = {
   ...mockDetailItemData[4],

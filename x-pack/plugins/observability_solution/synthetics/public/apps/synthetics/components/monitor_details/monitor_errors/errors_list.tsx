@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useMemo } from 'react';
 import {
-  EuiSpacer,
-  EuiText,
-  EuiInMemoryTable,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
+  EuiInMemoryTable,
+  EuiSpacer,
+  EuiText,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
-import { useHistory, useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSelectedLocation } from '../hooks/use_selected_location';
-import { ErrorDetailsLink } from '../../common/links/error_details_link';
+import React, { MouseEvent, useMemo } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
-import { useErrorFailedStep } from '../hooks/use_error_failed_step';
-import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { ErrorDetailsLink } from '../../common/links/error_details_link';
+import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 function isErrorActive(lastError: PingState, currentError: PingState, latestPing?: Ping) {
   return (

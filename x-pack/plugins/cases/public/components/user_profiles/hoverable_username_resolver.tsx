@@ -9,9 +9,9 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React from 'react';
 import type { CaseUser } from '../../containers/types';
 import type { HoverableUserWithAvatarProps } from './hoverable_user_with_avatar';
-import { Username } from './username';
 import { convertToUserInfo } from './user_converter';
 import { UserToolTip } from './user_tooltip';
+import { Username } from './username';
 
 const HoverableUsernameResolverComponent: React.FC<
   {

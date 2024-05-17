@@ -6,10 +6,10 @@
  */
 
 import {
-  migrateThrottledActions,
+  migrateAlertInstances,
   migrateLastScheduledActions,
   migrateMeta,
-  migrateAlertInstances,
+  migrateThrottledActions,
   upMigration,
 } from './migration';
 

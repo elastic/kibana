@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../common/lib/kibana';
-import { useSubAction, UseSubActionParams } from './use_sub_action';
+import { UseSubActionParams, useSubAction } from './use_sub_action';
 
 jest.mock('../../common/lib/kibana');
 

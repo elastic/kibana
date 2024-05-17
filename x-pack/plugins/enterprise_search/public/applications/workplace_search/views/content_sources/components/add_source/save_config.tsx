@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { ApiKey } from '../../../../components/shared/api_key';
-import { PUBLIC_KEY_LABEL, CONSUMER_KEY_LABEL, REMOVE_BUTTON } from '../../../../constants';
+import { CONSUMER_KEY_LABEL, PUBLIC_KEY_LABEL, REMOVE_BUTTON } from '../../../../constants';
 
 import { Configuration } from '../../../../types';
 
@@ -32,7 +32,7 @@ import { ExternalConnectorFormFields } from './add_external_connector';
 import { ExternalConnectorDocumentation } from './add_external_connector';
 import { AddSourceLogic, SourceConfigFormElement } from './add_source_logic';
 import { ConfigDocsLinks } from './config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from './constants';
+import { OAUTH_BACK_BUTTON, OAUTH_SAVE_CONFIG_BUTTON } from './constants';
 
 const clientIdSecretFields: SourceConfigFormElement[] = [
   {

@@ -7,8 +7,8 @@
  */
 
 import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
-import type { FileShare } from '../../common/types';
 import { FILE_SHARE_SO_TYPE } from '../../common/constants';
+import type { FileShare } from '../../common/types';
 
 /**
  * This saved object represents an instance of a publicly shared file.

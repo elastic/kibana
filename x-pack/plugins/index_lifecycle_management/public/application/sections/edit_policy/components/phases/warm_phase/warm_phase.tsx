@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent } from 'react';
 
 import { useConfiguration } from '../../../form';
 
 import {
+  DataTierAllocationField,
+  DownsampleField,
   ForcemergeField,
   IndexPriorityField,
-  DataTierAllocationField,
-  ShrinkField,
   ReadonlyField,
   ReplicasField,
-  DownsampleField,
+  ShrinkField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';

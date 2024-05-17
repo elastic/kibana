@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AlertingBuiltinsPlugin } from './plugin';
-import { coreMock } from '@kbn/core/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
+import { AlertingBuiltinsPlugin } from './plugin';
 
 describe('Stack Alerts Feature Privileges', () => {
   test('feature privilege should contain all built-in rule types', () => {

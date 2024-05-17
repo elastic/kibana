@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiToolTipProps } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { EuiToolTipProps } from '@elastic/eui';
 
 import { useDateFormat, useTimeZone, useUiSetting$ } from '../../lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';

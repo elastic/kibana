@@ -8,9 +8,9 @@
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  apiCanAccessViewMode,
   CanAccessViewMode,
   EmbeddableApiContext,
+  apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
@@ -18,8 +18,8 @@ import { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-p
 
 import { BehaviorSubject, merge } from 'rxjs';
 import {
-  apiHasDynamicActions,
   HasDynamicActions,
+  apiHasDynamicActions,
 } from '../embeddables/interfaces/has_dynamic_actions';
 
 export const txtOneDrilldown = i18n.translate(

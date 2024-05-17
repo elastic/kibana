@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 
-import { LogRetentionOptions, LogRetention, LogRetentionServer } from './types';
+import { LogRetention, LogRetentionOptions, LogRetentionServer } from './types';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
 
 interface LogRetentionActions {

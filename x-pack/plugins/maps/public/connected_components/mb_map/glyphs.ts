@@ -7,7 +7,7 @@
 
 import fetch from 'node-fetch';
 import { FONTS_API_PATH } from '../../../common/constants';
-import { getDocLinks, getHttp, getEMSSettings } from '../../kibana_services';
+import { getDocLinks, getEMSSettings, getHttp } from '../../kibana_services';
 
 let canAccessEmsFonts: boolean | undefined;
 let canAccessEmsFontsPromise: Promise<boolean> | null = null;

@@ -22,9 +22,7 @@
         "parentPluginId": "@kbn/core-saved-objects-browser-internal",
         "id": "def-common.SavedObjectsService",
         "type": "Class",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": ["deprecated"],
         "label": "SavedObjectsService",
         "description": [],
         "signature": [
@@ -80,9 +78,7 @@
             "tags": [],
             "label": "setup",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,9 +162,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts",
             "deprecated": false,
             "trackAdoption": false,

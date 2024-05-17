@@ -6,17 +6,17 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { takeLeading, takeEvery, select, put } from 'redux-saga/effects';
+import { put, select, takeEvery, takeLeading } from 'redux-saga/effects';
 
 import { ConfigKey, Ping, PingsResponse } from '../../../../../common/runtime_types';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
+  getMonitorAction,
   getMonitorLastRunAction,
   getMonitorRecentPingsAction,
-  getMonitorAction,
   updateMonitorLastRunAction,
 } from './actions';
-import { fetchSyntheticsMonitor, fetchMonitorRecentPings, fetchMonitorLastRun } from './api';
+import { fetchMonitorLastRun, fetchMonitorRecentPings, fetchSyntheticsMonitor } from './api';
 import { selectLastRunMetadata } from './selectors';
 
 export function* fetchSyntheticsMonitorEffect() {

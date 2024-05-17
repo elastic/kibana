@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButtonProps } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import React from 'react';
+import { canCategorize, triggerCategorizeActions } from './categorize_trigger_utils';
 import { FieldCategorizeButtonInner } from './field_categorize_button_inner';
-import { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';
 
 export interface FieldCategorizeButtonProps {
   field: DataViewField;

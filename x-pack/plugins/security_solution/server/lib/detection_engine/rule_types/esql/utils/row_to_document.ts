@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlResultRow, EsqlResultColumn } from '../esql_request';
+import type { EsqlResultColumn, EsqlResultRow } from '../esql_request';
 
 /**
  * transform ES|QL result row to JSON object

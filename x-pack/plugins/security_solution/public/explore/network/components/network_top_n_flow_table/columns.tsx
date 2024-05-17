@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
+import { get } from 'lodash/fp';
 import React from 'react';
 
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
-import { CountryFlag } from '../source_destination/country_flag';
 import type {
   AutonomousSystemItem,
   NetworkTopNFlowEdges,
   TopNetworkTablesEcsField,
 } from '../../../../../common/search_strategy';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { networkModel } from '../../store';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { NetworkDetailsLink } from '../../../../common/components/links';
-import type { Columns } from '../../../components/paginated_table';
-import * as i18n from './translations';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { PreferenceFormattedBytes } from '../../../../common/components/formatted_bytes';
+import { NetworkDetailsLink } from '../../../../common/components/links';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import type { Columns } from '../../../components/paginated_table';
+import { networkModel } from '../../store';
+import { CountryFlag } from '../source_destination/country_flag';
+import * as i18n from './translations';
 
 export type NetworkTopNFlowColumns = [
   Columns<NetworkTopNFlowEdges>,
@@ -37,7 +37,7 @@ export type NetworkTopNFlowColumns = [
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
   Columns<NetworkTopNFlowEdges>,
-  Columns<NetworkTopNFlowEdges>
+  Columns<NetworkTopNFlowEdges>,
 ];
 
 export type NetworkTopNFlowColumnsNetworkDetails = [
@@ -46,7 +46,7 @@ export type NetworkTopNFlowColumnsNetworkDetails = [
   Columns<NetworkTopNFlowEdges>,
   Columns<TopNetworkTablesEcsField['bytes_in']>,
   Columns<TopNetworkTablesEcsField['bytes_out']>,
-  Columns<NetworkTopNFlowEdges>
+  Columns<NetworkTopNFlowEdges>,
 ];
 
 export const getNetworkTopNFlowColumns = (

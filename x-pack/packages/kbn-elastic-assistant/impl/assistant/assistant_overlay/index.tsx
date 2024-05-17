@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiFlyoutResizable, EuiModal, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiModal, EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import useEvent from 'react-use/lib/useEvent';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { css } from '@emotion/react';
+import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 import {
   ShowAssistantOverlayProps,
-  useAssistantContext,
   UserAvatar,
+  useAssistantContext,
 } from '../../assistant_context';
-import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;

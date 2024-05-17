@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 import type { InternalUiSettingsRouter } from '../internal_types';
 

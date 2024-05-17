@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+import { cloneDeep } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
-import type { ITelemetryReceiver } from './receiver';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { AxiosInstance } from 'axios';
+import axios from 'axios';
+import { Subject, exhaustMap, takeUntil, timer } from 'rxjs';
+import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
+import { telemetryConfiguration } from './configuration';
 import { copyAllowlistedFields, filterList } from './filterlists';
-import { createTelemetryTaskConfigs } from './tasks';
 import { copyLicenseFields, createUsageCounterLabel, tlog } from './helpers';
-import type { TelemetryChannel, TelemetryEvent } from './types';
+import type { ITelemetryReceiver } from './receiver';
 import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
-import { telemetryConfiguration } from './configuration';
-import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
 import { TaskMetricsService } from './task_metrics';
+import { createTelemetryTaskConfigs } from './tasks';
+import type { TelemetryChannel, TelemetryEvent } from './types';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { getEventLog, ObjectRemover } from '../../../common/lib';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { ObjectRemover, getEventLog } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {

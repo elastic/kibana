@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import { configSchema, type ConfigSchema } from '../common/config';
+import { type ConfigSchema, configSchema } from '../common/config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,

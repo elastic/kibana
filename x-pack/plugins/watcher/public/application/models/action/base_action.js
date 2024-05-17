@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 
 export class BaseAction {
   constructor(props = {}) {

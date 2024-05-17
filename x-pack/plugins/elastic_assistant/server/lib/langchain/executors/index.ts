@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AgentExecutor } from './types';
 import { callAgentExecutor } from '../execute_custom_llm_chain';
 import { callOpenAIFunctionsExecutor } from './openai_functions_executor';
+import { AgentExecutor } from './types';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map

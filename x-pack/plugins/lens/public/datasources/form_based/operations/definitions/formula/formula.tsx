@@ -7,21 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { nonNullable } from '../../../../../utils';
 import type {
   BaseIndexPatternColumn,
   FieldBasedOperationErrorMessage,
   OperationDefinition,
 } from '..';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../../../types';
-import { runASTValidation, tryToParse } from './validation';
-import { WrappedFormulaEditor } from './editor';
-import { insertOrReplaceFormulaColumn } from './parse';
-import { generateFormula } from './generate';
-import { filterByVisibleOperation } from './util';
+import { nonNullable } from '../../../../../utils';
 import { getManagedColumnsFrom } from '../../layer_helpers';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
+import { WrappedFormulaEditor } from './editor';
+import { generateFormula } from './generate';
+import { insertOrReplaceFormulaColumn } from './parse';
+import { filterByVisibleOperation } from './util';
+import { runASTValidation, tryToParse } from './validation';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',

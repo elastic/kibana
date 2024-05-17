@@ -70,8 +70,9 @@ describe('decoding', () => {
     expect(Rison.decode('!n')).toMatchInlineSnapshot(`null`);
   });
   it('decodes a complex rison string', () => {
-    expect(Rison.decode(`(bar:(bar:!(x,(a:(),b:'1970-01-01T00:00:00.000Z')),bax:1),foo:1)`))
-      .toMatchInlineSnapshot(`
+    expect(
+      Rison.decode(`(bar:(bar:!(x,(a:(),b:'1970-01-01T00:00:00.000Z')),bax:1),foo:1)`)
+    ).toMatchInlineSnapshot(`
       Object {
         "bar": Object {
           "bar": Array [

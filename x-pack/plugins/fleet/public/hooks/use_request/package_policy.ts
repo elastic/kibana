@@ -7,6 +7,15 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 
+import type {
+  DeletePackagePoliciesRequest,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyResponse,
+} from '../../../common/types/rest_spec';
 import { packagePolicyRouteService } from '../../services';
 import type {
   CreatePackagePolicyRequest,
@@ -14,15 +23,6 @@ import type {
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
 } from '../../types';
-import type {
-  DeletePackagePoliciesRequest,
-  PostDeletePackagePoliciesResponse,
-  GetPackagePoliciesRequest,
-  GetPackagePoliciesResponse,
-  GetOnePackagePolicyResponse,
-  UpgradePackagePolicyDryRunResponse,
-  UpgradePackagePolicyResponse,
-} from '../../../common/types/rest_spec';
 
 import { API_VERSIONS } from '../../../common/constants';
 

@@ -6,7 +6,7 @@
  */
 
 import { catchError, from, map, of, throwError } from 'rxjs';
-import { createMachine, actions, assign } from 'xstate';
+import { actions, assign, createMachine } from 'xstate';
 import { ILogViewsClient } from '../../../services/log_views';
 import { NotificationChannel } from '../../xstate_helpers';
 import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
@@ -22,8 +22,8 @@ import {
 } from './types';
 import {
   InitializeFromUrl,
-  UpdateContextInUrl,
   ListenForUrlChanges,
+  UpdateContextInUrl,
 } from './url_state_storage_service';
 
 export const createPureLogViewStateMachine = (initialContext: LogViewContextWithReference) =>

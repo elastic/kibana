@@ -7,7 +7,7 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { fetchProvider, Usage } from './fetch';
+import { Usage, fetchProvider } from './fetch';
 
 export function makeKQLUsageCollector(
   usageCollection: UsageCollectionSetup,

@@ -7,29 +7,29 @@
 
 import {
   EuiButtonIcon,
-  EuiFlexItem,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexItem,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
-import { useKibana } from '../../../utils/kibana_react';
-import { parseAlert } from '../helpers/parse_alert';
-import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
+import { ObservabilityRuleTypeRegistry, observabilityFeatureId } from '../../..';
+import { SLO_DETAIL_PATH, paths } from '../../../../common/locators/paths';
 import type { ConfigSchema } from '../../../plugin';
+import { useKibana } from '../../../utils/kibana_react';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
+import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
+import { parseAlert } from '../helpers/parse_alert';
 
 export interface ObservabilityAlertActionsProps extends AlertActionsProps {
   config: ConfigSchema;

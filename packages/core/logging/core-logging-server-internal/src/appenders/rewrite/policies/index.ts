@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { assertNever } from '@kbn/std';
 import type { RewritePolicyConfig } from '@kbn/core-logging-server';
-import { RewritePolicy } from './policy';
+import { assertNever } from '@kbn/std';
 import { MetaRewritePolicy, metaRewritePolicyConfigSchema } from './meta';
+import { RewritePolicy } from './policy';
 
 export type { RewritePolicy };
 

@@ -6,16 +6,16 @@
  */
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
-import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
+import React from 'react';
 
+import { chromeServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { of } from 'rxjs';
-import { render } from '../../../../lib/helper/rtl_helpers';
-import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types/ping';
+import { render } from '../../../../lib/helper/rtl_helpers';
 import { JourneyState } from '../../../../state/reducers/journey';
-import { chromeServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 
 describe('useMonitorBreadcrumbs', () => {
   it('sets the given breadcrumbs for steps list view', () => {

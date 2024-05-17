@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import type { Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import moment from 'moment';
 import type { TelemetryReceiver } from './receiver';
 import type { TelemetryEventsSender } from './sender';
 import { type LatestTaskStateSchema, stateSchemaByVersion } from './task_state';

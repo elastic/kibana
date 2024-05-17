@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from './utils';
-import { variable } from '../var';
 import { ExecutionContext } from '../../../execution/types';
+import { variable } from '../var';
+import { functionWrapper } from './utils';
 
 describe('expression_functions', () => {
   describe('var', () => {

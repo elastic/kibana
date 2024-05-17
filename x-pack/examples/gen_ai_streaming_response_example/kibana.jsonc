@@ -6,15 +6,7 @@
     "id": "genAiStreamingResponseExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "triggersActionsUi",
-      "actions",
-      "kibanaReact",
-      "developerExamples"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "stackConnectors"
-    ]
+    "requiredPlugins": ["triggersActionsUi", "actions", "kibanaReact", "developerExamples"],
+    "requiredBundles": ["kibanaReact", "stackConnectors"]
   }
 }

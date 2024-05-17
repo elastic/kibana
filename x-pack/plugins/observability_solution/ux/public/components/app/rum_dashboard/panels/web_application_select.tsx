@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { serviceNameQuery } from '../../../../services/data/service_name_query';
-import { ServiceNameFilter } from '../url_filter/service_name_filter';
+import React from 'react';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useDataView } from '../local_uifilters/use_data_view';
 import { callDateMath } from '../../../../services/data/call_date_math';
+import { serviceNameQuery } from '../../../../services/data/service_name_query';
+import { useDataView } from '../local_uifilters/use_data_view';
+import { ServiceNameFilter } from '../url_filter/service_name_filter';
 
 export function WebApplicationSelect() {
   const {

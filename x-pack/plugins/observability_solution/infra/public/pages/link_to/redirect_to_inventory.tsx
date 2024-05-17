@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { parse } from 'query-string';
+import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 
 // FIXME what would be the right way to build this query string?

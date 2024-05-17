@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { render } from '@testing-library/react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { currentSuggestionMock } from '../__mocks__/suggestions';
-import { lensAdaptersMock } from '../__mocks__/lens_adapters';
-import { ChartConfigPanel } from './chart_config_panel';
 import type { UnifiedHistogramVisContext } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
+import { ChartConfigPanel } from './chart_config_panel';
 
 describe('ChartConfigPanel', () => {
   it('should return a jsx element to edit the visualization', async () => {

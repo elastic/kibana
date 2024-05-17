@@ -6,10 +6,10 @@
  */
 
 import {
+  CLEAR_CREATE_JOB_ERRORS,
+  CREATE_JOB_FAILURE,
   CREATE_JOB_START,
   CREATE_JOB_SUCCESS,
-  CREATE_JOB_FAILURE,
-  CLEAR_CREATE_JOB_ERRORS,
 } from '../action_types';
 
 const initialState = {

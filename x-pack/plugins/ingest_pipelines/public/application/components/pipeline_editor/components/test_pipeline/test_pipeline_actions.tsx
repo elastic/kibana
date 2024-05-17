@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { FunctionComponent, useState } from 'react';
 
-import { useTestPipelineContext, usePipelineProcessorsContext } from '../../context';
-import { DocumentsDropdown } from './documents_dropdown';
-import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
+import { usePipelineProcessorsContext, useTestPipelineContext } from '../../context';
 import { AddDocumentsButton } from './add_documents_button';
+import { DocumentsDropdown } from './documents_dropdown';
 import { TestOutputButton } from './test_output_button';
 import { TestPipelineFlyout } from './test_pipeline_flyout.container';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 const i18nTexts = {
   testPipelineActionsLabel: i18n.translate(

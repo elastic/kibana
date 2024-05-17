@@ -8,15 +8,15 @@
 import path, { join, resolve } from 'path';
 import type {
   CheckTimelineStatusRt,
-  TimelineSavedObject,
   ImportTimelinesSchema,
+  TimelineSavedObject,
 } from '../../../../common/api/timeline';
 
 import type { FrameworkRequest } from '../../framework';
 
 import { getExistingPrepackagedTimelines } from '../saved_object/timelines';
 
-import { loadData, getReadables } from './common';
+import { getReadables, loadData } from './common';
 
 export const getTimelinesToUpdate = (
   timelinesFromFileSystem: ImportTimelinesSchema[],

@@ -1,3 +1,8 @@
+import type { CoreStart } from '@kbn/core/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +11,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { CoreStart } from '@kbn/core/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import type { LensPluginStartDependencies } from '../../../plugin';
 import { extractReferencesFromState } from '../../../utils';
 import type { LensChartLoadEvent } from './types';
 

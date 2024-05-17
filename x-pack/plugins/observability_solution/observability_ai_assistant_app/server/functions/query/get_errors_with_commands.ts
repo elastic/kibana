@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
+import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import { splitIntoCommands } from './correct_common_esql_mistakes';
 
 export function getErrorsWithCommands(query: string, errors: Array<ESQLMessage | EditorError>) {

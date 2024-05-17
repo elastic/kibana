@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
+import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
+import { MOCK_TAG_ID } from '../../common/containers/tags/__mocks__/api';
+import { getTagsByName } from '../../common/containers/tags/api';
+import { useKibana } from '../../common/lib/kibana';
 import { DashboardContextProvider } from '../context/dashboard_context';
 import { useFetchSecurityDashboards } from './use_fetch_security_dashboards';
-import { getTagsByName } from '../../common/containers/tags/api';
-import { getDashboardsByTagIds } from '../../common/containers/dashboards/api';
-import { useKibana } from '../../common/lib/kibana';
-import { MOCK_TAG_ID } from '../../common/containers/tags/__mocks__/api';
-import { DEFAULT_DASHBOARDS_RESPONSE } from '../../common/containers/dashboards/__mocks__/api';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/tags/api');

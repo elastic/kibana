@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getSeries } from './_get_series';
 import { setFormatService } from '../../../services';
-import { Chart, Aspect } from './point_series';
-import { Table, Column } from '../../types';
+import { Column, Table } from '../../types';
 import { Serie } from './_add_to_siri';
 import { Point } from './_get_point';
+import { getSeries } from './_get_series';
+import { Aspect, Chart } from './point_series';
 
 describe('getSeries', function () {
   beforeAll(() => {

@@ -9,18 +9,18 @@
 import * as t from 'io-ts';
 
 import { DefaultUuid } from '@kbn/securitysolution-io-ts-types';
-import { nonEmptyEndpointEntriesArray } from '../../common/endpoint/entries';
-import { exceptionListItemType } from '../../common/exception_list_item_type';
+import { CreateCommentsArray } from '../../common/create_comment';
 import { DefaultCreateCommentsArray } from '../../common/default_create_comments_array';
+import { description } from '../../common/description';
+import { nonEmptyEndpointEntriesArray } from '../../common/endpoint/entries';
+import { EntriesArray } from '../../common/entries';
+import { exceptionListItemType } from '../../common/exception_list_item_type';
+import { ItemId } from '../../common/item_id';
+import { meta } from '../../common/meta';
+import { name } from '../../common/name';
 import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { CreateCommentsArray } from '../../common/create_comment';
 import { Tags } from '../../common/tags';
-import { ItemId } from '../../common/item_id';
-import { EntriesArray } from '../../common/entries';
-import { description } from '../../common/description';
-import { name } from '../../common/name';
-import { meta } from '../../common/meta';
 import { tags } from '../../common/tags';
 
 export const createEndpointListItemSchema = t.intersection([

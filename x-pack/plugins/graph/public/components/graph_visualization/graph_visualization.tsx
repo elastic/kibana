@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
 import classNames from 'classnames';
 import d3, { ZoomEvent } from 'd3';
-import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
+import React, { useRef } from 'react';
 import { makeNodeId } from '../../services/persistence';
-import { getIconOffset, IconRenderer } from '../icon_renderer';
+import { ControlType, TermIntersect, Workspace, WorkspaceEdge, WorkspaceNode } from '../../types';
+import { IconRenderer, getIconOffset } from '../icon_renderer';
 
 export interface GraphVisualizationProps {
   workspace: Workspace;

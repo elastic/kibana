@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import {
-  AGENT_CONFIG_PATH,
   AGENT_CONFIG_API_KEY_PATH,
+  AGENT_CONFIG_PATH,
   SOURCE_MAP_API_KEY_PATH,
   SOURCE_MAP_PATH,
 } from '@kbn/apm-plugin/server/routes/fleet/get_package_policy_decorators';
-import expect from '@kbn/expect';
-import { get } from 'lodash';
-import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { createEsClientForFtrConfig } from '@kbn/test';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
 } from '@kbn/apm-plugin/server/routes/settings/apm_indices/apm_system_index_constants';
+import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
+import expect from '@kbn/expect';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { createEsClientForFtrConfig } from '@kbn/test';
+import { get } from 'lodash';
+import { getBettertest } from '../../common/bettertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { expectToReject } from '../../common/utils/expect_to_reject';
 import {
   createAgentPolicy,
   createPackagePolicy,
@@ -30,8 +32,6 @@ import {
   getPackagePolicy,
   setupFleet,
 } from './helpers';
-import { getBettertest } from '../../common/bettertest';
-import { expectToReject } from '../../common/utils/expect_to_reject';
 
 export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const { getService } = ftrProviderContext;

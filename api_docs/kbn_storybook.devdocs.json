@@ -46,9 +46,7 @@
             "tags": [],
             "label": "extraConfig",
             "description": [],
-            "signature": [
-              "Configuration"
-            ],
+            "signature": ["Configuration"],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -65,9 +63,7 @@
         "tags": [],
         "label": "runStorybookCli",
         "description": [],
-        "signature": [
-          "({ configDir, name }: { configDir: string; name: string; }) => void"
-        ],
+        "signature": ["({ configDir, name }: { configDir: string; name: string; }) => void"],
         "path": "packages/kbn-storybook/src/lib/run_storybook_cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -119,12 +115,8 @@
         "type": "Interface",
         "tags": [],
         "label": "StorybookConfig",
-        "description": [
-          "\nThe interface for Storybook configuration in `main.ts` files."
-        ],
-        "signature": [
-          "StorybookConfig"
-        ],
+        "description": ["\nThe interface for Storybook configuration in `main.ts` files."],
+        "signature": ["StorybookConfig"],
         "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -135,13 +127,8 @@
             "type": "Array",
             "tags": [],
             "label": "addons",
-            "description": [
-              "\nSets the addons you want to use with Storybook.\n"
-            ],
-            "signature": [
-              "Preset",
-              "[] | undefined"
-            ],
+            "description": ["\nSets the addons you want to use with Storybook.\n"],
+            "signature": ["Preset", "[] | undefined"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -153,10 +140,7 @@
             "tags": [],
             "label": "core",
             "description": [],
-            "signature": [
-              "CoreConfig",
-              " | undefined"
-            ],
+            "signature": ["CoreConfig", " | undefined"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -170,9 +154,7 @@
             "description": [
               "\nSets a list of directories of static files to be loaded by Storybook server\n"
             ],
-            "signature": [
-              "(string | DirectoryMapping)[] | undefined"
-            ],
+            "signature": ["(string | DirectoryMapping)[] | undefined"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -184,9 +166,7 @@
             "tags": [],
             "label": "logLevel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -211,13 +191,8 @@
             "type": "Array",
             "tags": [],
             "label": "stories",
-            "description": [
-              "\nTells Storybook where to find stories.\n"
-            ],
-            "signature": [
-              "StoriesEntry",
-              "[]"
-            ],
+            "description": ["\nTells Storybook where to find stories.\n"],
+            "signature": ["StoriesEntry", "[]"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -228,13 +203,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "framework",
-            "description": [
-              "\nFramework, e.g. '@storybook/react', required in v7"
-            ],
-            "signature": [
-              "Preset",
-              " | undefined"
-            ],
+            "description": ["\nFramework, e.g. '@storybook/react', required in v7"],
+            "signature": ["Preset", " | undefined"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -245,14 +215,8 @@
             "type": "Object",
             "tags": [],
             "label": "typescript",
-            "description": [
-              "\nControls how Storybook handles TypeScript files."
-            ],
-            "signature": [
-              "Partial<",
-              "TypescriptOptions",
-              "> | undefined"
-            ],
+            "description": ["\nControls how Storybook handles TypeScript files."],
+            "signature": ["Partial<", "TypescriptOptions", "> | undefined"],
             "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -263,9 +227,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "refs",
-            "description": [
-              "\nReferences external Storybooks"
-            ],
+            "description": ["\nReferences external Storybooks"],
             "signature": [
               "StorybookRefs | ((config: ",
               "Configuration",
@@ -283,9 +245,7 @@
             "type": "Function",
             "tags": [],
             "label": "webpackFinal",
-            "description": [
-              "\nModify or return a custom Webpack config."
-            ],
+            "description": ["\nModify or return a custom Webpack config."],
             "signature": [
               "((config: ",
               "Configuration",
@@ -308,9 +268,7 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": [
-                  "Configuration"
-                ],
+                "signature": ["Configuration"],
                 "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -323,9 +281,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -338,9 +294,7 @@
             "parentPluginId": "@kbn/storybook",
             "id": "def-common.StorybookConfig.config",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": ["deprecated"],
             "label": "config",
             "description": [
               "\nAdd additional scripts to run in the preview a la `.storybook/preview.js`\n"
@@ -362,9 +316,7 @@
                 "tags": [],
                 "label": "entries",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -377,9 +329,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -413,9 +363,7 @@
                 "tags": [],
                 "label": "entries",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -428,9 +376,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -464,9 +410,7 @@
             "tags": [],
             "label": "addons",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -478,9 +422,7 @@
             "tags": [],
             "label": "stories",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -503,9 +445,7 @@
                 "tags": [],
                 "label": "reactDocgen",
                 "description": [],
-                "signature": [
-                  "false"
-                ],
+                "signature": ["false"],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -530,9 +470,7 @@
                 "tags": [],
                 "label": "postcss",
                 "description": [],
-                "signature": [
-                  "false"
-                ],
+                "signature": ["false"],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -548,9 +486,7 @@
             "description": [
               "// @ts-expect-error StorybookConfig type is incomplete\n// https://storybook.js.org/docs/react/configure/babel#custom-configuration"
             ],
-            "signature": [
-              "(options: any) => Promise<any>"
-            ],
+            "signature": ["(options: any) => Promise<any>"],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -562,9 +498,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -630,9 +564,7 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": [
-                  "Configuration"
-                ],
+                "signature": ["Configuration"],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -645,9 +577,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": [
-                  "Options"
-                ],
+                "signature": ["Options"],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -677,9 +607,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -691,12 +619,7 @@
             "tags": [],
             "label": "webpackFinal",
             "description": [],
-            "signature": [
-              "(config: ",
-              "Configuration",
-              ") => ",
-              "Configuration"
-            ],
+            "signature": ["(config: ", "Configuration", ") => ", "Configuration"],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -708,9 +631,7 @@
                 "tags": [],
                 "label": "config",
                 "description": [],
-                "signature": [
-                  "Configuration"
-                ],
+                "signature": ["Configuration"],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,

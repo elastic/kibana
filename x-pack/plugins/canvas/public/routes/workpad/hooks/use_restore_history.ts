@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useRef, useEffect } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
 // @ts-expect-error
 import { restoreHistory } from '../../../state/actions/history';
 import { initializeWorkpad } from '../../../state/actions/workpad';

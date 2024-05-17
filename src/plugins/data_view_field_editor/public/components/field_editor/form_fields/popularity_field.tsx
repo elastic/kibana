@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { UseField, NumericField } from '../../../shared_imports';
+import { NumericField, UseField } from '../../../shared_imports';
 
 export const PopularityField = () => {
   return (

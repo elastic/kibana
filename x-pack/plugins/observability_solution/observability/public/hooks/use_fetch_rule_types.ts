@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { AsApiContract } from '@kbn/actions-plugin/common';
+import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type { RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   QueryObserverResult,
   RefetchOptions,
@@ -12,10 +16,6 @@ import {
   useQuery,
 } from '@tanstack/react-query';
 import { camelCase, mapKeys } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import type { RuleType } from '@kbn/triggers-actions-ui-plugin/public';
-import type { AsApiContract } from '@kbn/actions-plugin/common';
 import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchRuleTypesResponse {

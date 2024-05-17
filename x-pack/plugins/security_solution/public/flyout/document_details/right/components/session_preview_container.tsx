@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback } from 'react';
-import { TimelineTabs } from '@kbn/securitysolution-data-table';
-import { useDispatch } from 'react-redux';
 import { EuiLink, useEuiTheme } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import React, { type FC, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { SessionPreview } from './session_preview';
-import { useSessionPreview } from '../hooks/use_session_preview';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useRightPanelContext } from '../context';
-import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { setActiveTabTimeline } from '../../../../timelines/store/actions';
+import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { getScopedActions } from '../../../../helpers';
+import { setActiveTabTimeline } from '../../../../timelines/store/actions';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { useRightPanelContext } from '../context';
+import { useSessionPreview } from '../hooks/use_session_preview';
+import { SessionPreview } from './session_preview';
+import { SESSION_PREVIEW_TEST_ID } from './test_ids';
 
 const timelineId = 'timeline-1';
 

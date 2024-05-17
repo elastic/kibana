@@ -7,14 +7,14 @@
  */
 
 import Path from 'path';
-import * as Rx from 'rxjs';
 import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/jest-serializers';
+import * as Rx from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { TestLog } from './log';
 import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
 import type { CliDevConfig } from './config';
+import { TestLog } from './log';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Rx.Observable, 'Rx.Observable'));

@@ -44,7 +44,7 @@ export interface EmulatorServerRequest<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends HapiTypes.Request['query'] = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = any
+  TPre extends HapiTypes.Request['pre'] = any,
 > extends HapiTypes.Request {
   params: TParams;
   query: TQuery;
@@ -56,7 +56,7 @@ export type EmulatorServerRouteHandlerMethod<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends HapiTypes.Request['query'] = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = any
+  TPre extends HapiTypes.Request['pre'] = any,
 > = (
   request: EmulatorServerRequest<TParams, TQuery, TPayload, TPre>,
   h: HapiTypes.ResponseToolkit,
@@ -67,7 +67,7 @@ export interface EmulatorServerRouteDefinition<
   TParams extends HapiTypes.Request['params'] = any,
   TQuery extends HapiTypes.Request['query'] = any,
   TPayload extends HapiTypes.Request['payload'] = any,
-  TPre extends HapiTypes.Request['pre'] = any
+  TPre extends HapiTypes.Request['pre'] = any,
 > extends Omit<HapiTypes.ServerRoute, 'handler'> {
   handler: EmulatorServerRouteHandlerMethod<TParams, TQuery, TPayload, TPre>;
 }

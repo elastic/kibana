@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
-import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
+import expect from '@kbn/expect';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { LlmProxy, createLlmProxy } from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

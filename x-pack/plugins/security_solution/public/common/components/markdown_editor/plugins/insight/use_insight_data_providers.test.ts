@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseInsightDataProvidersProps, Provider } from './use_insight_data_providers';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
-import {
-  useInsightDataProviders,
-  type UseInsightDataProvidersResult,
-} from './use_insight_data_providers';
 import { mockAlertDetailsData } from '../../../event_details/__mocks__';
+import type { Provider, UseInsightDataProvidersProps } from './use_insight_data_providers';
+import {
+  type UseInsightDataProvidersResult,
+  useInsightDataProviders,
+} from './use_insight_data_providers';
 
 const mockAlertDetailsDataWithIsObject = mockAlertDetailsData.map((detail) => {
   return {

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import type { PolicyResponseWrapperProps } from '../policy_response_wrapper';
-import { PolicyResponseWrapper } from '../policy_response_wrapper';
-import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';
-import { useGetEndpointPolicyResponse } from '../../../hooks/endpoint/use_get_endpoint_policy_response';
+import React from 'react';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import type {
   HostPolicyResponse,
   HostPolicyResponseAppliedAction,
 } from '../../../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { useGetEndpointDetails } from '../../../hooks';
+import { useGetEndpointPolicyResponse } from '../../../hooks/endpoint/use_get_endpoint_policy_response';
 import {
-  descriptions,
   LINUX_DEADLOCK_MESSAGE,
+  descriptions,
   policyResponseTitles,
 } from '../policy_response_friendly_names';
+import type { PolicyResponseWrapperProps } from '../policy_response_wrapper';
+import { PolicyResponseWrapper } from '../policy_response_wrapper';
 
 jest.mock('../../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../../hooks/endpoint/use_get_endpoint_details');

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
+import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> => ({
   getAllDeprecations: jest.fn().mockResolvedValue([]),

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { UserProfileService } from './service';
 import type { CoreUserProfileDelegateContract } from './api_provider';
+import type { UserProfileService } from './service';
 
 /**
  * Setup contract for Core's userProfile service.

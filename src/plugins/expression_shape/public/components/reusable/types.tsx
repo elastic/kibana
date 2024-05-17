@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Component, CSSProperties, Ref, SVGProps } from 'react';
+import { CSSProperties, Component, Ref, SVGProps } from 'react';
 import { ViewBoxParams } from '../../../common/types';
 import type { ShapeType } from './shape_factory';
 

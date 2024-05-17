@@ -41,9 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.expectState('completed');
         await searchSessions.save();
         await searchSessions.expectState('backgroundCompleted');
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'A Pie in another space'
-        );
+        const savedSessionId =
+          await dashboardPanelActions.getSearchSessionIdByTitle('A Pie in another space');
 
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();

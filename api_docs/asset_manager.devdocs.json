@@ -22,9 +22,7 @@
             "tags": [],
             "label": "publicAssetsClient",
             "description": [],
-            "signature": [
-              "IPublicAssetsClient"
-            ],
+            "signature": ["IPublicAssetsClient"],
             "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -50,9 +48,7 @@
             "tags": [],
             "label": "publicAssetsClient",
             "description": [],
-            "signature": [
-              "IPublicAssetsClient"
-            ],
+            "signature": ["IPublicAssetsClient"],
             "path": "x-pack/plugins/observability_solution/asset_manager/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -70,9 +66,7 @@
         "tags": [],
         "label": "AssetManagerAppId",
         "description": [],
-        "signature": [
-          "\"assetManager\""
-        ],
+        "signature": ["\"assetManager\""],
         "path": "x-pack/plugins/observability_solution/asset_manager/public/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -126,11 +120,7 @@
       "tags": [],
       "label": "AssetManagerServerPluginSetup",
       "description": [],
-      "signature": [
-        "{ assetClient: ",
-        "AssetClient",
-        "; } | undefined"
-      ],
+      "signature": ["{ assetClient: ", "AssetClient", "; } | undefined"],
       "path": "x-pack/plugins/observability_solution/asset_manager/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -144,9 +134,7 @@
       "tags": [],
       "label": "AssetManagerServerPluginStart",
       "description": [],
-      "signature": [
-        "{} | undefined"
-      ],
+      "signature": ["{} | undefined"],
       "path": "x-pack/plugins/observability_solution/asset_manager/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,

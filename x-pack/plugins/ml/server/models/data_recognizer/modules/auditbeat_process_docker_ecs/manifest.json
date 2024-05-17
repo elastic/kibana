@@ -8,13 +8,13 @@
   "query": {
     "bool": {
       "filter": [
-        { "term":  { "event.module": "auditd" } },
-        { "term":  { "container.runtime": "docker" } }
+        { "term": { "event.module": "auditd" } },
+        { "term": { "container.runtime": "docker" } }
       ],
       "must": {
         "exists": { "field": "auditd.data.syscall" }
       },
-      "must_not": { "terms": { "_tier": [ "data_frozen", "data_cold" ] } }
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
     }
   },
   "jobs": [

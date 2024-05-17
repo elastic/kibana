@@ -10,33 +10,33 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { Reference } from '@kbn/content-management-utils';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { I18nStart, KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
-import {
-  type PublishingSubject,
-  apiPublishesPanelTitle,
-  apiPublishesUnsavedChanges,
-  getPanelTitle,
-} from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
   DefaultEmbeddableApi,
-  EmbeddableFactoryNotFoundError,
-  embeddableInputToSubject,
-  isExplicitInputWithAttributes,
-  PanelNotFoundError,
-  ViewMode,
   type EmbeddableFactory,
+  EmbeddableFactoryNotFoundError,
   type EmbeddableInput,
   type EmbeddableOutput,
   type IEmbeddable,
+  PanelNotFoundError,
+  ViewMode,
+  embeddableInputToSubject,
+  isExplicitInputWithAttributes,
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TrackContentfulRender } from '@kbn/presentation-containers';
-import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
+import { PanelPackage, apiHasSerializableState } from '@kbn/presentation-containers';
+import {
+  type PublishingSubject,
+  apiPublishesPanelTitle,
+  apiPublishesUnsavedChanges,
+  getPanelTitle,
+} from '@kbn/presentation-publishing';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import deepEqual from 'fast-deep-equal';
@@ -47,9 +47,10 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
+import { DASHBOARD_CONTAINER_TYPE, DashboardLocatorParams } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_LOADED_EVENT,
@@ -61,11 +62,11 @@ import {
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
-import { placePanel } from '../panel_placement';
-import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
+import { placePanel } from '../panel_placement';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
+import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
 import {
@@ -89,7 +90,6 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -333,7 +333,7 @@ export class DashboardContainer
 
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>,
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {},

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { PluginInitializer } from '@kbn/core-plugins-browser';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { MOCK_IDP_LOGIN_PATH } from '@kbn/mock-idp-utils/src/constants';
-import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/public';
 import { RoleSwitcher } from './role_switcher';
 
 export interface PluginSetupDependencies {

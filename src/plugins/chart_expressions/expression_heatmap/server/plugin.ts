@@ -7,8 +7,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from '../common';
+import { ExpressionsServerSetup, ExpressionsServerStart } from '@kbn/expressions-plugin/server';
+import { heatmapFunction, heatmapGridConfig, heatmapLegendConfig } from '../common';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Duration } from 'moment';
 import { Stream } from 'stream';
+import { Duration } from 'moment';
 
 import { ByteSizeValue } from './src/byte_size_value';
 import { ContextReference, Reference, SiblingReference } from './src/references';
@@ -30,24 +30,24 @@ import {
   MapOfType,
   MaybeType,
   NeverType,
+  NullableProps,
   NumberOptions,
   NumberType,
   ObjectType,
   ObjectTypeOptions,
   Props,
-  NullableProps,
   RecordOfOptions,
   RecordOfType,
   SchemaStructureEntry,
+  StreamType,
   StringOptions,
   StringType,
   Type,
   TypeOf,
   TypeOptions,
-  UnionType,
   URIOptions,
   URIType,
-  StreamType,
+  UnionType,
   UnionTypeOptions,
 } from './src/types';
 
@@ -153,7 +153,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
     Type<H>,
     Type<I>,
     Type<J>,
-    Type<K>
+    Type<K>,
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
 ): Type<A | B | C | D | E | F | G | H | I | J | K>;
@@ -245,12 +245,12 @@ export type Schema = typeof schema;
 
 import {
   META_FIELD_X_OAS_ANY,
-  META_FIELD_X_OAS_REF_ID,
-  META_FIELD_X_OAS_OPTIONAL,
   META_FIELD_X_OAS_DEPRECATED,
+  META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
   META_FIELD_X_OAS_MAX_LENGTH,
   META_FIELD_X_OAS_MIN_LENGTH,
-  META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES,
+  META_FIELD_X_OAS_OPTIONAL,
+  META_FIELD_X_OAS_REF_ID,
 } from './src/oas_meta_fields';
 
 export const metaFields = Object.freeze({

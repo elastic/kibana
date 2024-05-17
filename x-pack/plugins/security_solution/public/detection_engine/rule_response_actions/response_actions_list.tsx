@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { OsqueryInvestigationGuidePanel } from './osquery/osquery_investigation_guide_panel';
-import { useRule } from '../rule_management/logic';
-import { ResponseActionTypeForm } from './response_action_type_form';
 import type { ArrayItem } from '../../shared_imports';
 import { UseField, useFormContext, useFormData } from '../../shared_imports';
-import { getResponseActionsFromNote, getOsqueryQueriesFromNote } from './utils';
+import { useRule } from '../rule_management/logic';
+import { OsqueryInvestigationGuidePanel } from './osquery/osquery_investigation_guide_panel';
+import { ResponseActionTypeForm } from './response_action_type_form';
+import { getOsqueryQueriesFromNote, getResponseActionsFromNote } from './utils';
 
 interface ResponseActionsListProps {
   items: ArrayItem[];

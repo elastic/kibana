@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enableGeoTrackingThresholdAlert: schema.maybe(schema.boolean({ defaultValue: false })),

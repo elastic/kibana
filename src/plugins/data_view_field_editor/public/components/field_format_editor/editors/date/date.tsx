@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
 import moment from 'moment';
+import React, { Fragment } from 'react';
 
 import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 

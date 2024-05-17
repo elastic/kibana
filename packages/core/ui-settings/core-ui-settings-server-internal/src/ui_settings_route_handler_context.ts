@@ -8,8 +8,8 @@
 
 import type { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
 import type {
-  UiSettingsRequestHandlerContext,
   IUiSettingsClient,
+  UiSettingsRequestHandlerContext,
 } from '@kbn/core-ui-settings-server';
 import type { InternalUiSettingsServiceStart } from './types';
 

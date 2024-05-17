@@ -24,9 +24,7 @@
         "type": "Class",
         "tags": [],
         "label": "SectionRegistry",
-        "description": [
-          "\nA registry of sections to add to pages within Advanced Settings."
-        ],
+        "description": ["\nA registry of sections to add to pages within Advanced Settings."],
         "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -51,9 +49,7 @@
                 "description": [
                   "/**\n     * Registers a section within the \"Space\" page.\n     *\n     * @param Component - A React component to render.\n     * @param queryMatch - A function that, given a search term, returns true if the section should be rendered.\n     */"
                 ],
-                "signature": [
-                  "(Component: RegistryComponent, queryMatch: QueryMatchFn) => void"
-                ],
+                "signature": ["(Component: RegistryComponent, queryMatch: QueryMatchFn) => void"],
                 "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -65,9 +61,7 @@
                     "tags": [],
                     "label": "Component",
                     "description": [],
-                    "signature": [
-                      "RegistryComponent"
-                    ],
+                    "signature": ["RegistryComponent"],
                     "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -80,9 +74,7 @@
                     "tags": [],
                     "label": "queryMatch",
                     "description": [],
-                    "signature": [
-                      "QueryMatchFn"
-                    ],
+                    "signature": ["QueryMatchFn"],
                     "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -100,9 +92,7 @@
                 "description": [
                   "/**\n     * Registers a section within the \"Global\" page.\n     *\n     * @param Component - A React component to render.\n     * @param queryMatch - A function that, given a search term, returns true if the section should be rendered.\n     */"
                 ],
-                "signature": [
-                  "(Component: RegistryComponent, queryMatch: QueryMatchFn) => void"
-                ],
+                "signature": ["(Component: RegistryComponent, queryMatch: QueryMatchFn) => void"],
                 "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -114,9 +104,7 @@
                     "tags": [],
                     "label": "Component",
                     "description": [],
-                    "signature": [
-                      "RegistryComponent"
-                    ],
+                    "signature": ["RegistryComponent"],
                     "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -129,9 +117,7 @@
                     "tags": [],
                     "label": "queryMatch",
                     "description": [],
-                    "signature": [
-                      "QueryMatchFn"
-                    ],
+                    "signature": ["QueryMatchFn"],
                     "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
                     "deprecated": false,
                     "trackAdoption": false,
@@ -219,9 +205,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegistryComponentProps",
-        "description": [
-          "\nProps provided to a `RegistryComponent`."
-        ],
+        "description": ["\nProps provided to a `RegistryComponent`."],
         "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -253,9 +237,7 @@
             "tags": [],
             "label": "enableSaving",
             "description": [],
-            "signature": [
-              "{ namespace: boolean; global: boolean; }"
-            ],
+            "signature": ["{ namespace: boolean; global: boolean; }"],
             "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -269,9 +251,7 @@
         "type": "Interface",
         "tags": [],
         "label": "RegistryEntry",
-        "description": [
-          "\nA registry entry for a section."
-        ],
+        "description": ["\nA registry entry for a section."],
         "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -313,9 +293,7 @@
             "tags": [],
             "label": "queryMatch",
             "description": [],
-            "signature": [
-              "(term: string) => boolean"
-            ],
+            "signature": ["(term: string) => boolean"],
             "path": "packages/kbn-management/settings/section_registry/section_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -346,9 +324,7 @@
         "type": "Type",
         "tags": [],
         "label": "SectionRegistrySetup",
-        "description": [
-          "\nThe `setup` contract provided by a `SectionRegistry`."
-        ],
+        "description": ["\nThe `setup` contract provided by a `SectionRegistry`."],
         "signature": [
           "{ addSpaceSection: (Component: RegistryComponent, queryMatch: QueryMatchFn) => void; addGlobalSection: (Component: RegistryComponent, queryMatch: QueryMatchFn) => void; }"
         ],
@@ -363,9 +339,7 @@
         "type": "Type",
         "tags": [],
         "label": "SectionRegistryStart",
-        "description": [
-          "\nThe `start` contract provided by a `SectionRegistry`."
-        ],
+        "description": ["\nThe `start` contract provided by a `SectionRegistry`."],
         "signature": [
           "{ getGlobalSections: () => ",
           {

@@ -1,3 +1,4 @@
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
 import { intersection } from 'lodash';
 
@@ -21,15 +21,15 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { bulkUpdateAgents } from './crud';
 import {
   bulkCreateAgentActionResults,
   createAgentAction,
   createErrorActionResults,
   getUnenrollAgentActions,
 } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
+import { bulkUpdateAgents } from './crud';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 
 export class UnenrollActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {

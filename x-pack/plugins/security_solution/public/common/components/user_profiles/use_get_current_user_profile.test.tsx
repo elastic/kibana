@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { renderHook } from '@testing-library/react-hooks';
 
-import { mockCurrentUserProfile } from './mock';
-import { useGetCurrentUserProfile } from './use_get_current_user_profile';
-import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../hooks/use_app_toasts.mock';
+import { useKibana } from '../../lib/kibana';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { TestProviders } from '../../mock';
+import { mockCurrentUserProfile } from './mock';
+import { useGetCurrentUserProfile } from './use_get_current_user_profile';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_app_toasts');

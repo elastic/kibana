@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 // Generate synthetic data for the environment test suite
 export async function generateData({

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import React from 'react';
+import { NavigationProvider } from '../context';
 import type { NavigationLink } from '../types';
 import type { LandingLinksIconsGroupsProps } from './landing_links_icons_groups';
 import { LandingLinksIconsGroups as LandingLinksIconsGroupsComponent } from './landing_links_icons_groups';
-import { NavigationProvider } from '../context';
 
 const items: NavigationLink[] = [
   {

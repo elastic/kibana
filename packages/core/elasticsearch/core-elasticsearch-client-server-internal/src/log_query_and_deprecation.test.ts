@@ -10,17 +10,17 @@ import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
 import {
-  errors,
   type Client,
   type ConnectionRequestParams,
-  type TransportRequestOptions,
-  type TransportRequestParams,
   type DiagnosticResult,
   type RequestBody,
+  type TransportRequestOptions,
+  type TransportRequestParams,
+  errors,
 } from '@elastic/elasticsearch';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
+import { ClientMock, parseClientOptionsMock } from './configure_client.test.mocks';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 
 const createApiResponse = <T>({

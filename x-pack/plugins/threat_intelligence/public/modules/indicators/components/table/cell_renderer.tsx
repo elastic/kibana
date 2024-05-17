@@ -6,14 +6,14 @@
  */
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import React, { useContext, useEffect } from 'react';
-import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
-import { useStyles } from './styles';
+import { euiDarkVars as themeDark, euiLightVars as themeLight } from '@kbn/ui-theme';
+import React, { useContext, useEffect } from 'react';
 import { Indicator } from '../../../../../common/types/indicator';
-import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorsTableContext } from '../../hooks/use_table_context';
+import { IndicatorFieldValue } from '../common/field_value';
 import { ActionsRowCell } from './actions_row_cell';
+import { useStyles } from './styles';
 
 export const cellRendererFactory = (from: number) => {
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {

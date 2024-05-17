@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { SetupResult, getProcessorValue, setup, setupEnvironment } from './processor.helpers';
 
 const DOT_EXPANDER_TYPE = 'dot_expander';
 

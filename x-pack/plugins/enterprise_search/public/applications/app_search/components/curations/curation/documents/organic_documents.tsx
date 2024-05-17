@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiSkeletonText, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +18,7 @@ import { LeafIcon } from '../../../../../shared/icons';
 
 import { DataPanel } from '../../../data_panel';
 
-import { PROMOTE_DOCUMENT_ACTION, HIDE_DOCUMENT_ACTION } from '../../constants';
+import { HIDE_DOCUMENT_ACTION, PROMOTE_DOCUMENT_ACTION } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 import { CurationResult } from '../results';
 

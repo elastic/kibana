@@ -36,8 +36,8 @@ export type MandatoryProperty<T, Prop extends keyof T> = T & {
 export type DeepPartial<T> = T extends any[]
   ? DeepPartialArray<T[number]>
   : T extends object
-  ? DeepPartialObject<T>
-  : T;
+    ? DeepPartialObject<T>
+    : T;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}

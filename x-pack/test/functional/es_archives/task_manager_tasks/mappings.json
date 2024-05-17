@@ -2,8 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".kibana_task_manager": {
-      }
+      ".kibana_task_manager": {}
     },
     "index": ".kibana_task_manager_1",
     "mappings": {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 import { compact, flattenDeep, isString } from 'lodash';
 import { Observable, ReplaySubject, distinctUntilChanged } from 'rxjs';
-import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 
 export interface InternalChromeDocTitleSetup {
   title$: Observable<string>;

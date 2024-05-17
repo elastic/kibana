@@ -6,9 +6,6 @@
     "id": "applicationUsageTest",
     "server": false,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "applicationUsageTest"
-    ]
+    "configPath": ["xpack", "applicationUsageTest"]
   }
 }

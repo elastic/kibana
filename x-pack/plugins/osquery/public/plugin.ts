@@ -8,37 +8,37 @@
 import type {
   AppMountParameters,
   CoreSetup,
+  CoreStart,
   Plugin,
   PluginInitializerContext,
-  CoreStart,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useAllLiveQueries } from './actions/use_all_live_queries';
-import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
-import { useFetchStatus } from './fleet_integration/use_fetch_status';
-import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
-import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
-import type {
-  OsqueryPluginSetup,
-  OsqueryPluginStart,
-  StartPlugins,
-  AppPluginStartDependencies,
-  SetupPlugins,
-} from './types';
 import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
+import { useAllLiveQueries } from './actions/use_all_live_queries';
 import {
+  LazyOsqueryManagedCustomButtonExtension,
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
-  LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
+import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import {
-  getLazyOsqueryAction,
-  getLazyLiveQueryField,
-  useIsOsqueryAvailableSimple,
   getExternalReferenceAttachmentRegular,
+  getLazyLiveQueryField,
+  getLazyOsqueryAction,
+  useIsOsqueryAvailableSimple,
 } from './shared_components';
+import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
+import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
+import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
+import type {
+  AppPluginStartDependencies,
+  OsqueryPluginSetup,
+  OsqueryPluginStart,
+  SetupPlugins,
+  StartPlugins,
+} from './types';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;

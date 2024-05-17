@@ -10,14 +10,14 @@ import type { FunctionComponent, MouseEvent } from 'react';
 
 import {
   EuiAccordion,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
   EuiHorizontalRule,
   EuiNotificationBadge,
-  EuiButton,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 

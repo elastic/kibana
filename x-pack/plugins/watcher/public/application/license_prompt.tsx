@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
+import React from 'react';
 
 export const LicensePrompt = ({
   message,

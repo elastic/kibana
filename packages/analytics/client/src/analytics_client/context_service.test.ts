@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { BehaviorSubject, firstValueFrom, lastValueFrom, Subject, take, toArray } from 'rxjs';
+import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { BehaviorSubject, Subject, firstValueFrom, lastValueFrom, take, toArray } from 'rxjs';
 import type { EventContext } from '../events';
 import { ContextService } from './context_service';
 

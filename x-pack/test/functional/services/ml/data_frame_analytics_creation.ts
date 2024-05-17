@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import {
-  isRegressionAnalysis,
-  isClassificationAnalysis,
   type DataFrameAnalyticsConfig,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
-import type { MlCommonUI } from './common_ui';
 import type { MlApi } from './api';
+import type { MlCommonUI } from './common_ui';
 import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(

@@ -7,8 +7,8 @@
  */
 
 import * as React from 'react';
-import { useDrilldownManager } from '../context';
 import { DrilldownHelloBar } from '../../components/drilldown_hello_bar';
+import { useDrilldownManager } from '../context';
 
 export const HelloBar: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();

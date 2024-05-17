@@ -8,18 +8,18 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { mockTimelineModel, TestProviders } from '../../../../../common/mock';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
-  useTimelineFullScreen,
   useGlobalFullScreen,
+  useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { useSessionView, useSessionViewNavigation } from './use_session_view';
-import { TableId } from '@kbn/securitysolution-data-table';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../../common/hooks/use_selector');

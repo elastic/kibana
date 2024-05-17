@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Chance from 'chance';
 import { ToolingLog } from '@kbn/tooling-log';
+import Chance from 'chance';
 
 import { FtrService } from '../ftr_provider_context';
 

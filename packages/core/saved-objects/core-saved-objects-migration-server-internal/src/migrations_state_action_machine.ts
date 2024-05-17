@@ -7,18 +7,18 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import * as Option from 'fp-ts/lib/Option';
-import type { Logger } from '@kbn/logging';
 import {
   getErrorMessage,
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
-import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
-import { logActionResponse, logStateTransition } from './common/utils/logs';
-import { type Model, type Next, stateActionMachine } from './state_action_machine';
-import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type { Logger } from '@kbn/logging';
+import * as Option from 'fp-ts/lib/Option';
 import { redactBulkOperationBatches } from './common/redact_state';
+import { logActionResponse, logStateTransition } from './common/utils/logs';
+import type { ReindexSourceToTempIndexBulk, ReindexSourceToTempTransform, State } from './state';
+import { type Model, type Next, stateActionMachine } from './state_action_machine';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -69,7 +69,7 @@ export async function migrationStateActionMachine({
               (doc) =>
                 ({
                   _id: doc._id,
-                } as SavedObjectsRawDoc)
+                }) as SavedObjectsRawDoc
             ),
           },
           ...{

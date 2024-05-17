@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import {
-  DataViewsContract,
   DataView,
-  DataViewSpec,
   DataViewField,
+  DataViewSpec,
+  DataViewsContract,
 } from '@kbn/data-views-plugin/public';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import { keyBy } from 'lodash';
-import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
 import { documentField } from '../datasources/form_based/document_field';
+import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } from '../types';
 import { sortDataViewRefs } from '../utils';
 
 type ErrorHandler = (err: Error) => void;

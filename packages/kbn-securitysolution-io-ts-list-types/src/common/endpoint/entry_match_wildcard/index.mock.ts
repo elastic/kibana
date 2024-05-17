@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../../constants/index.mock';
 import { EndpointEntryMatchWildcard } from '.';
+import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../../constants/index.mock';
 
 export const getEndpointEntryMatchWildcardMock = (): EndpointEntryMatchWildcard => ({
   field: FIELD,

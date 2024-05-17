@@ -30,9 +30,9 @@ import { ItemWithAnID } from '../../../../shared/tables/types';
 import { CRAWL_RULES_DOCS_URL } from '../../../routes';
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
 import {
+  CrawlRule,
   CrawlerPolicies,
   CrawlerRules,
-  CrawlRule,
   getReadableCrawlerPolicy,
   getReadableCrawlerRule,
 } from '../types';

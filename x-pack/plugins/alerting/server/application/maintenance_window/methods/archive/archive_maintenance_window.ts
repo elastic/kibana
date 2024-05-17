@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import Boom from '@hapi/boom';
+import moment from 'moment';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
-import type { MaintenanceWindow } from '../../types';
-import type { ArchiveMaintenanceWindowParams } from './types';
-import { archiveMaintenanceWindowParamsSchema } from './schemas';
-import {
-  generateMaintenanceWindowEvents,
-  mergeEvents,
-} from '../../lib/generate_maintenance_window_events';
-import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
-import {
-  transformMaintenanceWindowAttributesToMaintenanceWindow,
-  transformMaintenanceWindowToMaintenanceWindowAttributes,
-} from '../../transforms';
 import {
   getMaintenanceWindowSo,
   updateMaintenanceWindowSo,
 } from '../../../../data/maintenance_window';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
+import {
+  generateMaintenanceWindowEvents,
+  mergeEvents,
+} from '../../lib/generate_maintenance_window_events';
+import {
+  transformMaintenanceWindowAttributesToMaintenanceWindow,
+  transformMaintenanceWindowToMaintenanceWindowAttributes,
+} from '../../transforms';
+import type { MaintenanceWindow } from '../../types';
+import { archiveMaintenanceWindowParamsSchema } from './schemas';
+import type { ArchiveMaintenanceWindowParams } from './types';
 
 const getArchivedExpirationDate = (shouldArchive: boolean) => {
   if (shouldArchive) {

@@ -6,7 +6,7 @@
  */
 
 import { handleActions } from 'redux-actions';
-import { appReady, appError } from '../actions/app';
+import { appError, appReady } from '../actions/app';
 
 export const appReducer = handleActions(
   {

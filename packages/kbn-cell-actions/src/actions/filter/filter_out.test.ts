@@ -1,3 +1,4 @@
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +8,8 @@
  */
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { createFilterOutActionFactory } from './filter_out';
 import { makeActionContext } from '../../mocks/helpers';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { createFilterOutActionFactory } from './filter_out';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 

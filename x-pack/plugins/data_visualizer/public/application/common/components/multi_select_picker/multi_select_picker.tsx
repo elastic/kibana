@@ -10,17 +10,17 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
-  EuiSelectableMessage,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSelectableMessage,
   EuiSpacer,
 } from '@elastic/eui';
-import type { FC, ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC, ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface Option {

@@ -10,9 +10,9 @@ import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import {
+  FetchConnectorExecuteAction,
   deleteKnowledgeBase,
   fetchConnectorExecuteAction,
-  FetchConnectorExecuteAction,
   getKnowledgeBaseStatus,
   postKnowledgeBase,
 } from '.';

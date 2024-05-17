@@ -1,3 +1,5 @@
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,26 +7,24 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
-import { HostEntityOverview } from './host_entity_overview';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
-import {
-  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
-} from './test_ids';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { TestProviders } from '../../../../common/mock';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { RightPanelContext } from '../context';
+import { mockContextValue } from '../mocks/mock_context';
+import { HostEntityOverview } from './host_entity_overview';
+import {
+  ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+} from './test_ids';
 
 const hostName = 'host';
 const osFamily = 'Windows';

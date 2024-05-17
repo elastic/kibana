@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiCodeBlock,
-  EuiTitle,
   EuiCallOut,
-  EuiSpacer,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiLink,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { getLifecycleValue } from '../../../lib/data_streams';
-import { ComponentTemplateDeserialized } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import { ComponentTemplateDeserialized } from '../shared_imports';
 
 interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;

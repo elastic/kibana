@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../shared/licensing';
@@ -24,15 +24,15 @@ import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 import { toSentenceSerial } from '../../utils';
 
 import {
-  PRIVATE_LINK_TITLE,
-  PRIVATE_HEADER_TITLE,
-  PRIVATE_HEADER_DESCRIPTION,
-  PRIVATE_ORG_SOURCES_TITLE,
-  PRIVATE_EMPTY_TITLE,
-  ORG_SOURCES_EMPTY_TITLE,
-  ORG_SOURCES_EMPTY_DESCRIPTION,
-  LICENSE_CALLOUT_TITLE,
   LICENSE_CALLOUT_DESCRIPTION,
+  LICENSE_CALLOUT_TITLE,
+  ORG_SOURCES_EMPTY_DESCRIPTION,
+  ORG_SOURCES_EMPTY_TITLE,
+  PRIVATE_EMPTY_TITLE,
+  PRIVATE_HEADER_DESCRIPTION,
+  PRIVATE_HEADER_TITLE,
+  PRIVATE_LINK_TITLE,
+  PRIVATE_ORG_SOURCES_TITLE,
 } from './constants';
 import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';

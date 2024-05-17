@@ -6,14 +6,14 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useState, MouseEvent } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { useSyntheticsDataView } from '../../../contexts/synthetics_data_view_context';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
+import { useSyntheticsDataView } from '../../../contexts/synthetics_data_view_context';
+import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 
 export const ViewDocument = ({ ping }: { ping: Ping }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState<boolean>(false);

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useEffect, useRef, useState } from 'react';
+import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18nCommon from '../../../common/translations';
 import {
   buildAlertStatusesFilter,
   buildAlertsFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
-import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
-import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 /**
  * Closes alerts.

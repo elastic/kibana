@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useMemo } from 'react';
 import type { ListPageRouteState } from '../../../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../../../common/lib/kibana';
 import { useAppUrl } from '../../../../../../../common/lib/kibana/hooks';
-import { LinkWithIcon } from '../../components/link_with_icon';
-import { ExceptionItemsSummary } from '../../components/exception_items_summary';
-import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
 import { useSummaryArtifact } from '../../../../../../hooks/artifacts';
-import type { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import type { ExceptionsListApiClient } from '../../../../../../services/exceptions_list/exceptions_list_api_client';
+import { ExceptionItemsSummary } from '../../components/exception_items_summary';
+import { LinkWithIcon } from '../../components/link_with_icon';
+import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
 
 const ARTIFACTS_LABELS = {
   artifactsSummaryApiError: (error: string) =>

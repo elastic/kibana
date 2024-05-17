@@ -23,8 +23,8 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
-import { transformSavedObjectUpdateToExceptionList } from './utils';
 import { getExceptionList } from './get_exception_list';
+import { transformSavedObjectUpdateToExceptionList } from './utils';
 
 interface UpdateExceptionListOptions {
   id: IdOrUndefined;

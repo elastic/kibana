@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiCallOut } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
-import type { FormSchema } from '../../../../../../shared_imports';
-import { useForm, UseField } from '../../../../../../shared_imports';
-import { PickTimeline } from '../../../../../rule_creation/components/pick_timeline';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { FormSchema } from '../../../../../../shared_imports';
+import { UseField, useForm } from '../../../../../../shared_imports';
+import { PickTimeline } from '../../../../../rule_creation/components/pick_timeline';
 
-import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 import { bulkApplyTimelineTemplate as i18n } from '../translations';
+import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
 
 export interface TimelineTemplateFormData {
   timeline: {

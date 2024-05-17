@@ -9,19 +9,19 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useLocation, useParams } from 'react-router-dom';
 
-import moment from 'moment';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import moment from 'moment';
 import {
   ALERTS_PATH,
   DEFAULT_ALERTS_INDEX,
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
 } from '../../../../common/constants';
+import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { inputsSelectors } from '../../../common/store';
-import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { resolveFlyoutParams } from './utils';
 
 export const AlertDetailsRedirect = () => {

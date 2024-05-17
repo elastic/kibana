@@ -10,11 +10,11 @@ import { Outcome } from 'elastic-apm-node';
 import { RuleExecutionStatus, RuleLastRun } from '../../../common';
 import { ElasticsearchError } from '../../lib';
 import { ILastRun, lastRunFromError, lastRunFromState } from '../../lib/last_run_status';
-import { map, Result } from '../../lib/result_type';
+import { Result, map } from '../../lib/result_type';
 import {
+  IExecutionStatusAndMetrics,
   executionStatusFromError,
   executionStatusFromState,
-  IExecutionStatusAndMetrics,
 } from '../../lib/rule_execution_status';
 import { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
 import { RuleResultService } from '../../monitoring/rule_result_service';

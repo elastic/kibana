@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { SavedObjectSetup } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 import { SavedObjectsTaggingApi } from './api';
 import { tagDecoratorConfig } from './decorator';
+import { SavedObjectTaggingOssPluginSetup, SavedObjectTaggingOssPluginStart } from './types';
 
 interface SetupDeps {
   savedObjects?: SavedObjectSetup;

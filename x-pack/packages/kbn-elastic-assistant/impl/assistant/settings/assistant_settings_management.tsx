@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiIcon,
-  EuiFlexItem,
-  EuiPageTemplate,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPageTemplate,
 } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
-import { Conversation, Prompt, QuickPrompt } from '../../..';
-import * as i18n from './translations';
-import { useAssistantContext } from '../../assistant_context';
-import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 import {
   AnonymizationSettings,
   ConversationSettings,
@@ -28,9 +24,13 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
+import { Conversation, Prompt, QuickPrompt } from '../../..';
+import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
-import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
+import { getDefaultConnector } from '../helpers';
+import * as i18n from './translations';
+import { useSettingsUpdater } from './use_settings_updater/use_settings_updater';
 
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;

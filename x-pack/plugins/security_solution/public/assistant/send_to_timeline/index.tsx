@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useAssistantContext } from '@kbn/elastic-assistant';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererSelectors } from '../../common/store';
 import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
+import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 import {
   ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE,
 } from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
+import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
@@ -32,11 +37,6 @@ import {
   updateDataView,
   updateEqlOptions,
 } from '../../timelines/store/actions';
-import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;

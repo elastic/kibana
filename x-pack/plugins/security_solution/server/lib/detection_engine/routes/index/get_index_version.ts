@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { readIndex } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { readIndex } from '@kbn/securitysolution-es-utils';
+import { get } from 'lodash';
 
 export const getIndexVersion = async (
   esClient: ElasticsearchClient,

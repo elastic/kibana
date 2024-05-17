@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
+import React, { useState } from 'react';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
-  TypedLensByValueInput,
-  PersistedIndexPatternLayer,
-  XYState,
-  LensEmbeddableInput,
-  FormulaPublicApi,
   DateHistogramIndexPatternColumn,
+  FormulaPublicApi,
+  LensEmbeddableInput,
+  PersistedIndexPatternLayer,
+  TypedLensByValueInput,
+  XYState,
 } from '@kbn/lens-plugin/public';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';

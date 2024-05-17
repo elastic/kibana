@@ -1,3 +1,4 @@
+import { EuiCodeBlock, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import React, { FC, PropsWithChildren } from 'react';
-import { EuiTitle, EuiSpacer, EuiSplitPanel, EuiCodeBlock } from '@elastic/eui';
 
 export interface PanelWithCodeBlockProps {
   title: string;

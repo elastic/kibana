@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { useEffect, useMemo } from 'react';
 import { ObservabilityApp } from '../../typings/common';
 
 /**

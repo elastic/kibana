@@ -6,22 +6,22 @@
  */
 
 import {
-  EuiSpacer,
-  EuiText,
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiFlexGroup,
-  EuiButton,
   EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useContext, useState } from 'react';
 
-import { Action } from '../../../../models/action';
 import { ACTION_TYPES } from '../../../../../../common/constants';
+import { Action } from '../../../../models/action';
 import { WatchContext } from '../../watch_context';
 
 const disabledMessage = i18n.translate(

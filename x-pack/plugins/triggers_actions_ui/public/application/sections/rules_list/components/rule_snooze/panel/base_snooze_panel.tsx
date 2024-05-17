@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGrid,
@@ -18,17 +17,18 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
-  EuiPopoverTitle,
   EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
-  useGeneratedHtmlId,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useState, useCallback, useMemo } from 'react';
 import { parseInterval } from '../../../../../../../common';

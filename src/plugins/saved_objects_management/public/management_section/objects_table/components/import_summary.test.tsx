@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { ImportSummary, ImportSummaryProps } from './import_summary';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { ReactWrapper } from 'enzyme';
+import React from 'react';
 import { FailedImport } from '../../../lib';
+import { ImportSummary, ImportSummaryProps } from './import_summary';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;

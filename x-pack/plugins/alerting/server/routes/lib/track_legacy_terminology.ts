@@ -1,3 +1,4 @@
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { flatten } from 'lodash';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export const LEGACY_TERMS = ['alertTypeId', 'actionTypeId'];
 

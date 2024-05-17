@@ -40,9 +40,7 @@
             "tags": [],
             "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  onSelectEventHandler,\n  showButtonTitle = false,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<Props>"
-            ],
+            "signature": ["React.PropsWithChildren<Props>"],
             "path": "packages/kbn-alerts-ui-shared/src/add_message_variables/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -58,9 +56,7 @@
         "type": "Function",
         "tags": [],
         "label": "AlertFieldsTable",
-        "description": [
-          "\nA paginated, filterable table to show alert object fields"
-        ],
+        "description": ["\nA paginated, filterable table to show alert object fields"],
         "signature": [
           "React.NamedExoticComponent<",
           {
@@ -92,9 +88,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -140,9 +134,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -265,9 +257,7 @@
                 "tags": [],
                 "label": "ruleTypeId",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/apis/fetch_aad_fields.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -478,9 +468,7 @@
                 "tags": [],
                 "label": "kibanaServices",
                 "description": [],
-                "signature": [
-                  "KibanaServices"
-                ],
+                "signature": ["KibanaServices"],
                 "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -492,9 +480,7 @@
                 "tags": [],
                 "label": "categories",
                 "description": [],
-                "signature": [
-                  "string[] | undefined"
-                ],
+                "signature": ["string[] | undefined"],
                 "path": "packages/kbn-alerts-ui-shared/src/maintenance_window_callout/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -528,11 +514,7 @@
             "tags": [],
             "label": "{\n  http,\n  toasts,\n  filteredRuleTypes = EMPTY_ARRAY,\n  registeredRuleTypes,\n  ...rest\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "RuleTypeModalComponentProps",
-              ">"
-            ],
+            "signature": ["React.PropsWithChildren<", "RuleTypeModalComponentProps", ">"],
             "path": "packages/kbn-alerts-ui-shared/src/rule_type_modal/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -549,11 +531,7 @@
         "tags": [],
         "label": "ScrollableFlyoutTabbedContent",
         "description": [],
-        "signature": [
-          "(props: ",
-          "EuiTabbedContentProps",
-          ") => JSX.Element"
-        ],
+        "signature": ["(props: ", "EuiTabbedContentProps", ") => JSX.Element"],
         "path": "packages/kbn-alerts-ui-shared/src/alert_fields_table/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -565,9 +543,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "EuiTabbedContentProps"
-            ],
+            "signature": ["EuiTabbedContentProps"],
             "path": "packages/kbn-alerts-ui-shared/src/alert_fields_table/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -704,9 +680,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "alert",
-            "description": [
-              "\nThe raw alert object"
-            ],
+            "description": ["\nThe raw alert object"],
             "signature": [
               {
                 "pluginId": "@kbn/alerting-types",
@@ -730,9 +704,7 @@
             "description": [
               "\nA list of alert field keys to be shown in the table.\nWhen not defined, all the fields are shown."
             ],
-            "signature": [
-              "(string | number)[] | undefined"
-            ],
+            "signature": ["(string | number)[] | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alert_fields_table/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -758,9 +730,7 @@
             "tags": [],
             "label": "alertStatus",
             "description": [],
-            "signature": [
-              "\"recovered\" | \"active\" | \"untracked\""
-            ],
+            "signature": ["\"recovered\" | \"active\" | \"untracked\""],
             "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -772,9 +742,7 @@
             "tags": [],
             "label": "flapping",
             "description": [],
-            "signature": [
-              "string | boolean | undefined"
-            ],
+            "signature": ["string | boolean | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -811,9 +779,7 @@
             "tags": [],
             "label": "disableQueryLanguageSwitcher",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -846,9 +812,7 @@
             "tags": [],
             "label": "rangeFrom",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -860,9 +824,7 @@
             "tags": [],
             "label": "rangeTo",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -874,9 +836,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -909,9 +869,7 @@
             "tags": [],
             "label": "showFilterBar",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -923,9 +881,7 @@
             "tags": [],
             "label": "showDatePicker",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -937,9 +893,7 @@
             "tags": [],
             "label": "showSubmitButton",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -951,9 +905,7 @@
             "tags": [],
             "label": "placeholder",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -965,9 +917,7 @@
             "tags": [],
             "label": "submitOnBlur",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -979,9 +929,7 @@
             "tags": [],
             "label": "ruleTypeId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1032,9 +980,7 @@
                     "tags": [],
                     "label": "query",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1090,9 +1036,7 @@
                     "tags": [],
                     "label": "query",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1674,9 +1618,7 @@
             "tags": [],
             "label": "spaceId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1688,9 +1630,7 @@
             "tags": [],
             "label": "dataViewId",
             "description": [],
-            "signature": [
-              "string | null"
-            ],
+            "signature": ["string | null"],
             "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1722,9 +1662,7 @@
             "type": "Function",
             "tags": [],
             "label": "onFiltersChange",
-            "description": [
-              "\nFilters changed callback"
-            ],
+            "description": ["\nFilters changed callback"],
             "signature": [
               "((newFilters: ",
               {
@@ -1815,9 +1753,7 @@
             "type": "Function",
             "tags": [],
             "label": "setControlsUrlState",
-            "description": [
-              "\nSetter for the controls url state"
-            ],
+            "description": ["\nSetter for the controls url state"],
             "signature": [
               "((controls: ",
               {
@@ -1864,9 +1800,7 @@
             "type": "Function",
             "tags": [],
             "label": "onInit",
-            "description": [
-              "\nInit callback"
-            ],
+            "description": ["\nInit callback"],
             "signature": [
               "((controlGroupHandler: ",
               {
@@ -1913,12 +1847,8 @@
             "type": "number",
             "tags": [],
             "label": "maxControls",
-            "description": [
-              "\nMaximum number of controls that can be added to the group"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
+            "description": ["\nMaximum number of controls that can be added to the group"],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1929,9 +1859,7 @@
             "type": "Function",
             "tags": [],
             "label": "ControlGroupRenderer",
-            "description": [
-              "\nThe control embeddable renderer"
-            ],
+            "description": ["\nThe control embeddable renderer"],
             "signature": [
               "React.ForwardRefExoticComponent<",
               {
@@ -1963,9 +1891,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "P"
-                ],
+                "signature": ["P"],
                 "path": "node_modules/@types/react/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2433,9 +2359,7 @@
             "tags": [],
             "label": "ruleTypeId",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-alerts-ui-shared/src/alerts_search_bar/hooks/use_rule_aad_fields.ts",
             "deprecated": false,
             "trackAdoption": false

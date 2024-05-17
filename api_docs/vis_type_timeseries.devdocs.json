@@ -18,12 +18,7 @@
         "tags": [],
         "label": "isVisSeriesData",
         "description": [],
-        "signature": [
-          "(data: ",
-          "TimeseriesVisData",
-          ") => data is ",
-          "SeriesData"
-        ],
+        "signature": ["(data: ", "TimeseriesVisData", ") => data is ", "SeriesData"],
         "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -35,9 +30,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "TimeseriesVisData"
-            ],
+            "signature": ["TimeseriesVisData"],
             "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -54,12 +47,7 @@
         "tags": [],
         "label": "isVisTableData",
         "description": [],
-        "signature": [
-          "(data: ",
-          "TimeseriesVisData",
-          ") => data is ",
-          "TableData"
-        ],
+        "signature": ["(data: ", "TimeseriesVisData", ") => data is ", "TableData"],
         "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -71,9 +59,7 @@
             "tags": [],
             "label": "data",
             "description": [],
-            "signature": [
-              "TimeseriesVisData"
-            ],
+            "signature": ["TimeseriesVisData"],
             "path": "src/plugins/vis_types/timeseries/common/vis_data_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -94,11 +80,7 @@
         "tags": [],
         "label": "TimeseriesVisData",
         "description": [],
-        "signature": [
-          "SeriesData",
-          " | ",
-          "TableData"
-        ],
+        "signature": ["SeriesData", " | ", "TableData"],
         "path": "src/plugins/vis_types/timeseries/common/types/vis_data.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -199,9 +181,7 @@
               "tags": [],
               "label": "options",
               "description": [],
-              "signature": [
-                "any"
-              ],
+              "signature": ["any"],
               "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,

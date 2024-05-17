@@ -1,3 +1,6 @@
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +9,6 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import { ExecutionContextService } from './execution_context_service';
 
 describe('ExecutionContextService', () => {

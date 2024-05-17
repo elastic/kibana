@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { euiLightVars } from '@kbn/ui-theme';
+import { addDecorator, storiesOf } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
-import { euiLightVars } from '@kbn/ui-theme';
 
-import { createItems, TEST_COLUMNS } from './test_utils';
 import { ConditionsTable } from '.';
+import { TEST_COLUMNS, createItems } from './test_utils';
 
 addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>

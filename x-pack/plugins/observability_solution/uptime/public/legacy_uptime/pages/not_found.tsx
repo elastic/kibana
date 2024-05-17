@@ -6,16 +6,16 @@
  */
 
 import {
+  EuiButton,
   EuiEmptyPrompt,
-  EuiPanel,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 export const NotFoundPage = () => {
   const history = useHistory();

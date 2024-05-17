@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import * as fs from 'fs';
-import * as parser from '@babel/parser';
 import generate from '@babel/generator';
+import * as parser from '@babel/parser';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
-import { schema, type TypeOf } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
+import _ from 'lodash';
 
 /**
  * Retrieve test files using a glob pattern.

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getColorAssignments } from './color_assignment';
-import type { FormatFactory } from '../../../common/types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { XYDataLayerConfig } from './types';
 import { Datatable } from '@kbn/expressions-plugin/common';
+import type { FormatFactory } from '../../../common/types';
+import { getColorAssignments } from './color_assignment';
+import { XYDataLayerConfig } from './types';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
@@ -73,7 +73,7 @@ describe('color_assignment', () => {
       convert(x: unknown) {
         return x;
       },
-    } as unknown)) as FormatFactory;
+    }) as unknown) as FormatFactory;
 
   describe('totalSeriesCount', () => {
     it('should calculate total number of series per palette', () => {
@@ -120,7 +120,7 @@ describe('color_assignment', () => {
         (() =>
           ({
             convert: formatMock,
-          } as unknown)) as FormatFactory
+          }) as unknown) as FormatFactory
       );
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
@@ -196,7 +196,7 @@ describe('color_assignment', () => {
         (() =>
           ({
             convert: () => 'formatted',
-          } as unknown)) as FormatFactory
+          }) as unknown) as FormatFactory
       );
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
       expect(assignments.palette1.getRank(layers[0], 'formatted', 'y1')).toEqual(2);

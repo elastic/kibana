@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getActionList, getActionListByStatus } from './action_list';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import {
-  applyActionListEsSearchMock,
-  createActionRequestsEsSearchResultsMock,
-  createActionResponsesEsSearchResultsMock,
-} from './mocks';
-import type { MockedLogger } from '@kbn/logging-mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../mocks';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { getActionList, getActionListByStatus } from './action_list';
+import {
+  applyActionListEsSearchMock,
+  createActionRequestsEsSearchResultsMock,
+  createActionResponsesEsSearchResultsMock,
+} from './mocks';
 
 describe('When using `getActionList()', () => {
   let esClient: ElasticsearchClientMock;
@@ -544,9 +544,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
@@ -573,9 +572,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
 
     await expect(
       await (
@@ -601,9 +599,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
 
     await expect(
       await (
@@ -631,9 +628,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
@@ -662,9 +658,8 @@ describe('When using `getActionList()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     (actionResponses.hits.hits[0]._source as LogsEndpointActionResponse).error = Error(
       'Some error in action response'
     );

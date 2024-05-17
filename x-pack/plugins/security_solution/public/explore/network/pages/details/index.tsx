@@ -13,50 +13,50 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
-import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { SecurityPageName } from '../../../../app/types';
+import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { networkToCriteria } from '../../../../common/components/ml/criteria/network_to_criteria';
+import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
-import { IpOverview } from '../../components/details';
-import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { useNetworkDetails, ID } from '../../containers/details';
-import { useKibana } from '../../../../common/lib/kibana';
+import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { getNetworkDetailsPageFilter } from '../../../../common/components/visualization_actions/utils';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { decodeIpv6 } from '../../../../common/lib/helpers';
+import { useKibana } from '../../../../common/lib/kibana';
 import { inputsSelectors } from '../../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { networkModel } from '../../store';
-import { SecurityPageName } from '../../../../app/types';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import { getNetworkDetailsPageFilter } from '../../../../common/components/visualization_actions/utils';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { navTabsNetworkDetails } from './nav_tabs';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
+import { IpOverview } from '../../components/details';
+import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
+import { ID, useNetworkDetails } from '../../containers/details';
+import { networkModel } from '../../store';
+import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { NetworkDetailsTabs } from './details_tabs';
-import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { navTabsNetworkDetails } from './nav_tabs';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 

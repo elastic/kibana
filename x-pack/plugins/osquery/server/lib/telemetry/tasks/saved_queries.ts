@@ -8,8 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { TELEMETRY_EBT_SAVED_QUERY_EVENT } from '../constants';
 import { templateSavedQueries } from '../helpers';
-import type { TelemetryEventsSender } from '../sender';
 import type { TelemetryReceiver } from '../receiver';
+import type { TelemetryEventsSender } from '../sender';
 
 export function createTelemetrySavedQueriesTaskConfig() {
   return {

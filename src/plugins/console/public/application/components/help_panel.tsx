@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiText,
   EuiFlyout,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
-  EuiTitle,
-  EuiSpacer,
+  EuiFlyoutHeader,
   EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-import EditorExample from './editor_example';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useServicesContext } from '../contexts';
+import EditorExample from './editor_example';
 
 interface Props {
   onClose: () => void;

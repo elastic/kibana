@@ -7,13 +7,13 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { OpenTimelineButton } from './open_timeline_button';
-import { TestProviders } from '../../../../common/mock/test_providers';
 import { useParams } from 'react-router-dom';
 import { TimelineType } from '../../../../../common/api/timeline';
-import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { TestProviders } from '../../../../common/mock/test_providers';
 import { useTimelineStatus } from '../../open_timeline/use_timeline_status';
+import { OpenTimelineButton } from './open_timeline_button';
 
 jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/containers/sourcerer');

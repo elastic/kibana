@@ -8,12 +8,12 @@
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { prefixedOutputLogger } from './utils';
-import type { HostVm } from './types';
-import type { BaseVmCreateOptions } from './vm_services';
-import { createVm, getHostVmClient } from './vm_services';
 import { downloadAndStoreAgent } from './agent_downloads_service';
 import { enrollHostVmWithFleet, getAgentDownloadUrl, unEnrollFleetAgent } from './fleet_services';
+import type { HostVm } from './types';
+import { prefixedOutputLogger } from './utils';
+import type { BaseVmCreateOptions } from './vm_services';
+import { createVm, getHostVmClient } from './vm_services';
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<BaseVmCreateOptions, 'disk' | 'cpus' | 'memory'> {

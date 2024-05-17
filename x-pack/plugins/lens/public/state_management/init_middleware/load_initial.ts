@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
-import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { History } from 'history';
-import { setState, initExisting, initEmpty, LensStoreDeps } from '..';
-import { disableAutoApply, getPreloadedState } from '../lens_slice';
-import { SharingSavedObjectProps } from '../../types';
-import { LensEmbeddableInput, LensByReferenceInput } from '../../embeddable/embeddable';
-import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
-import { initializeSources } from '../../editor_frame_service/editor_frame';
+import { cloneDeep } from 'lodash';
+import { LensStoreDeps, initEmpty, initExisting, setState } from '..';
+import { LENS_EMBEDDABLE_TYPE, getEditPath, getFullPath } from '../../../common/constants';
 import { LensAppServices } from '../../app_plugin/types';
-import { getEditPath, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
+import { initializeSources } from '../../editor_frame_service/editor_frame';
+import { LensByReferenceInput, LensEmbeddableInput } from '../../embeddable/embeddable';
 import { Document } from '../../persistence';
+import { SharingSavedObjectProps } from '../../types';
+import { getInitialDataViewsObject, getInitialDatasourceId } from '../../utils';
+import { disableAutoApply, getPreloadedState } from '../lens_slice';
 
 export const getPersisted = async ({
   initialInput,
@@ -347,8 +347,8 @@ export function loadInitial(
                       !(initialInput as LensByReferenceInput)?.savedObjectId && currentSessionId
                         ? currentSessionId
                         : !inlineEditing
-                        ? data.search.session.start()
-                        : undefined,
+                          ? data.search.session.start()
+                          : undefined,
                     persistedDoc: doc,
                     activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                     visualization: {

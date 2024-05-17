@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
+import { Indicator, generateMockFileIndicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { MoreActions } from './more_actions';
 import { MORE_ACTIONS_TEST_ID } from './test_ids';

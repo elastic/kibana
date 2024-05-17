@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import dateMath, { Unit } from '@kbn/datemath';
 import { find } from 'lodash';
 import moment from 'moment';
-import dateMath, { Unit } from '@kbn/datemath';
 
 // Assume interval is in the form (value)(unit), such as "1h"
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');

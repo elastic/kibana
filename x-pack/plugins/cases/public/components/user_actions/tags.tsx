@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { TagsUserAction } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
-import type { UserActionBuilder } from './types';
-import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tags/tags';
+import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
+import type { UserActionBuilder } from './types';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<TagsUserAction>) => {
   const tags = userAction.payload.tags ?? [];

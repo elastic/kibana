@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { forOwn } from 'lodash';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
+import { forOwn } from 'lodash';
 import { SavedObject, SavedObjectConfig } from '../../types';
 import { expandShorthand } from './field_mapping';
 

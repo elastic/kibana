@@ -13,25 +13,25 @@ import {
   ALL_CASES_COMMENTS_COUNT,
   ALL_CASES_IN_PROGRESS_CASES_STATS,
   ALL_CASES_NAME,
-  ALL_CASES_STATUS_FILTER,
-  ALL_CASES_OPEN_CASES_STATS,
   ALL_CASES_OPENED_ON,
+  ALL_CASES_OPEN_CASES_STATS,
   ALL_CASES_PAGE_TITLE,
   ALL_CASES_SERVICE_NOW_INCIDENT,
+  ALL_CASES_STATUS_FILTER,
   ALL_CASES_TAGS,
   ALL_CASES_TAGS_COUNT,
 } from '../../../screens/all_cases';
 import {
+  CASES_METRIC,
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
-  CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT,
   CASE_DETAILS_USERNAMES,
+  CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT,
+  EXPECTED_METRICS,
   PARTICIPANTS,
   REPORTER,
-  EXPECTED_METRICS,
-  CASES_METRIC,
   UNEXPECTED_METRICS,
 } from '../../../screens/case_details';
 import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
@@ -51,9 +51,9 @@ import {
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 import { CLOUD_SERVERLESS, ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
 import { deleteCases } from '../../../tasks/api_calls/cases';
+import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 
 // https://github.com/elastic/kibana/issues/179231
 const isCloudServerless = Cypress.env(CLOUD_SERVERLESS);

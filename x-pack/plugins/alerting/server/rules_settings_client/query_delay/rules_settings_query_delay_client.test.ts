@@ -6,13 +6,13 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
-  RULES_SETTINGS_FEATURE_ID,
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
-  RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,
-  RulesSettings,
   DEFAULT_QUERY_DELAY_SETTINGS,
+  RULES_SETTINGS_FEATURE_ID,
+  RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  RulesSettings,
 } from '../../../common';
 import {
   RulesSettingsQueryDelayClient,

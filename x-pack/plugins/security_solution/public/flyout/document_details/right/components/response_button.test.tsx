@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import React from 'react';
+import type { SearchHit } from '../../../../../common/search_strategy';
 import { RightPanelContext } from '../context';
-import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
 import { ResponseButton } from './response_button';
-import type { SearchHit } from '../../../../../common/search_strategy';
-import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { RESPONSE_BUTTON_TEST_ID, RESPONSE_EMPTY_TEST_ID } from './test_ids';
 
 const mockValidSearchHit = {
   fields: {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getPromptById } from './helpers';
-import { mockSystemPrompt, mockSuperheroSystemPrompt } from '../../mock/system_prompt';
+import { mockSuperheroSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 import type { Prompt } from '../types';
+import { getPromptById } from './helpers';
 
 describe('helpers', () => {
   describe('getPromptById', () => {

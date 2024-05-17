@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { checkForUnknownDocs, type DocumentIdAndType } from './check_for_unknown_docs';
-import { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
+import * as Either from 'fp-ts/lib/Either';
 import { calculateExcludeFilters } from './calculate_exclude_filters';
-import { deleteByQuery } from './delete_by_query';
+import { type DocumentIdAndType, checkForUnknownDocs } from './check_for_unknown_docs';
+import { cleanupUnknownAndExcluded } from './cleanup_unknown_and_excluded';
 import {
   emptyResponseClientMock,
   initialExcludeOnUpgradeQueryMock,
 } from './cleanup_unknown_and_excluded.mocks';
+import { deleteByQuery } from './delete_by_query';
 
 jest.mock('./check_for_unknown_docs');
 jest.mock('./calculate_exclude_filters');

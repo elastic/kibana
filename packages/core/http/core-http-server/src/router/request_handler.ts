@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { RouteMethod } from './route';
 import type { KibanaRequest } from './request';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { IKibanaResponse } from './response';
 import type { KibanaResponseFactory } from './response_factory';
+import type { RouteMethod } from './route';
 
 /**
  * A function executed when route path matched requested resource path.
@@ -54,7 +54,7 @@ export type RequestHandler<
   B = unknown,
   Context extends RequestHandlerContextBase = RequestHandlerContextBase,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 > = (
   context: Context,
   request: KibanaRequest<P, Q, B, Method>,
@@ -80,7 +80,7 @@ export type RequestHandlerWrapper = <
   B,
   Context extends RequestHandlerContextBase = RequestHandlerContextBase,
   Method extends RouteMethod = any,
-  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory,
 >(
   handler: RequestHandler<P, Q, B, Context, Method, ResponseFactory>
 ) => RequestHandler<P, Q, B, Context, Method, ResponseFactory>;

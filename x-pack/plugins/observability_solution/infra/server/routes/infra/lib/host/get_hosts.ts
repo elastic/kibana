@@ -6,10 +6,10 @@
  */
 
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
-import { getFilteredHosts } from './get_filtered_hosts';
-import { hasFilters } from '../utils';
 import type { GetHostsArgs } from '../types';
+import { hasFilters } from '../utils';
 import { getAllHosts } from './get_all_hosts';
+import { getFilteredHosts } from './get_filtered_hosts';
 import { getHostsAlertsCount } from './get_hosts_alerts_count';
 
 export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsResponsePayload> => {
@@ -39,10 +39,13 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     }),
   ]);
 
-  const alertsByHostName = alertsCountResponse.reduce((acc, { name, alertsCount }) => {
-    acc[name] = { alertsCount };
-    return acc;
-  }, {} as Record<string, { alertsCount: number }>);
+  const alertsByHostName = alertsCountResponse.reduce(
+    (acc, { name, alertsCount }) => {
+      acc[name] = { alertsCount };
+      return acc;
+    },
+    {} as Record<string, { alertsCount: number }>
+  );
 
   const hosts = hostMetrics.map(({ name, metrics, metadata }) => {
     const { alertsCount } = alertsByHostName[name] ?? {};

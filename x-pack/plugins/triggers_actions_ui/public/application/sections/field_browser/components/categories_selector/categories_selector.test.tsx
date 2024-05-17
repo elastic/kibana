@@ -1,3 +1,5 @@
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import { EuiLoadingSpinner, EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner, EuiPage, EuiPageBody, EuiSpacer, EuiText } from '@elastic/eui';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import { loadStatus, type ProcessedServerResponse } from './lib';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component } from 'react';
 import { MetricTiles, ServerStatus, StatusSection, VersionHeader } from './components';
+import { type ProcessedServerResponse, loadStatus } from './lib';
 
 interface StatusAppProps {
   http: InternalHttpSetup;

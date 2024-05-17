@@ -6,20 +6,20 @@
  */
 
 import type { AggregationOptionsByType } from '@kbn/es-types';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   METRIC_PROCESS_CPU_PERCENT,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/es_fields/apm';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { systemMemory, cgroupMemory } from '../../metrics/by_agent/shared/memory';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { Coordinate } from '../../../../typings/timeseries';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { cgroupMemory, systemMemory } from '../../metrics/by_agent/shared/memory';
 
 interface ServiceInstanceSystemMetricPrimaryStatistics {
   serviceNodeName: string;

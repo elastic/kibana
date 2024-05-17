@@ -10,15 +10,15 @@ import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
-import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
+import type { BrowserField } from '../../../../common/search_strategy';
+import { getSourcererScopeId } from '../../../helpers';
 import type { BrowserFields } from '../../containers/source';
+import { CellActionsMode, SecurityCellActions, SecurityCellActionsTrigger } from '../cell_actions';
+import type { ColumnsProvider } from './event_fields_browser';
+import { FieldNameCell } from './table/field_name_cell';
+import { FieldValueCell } from './table/field_value_cell';
 import * as i18n from './translations';
 import type { EventFieldsData } from './types';
-import type { BrowserField } from '../../../../common/search_strategy';
-import { FieldValueCell } from './table/field_value_cell';
-import { FieldNameCell } from './table/field_name_cell';
-import { getSourcererScopeId } from '../../../helpers';
-import type { ColumnsProvider } from './event_fields_browser';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;

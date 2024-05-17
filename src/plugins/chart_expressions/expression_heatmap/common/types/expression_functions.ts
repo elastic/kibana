@@ -21,9 +21,9 @@ import {
 } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
-  EXPRESSION_HEATMAP_NAME,
-  EXPRESSION_HEATMAP_LEGEND_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,
+  EXPRESSION_HEATMAP_LEGEND_NAME,
+  EXPRESSION_HEATMAP_NAME,
   HEATMAP_FUNCTION_RENDERER_NAME,
 } from '../constants';
 

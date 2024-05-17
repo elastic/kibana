@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
+import { EuiLink } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { EuiLink } from '@elastic/eui';
-import type { IEsError } from './types';
+import React from 'react';
 import { EsError } from './es_error';
+import type { IEsError } from './types';
 
 export class TsdbError extends EsError {
   private readonly docLinks: CoreStart['docLinks'];

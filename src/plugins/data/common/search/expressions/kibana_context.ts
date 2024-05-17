@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
+import { ExecutionContext, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { KibanaTimerangeOutput, KibanaContext, KibanaFilter, KibanaQueryOutput } from '../..';
+import { KibanaContext, KibanaFilter, KibanaQueryOutput, KibanaTimerangeOutput } from '../..';
 
 interface Arguments {
   q?: KibanaQueryOutput[] | null;

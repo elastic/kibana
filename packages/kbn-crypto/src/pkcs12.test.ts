@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { readFileSync } from 'fs';
 import {
   CA_CERT_PATH,
-  ES_KEY_PATH,
   ES_CERT_PATH,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
   ES_EMPTYPASSWORD_P12_PATH,
+  ES_KEY_PATH,
   ES_NOPASSWORD_P12_PATH,
+  ES_P12_PASSWORD,
+  ES_P12_PATH,
 } from '@kbn/dev-utils';
 import { NO_CA_PATH, NO_CERT_PATH, NO_KEY_PATH, TWO_CAS_PATH, TWO_KEYS_PATH } from './__fixtures__';
-import { readFileSync } from 'fs';
 
-import { readPkcs12Keystore, Pkcs12ReadResult, readPkcs12Truststore } from './pkcs12';
+import { Pkcs12ReadResult, readPkcs12Keystore, readPkcs12Truststore } from './pkcs12';
 
 const reformatPem = (pem: string) => {
   // ensure consistency in line endings when comparing two PEM files

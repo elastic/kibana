@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import _, { isArray, last, get } from 'lodash';
-import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
-import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { getMetricsField } from '../../lib/get_metrics_field';
-import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
-import { isSortable } from './is_sortable';
-import { EuiToolTip, EuiIcon } from '@elastic/eui';
-import { replaceVars } from '../../lib/replace_vars';
-import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { getFieldFormats, getCoreStart } from '../../../../services';
-import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import _, { isArray, last, get } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { getCoreStart, getFieldFormats } from '../../../../services';
+import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { ExternalUrlErrorModal } from '../../lib/external_url_error_modal';
+import { getMetricsField } from '../../lib/get_metrics_field';
+import { replaceVars } from '../../lib/replace_vars';
+import { createTickFormatter } from '../../lib/tick_formatter';
+import { isSortable } from './is_sortable';
 
 import {
+  MULTI_FIELD_VALUES_SEPARATOR,
   createCachedFieldValueFormatter,
   getFieldsForTerms,
   getMultiFieldLabel,
-  MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
 import { RenderCounter } from '../../render_counter';
 

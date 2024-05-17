@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT, EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, EuiToolTip, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
@@ -22,8 +22,8 @@ import { SparkPlot } from '../../../../shared/charts/spark_plot';
 import { CrashDetailLink } from '../../../../shared/links/apm/mobile/crash_detail_link';
 import { ErrorOverviewLink } from '../../../../shared/links/apm/mobile/error_overview_link';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
-import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
+import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 
 const MessageAndCulpritCell = euiStyled.div`
   ${truncate('100%')};

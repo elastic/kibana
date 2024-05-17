@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
 import { isEqual } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 
-import { set } from '@kbn/safer-lodash-set';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { set } from '@kbn/safer-lodash-set';
 
-import { DashboardSpacesService } from '../spaces/types';
-import type { DashboardStartDependencies } from '../../plugin';
-import type { DashboardBackupServiceType } from './types';
 import type { DashboardContainerInput } from '../../../common';
-import { DashboardNotificationsService } from '../notifications/types';
 import { backupServiceStrings } from '../../dashboard_container/_dashboard_container_strings';
+import type { DashboardStartDependencies } from '../../plugin';
+import { DashboardNotificationsService } from '../notifications/types';
+import { DashboardSpacesService } from '../spaces/types';
+import type { DashboardBackupServiceType } from './types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';

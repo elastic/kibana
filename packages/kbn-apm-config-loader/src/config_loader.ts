@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import type { AgentConfigOptions } from 'elastic-apm-node';
-import { getConfigurationFilePaths, getConfigFromFiles, applyConfigOverrides } from './utils';
 import { ApmConfiguration } from './config';
+import { applyConfigOverrides, getConfigFromFiles, getConfigurationFilePaths } from './utils';
 
 let apmConfig: ApmConfiguration | undefined;
 

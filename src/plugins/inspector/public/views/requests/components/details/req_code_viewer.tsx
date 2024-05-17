@@ -11,10 +11,10 @@
 // but that inserts a div which messes up the layout of the inspector.
 
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import React, { ReactNode } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
 
 interface RequestCodeViewerProps {
   value: string;

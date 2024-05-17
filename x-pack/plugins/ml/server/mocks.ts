@@ -1,3 +1,10 @@
+import type { MlPluginSetup } from './plugin';
+import { createAlertingServiceProviderMock } from './shared_services/providers/__mocks__/alerting_service';
+import { createAnomalyDetectorsProviderMock } from './shared_services/providers/__mocks__/anomaly_detectors';
+import { createJobServiceProviderMock } from './shared_services/providers/__mocks__/jobs_service';
+import { createModulesProviderMock } from './shared_services/providers/__mocks__/modules';
+import { createResultsServiceProviderMock } from './shared_services/providers/__mocks__/results_service';
+import { createMockMlSystemProvider } from './shared_services/providers/__mocks__/system';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +12,6 @@
  * 2.0.
  */
 import { createTrainedModelsProviderMock } from './shared_services/providers/__mocks__/trained_models';
-import { createJobServiceProviderMock } from './shared_services/providers/__mocks__/jobs_service';
-import { createAnomalyDetectorsProviderMock } from './shared_services/providers/__mocks__/anomaly_detectors';
-import { createMockMlSystemProvider } from './shared_services/providers/__mocks__/system';
-import { createModulesProviderMock } from './shared_services/providers/__mocks__/modules';
-import { createResultsServiceProviderMock } from './shared_services/providers/__mocks__/results_service';
-import { createAlertingServiceProviderMock } from './shared_services/providers/__mocks__/alerting_service';
-import type { MlPluginSetup } from './plugin';
 
 const createSetupContract = () =>
   ({
@@ -22,7 +22,7 @@ const createSetupContract = () =>
     resultsServiceProvider: createResultsServiceProviderMock(),
     alertingServiceProvider: createAlertingServiceProviderMock(),
     trainedModelsProvider: createTrainedModelsProviderMock(),
-  } as unknown as jest.Mocked<MlPluginSetup>);
+  }) as unknown as jest.Mocked<MlPluginSetup>;
 
 const createStartContract = () => jest.fn();
 

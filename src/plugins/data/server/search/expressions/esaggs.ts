@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
   handleEsaggsRequest,
 } from '../../../common/search/expressions';
-import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
+import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

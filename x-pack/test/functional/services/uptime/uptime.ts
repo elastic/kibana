@@ -7,14 +7,14 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { UptimeSettingsProvider } from './settings';
+import { UptimeAlertsProvider } from './alerts';
+import { UptimeCertProvider } from './certificates';
 import { UptimeCommonProvider } from './common';
+import { UptimeMLAnomalyProvider } from './ml_anomaly';
 import { UptimeMonitorProvider } from './monitor';
 import { UptimeNavigationProvider } from './navigation';
-import { UptimeAlertsProvider } from './alerts';
-import { UptimeMLAnomalyProvider } from './ml_anomaly';
-import { UptimeCertProvider } from './certificates';
 import { UptimeOverviewProvider } from './overview';
+import { UptimeSettingsProvider } from './settings';
 
 export function UptimeProvider(context: FtrProviderContext) {
   const common = UptimeCommonProvider(context);

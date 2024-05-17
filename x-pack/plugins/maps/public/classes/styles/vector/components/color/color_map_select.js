@@ -8,17 +8,17 @@
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiSpacer,
-  EuiSelect,
   EuiColorPalettePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelect,
+  EuiSpacer,
 } from '@elastic/eui';
-import { ColorStopsOrdinal } from './color_stops_ordinal';
-import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
-import { ColorStopsCategorical } from './color_stops_categorical';
-import { CATEGORICAL_COLOR_PALETTES, NUMERICAL_COLOR_PALETTES } from '../../../color_palettes';
 import { i18n } from '@kbn/i18n';
+import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
+import { CATEGORICAL_COLOR_PALETTES, NUMERICAL_COLOR_PALETTES } from '../../../color_palettes';
+import { ColorStopsCategorical } from './color_stops_categorical';
+import { ColorStopsOrdinal } from './color_stops_ordinal';
 
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 

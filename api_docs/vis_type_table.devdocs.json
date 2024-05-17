@@ -38,9 +38,7 @@
             "tags": [],
             "label": "perPage",
             "description": [],
-            "signature": [
-              "number | \"\""
-            ],
+            "signature": ["number | \"\""],
             "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -127,9 +125,7 @@
             "tags": [],
             "label": "autoFitRowToContent",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -141,9 +137,7 @@
             "tags": [],
             "label": "row",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "src/plugins/vis_types/table/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -174,9 +168,7 @@
         "tags": [],
         "label": "VIS_TYPE_TABLE",
         "description": [],
-        "signature": [
-          "\"table\""
-        ],
+        "signature": ["\"table\""],
         "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,

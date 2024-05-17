@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface DetailViewData {
   name: string;

@@ -9,8 +9,8 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX, CURRENT_CONNECTORS_JOB_INDEX } from '..';
-import { SyncJobType, SyncStatus, TriggerMethod } from '../types/connectors';
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '..';
+import { SyncJobType, SyncStatus, TriggerMethod } from '../types/connectors';
 
 import { startConnectorSync } from './start_sync';
 

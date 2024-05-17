@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { CoreSetup } from '@kbn/core/server';
-import { registerValueSuggestionsRoute } from './value_suggestions_route';
+import { Observable } from 'rxjs';
 import { ConfigSchema } from '../../config';
+import { registerValueSuggestionsRoute } from './value_suggestions_route';
 
 export function registerRoutes({ http }: CoreSetup, config$: Observable<ConfigSchema>): void {
   const router = http.createRouter();

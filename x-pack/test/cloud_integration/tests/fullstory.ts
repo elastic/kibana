@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import fetch from 'node-fetch';
-import { sha256 } from 'js-sha256';
 import { CLOUD_USER_ID } from '@kbn/cloud-integration-saml-provider-plugin/constants';
+import expect from '@kbn/expect';
+import { sha256 } from 'js-sha256';
+import fetch from 'node-fetch';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

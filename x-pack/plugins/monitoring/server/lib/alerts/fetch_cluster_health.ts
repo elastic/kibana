@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { ElasticsearchClient } from '@kbn/core/server';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
-import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
-import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket } from './types';
-import type { RunOpts } from '../types';
-import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
+import type { ExperimentalFeatures } from '../../../../../common';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
+import type { RunOpts } from '../types';
 import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
+import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
+import type { ThresholdBucket } from './types';
 import { transformBulkCreatedItemsToHits } from './utils';
-import type { ExperimentalFeatures } from '../../../../../common';
+import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
   buckets: ThresholdBucket[];

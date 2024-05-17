@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_MAX_INNER_RESULT_WINDOW, DEFAULT_MAX_RESULT_WINDOW } from '../../common/constants';
 import { getIndexPatternSettings } from './get_index_pattern_settings';
-import { DEFAULT_MAX_RESULT_WINDOW, DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../common/constants';
 
 describe('max_result_window and max_inner_result_window are not set', () => {
   test('Should provide default values when values not set', () => {

@@ -7,10 +7,10 @@
  */
 
 import { CustomIntegrationsServices } from '..';
+import { CustomIntegrationsStartDependencies } from '../../types';
+import { KibanaPluginServiceFactory } from '../types';
 import { findServiceFactory } from './find';
 import { platformServiceFactory } from './platform';
-import { KibanaPluginServiceFactory } from '../types';
-import { CustomIntegrationsStartDependencies } from '../../types';
 
 export { findServiceFactory } from './find';
 export { platformServiceFactory } from './platform';

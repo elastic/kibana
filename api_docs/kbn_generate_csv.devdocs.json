@@ -28,9 +28,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -86,9 +84,7 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
+                "signature": ["TaskInstanceFields"],
                 "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -101,9 +97,7 @@
                 "tags": [],
                 "label": "clients",
                 "description": [],
-                "signature": [
-                  "Clients"
-                ],
+                "signature": ["Clients"],
                 "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -158,9 +152,7 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": [
-                  "Writable"
-                ],
+                "signature": ["Writable"],
                 "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -176,11 +168,7 @@
             "tags": [],
             "label": "generateData",
             "description": [],
-            "signature": [
-              "() => Promise<",
-              "TaskRunResult",
-              ">"
-            ],
+            "signature": ["() => Promise<", "TaskRunResult", ">"],
             "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -208,9 +196,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-generate-csv/src/generate_csv.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -222,11 +208,7 @@
                 "tags": [],
                 "label": "job",
                 "description": [],
-                "signature": [
-                  "Omit<",
-                  "JobParamsCSV",
-                  ", \"version\">"
-                ],
+                "signature": ["Omit<", "JobParamsCSV", ", \"version\">"],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -262,9 +244,7 @@
                 "tags": [],
                 "label": "taskInstanceFields",
                 "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
+                "signature": ["TaskInstanceFields"],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -277,9 +257,7 @@
                 "tags": [],
                 "label": "clients",
                 "description": [],
-                "signature": [
-                  "Clients"
-                ],
+                "signature": ["Clients"],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -292,9 +270,7 @@
                 "tags": [],
                 "label": "dependencies",
                 "description": [],
-                "signature": [
-                  "Dependencies"
-                ],
+                "signature": ["Dependencies"],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -349,9 +325,7 @@
                 "tags": [],
                 "label": "stream",
                 "description": [],
-                "signature": [
-                  "Writable"
-                ],
+                "signature": ["Writable"],
                 "path": "packages/kbn-generate-csv/src/generate_csv.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -367,11 +341,7 @@
             "tags": [],
             "label": "generateData",
             "description": [],
-            "signature": [
-              "() => Promise<",
-              "TaskRunResult",
-              ">"
-            ],
+            "signature": ["() => Promise<", "TaskRunResult", ">"],
             "path": "packages/kbn-generate-csv/src/generate_csv.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -402,9 +372,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "{ esql: string; }"
-            ],
+            "signature": ["{ esql: string; }"],
             "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -416,9 +384,7 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -451,9 +417,7 @@
             "tags": [],
             "label": "browserTimezone",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-generate-csv/src/generate_csv_esql.ts",
             "deprecated": false,
             "trackAdoption": false

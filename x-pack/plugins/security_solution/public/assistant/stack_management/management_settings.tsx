@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
+  WELCOME_CONVERSATION_TITLE,
   mergeBaseWithPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
-  WELCOME_CONVERSATION_TITLE,
 } from '@kbn/elastic-assistant';
-import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
+import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
+import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const ManagementSettings = React.memo(() => {

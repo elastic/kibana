@@ -6,10 +6,10 @@
  */
 
 import {
+  RETRY_IF_CONFLICTS_ATTEMPTS,
+  RETRY_IF_CONFLICTS_DELAY,
   getExponentialDelayMultiplier,
   randomDelayMs,
-  RETRY_IF_CONFLICTS_DELAY,
-  RETRY_IF_CONFLICTS_ATTEMPTS,
   waitBeforeNextRetry,
 } from './wait_before_next_retry';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, ValidationError } from '@kbn/config-schema';
+import { ValidationError, schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';

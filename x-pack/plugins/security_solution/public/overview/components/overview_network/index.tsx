@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
+import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import type { ESQuery } from '../../../../common/typed_json';
+import { SecurityPageName } from '../../../app/types';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
+import { InspectButtonContainer } from '../../../common/components/inspect';
+import { getNetworkUrl, useFormatUrl } from '../../../common/components/link_to';
+import { LinkButton } from '../../../common/components/links';
 import { manageQuery } from '../../../common/components/page/manage_query';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import {
   ID as OverviewNetworkQueryId,
   useNetworkOverview,
 } from '../../containers/overview_network';
-import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
-import { getNetworkUrl, useFormatUrl } from '../../../common/components/link_to';
-import { InspectButtonContainer } from '../../../common/components/inspect';
-import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { SecurityPageName } from '../../../app/types';
-import { LinkButton } from '../../../common/components/links';
-import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { OverviewNetworkStats, getOverviewNetworkStats } from '../overview_network_stats';
 
 export interface OverviewNetworkProps {
   startDate: GlobalTimeArgs['from'];

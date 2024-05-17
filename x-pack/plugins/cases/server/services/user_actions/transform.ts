@@ -7,19 +7,22 @@
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
-import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
-  isConnectorUserAction,
-  isPushedUserAction,
-  isCreateCaseUserAction,
-  isCommentUserAction,
-} from '../../../common/utils/user_actions';
-import {
-  CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
   NONE_CONNECTOR_ID,
 } from '../../../common/constants';
+import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
+import type { UserActionAttributes } from '../../../common/types/domain';
+import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
+import {
+  isCommentUserAction,
+  isConnectorUserAction,
+  isCreateCaseUserAction,
+  isPushedUserAction,
+} from '../../../common/utils/user_actions';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -27,17 +30,14 @@ import {
   EXTERNAL_REFERENCE_REF_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
-import { findConnectorIdReference } from '../transform';
-import { isCommentRequestTypeExternalReferenceSO } from '../type_guards';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { findReferenceId } from '../../common/references';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../common/types/user_actions';
-import type { UserActionAttributes } from '../../../common/types/domain';
+import { findConnectorIdReference } from '../transform';
+import { isCommentRequestTypeExternalReferenceSO } from '../type_guards';
 
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,

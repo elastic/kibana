@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { setup as watchListPageSetup } from './watch_list_page.helpers';
-import { setup as watchStatusPageSetup } from './watch_status_page.helpers';
 import { setup as watchCreateJsonPageSetup } from './watch_create_json_page.helpers';
 import { setup as watchCreateThresholdPageSetup } from './watch_create_threshold_page.helpers';
 import { setup as watchEditPageSetup } from './watch_edit_page.helpers';
+import { setup as watchListPageSetup } from './watch_list_page.helpers';
+import { setup as watchStatusPageSetup } from './watch_status_page.helpers';
 
 export type { TestBed } from '@kbn/test-jest-helpers';
 export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';

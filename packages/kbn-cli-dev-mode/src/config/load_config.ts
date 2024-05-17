@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Env, RawConfigService, ConfigService, RawConfigAdapter } from '@kbn/config';
+import { ConfigService, Env, RawConfigAdapter, RawConfigService } from '@kbn/config';
 import { Logger } from '@kbn/logging';
-import { devConfigSchema, DevConfig, DevConfigType } from './dev_config';
-import { httpConfigSchema, HttpConfig, HttpConfigType } from './http_config';
-import { pluginsConfigSchema, PluginsConfig, PluginsConfigType } from './plugins_config';
+import { DevConfig, DevConfigType, devConfigSchema } from './dev_config';
+import { HttpConfig, HttpConfigType, httpConfigSchema } from './http_config';
+import { PluginsConfig, PluginsConfigType, pluginsConfigSchema } from './plugins_config';
 import { CliDevConfig } from './types';
 
 export const loadConfig = async ({

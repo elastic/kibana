@@ -1,3 +1,7 @@
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assetCriticalityDeleteRoute } from './delete';
+import { assetCriticalityGetRoute } from './get';
+import { assetCriticalityPrivilegesRoute } from './privileges';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +9,8 @@
  * 2.0.
  */
 import { assetCriticalityStatusRoute } from './status';
-import { assetCriticalityUpsertRoute } from './upsert';
-import { assetCriticalityGetRoute } from './get';
-import { assetCriticalityDeleteRoute } from './delete';
-import { assetCriticalityPrivilegesRoute } from './privileges';
 import { assetCriticalityCSVUploadRoute } from './upload_csv';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assetCriticalityUpsertRoute } from './upsert';
 
 export const registerAssetCriticalityRoutes = ({
   router,

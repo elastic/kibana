@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
+import React, { memo, useMemo } from 'react';
 
 export interface ObjectContentProps {
   data: object;

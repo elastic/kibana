@@ -40,9 +40,7 @@
             "tags": [],
             "label": "rootPath",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -55,9 +53,7 @@
             "tags": [],
             "label": "replacement",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,9 +84,7 @@
             "tags": [],
             "label": "Class",
             "description": [],
-            "signature": [
-              "Function"
-            ],
+            "signature": ["Function"],
             "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -103,9 +97,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string | ((instance: any) => string) | undefined"
-            ],
+            "signature": ["string | ((instance: any) => string) | undefined"],
             "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -136,9 +128,7 @@
             "tags": [],
             "label": "test",
             "description": [],
-            "signature": [
-              "(v: any) => boolean"
-            ],
+            "signature": ["(v: any) => boolean"],
             "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -151,9 +141,7 @@
             "tags": [],
             "label": "print",
             "description": [],
-            "signature": [
-              "(v: any, printRaw: (v: string) => RawPrint) => string | RawPrint"
-            ],
+            "signature": ["(v: any, printRaw: (v: string) => RawPrint) => string | RawPrint"],
             "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -184,9 +172,7 @@
             "tags": [],
             "label": "toReplace",
             "description": [],
-            "signature": [
-              "string | RegExp"
-            ],
+            "signature": ["string | RegExp"],
             "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -199,9 +185,7 @@
             "tags": [],
             "label": "replaceWith",
             "description": [],
-            "signature": [
-              "string | Replacer"
-            ],
+            "signature": ["string | Replacer"],
             "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
             "trackAdoption": false,

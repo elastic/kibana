@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiButton, EuiSpacer } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
 interface Props {
   onResendRequest: () => void;

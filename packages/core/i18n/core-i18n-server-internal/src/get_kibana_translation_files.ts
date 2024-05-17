@@ -8,8 +8,8 @@
 
 import { basename } from 'path';
 import { fromRoot } from '@kbn/repo-info';
-import { asyncMapWithLimit } from '@kbn/std';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
+import { asyncMapWithLimit } from '@kbn/std';
 import { getTranslationPaths } from './get_translation_paths';
 
 export const getKibanaTranslationFiles = async (

@@ -1,3 +1,4 @@
+import fs from 'fs';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { RouteMethod } from '@kbn/core/server';
-import fs from 'fs';
 import { MonitoringConfig } from './config';
 import { LegacyRequest, MonitoringCore, MonitoringRouteConfig, RouteDependencies } from './types';
 

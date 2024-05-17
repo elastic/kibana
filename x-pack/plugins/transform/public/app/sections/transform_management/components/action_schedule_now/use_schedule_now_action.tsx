@@ -7,17 +7,17 @@
 
 import React, { useMemo } from 'react';
 
-import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 
-import { useTransformCapabilities } from '../../../../hooks';
 import type { TransformListAction, TransformListRow } from '../../../../common';
+import { useTransformCapabilities } from '../../../../hooks';
 import { useScheduleNowTransforms } from '../../../../hooks';
 
 import {
+  ScheduleNowActionName,
   isScheduleNowActionDisabled,
   scheduleNowActionNameText,
-  ScheduleNowActionName,
 } from './schedule_now_action_name';
 
 export type ScheduleNowAction = ReturnType<typeof useScheduleNowAction>;

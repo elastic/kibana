@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { DemoEnvironmentPanel } from './demo_env_panel';
 import { SampleDataCards } from './sample_data_cards';
 
 // TODO: clintandrewhall - pull from config.
 import {
-  URL_DEMO_ENV,
+  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION,
+  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
   METRIC_CLICK_DEMO_ENV_BUTTON,
   METRIC_CLICK_SHOW_SAMPLE_DATA_BUTTON,
-  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON,
-  DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION,
+  URL_DEMO_ENV,
 } from './constants';
 import { useServices } from './services';
 

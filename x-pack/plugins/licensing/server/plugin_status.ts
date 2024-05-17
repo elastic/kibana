@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { takeUntil, map } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { map, takeUntil } from 'rxjs';
 import type { ILicense } from '../common/types';
 
 export const getPluginStatus$ = (

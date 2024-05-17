@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
 import { FileClientImpl } from './file_client';
-import type { FileClient } from './types';
 import { EsIndexFilesMetadataClient } from './file_metadata_client';
+import type { FileClient } from './types';
 
 const NO_FILE_KIND = 'none';
 

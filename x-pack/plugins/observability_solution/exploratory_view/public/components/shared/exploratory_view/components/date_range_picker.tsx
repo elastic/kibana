@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import { Moment } from 'moment';
 import DateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { Moment } from 'moment';
+import React from 'react';
+import { ReportTypes } from '../configurations/constants';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesUrl } from '../types';
-import { ReportTypes } from '../configurations/constants';
 
 export const parseRelativeDate = (date: string, options = {}): Moment | void => {
   return DateMath.parse(date, options)!;

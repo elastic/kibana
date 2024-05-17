@@ -6,10 +6,10 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { bulkUntrackAlertsByQueryRoute } from './bulk_untrack_alerts_by_query_route';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { bulkUntrackAlertsByQueryRoute } from './bulk_untrack_alerts_by_query_route';
 
 const rulesClient = rulesClientMock.create();
 

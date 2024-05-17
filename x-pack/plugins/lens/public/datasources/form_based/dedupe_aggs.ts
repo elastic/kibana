@@ -12,7 +12,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { GenericOperationDefinition } from './operations';
 import { groupByKey } from './operations/definitions/get_group_by_key';
-import { extractAggId, OriginalColumn } from './to_expression';
+import { OriginalColumn, extractAggId } from './to_expression';
 
 /**
  * Consolidates duplicate agg expression builders to increase performance

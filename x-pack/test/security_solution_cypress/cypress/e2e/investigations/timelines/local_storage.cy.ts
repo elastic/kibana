@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { DATAGRID_HEADER, DATAGRID_HEADERS } from '../../../screens/timeline';
+import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
+import { openEvents } from '../../../tasks/hosts/main';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { hostsUrl } from '../../../urls/navigation';
-import { openEvents } from '../../../tasks/hosts/main';
-import { DATAGRID_HEADERS, DATAGRID_HEADER } from '../../../screens/timeline';
-import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { removeColumn } from '../../../tasks/timeline';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe('persistent timeline', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {

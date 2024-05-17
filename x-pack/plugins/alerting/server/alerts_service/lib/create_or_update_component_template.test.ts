@@ -1,3 +1,5 @@
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +7,7 @@
  * 2.0.
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();

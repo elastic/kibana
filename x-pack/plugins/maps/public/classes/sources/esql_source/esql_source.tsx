@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
-import { tap } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import {
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  ESQL_LATEST_VERSION,
-} from '@kbn/esql-utils';
+import { getTime } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
-import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
-import { getTime } from '@kbn/data-plugin/public';
+import {
+  ESQL_LATEST_VERSION,
+  getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
+} from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import React from 'react';
+import { lastValueFrom } from 'rxjs';
+import { tap } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type {
   ESQLSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { DataRequest } from '../../util/data_request';
-import { isValidStringConfig } from '../../util/valid_string_config';
-import type { SourceEditorArgs } from '../source';
-import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
-import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
-import type { IESSource } from '../es_source';
+import { getData, getUiSettings } from '../../../kibana_services';
 import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
-import { getData, getUiSettings } from '../../../kibana_services';
+import { DataRequest } from '../../util/data_request';
+import { isValidStringConfig } from '../../util/valid_string_config';
+import type { IESSource } from '../es_source';
+import type { SourceEditorArgs } from '../source';
+import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';
+import type { GeoJsonWithMeta, IVectorSource, SourceStatus } from '../vector_source';
 import { convertToGeoJson } from './convert_to_geojson';
-import { getFieldType, isGeometryColumn, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import { ESQL_GEO_SHAPE_TYPE, getFieldType, isGeometryColumn } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 
 type ESQLSourceSyncMeta = Pick<

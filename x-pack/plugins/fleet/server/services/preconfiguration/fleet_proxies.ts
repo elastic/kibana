@@ -11,6 +11,7 @@ import pMap from 'p-map';
 
 import type { FleetConfigType } from '../../config';
 import type { FleetProxy } from '../../types';
+import { agentPolicyService } from '../agent_policy';
 import {
   bulkGetFleetProxies,
   createFleetProxy,
@@ -19,7 +20,6 @@ import {
   updateFleetProxy,
 } from '../fleet_proxies';
 import { listFleetServerHostsForProxyId } from '../fleet_server_host';
-import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
 
 export function getPreconfiguredFleetProxiesFromConfig(config?: FleetConfigType) {

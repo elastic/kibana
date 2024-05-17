@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  htmlIdGenerator,
+  EuiAccordion,
+  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,67 +15,70 @@ import {
   EuiIconTip,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiPanel,
+  EuiResizableContainer,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
-  EuiSkeletonText,
-  EuiPanel,
-  EuiAccordion,
-  EuiBadge,
-  EuiResizableContainer,
-  useIsWithinBreakpoints,
+  htmlIdGenerator,
   useEuiTheme,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
-import { useStorage } from '@kbn/ml-local-storage';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useStorage } from '@kbn/ml-local-storage';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { HelpPopover } from '../components/help_popover';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
+import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
-import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
-import { InfluencersList } from '../components/influencers_list';
-import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
-import { JobSelector } from '../components/job_selector';
-import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { SelectSeverity } from '../components/controls/select_severity/select_severity';
-import {
-  ExplorerQueryBar,
-  getKqlQueryValues,
-  DEFAULT_QUERY_LANG,
-} from './components/explorer_query_bar/explorer_query_bar';
-import type {
-  OverallSwimlaneData,
-  AppStateSelectedCells,
-  SourceIndicesWithGeoFields,
-} from './explorer_utils';
-import {
-  getDateFormatTz,
-  removeFilterFromQueryString,
-  getQueryPattern,
-  escapeParens,
-  escapeDoubleQuotes,
-  getDataViewsAndIndicesWithGeoFields,
-} from './explorer_utils';
-import { AnomalyTimeline } from './anomaly_timeline';
-import type { FilterAction } from './explorer_constants';
-import { FILTER_ACTION } from './explorer_constants';
 // Anomalies Table
 // @ts-ignore
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
-import { AnomalyContextMenu } from './anomaly_context_menu';
+import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
+import { SelectInterval } from '../components/controls/select_interval/select_interval';
+import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { HelpPopover } from '../components/help_popover';
+import { InfluencersList } from '../components/influencers_list';
+import { JobSelector } from '../components/job_selector';
 import type { JobSelectorProps } from '../components/job_selector/job_selector';
-import type { ExplorerState } from './reducers';
-import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
-import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
-import { AlertsPanel } from './alerts';
+import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlIndexUtils } from '../util/index_service';
+import { AlertsPanel } from './alerts';
+import { AnomalyContextMenu } from './anomaly_context_menu';
+import { useAnomalyExplorerContext } from './anomaly_explorer_context';
+import { AnomalyTimeline } from './anomaly_timeline';
+import { ExplorerNoJobsSelected, ExplorerNoResultsFound } from './components';
+import {
+  DEFAULT_QUERY_LANG,
+  ExplorerQueryBar,
+  getKqlQueryValues,
+} from './components/explorer_query_bar/explorer_query_bar';
+import type { FilterAction } from './explorer_constants';
+import { FILTER_ACTION } from './explorer_constants';
+import type {
+  AppStateSelectedCells,
+  OverallSwimlaneData,
+  SourceIndicesWithGeoFields,
+} from './explorer_utils';
+import {
+  escapeDoubleQuotes,
+  escapeParens,
+  getDataViewsAndIndicesWithGeoFields,
+  getDateFormatTz,
+  getQueryPattern,
+  removeFilterFromQueryString,
+} from './explorer_utils';
+import type { ExplorerState } from './reducers';
 
 const AnnotationFlyout = dynamic(async () => ({
   default: (await import('../components/annotations/annotation_flyout')).AnnotationFlyout,

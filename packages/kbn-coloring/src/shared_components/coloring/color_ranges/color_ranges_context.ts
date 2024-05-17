@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { PaletteRegistry, DataBounds } from '../../../palettes';
+import type { DataBounds, PaletteRegistry } from '../../../palettes';
 
 interface ColorRangesContextType {
   dataBounds: DataBounds;

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import { RemoteClusterAdd } from '../../../public/application/sections';
-import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
-import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
+import { createRemoteClustersStore } from '../../../public/application/store';
+import { WithAppDependencies, createRemoteClustersActions } from '../helpers';
 
 const testBedConfig = {
   store: createRemoteClustersStore,

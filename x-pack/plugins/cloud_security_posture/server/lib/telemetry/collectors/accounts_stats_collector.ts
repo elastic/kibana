@@ -1,3 +1,7 @@
+import type {
+  AggregationsMultiBucketBase,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +10,10 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type {
-  AggregationsMultiBucketBase,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
 interface Value {
   value: number;

@@ -14,8 +14,8 @@ import {
 } from '../../../common/http_api/custom_dashboards_api';
 import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 import { INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
 import { handleRouteErrors } from '../../utils/handle_route_errors';
+import { checkCustomDashboardsEnabled } from './lib/check_custom_dashboards_enabled';
 
 export function initUpdateCustomDashboardRoute(framework: KibanaFramework) {
   const validatePayload = createRouteValidationFunction(InfraSaveCustomDashboardsRequestPayloadRT);

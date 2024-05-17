@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { resolve } from 'path';
+import execa from 'execa';
 import * as Either from './either';
 import * as Maybe from './maybe';
-import { always, id, noop, pink, pipe, ccMark } from './utils';
-import execa from 'execa';
-import { resolve } from 'path';
+import { always, ccMark, id, noop, pink, pipe } from './utils';
 
 const ROOT_DIR = resolve(__dirname, '../../../..');
 

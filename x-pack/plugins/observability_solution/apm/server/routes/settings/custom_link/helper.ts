@@ -7,8 +7,8 @@
 
 import { isEmpty } from 'lodash';
 import {
-  CustomLinkES,
   CustomLink,
+  CustomLinkES,
   Filter,
   FilterKey,
 } from '../../../../common/custom_link/custom_link_types';

@@ -17,35 +17,33 @@ const Context = React.createContext<KibanaErrorBoundaryServices | null>(null);
  * A Context Provider for Jest and Storybooks
  * @internal
  */
-export const KibanaErrorBoundaryDepsProvider: FC<
-  PropsWithChildren<KibanaErrorBoundaryServices>
-> = ({ children, onClickRefresh, errorService }) => (
-  <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>
-);
+export const KibanaErrorBoundaryDepsProvider: FC<PropsWithChildren<KibanaErrorBoundaryServices>> =
+  ({ children, onClickRefresh, errorService }) => (
+    <Context.Provider value={{ onClickRefresh, errorService }}>{children}</Context.Provider>
+  );
 
 /**
  * Provider that uses dependencies to give context to the KibanaErrorBoundary component
  * This provider is aware if services were already created from a higher level of the component tree
  * @public
  */
-export const KibanaErrorBoundaryProvider: FC<
-  PropsWithChildren<KibanaErrorBoundaryProviderDeps>
-> = ({ children, analytics }) => {
-  const parentContext = useContext(Context);
-  const value: KibanaErrorBoundaryServices = useMemo(() => {
-    // FIXME: analytics dep is optional - know when not to overwrite
-    if (parentContext) {
-      return parentContext;
-    }
+export const KibanaErrorBoundaryProvider: FC<PropsWithChildren<KibanaErrorBoundaryProviderDeps>> =
+  ({ children, analytics }) => {
+    const parentContext = useContext(Context);
+    const value: KibanaErrorBoundaryServices = useMemo(() => {
+      // FIXME: analytics dep is optional - know when not to overwrite
+      if (parentContext) {
+        return parentContext;
+      }
 
-    return {
-      onClickRefresh: () => window.location.reload(),
-      errorService: new KibanaErrorService({ analytics }),
-    };
-  }, [parentContext, analytics]);
+      return {
+        onClickRefresh: () => window.location.reload(),
+        errorService: new KibanaErrorService({ analytics }),
+      };
+    }, [parentContext, analytics]);
 
-  return <Context.Provider value={value}>{children}</Context.Provider>;
-};
+    return <Context.Provider value={value}>{children}</Context.Provider>;
+  };
 
 /**
  * Utility that provides context

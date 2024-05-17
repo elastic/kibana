@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -16,11 +15,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 
-import type { ActionConnector } from '../../containers/configure/types';
-import * as i18n from './translations';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import type { ActionConnector } from '../../containers/configure/types';
 import { getConnectorIcon, isDeprecatedConnector } from '../utils';
+import * as i18n from './translations';
 
 export interface Props {
   connectors: ActionConnector[];

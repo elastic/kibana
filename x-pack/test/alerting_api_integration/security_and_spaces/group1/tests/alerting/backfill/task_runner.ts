@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import moment from 'moment';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '@kbn/alerting-plugin/server/saved_objects';
 import type { SecurityAlert } from '@kbn/alerts-as-data-utils';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import expect from '@kbn/expect';
 import {
   ALERT_LAST_DETECTED,
   ALERT_RULE_CATEGORY,
@@ -26,28 +31,23 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import {
-  AD_HOC_RUN_SAVED_OBJECT_TYPE,
-  RULE_SAVED_OBJECT_TYPE,
-} from '@kbn/alerting-plugin/server/saved_objects';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import {
-  createEsDocument,
-  DOCUMENT_REFERENCE,
-  DOCUMENT_SOURCE,
-} from '../../../../../spaces_only/tests/alerting/create_test_data';
+import moment from 'moment';
 import { asyncForEach } from '../../../../../../functional/services/transform/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
+  ObjectRemover,
+  TaskManagerDoc,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../../common/lib';
+import {
+  DOCUMENT_REFERENCE,
+  DOCUMENT_SOURCE,
+  createEsDocument,
+} from '../../../../../spaces_only/tests/alerting/create_test_data';
+import { SuperuserAtSpace1 } from '../../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createBackfillTaskRunnerTests({ getService }: FtrProviderContext) {
@@ -62,18 +62,36 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
   const originalDocTimestamps = [
     // before first backfill run
-    moment().utc().subtract(14, 'days').toISOString(),
+    moment()
+      .utc()
+      .subtract(14, 'days')
+      .toISOString(),
 
     // backfill execution set 1
-    moment().utc().startOf('day').subtract(13, 'days').add(64, 'seconds').toISOString(),
+    moment()
+      .utc()
+      .startOf('day')
+      .subtract(13, 'days')
+      .add(64, 'seconds')
+      .toISOString(),
     moment().utc().startOf('day').subtract(13, 'days').add(65, 'seconds').toISOString(),
     moment().utc().startOf('day').subtract(13, 'days').add(66, 'seconds').toISOString(),
 
     // backfill execution set 2
-    moment().utc().startOf('day').subtract(12, 'days').add(89, 'seconds').toISOString(),
+    moment()
+      .utc()
+      .startOf('day')
+      .subtract(12, 'days')
+      .add(89, 'seconds')
+      .toISOString(),
 
     // backfill execution set 3
-    moment().utc().startOf('day').subtract(11, 'days').add(785, 'seconds').toISOString(),
+    moment()
+      .utc()
+      .startOf('day')
+      .subtract(11, 'days')
+      .add(785, 'seconds')
+      .toISOString(),
     moment().utc().startOf('day').subtract(11, 'days').add(888, 'seconds').toISOString(),
     moment().utc().startOf('day').subtract(11, 'days').add(954, 'seconds').toISOString(),
     moment().utc().startOf('day').subtract(11, 'days').add(1045, 'seconds').toISOString(),
@@ -82,7 +100,12 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
     // backfill execution set 4 purposely left empty
 
     // after last backfill
-    moment().utc().startOf('day').subtract(9, 'days').add(666, 'seconds').toISOString(),
+    moment()
+      .utc()
+      .startOf('day')
+      .subtract(9, 'days')
+      .add(666, 'seconds')
+      .toISOString(),
     moment().utc().startOf('day').subtract(9, 'days').add(667, 'seconds').toISOString(),
   ];
 

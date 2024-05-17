@@ -6,8 +6,6 @@
     "id": "samlProviderPlugin",
     "server": true,
     "browser": false,
-    "optionalPlugins": [
-      "cloud"
-    ]
+    "optionalPlugins": ["cloud"]
   }
 }

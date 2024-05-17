@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { CommonProps } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import type { CommonProps } from '@elastic/eui';
 
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { AppGlobalStyle } from '../page';

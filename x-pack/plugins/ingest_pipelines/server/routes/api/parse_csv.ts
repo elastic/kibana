@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
+import { Type, TypeOf, schema } from '@kbn/config-schema';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { FieldCopyAction } from '../../../common/types';

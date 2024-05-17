@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { RenderResult, render } from '@testing-library/react';
+import React from 'react';
 import { FormTestProvider } from '../../components/test_utils';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
-import { render, RenderResult } from '@testing-library/react';
 
 const renderWithSecretFields = ({
   isEdit,

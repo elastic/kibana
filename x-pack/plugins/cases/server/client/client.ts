@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { CasesClientArgs } from './types';
-import type { CasesSubClient } from './cases/client';
-import { createCasesSubClient } from './cases/client';
 import type { AttachmentsSubClient } from './attachments/client';
 import { createAttachmentsSubClient } from './attachments/client';
-import type { UserActionsSubClient } from './user_actions/client';
-import { createUserActionsSubClient } from './user_actions/client';
+import type { CasesSubClient } from './cases/client';
+import { createCasesSubClient } from './cases/client';
 import type { CasesClientInternal } from './client_internal';
 import { createCasesClientInternal } from './client_internal';
 import type { ConfigureSubClient } from './configure/client';
 import { createConfigurationSubClient } from './configure/client';
 import type { MetricsSubClient } from './metrics/client';
 import { createMetricsSubClient } from './metrics/client';
+import type { CasesClientArgs } from './types';
+import type { UserActionsSubClient } from './user_actions/client';
+import { createUserActionsSubClient } from './user_actions/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.

@@ -7,9 +7,9 @@
 
 import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NodeDataDefinition } from 'cytoscape';
+import React from 'react';
 import type { ContentsProps } from '.';
 import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 

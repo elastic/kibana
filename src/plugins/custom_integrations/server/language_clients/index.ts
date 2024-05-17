@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { CoreSetup } from '@kbn/core/server';
-import { CustomIntegrationRegistry } from '../custom_integration_registry';
 import { CustomIntegrationIcon, PLUGIN_ID } from '../../common';
+import { CustomIntegrationRegistry } from '../custom_integration_registry';
 
 import { languageIntegrations } from '../../common/language_integrations';
 import type { LanguageIntegration } from '../../common/language_integrations';

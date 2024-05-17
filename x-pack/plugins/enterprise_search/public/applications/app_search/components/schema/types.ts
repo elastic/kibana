@@ -6,10 +6,10 @@
  */
 
 import {
-  Schema,
-  IndexJob,
-  SchemaConflicts,
   FieldCoercionErrors,
+  IndexJob,
+  Schema,
+  SchemaConflicts,
 } from '../../../shared/schema/types';
 
 export interface SchemaApiResponse {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { unsnoozeRuleRoute } from './unsnooze_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { unsnoozeRuleRoute } from './unsnooze_rule_route';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({

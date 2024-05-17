@@ -75,9 +75,7 @@
             "tags": [],
             "label": "publicBaseUrl",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -89,9 +87,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -125,9 +121,7 @@
                     "tags": [],
                     "label": "serverBasePath",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -139,9 +133,7 @@
                     "tags": [],
                     "label": "assetsHrefBase",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -153,9 +145,7 @@
                     "tags": [],
                     "label": "publicBaseUrl",
                     "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
+                    "signature": ["string | undefined"],
                     "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -172,9 +162,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -188,9 +176,7 @@
             "tags": [],
             "label": "prepend",
             "description": [],
-            "signature": [
-              "(path: string) => string"
-            ],
+            "signature": ["(path: string) => string"],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -202,9 +188,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -220,9 +204,7 @@
             "tags": [],
             "label": "remove",
             "description": [],
-            "signature": [
-              "(path: string) => string"
-            ],
+            "signature": ["(path: string) => string"],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -234,9 +216,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
+import { useEffect, useMemo } from 'react';
 import { type InfraProfilingFlamegraphRequestParams } from '../../../../common/http_api/profiling_api';
 import { useHTTPRequest } from '../../../hooks/use_http_request';
 import { useRequestObservable } from './use_request_observable';

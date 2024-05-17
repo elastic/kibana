@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { includes, without } from 'lodash';
 import { createAction } from 'redux-actions';
-import { without, includes } from 'lodash';
+import { CanvasVariable, CanvasWorkpad } from '../../../types';
 import { createThunk } from '../../lib/create_thunk';
 import { getWorkpadColors } from '../selectors/workpad';
 // @ts-expect-error
 import { fetchAllRenderables } from './elements';
-import { CanvasWorkpad, CanvasVariable } from '../../../types';
 
 export const sizeWorkpad = createAction<{ height: number; width: number }>('sizeWorkpad');
 export const setName = createAction<string>('setName');

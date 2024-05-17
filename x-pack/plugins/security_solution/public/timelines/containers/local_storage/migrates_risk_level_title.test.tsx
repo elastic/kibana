@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import {
-  LOCAL_STORAGE_MIGRATION_KEY,
-  migrateEntityRiskLevelColumnTitle,
-} from './migrates_risk_level_title';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataTableState } from '@kbn/securitysolution-data-table';
+import { LOCAL_STORAGE_TABLE_KEY } from '.';
+import { localStorageMock } from '../../../common/mock/mock_local_storage';
 import {
   hostRiskLevelColumn,
   userRiskLevelColumn,
 } from '../../../detections/configurations/security_solution_detections/columns';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { localStorageMock } from '../../../common/mock/mock_local_storage';
-import { LOCAL_STORAGE_TABLE_KEY } from '.';
+import {
+  LOCAL_STORAGE_MIGRATION_KEY,
+  migrateEntityRiskLevelColumnTitle,
+} from './migrates_risk_level_title';
 
 const getColumnsBeforeMigration = () => [
   { ...userRiskLevelColumn, displayAsText: undefined },

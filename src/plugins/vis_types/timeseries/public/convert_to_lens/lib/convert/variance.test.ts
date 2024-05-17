@@ -7,10 +7,10 @@
  */
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
+import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { FormulaColumn } from './types';
-import { Metric } from '../../../../common/types';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { convertVarianceToFormulaColumn } from './variance';
 
 describe('convertVarianceToFormulaColumn', () => {

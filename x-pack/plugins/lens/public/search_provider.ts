@@ -6,10 +6,10 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
-import { from, of } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { from, of } from 'rxjs';
 import { getFullPath } from '../common/constants';
 
 /**

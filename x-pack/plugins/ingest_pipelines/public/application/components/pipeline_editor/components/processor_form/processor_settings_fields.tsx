@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
 import { FormDataProvider } from '../../../../../shared_imports';
 import { ProcessorInternal } from '../../types';

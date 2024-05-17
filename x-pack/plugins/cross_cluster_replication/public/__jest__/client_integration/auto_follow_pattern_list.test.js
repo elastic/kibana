@@ -7,7 +7,7 @@
 
 import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from './helpers';
+import { delay, getRandomString, nextTick, pageHelpers, setupEnvironment } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternList;
 

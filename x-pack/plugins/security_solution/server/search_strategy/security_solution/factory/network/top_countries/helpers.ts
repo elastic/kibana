@@ -10,9 +10,9 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
 import type {
+  FlowTargetSourceDest,
   NetworkTopCountriesBuckets,
   NetworkTopCountriesEdges,
-  FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy/security_solution/network';
 import { getOppositeField } from '../helpers';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy, isNumber } from 'lodash';
+import { isNumber, sortBy } from 'lodash';
 import { INTERVAL_STRING_RE } from './interval_regex';
 
 export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];

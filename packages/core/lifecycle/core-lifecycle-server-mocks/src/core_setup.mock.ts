@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { statusServiceMock } from '@kbn/core-status-server-mocks';
+import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
 import { loggingServiceMock } from '@kbn/core-logging-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
-import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
-import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
-import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { statusServiceMock } from '@kbn/core-status-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { createCoreStartMock } from './core_start.mock';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {

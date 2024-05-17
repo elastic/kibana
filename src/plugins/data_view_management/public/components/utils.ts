@@ -7,11 +7,11 @@
  */
 
 import {
-  DataViewsContract,
   DataView,
   DataViewField,
   DataViewListItem,
   DataViewType,
+  DataViewsContract,
 } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 

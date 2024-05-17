@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useState, useEffect } from 'react';
 import {
-  htmlIdGenerator,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldNumber,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiFormErrorText,
+  EuiFormRow,
   EuiIcon,
   EuiSpacer,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiToolTip,
   EuiText,
+  EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual, omit } from 'lodash';
+import React, { Fragment, useCallback, useState, useEffect } from 'react';
 
 const FROM_PLACEHOLDER = '\u2212\u221E';
 const TO_PLACEHOLDER = '+\u221E';

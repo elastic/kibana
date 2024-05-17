@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
-import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { StartInitializer } from '../plugin';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory } from '../../types';
+import { StartInitializer } from '../plugin';
 
 const { text: strings } = RendererStrings;
 

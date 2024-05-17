@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as i18n from '../../common/components/event_details/cti_details/translations';
+import React from 'react';
+import type { RiskSeverity } from '../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../common/search_strategy';
+import { getEmptyValue } from '../../common/components/empty_value';
 import {
   EnrichedDataRow,
   ThreatSummaryPanelHeader,
 } from '../../common/components/event_details/cti_details/threat_summary_view';
-import { RiskScoreLevel } from './severity/common';
-import type { RiskSeverity } from '../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../common/search_strategy';
-import { getEmptyValue } from '../../common/components/empty_value';
+import * as i18n from '../../common/components/event_details/cti_details/translations';
+import type { HostRisk, UserRisk } from '../api/types';
 import { RiskScoreDocLink } from './risk_score_onboarding/risk_score_doc_link';
 import { RiskScoreHeaderTitle } from './risk_score_onboarding/risk_score_header_title';
-import type { HostRisk, UserRisk } from '../api/types';
+import { RiskScoreLevel } from './severity/common';
 
 interface HostRiskEntity {
   originalRisk?: RiskSeverity | undefined;

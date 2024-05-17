@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { useMemo } from 'react';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
+import { useMemo } from 'react';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
 import type {
-  TrainedModelConfigResponse,
-  ModelPipelines,
-  TrainedModelStat,
-  NodesOverviewResponse,
   MemoryUsageInfo,
+  ModelPipelines,
+  NodesOverviewResponse,
+  TrainedModelConfigResponse,
+  TrainedModelStat,
 } from '../../../../common/types/trained_models';
+import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
 export interface InferenceQueryParams {
   decompress_definition?: boolean;
   from?: number;

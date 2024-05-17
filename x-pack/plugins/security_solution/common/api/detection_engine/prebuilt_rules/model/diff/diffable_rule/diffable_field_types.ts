@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 // TODO https://github.com/elastic/security-team/issues/7491
 // eslint-disable-next-line no-restricted-imports
 import {
@@ -19,8 +19,8 @@ import {
   RuleQuery,
   TimelineTemplateId,
   TimelineTemplateTitle,
-  TimestampOverride as TimestampOverrideFieldName,
   TimestampOverrideFallbackDisabled,
+  TimestampOverride as TimestampOverrideFieldName,
 } from '../../../../model/rule_schema_legacy';
 import { saved_id } from '../../../../model/schemas';
 
@@ -28,8 +28,8 @@ import { saved_id } from '../../../../model/schemas';
 // Rule data source
 
 export enum DataSourceType {
-  'index_patterns' = 'index_patterns',
-  'data_view' = 'data_view',
+  index_patterns = 'index_patterns',
+  data_view = 'data_view',
 }
 
 export type DataSourceIndexPatterns = t.TypeOf<typeof DataSourceIndexPatterns>;
@@ -55,8 +55,8 @@ export const RuleDataSource = t.union([DataSourceIndexPatterns, DataSourceDataVi
 // Rule data query
 
 export enum KqlQueryType {
-  'inline_query' = 'inline_query',
-  'saved_query' = 'saved_query',
+  inline_query = 'inline_query',
+  saved_query = 'saved_query',
 }
 
 export type InlineKqlQuery = t.TypeOf<typeof InlineKqlQuery>;

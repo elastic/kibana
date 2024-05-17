@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RuleActionParams } from '../../../types';
 import type { RuleTypeParams } from '../../..';
 import type { Rule } from '../../../../common';
+import { RuleActionParams } from '../../../types';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

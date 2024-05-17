@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ListPluginSetup } from './types';
-import { getListClientMock } from './services/lists/list_client.mock';
 import {
   getCreateExceptionListItemOptionsMock,
   getExceptionListClientMock,
 } from './services/exception_lists/exception_list_client.mock';
+import { getListClientMock } from './services/lists/list_client.mock';
+import { ListPluginSetup } from './types';
 
 const createSetupMock = (): jest.Mocked<ListPluginSetup> => {
   const mock: jest.Mocked<ListPluginSetup> = {

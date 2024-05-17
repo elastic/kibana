@@ -7,16 +7,16 @@
 
 import { extname } from 'path';
 
+import type { SavedObjectsBulkCreateObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import { v5 as uuidv5 } from 'uuid';
-import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
-  InstallablePackage,
   InstallSource,
+  InstallablePackage,
   PackageAssetReference,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../errors';
@@ -196,8 +196,8 @@ export const getEsPackage = async (
       so.error
         ? { type: so.type, id: so.id, error: so.error }
         : !so.attributes
-        ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
-        : { type: so.type, id: so.id, error: { error: `Unknown` } }
+          ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
+          : { type: so.type, id: so.id, error: { error: `Unknown` } }
     );
 
     logger.warn(

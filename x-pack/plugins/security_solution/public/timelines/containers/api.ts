@@ -14,46 +14,46 @@ import { throwErrors } from '@kbn/cases-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 import type {
-  TimelineResponse,
-  TimelineErrorResponse,
+  AllTimelinesResponse,
+  GetTimelinesArgs,
   ImportTimelineResultSchema,
   ResponseFavoriteTimeline,
-  AllTimelinesResponse,
-  SingleTimelineResponse,
   SingleTimelineResolveResponse,
-  GetTimelinesArgs,
+  SingleTimelineResponse,
+  TimelineErrorResponse,
+  TimelineResponse,
 } from '../../../common/api/timeline';
 import {
+  ResolvedSingleTimelineResponseType,
+  SingleTimelineResponseType,
+  TimelineErrorResponseType,
   TimelineResponseType,
   TimelineStatus,
-  TimelineErrorResponseType,
-  importTimelineResultSchema,
-  allTimelinesResponse,
-  responseFavoriteTimeline,
-  SingleTimelineResponseType,
   TimelineType,
-  ResolvedSingleTimelineResponseType,
+  allTimelinesResponse,
+  importTimelineResultSchema,
+  responseFavoriteTimeline,
 } from '../../../common/api/timeline';
 import {
-  TIMELINE_URL,
-  TIMELINE_DRAFT_URL,
-  TIMELINE_IMPORT_URL,
-  TIMELINE_EXPORT_URL,
-  TIMELINE_PREPACKAGED_URL,
-  TIMELINE_RESOLVE_URL,
   TIMELINES_URL,
   TIMELINE_COPY_URL,
+  TIMELINE_DRAFT_URL,
+  TIMELINE_EXPORT_URL,
   TIMELINE_FAVORITE_URL,
+  TIMELINE_IMPORT_URL,
+  TIMELINE_PREPACKAGED_URL,
+  TIMELINE_RESOLVE_URL,
+  TIMELINE_URL,
 } from '../../../common/constants';
 
-import { KibanaServices } from '../../common/lib/kibana';
+import type { TimelineInput } from '../../../common/search_strategy';
 import { ToasterError } from '../../common/components/toasters';
+import { KibanaServices } from '../../common/lib/kibana';
 import type {
   ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
 } from '../../detection_engine/rule_management/logic';
-import type { TimelineInput } from '../../../common/search_strategy';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;

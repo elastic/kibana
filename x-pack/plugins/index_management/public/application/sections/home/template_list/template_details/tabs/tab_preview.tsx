@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { TemplateDeserialized } from '../../../../../../../common';
 import { SimulateTemplate } from '../../../../../components/index_templates';
 

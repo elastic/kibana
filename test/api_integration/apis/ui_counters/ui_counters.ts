@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPE, Report, ReportManager, UiCounterMetricType } from '@kbn/analytics';
 import expect from '@kbn/expect';
-import { ReportManager, METRIC_TYPE, UiCounterMetricType, Report } from '@kbn/analytics';
 import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

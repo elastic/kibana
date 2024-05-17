@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
@@ -16,10 +16,10 @@ import {
 } from '../../../../../common/alerting/metrics';
 import {
   AdditionalContext,
-  doFieldsExist,
   KUBERNETES_POD_UID,
-  termsAggField,
   UNGROUPED_FACTORY_KEY,
+  doFieldsExist,
+  termsAggField,
 } from '../../common/utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
@@ -170,10 +170,10 @@ export const getData = async (
             params.aggType === Aggregators.COUNT
               ? docCount
               : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
-              ? aggregatedValueForRate.value
-              : aggregatedValue != null
-              ? getValue(aggregatedValue, params)
-              : null;
+                ? aggregatedValueForRate.value
+                : aggregatedValue != null
+                  ? getValue(aggregatedValue, params)
+                  : null;
 
           previous[key] = {
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
@@ -217,10 +217,10 @@ export const getData = async (
         params.aggType === Aggregators.COUNT
           ? docCount
           : params.aggType === Aggregators.RATE && aggregatedValueForRate != null
-          ? aggregatedValueForRate.value
-          : aggregatedValue != null
-          ? getValue(aggregatedValue, params)
-          : null;
+            ? aggregatedValueForRate.value
+            : aggregatedValue != null
+              ? getValue(aggregatedValue, params)
+              : null;
       // There is an edge case where there is no results and the shouldWarn/shouldTrigger
       // bucket scripts will be missing. This is only an issue for document count because
       // the value will end up being ZERO, for other metrics it will be null. In this case

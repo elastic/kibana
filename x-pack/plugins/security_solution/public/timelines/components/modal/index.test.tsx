@@ -8,9 +8,9 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../common/mock';
-import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineModal } from '.';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TestProviders } from '../../../common/mock';
 
 jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div data-test-subj="StatefulTimelineMock" />,

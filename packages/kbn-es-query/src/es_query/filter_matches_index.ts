@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../filters';
 import { DataViewBase } from '../..';
+import { Filter } from '../filters';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify

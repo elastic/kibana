@@ -9,8 +9,11 @@
 import 'jest-canvas-mock';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { LensAttributesBuilder } from './lens_attributes_builder';
+import type { FormulaValueConfig } from './types';
 import {
   MetricChart,
   MetricLayer,
@@ -18,9 +21,6 @@ import {
   XYDataLayer,
   XYReferenceLinesLayer,
 } from './visualization_types';
-import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { FormulaValueConfig } from './types';
 
 const mockDataView = {
   id: 'mock-id',

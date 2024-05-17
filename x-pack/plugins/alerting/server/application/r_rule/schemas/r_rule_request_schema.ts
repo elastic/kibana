@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { validateStartDate, validateEndDate, createValidateRecurrenceBy } from '../validation';
+import { createValidateRecurrenceBy, validateEndDate, validateStartDate } from '../validation';
 
 export const rRuleRequestSchema = schema.object({
   dtstart: schema.string({ validate: validateStartDate }),

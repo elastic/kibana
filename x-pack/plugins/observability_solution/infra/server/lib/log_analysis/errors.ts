@@ -8,9 +8,9 @@
 /* eslint-disable max-classes-per-file */
 
 import {
-  UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
+  UnknownMLCapabilitiesError,
 } from '@kbn/ml-plugin/server';
 
 export class NoLogAnalysisMlJobError extends Error {

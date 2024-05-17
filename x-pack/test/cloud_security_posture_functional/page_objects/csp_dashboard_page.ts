@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin

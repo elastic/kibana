@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { config, InfraConfig } from './plugin';
+import { InfraConfig, config } from './plugin';
 
 export type { InfraPluginSetup, InfraPluginStart, InfraRequestHandlerContext } from './types';
 export type { InfraConfig };

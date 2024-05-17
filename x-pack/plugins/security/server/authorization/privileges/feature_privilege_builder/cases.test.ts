@@ -8,8 +8,8 @@
 import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 
-import { FeaturePrivilegeCasesBuilder } from './cases';
 import { Actions } from '../../actions';
+import { FeaturePrivilegeCasesBuilder } from './cases';
 
 describe(`cases`, () => {
   describe(`feature_privilege_builder`, () => {

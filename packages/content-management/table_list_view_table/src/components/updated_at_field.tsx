@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import React, { FC } from 'react';
 
 import { DateFormatter } from '../services';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { isRight } from 'fp-ts/lib/Either';
-import { selectedFiltersSelector } from '../../../../state/selectors';
-import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';
-import { setSearchTextAction } from '../../../../state/actions';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   AtomicStatusCheckParamsType,
   GetMonitorAvailabilityParamsType,
 } from '../../../../../../common/runtime_types';
+import { setSearchTextAction } from '../../../../state/actions';
+import { selectedFiltersSelector } from '../../../../state/selectors';
+import { AlertMonitorStatusComponent } from '../monitor_status_alert/alert_monitor_status';
 
-import { useSnapShotCount } from './use_snap_shot';
 import { FILTER_FIELDS } from '../../../../../../common/constants';
+import { useSnapShotCount } from './use_snap_shot';
 
 const { TYPE, TAGS, LOCATION, PORT } = FILTER_FIELDS;
 

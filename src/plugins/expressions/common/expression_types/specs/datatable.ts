@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
-import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';

@@ -13,7 +13,7 @@ import { useActions, useMountedLogic, useValues } from 'kea';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import {
   COLLECTION_EXPLORER_PATH,

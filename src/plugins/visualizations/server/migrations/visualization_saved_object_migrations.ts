@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
 import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { cloneDeep, flow, forOwn, get, has, mapValues, omit } from 'lodash';
 
 import {
   DEFAULT_QUERY_LANGUAGE,
-  isSerializedSearchSource,
   SerializedSearchSourceFields,
+  isSerializedSearchSource,
 } from '@kbn/data-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import { VisualizationSavedObjectAttributes } from '../../common/content_management';
 import {
-  commonAddSupportOfDualIndexSelectionModeInTSVB,
-  commonHideTSVBLastValueIndicator,
-  commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
-  commonMigrateVislibPie,
-  commonAddEmptyValueColorRule,
-  commonMigrateTagCloud,
   commonAddDropLastBucketIntoTSVBModel,
   commonAddDropLastBucketIntoTSVBModel714Above,
+  commonAddEmptyValueColorRule,
+  commonAddSupportOfDualIndexSelectionModeInTSVB,
+  commonHideTSVBLastValueIndicator,
+  commonMigrateTagCloud,
+  commonMigrateVislibPie,
+  commonPreserveOldLegendSizeDefault,
+  commonRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel,
+  commonRemoveExclamationCircleIcon,
   commonRemoveMarkdownLessFromTSVB,
   commonUpdatePieVisApi,
-  commonPreserveOldLegendSizeDefault,
-  commonRemoveExclamationCircleIcon,
 } from './visualization_common_migrations';
-import { VisualizationSavedObjectAttributes } from '../../common/content_management';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

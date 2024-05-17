@@ -7,9 +7,9 @@
 
 import { useCallback } from 'react';
 import { InventoryViewAttributes } from '../../../../../common/inventory_views';
-import { useWaffleOptionsContext, DEFAULT_WAFFLE_OPTIONS_STATE } from './use_waffle_options';
-import { useWaffleTimeContext, DEFAULT_WAFFLE_TIME_STATE } from './use_waffle_time';
-import { useWaffleFiltersContext, DEFAULT_WAFFLE_FILTERS_STATE } from './use_waffle_filters';
+import { DEFAULT_WAFFLE_FILTERS_STATE, useWaffleFiltersContext } from './use_waffle_filters';
+import { DEFAULT_WAFFLE_OPTIONS_STATE, useWaffleOptionsContext } from './use_waffle_options';
+import { DEFAULT_WAFFLE_TIME_STATE, useWaffleTimeContext } from './use_waffle_time';
 
 export const DEFAULT_WAFFLE_VIEW_STATE: WaffleViewState = {
   ...DEFAULT_WAFFLE_OPTIONS_STATE,

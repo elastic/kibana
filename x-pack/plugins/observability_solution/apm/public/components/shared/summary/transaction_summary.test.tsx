@@ -7,8 +7,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { TransactionSummary } from './transaction_summary';
 import * as exampleTransactions from './__fixtures__/transactions';
+import { TransactionSummary } from './transaction_summary';
 
 describe('TransactionSummary', () => {
   describe('render', () => {

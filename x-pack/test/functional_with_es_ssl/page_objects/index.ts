@@ -6,8 +6,8 @@
  */
 
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
-import { TriggersActionsPageProvider } from './triggers_actions_ui_page';
 import { RuleDetailsPageProvider } from './rule_details';
+import { TriggersActionsPageProvider } from './triggers_actions_ui_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,

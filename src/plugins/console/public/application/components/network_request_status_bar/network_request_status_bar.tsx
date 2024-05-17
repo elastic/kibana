@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 
 export interface Props {
   requestInProgress: boolean;

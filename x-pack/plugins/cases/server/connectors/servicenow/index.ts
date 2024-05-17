@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getMapping as getServiceNowITSMMapping } from './itsm_mapping';
 import { format as formatServiceNowITSM } from './itsm_format';
-import { getMapping as getServiceNowSIRMapping } from './sir_mapping';
+import { getMapping as getServiceNowITSMMapping } from './itsm_mapping';
 import { format as formatServiceNowSIR } from './sir_format';
+import { getMapping as getServiceNowSIRMapping } from './sir_mapping';
 
 import type { ServiceNowITSMCasesConnector, ServiceNowSIRCasesConnector } from './types';
 

@@ -8,10 +8,18 @@
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
-  REPORT_METRIC_FIELD,
   RECORDS_PERCENTAGE_FIELD,
+  REPORT_METRIC_FIELD,
   ReportTypes,
 } from '../constants';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+} from '../constants/field_names/synthetics';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -21,14 +29,6 @@ import {
   MONITORS_DURATION_LABEL,
   PINGS_LABEL,
 } from '../constants/labels';
-import {
-  MONITOR_DURATION_US,
-  SYNTHETICS_CLS,
-  SYNTHETICS_DCL,
-  SYNTHETICS_DOCUMENT_ONLOAD,
-  SYNTHETICS_FCP,
-  SYNTHETICS_LCP,
-} from '../constants/field_names/synthetics';
 import { buildExistsFilter } from '../utils';
 
 export function getSyntheticsDistributionConfig({ series, dataView }: ConfigProps): SeriesConfig {

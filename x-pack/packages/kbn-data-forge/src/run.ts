@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
+import { indexSchedule } from './lib/index_schedule';
+import { indices } from './lib/indices';
+import { installAssets } from './lib/install_assets';
+import { installIndexTemplate } from './lib/install_index_template';
 import { setupKibanaSystemUser } from './lib/setup_kibana_system_user';
 import type { Config } from './types';
-import { installAssets } from './lib/install_assets';
-import { indexSchedule } from './lib/index_schedule';
-import { installIndexTemplate } from './lib/install_index_template';
-import { indices } from './lib/indices';
 
 export async function run(config: Config, client: Client, logger: ToolingLog) {
   await installIndexTemplate(config, client, logger);

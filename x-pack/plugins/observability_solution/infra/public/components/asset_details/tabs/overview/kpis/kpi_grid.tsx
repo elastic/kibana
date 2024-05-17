@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { EuiFlexGroup } from '@elastic/eui';
 import {
-  findInventoryFields,
   type InventoryItemType,
+  findInventoryFields,
 } from '@kbn/metrics-data-access-plugin/common';
+import React, { useMemo } from 'react';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
+import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
-import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
 
 interface Props {
   dataView?: DataView;

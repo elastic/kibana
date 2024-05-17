@@ -6,8 +6,8 @@
  */
 
 import { addInternalBasePath } from '..';
-import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
 import { serializeEnrichmentPolicies } from '../../../lib/enrich_policies';
+import { RequestMock, RouterMock, routeDependencies } from '../../../test/helpers';
 import { createTestESEnrichPolicy } from '../../../test/helpers';
 
 import { registerEnrichPoliciesRoute } from './register_enrich_policies_routes';

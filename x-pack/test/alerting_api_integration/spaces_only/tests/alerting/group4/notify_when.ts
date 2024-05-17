@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import { Spaces } from '../../../scenarios';
-import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getEventLog, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createNotifyWhenTests({ getService }: FtrProviderContext) {

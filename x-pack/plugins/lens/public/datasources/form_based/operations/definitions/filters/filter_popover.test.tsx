@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { EuiPopover, EuiLink } from '@elastic/eui';
-import { createMockedIndexPattern } from '../../../mocks';
-import { FilterPopover } from './filter_popover';
-import { LabelInput } from '../shared_components';
+import { EuiLink, EuiPopover } from '@elastic/eui';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { QueryInput } from '@kbn/visualization-ui-components';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { createMockedIndexPattern } from '../../../mocks';
+import { LabelInput } from '../shared_components';
+import { FilterPopover } from './filter_popover';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,

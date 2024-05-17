@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -16,6 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

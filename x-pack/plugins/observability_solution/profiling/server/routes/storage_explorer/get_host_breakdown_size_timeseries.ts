@@ -10,8 +10,8 @@ import { ProfilingESField } from '@kbn/profiling-utils';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../../common/histogram';
 import {
   IndexLifecyclePhaseSelectOption,
-  indexLifeCyclePhaseToDataTier,
   StorageExplorerHostDetailsTimeseries,
+  indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { getEstimatedSizeForDocumentsInIndex } from './get_daily_data_generation.size';

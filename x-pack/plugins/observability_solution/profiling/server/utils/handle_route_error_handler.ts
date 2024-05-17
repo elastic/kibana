@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { KibanaResponseFactory } from '@kbn/core-http-server';
 import { Logger } from '@kbn/logging';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
-import { errors } from '@elastic/elasticsearch';
 
 export function handleRouteHandlerError({
   error,

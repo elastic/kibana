@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Action } from './action';
 import { ACTION_TYPES } from '../../constants';
+import { Action } from './action';
 
 jest.mock('./logging_action', () => ({
   LoggingAction: {

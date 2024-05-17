@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { getSAMLResponse } from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { Cookie, parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

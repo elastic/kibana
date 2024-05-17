@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { VisualizeTab } from './tabs/visualize_tab';
-import { InvestigationTab } from './tabs/investigation_tab';
-import { InsightsTab } from './tabs/insights_tab';
 import type { LeftPanelPaths } from '.';
+import { InsightsTab } from './tabs/insights_tab';
+import { InvestigationTab } from './tabs/investigation_tab';
+import { ResponseTab } from './tabs/response_tab';
+import { VisualizeTab } from './tabs/visualize_tab';
 import {
   INSIGHTS_TAB_TEST_ID,
   INVESTIGATION_TAB_TEST_ID,
   RESPONSE_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
 } from './test_ids';
-import { ResponseTab } from './tabs/response_tab';
 
 export interface LeftPanelTabType {
   id: LeftPanelPaths;

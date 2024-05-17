@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiPageHeaderProps, EuiTab } from '@elastic/eui';
 

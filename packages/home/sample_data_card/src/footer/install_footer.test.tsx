@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { mountWithIntl, renderWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { renderWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
-import { InstallFooter, Props } from './install_footer';
-import { SampleDataCardProvider, Services } from '../services';
 import { getMockServices } from '../mocks';
+import { SampleDataCardProvider, Services } from '../services';
+import { InstallFooter, Props } from './install_footer';
 
 describe('install footer', () => {
   beforeEach(() => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import React from 'react';
 
 export type TooltipWrapperProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
   tooltipContent: string;

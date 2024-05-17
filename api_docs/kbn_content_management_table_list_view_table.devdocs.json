@@ -9,9 +9,7 @@
         "type": "Function",
         "tags": [],
         "label": "TableListViewKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps to known dependency types."
-        ],
+        "description": ["\nKibana-specific Provider that maps to known dependency types."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
@@ -60,9 +58,7 @@
         "type": "Function",
         "tags": [],
         "label": "TableListViewProvider",
-        "description": [
-          "\nAbstract external service Provider."
-        ],
+        "description": ["\nAbstract external service Provider."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "Services",
@@ -79,11 +75,7 @@
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
-              "Services",
-              ">>"
-            ],
+            "signature": ["React.PropsWithChildren<React.PropsWithChildren<", "Services", ">>"],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -156,9 +148,7 @@
         "type": "Interface",
         "tags": [],
         "label": "TableListViewKibanaDependencies",
-        "description": [
-          "\nKibana-specific service types."
-        ],
+        "description": ["\nKibana-specific service types."],
         "path": "packages/content-management/table_list_view_table/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -169,9 +159,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "core",
-            "description": [
-              "CoreStart contract"
-            ],
+            "description": ["CoreStart contract"],
             "signature": [
               "TableListViewStartServices & { application: { capabilities: { [key: string]: Readonly<Record<string, boolean | Record<string, boolean>>>; }; getUrlForApp: (app: string, options: { path: string; }) => string; currentAppId$: ",
               "Observable",
@@ -285,12 +273,8 @@
             "type": "Object",
             "tags": [],
             "label": "FormattedRelative",
-            "description": [
-              "The <FormattedRelative /> component from the @kbn/i18n-react package"
-            ],
-            "signature": [
-              "typeof ReactIntl.FormattedRelative"
-            ],
+            "description": ["The <FormattedRelative /> component from the @kbn/i18n-react package"],
+            "signature": ["typeof ReactIntl.FormattedRelative"],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -359,9 +343,7 @@
             "tags": [],
             "label": "initialFilter",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -384,9 +366,7 @@
             "tags": [],
             "label": "emptyPrompt",
             "description": [],
-            "signature": [
-              "JSX.Element | undefined"
-            ],
+            "signature": ["JSX.Element | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -397,13 +377,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "customTableColumn",
-            "description": [
-              "Add an additional custom column"
-            ],
-            "signature": [
-              "EuiBasicTableColumn",
-              "<T> | undefined"
-            ],
+            "description": ["Add an additional custom column"],
+            "signature": ["EuiBasicTableColumn", "<T> | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -415,9 +390,7 @@
             "tags": [],
             "label": "urlStateEnabled",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -429,9 +402,7 @@
             "tags": [],
             "label": "createdByEnabled",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -445,9 +416,7 @@
             "description": [
               "\nId of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.\nIf the table is not empty, this component renders its own h1 element using the same id."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -461,9 +430,7 @@
             "description": [
               "An optional id for the listing. Used to generate unique data-test-subj. Default: \"userContent\""
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -499,9 +466,7 @@
                 "tags": [],
                 "label": "obj",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -535,9 +500,7 @@
                 "tags": [],
                 "label": "searchQuery",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -561,10 +524,7 @@
                     "tags": [],
                     "label": "references",
                     "description": [],
-                    "signature": [
-                      "SavedObjectsFindOptionsReference",
-                      "[] | undefined"
-                    ],
+                    "signature": ["SavedObjectsFindOptionsReference", "[] | undefined"],
                     "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                     "deprecated": false,
                     "trackAdoption": false
@@ -576,10 +536,7 @@
                     "tags": [],
                     "label": "referencesToExclude",
                     "description": [],
-                    "signature": [
-                      "SavedObjectsFindOptionsReference",
-                      "[] | undefined"
-                    ],
+                    "signature": ["SavedObjectsFindOptionsReference", "[] | undefined"],
                     "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                     "deprecated": false,
                     "trackAdoption": false
@@ -598,9 +555,7 @@
             "description": [
               "Handler to set the item title \"href\" value. If it returns undefined there won't be a link for this item."
             ],
-            "signature": [
-              "((entity: T) => string | undefined) | undefined"
-            ],
+            "signature": ["((entity: T) => string | undefined) | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -612,9 +567,7 @@
                 "tags": [],
                 "label": "entity",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -629,12 +582,8 @@
             "type": "Function",
             "tags": [],
             "label": "getOnClickTitle",
-            "description": [
-              "Handler to execute when clicking the item title"
-            ],
-            "signature": [
-              "((item: T) => (() => void) | undefined) | undefined"
-            ],
+            "description": ["Handler to execute when clicking the item title"],
+            "signature": ["((item: T) => (() => void) | undefined) | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -646,9 +595,7 @@
                 "tags": [],
                 "label": "item",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -664,9 +611,7 @@
             "tags": [],
             "label": "createItem",
             "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -680,9 +625,7 @@
             "tags": [],
             "label": "deleteItems",
             "description": [],
-            "signature": [
-              "((items: T[]) => Promise<void>) | undefined"
-            ],
+            "signature": ["((items: T[]) => Promise<void>) | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -694,9 +637,7 @@
                 "tags": [],
                 "label": "items",
                 "description": [],
-                "signature": [
-                  "T[]"
-                ],
+                "signature": ["T[]"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -714,9 +655,7 @@
             "description": [
               "\nEdit action onClick handler. Edit action not provided when property is not provided"
             ],
-            "signature": [
-              "((item: T) => void) | undefined"
-            ],
+            "signature": ["((item: T) => void) | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -728,9 +667,7 @@
                 "tags": [],
                 "label": "item",
                 "description": [],
-                "signature": [
-                  "T"
-                ],
+                "signature": ["T"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -745,12 +682,8 @@
             "type": "string",
             "tags": [],
             "label": "titleColumnName",
-            "description": [
-              "\nName for the column containing the \"title\" value."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nName for the column containing the \"title\" value."],
+            "signature": ["string | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -759,17 +692,12 @@
             "parentPluginId": "@kbn/content-management-table-list-view-table",
             "id": "def-public.TableListViewTableProps.withoutPageTemplateWrapper",
             "type": "CompoundType",
-            "tags": [
-              "note",
-              "deprecated"
-            ],
+            "tags": ["note", "deprecated"],
             "label": "withoutPageTemplateWrapper",
             "description": [
               "\nThis assumes the content is already wrapped in an outer PageTemplate component."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": true,
             "trackAdoption": false,
@@ -795,9 +723,7 @@
             "tags": [],
             "label": "contentEditor",
             "description": [],
-            "signature": [
-              "ContentEditorConfig | undefined"
-            ],
+            "signature": ["ContentEditorConfig | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -822,9 +748,7 @@
             "description": [
               "Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -836,9 +760,7 @@
             "tags": [],
             "label": "onFetchSuccess",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -852,9 +774,7 @@
             "tags": [],
             "label": "setPageDataTestSubject",
             "description": [],
-            "signature": [
-              "(subject: string) => void"
-            ],
+            "signature": ["(subject: string) => void"],
             "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -866,9 +786,7 @@
                 "tags": [],
                 "label": "subject",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
                 "deprecated": false,
                 "trackAdoption": false,

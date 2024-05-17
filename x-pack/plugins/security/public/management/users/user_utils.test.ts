@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from './user_utils';
 import type { User } from '../../../common';
+import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from './user_utils';
 
 describe('#isUserReserved', () => {
   it('returns false for a user with no metadata', () => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useMemo } from 'react';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface MonitorErrorsCountProps {
   from: string;

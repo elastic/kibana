@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-import { TestProviders } from '../../../common/mock';
-import { Sidebar } from './sidebar';
-import { useKibana } from '../../../common/lib/kibana';
 import type { CaseUiClientMock } from '@kbn/cases-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
+import React from 'react';
 import { noCasesPermissions, readCasesPermissions } from '../../../cases_test_utils';
+import { useKibana } from '../../../common/lib/kibana';
+import { TestProviders } from '../../../common/mock';
+import { Sidebar } from './sidebar';
 
 jest.mock('../../../common/lib/kibana');
 

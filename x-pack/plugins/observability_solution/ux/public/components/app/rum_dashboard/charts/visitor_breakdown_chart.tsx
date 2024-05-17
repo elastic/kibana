@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import { EuiText } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import { EuiText } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import React, { useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
-import { getEsFilter } from '../../../../services/data/get_es_filter';
-import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import type { UxUIFilters } from '../../../../../typings/ui_filters';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { getEsFilter } from '../../../../services/data/get_es_filter';
 
 const BUCKET_SIZE = 9;
 

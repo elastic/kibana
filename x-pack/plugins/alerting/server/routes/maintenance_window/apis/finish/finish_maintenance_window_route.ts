@@ -6,19 +6,19 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
+import {
+  FinishMaintenanceWindowRequestParamsV1,
+  FinishMaintenanceWindowResponseV1,
+  finishParamsSchemaV1,
+} from '../../../../../common/routes/maintenance_window/apis/finish';
+import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
 import { ILicenseState } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import {
-  finishParamsSchemaV1,
-  FinishMaintenanceWindowRequestParamsV1,
-  FinishMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/finish';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
 
 export const finishMaintenanceWindowRoute = (

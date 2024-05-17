@@ -7,9 +7,9 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
+  allConnectorsResponseSchema,
   connectorResponseSchemaV1,
   connectorTypesResponseSchemaV1,
-  allConnectorsResponseSchema,
 } from '..';
 
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;

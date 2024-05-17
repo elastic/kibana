@@ -50,9 +50,7 @@
             "tags": [],
             "label": "shouldReplayLastEvent",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -69,9 +67,7 @@
         "tags": [],
         "label": "getDevToolsOptions",
         "description": [],
-        "signature": [
-          "() => boolean | object"
-        ],
+        "signature": ["() => boolean | object"],
         "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -86,9 +82,7 @@
         "tags": [],
         "label": "isDevMode",
         "description": [],
-        "signature": [
-          "() => boolean"
-        ],
+        "signature": ["() => boolean"],
         "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -131,11 +125,7 @@
             "tags": [],
             "label": "target",
             "description": [],
-            "signature": [
-              "string | ",
-              "ActorRef",
-              "<TSentEvent, any>"
-            ],
+            "signature": ["string | ", "ActorRef", "<TSentEvent, any>"],
             "path": "packages/kbn-xstate-utils/src/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -175,11 +165,7 @@
             "tags": [],
             "label": "createService",
             "description": [],
-            "signature": [
-              "() => ",
-              "Subscribable",
-              "<TSentEvent>"
-            ],
+            "signature": ["() => ", "Subscribable", "<TSentEvent>"],
             "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -213,10 +199,7 @@
                 "tags": [],
                 "label": "eventExpr",
                 "description": [],
-                "signature": [
-                  "Expr",
-                  "<TContext, TEvent, TSentEvent | undefined>"
-                ],
+                "signature": ["Expr", "<TContext, TEvent, TSentEvent | undefined>"],
                 "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -289,9 +272,7 @@
         "tags": [],
         "label": "OmitDeprecatedState",
         "description": [],
-        "signature": [
-          "{ [P in Exclude<keyof T, \"state\">]: T[P]; }"
-        ],
+        "signature": ["{ [P in Exclude<keyof T, \"state\">]: T[P]; }"],
         "path": "packages/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

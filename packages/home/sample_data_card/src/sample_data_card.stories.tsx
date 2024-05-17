@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { ComponentMeta } from '@storybook/react';
+import React from 'react';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { Params, getStoryArgTypes, getStoryServices, mockDataSet } from './mocks';
-import { SampleDataCardProvider } from './services';
 import { SampleDataCard } from './sample_data_card';
+import { SampleDataCardProvider } from './services';
 
 import mdx from '../README.mdx';
 

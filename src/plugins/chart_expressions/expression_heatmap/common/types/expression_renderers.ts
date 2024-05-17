@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteRegistry } from '@kbn/coloring';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type {
+  MultiValueClickContext,
   RangeSelectContext,
   ValueClickContext,
-  MultiValueClickContext,
 } from '@kbn/embeddable-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {

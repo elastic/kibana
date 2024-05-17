@@ -6,8 +6,8 @@
  */
 
 import { createAssignableObject } from '../../../common/test_utils';
-import { sortByStatusAndTitle, getAssignmentAction, getOverriddenStatus, getKey } from './utils';
 import { AssignmentStatusMap } from './types';
+import { getAssignmentAction, getKey, getOverriddenStatus, sortByStatusAndTitle } from './utils';
 
 describe('getOverriddenStatus', () => {
   it('returns the initial status if no override is defined', () => {

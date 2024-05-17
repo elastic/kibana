@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useDispatch, useSelector } from 'react-redux';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useSessionStorage } from 'react-use';
-import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { selectDynamicSettings } from '../../../state/settings';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSessionStorage } from 'react-use';
+import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useSyntheticsSettingsContext, useSyntheticsStartPlugins } from '../../../contexts';
+import { selectMonitorListState } from '../../../state';
 import {
   selectSyntheticsAlerts,
   selectSyntheticsAlertsLoaded,
 } from '../../../state/alert_rules/selectors';
-import { selectMonitorListState } from '../../../state';
+import { selectDynamicSettings } from '../../../state/settings';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
-import { useSyntheticsSettingsContext, useSyntheticsStartPlugins } from '../../../contexts';
-import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boolean }) => {
   const dispatch = useDispatch();

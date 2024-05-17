@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { resolve, join } from 'path';
+import { join, resolve } from 'path';
 import { getConfigPath } from '@kbn/utils';
 import { getConfigurationFilePaths } from './get_config_file_paths';
 

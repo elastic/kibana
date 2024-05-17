@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Config } from './config';
 import { Build } from './build';
+import { Config } from './config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 

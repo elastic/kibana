@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import moment from 'moment';
+import * as rxOp from 'rxjs';
 /* eslint-disable dot-notation */
 import { UsageCountersService } from './usage_counters_service';
-import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
-import * as rxOp from 'rxjs';
-import moment from 'moment';
 
 const tick = () => {
   jest.useRealTimers();

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 
 /**
  * converts AggregateQuery type to Query

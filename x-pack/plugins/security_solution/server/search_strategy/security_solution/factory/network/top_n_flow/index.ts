@@ -11,17 +11,17 @@ import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type {
-  NetworkTopNFlowStrategyResponse,
   NetworkQueries,
-  NetworkTopNFlowEdges,
   NetworkTopNFlowCountStrategyResponse,
+  NetworkTopNFlowEdges,
+  NetworkTopNFlowStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
 
 import { getTopNFlowEdges } from './helpers';
-import { buildTopNFlowQuery, buildTopNFlowCountQuery } from './query.top_n_flow_network.dsl';
+import { buildTopNFlowCountQuery, buildTopNFlowQuery } from './query.top_n_flow_network.dsl';
 
 export const networkTopNFlow: SecuritySolutionFactory<NetworkQueries.topNFlow> = {
   buildDsl: (options) => {

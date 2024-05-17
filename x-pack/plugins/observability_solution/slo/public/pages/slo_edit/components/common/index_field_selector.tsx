@@ -6,10 +6,10 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useEffect, useState, ReactNode } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { createOptionsFromFields, Option } from '../../helpers/create_options';
+import { Option, createOptionsFromFields } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 
 interface Props {

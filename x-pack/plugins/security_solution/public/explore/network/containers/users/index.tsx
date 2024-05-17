@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { NetworkUsersRequestOptionsInput } from '../../../../../common/api/search_strategy';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { ESTermQuery } from '../../../../../common/typed_json';
 import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
-import type { inputsModel } from '../../../../common/store';
-import { useKibana } from '../../../../common/lib/kibana';
-import { createFilter } from '../../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
-import { networkSelectors } from '../../store';
+import type { PageInfoPaginated } from '../../../../../common/search_strategy';
 import type {
   FlowTargetSourceDest,
   NetworkUsersStrategyResponse,
 } from '../../../../../common/search_strategy/security_solution/network';
 import { NetworkQueries } from '../../../../../common/search_strategy/security_solution/network';
-import * as i18n from './translations';
-import type { InspectResponse } from '../../../../types';
-import type { PageInfoPaginated } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
+import { createFilter } from '../../../../common/containers/helpers';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { inputsModel } from '../../../../common/store';
+import type { InspectResponse } from '../../../../types';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
+import { networkSelectors } from '../../store';
+import * as i18n from './translations';
 
 export const ID = 'networkUsersQuery';
 

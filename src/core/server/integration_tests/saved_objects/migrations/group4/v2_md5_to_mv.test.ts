@@ -8,10 +8,10 @@
 
 import Path from 'path';
 import type { Metadata } from '@elastic/elasticsearch/lib/api/types';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   clearLog,
   deleteSavedObjectIndices,
@@ -19,7 +19,7 @@ import {
   readLog,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { delay, createType } from '../test_utils';
+import { createType, delay } from '../test_utils';
 import '../jest_matchers';
 
 const logFilePath = Path.join(__dirname, 'v2_md5_to_mv.test.log');

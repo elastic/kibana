@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import _ from 'lodash';
 import { EuiResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { calculateCoordinates } from '../lib/calculate_coordinates';
-import { COLORS } from '../constants/chart';
+import _ from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { isEmptyValue } from '../../../../common/last_value_utils';
 import { RenderCounter } from '../../components/render_counter';
+import { COLORS } from '../constants/chart';
+import { calculateCoordinates } from '../lib/calculate_coordinates';
 
 export class GaugeVis extends Component {
   constructor(props) {

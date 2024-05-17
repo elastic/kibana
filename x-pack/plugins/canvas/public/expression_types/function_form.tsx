@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
 import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
-import { isPlainObject, uniq, last, compact } from 'lodash';
 import { Ast, fromExpression } from '@kbn/interpreter';
-import { ArgAddPopover, ArgOptions } from '../components/arg_add_popover';
-// @ts-expect-error unconverted components
-import { SidebarSection } from '../components/sidebar/sidebar_section';
-// @ts-expect-error unconverted components
-import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
-import { BaseForm, BaseFormProps } from './base_form';
-import { Arg, ArgUiConfig, ResolvedArgProps } from './arg';
-import { ArgDisplayType, Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
+import { compact, isPlainObject, last, uniq } from 'lodash';
+import React, { ReactElement } from 'react';
 import { Model, Transform, View } from '.';
 import {
   AssetType,
@@ -25,7 +17,15 @@ import {
   ExpressionContext,
   ExpressionValue,
 } from '../../types';
+import { ArgAddPopover, ArgOptions } from '../components/arg_add_popover';
+// @ts-expect-error unconverted components
+import { SidebarSection } from '../components/sidebar/sidebar_section';
+// @ts-expect-error unconverted components
+import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
 import { buildDefaultArgExpr, getArgTypeDef } from '../lib/args';
+import { Arg, ArgUiConfig, ResolvedArgProps } from './arg';
+import { BaseForm, BaseFormProps } from './base_form';
+import { ArgDisplayType, ArgType, ArgTypeDef, ArgValue, Args, ExpressionType } from './types';
 
 export interface ArgWithValues {
   arg: Arg | undefined;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { Either, either } from 'fp-ts/lib/Either';
+import * as t from 'io-ts';
 
 export type StringToPositiveNumberC = t.Type<number, string, unknown>;
 

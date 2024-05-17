@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix } from '../../../../common/lib/space_test_utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix } from '../../../../common/lib/space_test_utils';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function listActionTypesTests({ getService }: FtrProviderContext) {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import {
-  RowItemOverflowComponent,
-  OverflowFieldComponent,
-  getRowItemsWithActions,
-} from './helpers';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { getEmptyValue } from '../empty_value';
-import { render } from '@testing-library/react';
+import {
+  OverflowFieldComponent,
+  RowItemOverflowComponent,
+  getRowItemsWithActions,
+} from './helpers';
 
 jest.mock('../../lib/kibana');
 

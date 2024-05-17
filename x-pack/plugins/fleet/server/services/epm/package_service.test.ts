@@ -27,14 +27,14 @@ import type { InstallablePackage } from '../../types';
 
 import { getAuthzFromRequest } from '../security';
 
+import * as epmArchiveParse from './archive/parse';
+import { getEsPackage } from './archive/storage';
+import * as epmTransformsInstall from './elasticsearch/transform/install';
 import type { PackageClient, PackageService } from './package_service';
 import { PackageServiceImpl } from './package_service';
 import * as epmPackagesGet from './packages/get';
 import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
-import * as epmTransformsInstall from './elasticsearch/transform/install';
-import * as epmArchiveParse from './archive/parse';
-import { getEsPackage } from './archive/storage';
 
 jest.mock('./archive/storage');
 

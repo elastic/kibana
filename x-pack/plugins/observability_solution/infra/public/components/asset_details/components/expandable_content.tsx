@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import type { Field } from '../tabs/metadata/utils';
 

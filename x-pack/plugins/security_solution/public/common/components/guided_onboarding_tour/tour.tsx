@@ -8,14 +8,14 @@
 import type { ReactChild } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
-import { useLocation } from 'react-router-dom';
 import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import type { AlertsCasesTourSteps } from './tour_config';
-import { securityTourConfig, SecurityStepId } from './tour_config';
+import { SecurityStepId, securityTourConfig } from './tour_config';
 
 export interface TourContextValue {
   activeStep: number;

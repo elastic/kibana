@@ -6,44 +6,44 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FC } from 'react';
-import React, { Fragment, useState, useContext, useEffect } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
 import {
-  type Field,
   type Aggregation,
   EVENT_RATE_FIELD_ID,
+  type Field,
   mlCategory,
 } from '@kbn/ml-anomaly-utils';
+import type { FC } from 'react';
+import React, { Fragment, useState, useContext, useEffect } from 'react';
+import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
 import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { detectorToString } from '../../../../../../../util/string_utils';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
 import {
   createFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
-import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
-import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { ModalWrapper } from './modal_wrapper';
-import { detectorToString } from '../../../../../../../util/string_utils';
-import { createBasicDetector } from '../../../../../common/job_creator/util/default_configs';
 
 import {
   AggDescription,
-  FieldDescription,
   ByFieldDescription,
+  DescriptionDescription,
+  ExcludeFrequentDescription,
+  FieldDescription,
   OverFieldDescription,
   PartitionFieldDescription,
-  ExcludeFrequentDescription,
-  DescriptionDescription,
 } from './descriptions';
 
 interface Props {

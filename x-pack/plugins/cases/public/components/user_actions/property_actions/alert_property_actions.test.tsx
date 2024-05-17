@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { waitFor, screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
+  createAppMockRenderer,
   noCasesPermissions,
   onlyDeleteCasesPermission,
-  createAppMockRenderer,
 } from '../../../common/mock';
 import { AlertPropertyActions } from './alert_property_actions';
 

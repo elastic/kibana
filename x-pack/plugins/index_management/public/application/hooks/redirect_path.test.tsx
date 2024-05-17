@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { useRedirectPath } from './redirect_path';
 import { useKibana } from '..';
+import { useRedirectPath } from './redirect_path';
 
 const mockedUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 jest.mock('..');

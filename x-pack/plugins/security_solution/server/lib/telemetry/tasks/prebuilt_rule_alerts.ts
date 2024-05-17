@@ -6,20 +6,20 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ITelemetryEventsSender } from '../sender';
-import type { ITelemetryReceiver } from '../receiver';
-import type { ITaskMetricsService } from '../task_metrics.types';
-import type { TelemetryEvent } from '../types';
-import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
+import { copyAllowlistedFields, filterList } from '../filterlists';
 import {
   batchTelemetryRecords,
-  processK8sUsernames,
-  newTelemetryLogger,
   getPreviousDailyTaskTimestamp,
+  newTelemetryLogger,
+  processK8sUsernames,
   safeValue,
 } from '../helpers';
-import { copyAllowlistedFields, filterList } from '../filterlists';
+import type { ITelemetryReceiver } from '../receiver';
+import type { ITelemetryEventsSender } from '../sender';
+import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import type { TelemetryEvent } from '../types';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';

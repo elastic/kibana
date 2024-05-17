@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { Logger } from '@kbn/core/server';
 
 const MIN_CLOUD_MEM_GB: number = 2;
 const MIN_CLOUD_MEM_MB: number = MIN_CLOUD_MEM_GB * 1024;

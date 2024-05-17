@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
+import { ToolingLog } from '@kbn/tooling-log';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

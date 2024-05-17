@@ -1,3 +1,4 @@
+import { Frequency } from '@kbn/rrule';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import { invert, mapValues } from 'lodash';
-import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
-import * as i18n from './translations';
 import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
+import * as i18n from './translations';
 
 export type MaintenanceWindowFrequency = Extract<
   Frequency,

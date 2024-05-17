@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo } from 'react';
+import { EventKind } from '../../shared/constants/event_kinds';
+import { getField } from '../../shared/utils';
+import { useRightPanelContext } from '../context';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
-import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
-import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
-import { useRightPanelContext } from '../context';
+import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 
 const KEY = 'investigation';
 

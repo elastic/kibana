@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import type { EuiDataGridSchemaDetector, EuiDataGridSorting } from '@elastic/eui';
+import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from '@elastic/eui';
 import React, { useMemo, useCallback, memo } from 'react';
-import type { EuiDataGridSorting, EuiDataGridSchemaDetector } from '@elastic/eui';
-import { EuiButtonIcon, EuiToolTip, useDataGridColumnSorting, EuiCheckbox } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import type { HeaderActionProps, SortDirection } from '../../../../common/types';
-import { TimelineTabs, TimelineId } from '../../../../common/types';
-import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
-import { isActiveTimeline } from '../../../helpers';
-import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
-import { useKibana } from '../../lib/kibana';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
-import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
+import type { HeaderActionProps, SortDirection } from '../../../../common/types';
+import { TimelineId, TimelineTabs } from '../../../../common/types';
+import { isActiveTimeline } from '../../../helpers';
 import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
-import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
+import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
+import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
+import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useKibana } from '../../lib/kibana';
+import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
 import * as i18n from './translations';
 
 const SortingColumnsContainer = styled.div`

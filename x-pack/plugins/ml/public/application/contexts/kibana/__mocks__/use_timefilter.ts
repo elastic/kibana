@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('./kibana_context');
 

@@ -6,7 +6,7 @@
  */
 
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { generateMockFileIndicator, Indicator } from '../../../../common/types/indicator';
+import { Indicator, generateMockFileIndicator } from '../../../../common/types/indicator';
 import {
   AttachmentMetadata,
   generateAttachmentsMetadata,

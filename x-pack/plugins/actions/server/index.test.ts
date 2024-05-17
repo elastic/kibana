@@ -1,3 +1,5 @@
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { config } from '.';
-import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.actions';
 const applyStackAlertDeprecations = (settings: Record<string, unknown> = {}) => {

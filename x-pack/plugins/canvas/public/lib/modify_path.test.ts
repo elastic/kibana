@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { prepend, append } from './modify_path';
+import { append, prepend } from './modify_path';
 
 describe('modify paths', () => {
   describe('prepend', () => {

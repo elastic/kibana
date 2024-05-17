@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useGetDataViewsTitleIdMap, useTransformCapabilities } from '../../../../hooks';
 
-import { editActionNameText, EditActionName } from './edit_action_name';
-import { useToastNotifications } from '../../../../app_dependencies';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { useToastNotifications } from '../../../../app_dependencies';
+import { EditActionName, editActionNameText } from './edit_action_name';
 
 export type EditAction = ReturnType<typeof useEditAction>;
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {

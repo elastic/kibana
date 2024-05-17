@@ -7,8 +7,8 @@
  */
 
 import { flow } from 'lodash';
-import { filterAnnotations } from './filter';
 import { getAnnotationBuckets } from './buckets';
+import { filterAnnotations } from './filter';
 
 export const handleAnnotationResponse = (timestamp?: number) =>
   flow(getAnnotationBuckets, filterAnnotations(timestamp));

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ScopedHistory } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../../../types';

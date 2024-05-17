@@ -9,8 +9,8 @@
 import { existsSync } from 'fs';
 import { join } from 'path';
 
-import { Logger } from '../logger';
 import { getConfigDirectory, getDataPath } from '@kbn/utils';
+import { Logger } from '../logger';
 
 export function getKeystore() {
   const configKeystore = join(getConfigDirectory(), 'kibana.keystore');

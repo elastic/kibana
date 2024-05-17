@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import alter from '../lib/alter';
-import { toMS } from '../../common/lib/to_milliseconds';
 import _ from 'lodash';
+import { toMS } from '../../common/lib/to_milliseconds';
+import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
 
 export default new Chainable('scale_interval', {

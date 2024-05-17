@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React, {
   createContext,
   useState,
@@ -19,16 +21,14 @@ import React, {
 } from 'react';
 import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
 import { useStateSelector } from '../../state_utils';
 
 import { parseEsError } from '../../lib/runtime_field_validation';
 import { useFieldEditorContext } from '../field_editor_context';
-import type { PainlessExecuteContext, Context, Params, FieldPreview, PreviewState } from './types';
 import type { PreviewController } from './preview_controller';
+import type { Context, FieldPreview, PainlessExecuteContext, Params, PreviewState } from './types';
 
 const fieldPreviewContext = createContext<Context | undefined>(undefined);
 
@@ -293,9 +293,9 @@ export const FieldPreviewProvider: FC<
           controller.getInternalFieldType() === 'concrete'
             ? get(document?.fields, name ?? '')
             : // if its a runtime field, look at source or the returned value
-            script === null && Boolean(document)
-            ? get(document?._source, name ?? '')
-            : field?.value;
+              script === null && Boolean(document)
+              ? get(document?._source, name ?? '')
+              : field?.value;
 
         const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
 

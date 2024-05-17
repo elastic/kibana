@@ -7,8 +7,8 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { GroupSelector } from '..';
 import React from 'react';
+import { GroupSelector } from '..';
 
 const onGroupChange = jest.fn();
 const testProps = {

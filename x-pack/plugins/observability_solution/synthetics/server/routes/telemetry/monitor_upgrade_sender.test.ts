@@ -1,3 +1,6 @@
+import type { Logger } from '@kbn/core/server';
+import { SavedObject } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +8,24 @@
  * 2.0.
  */
 import { sha256 } from 'js-sha256';
-import type { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObject } from '@kbn/core/server';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import {
-  SyntheticsMonitor,
   ConfigKey,
   MonitorTypeEnum,
   ScheduleUnit,
   SourceType,
+  SyntheticsMonitor,
 } from '../../../common/runtime_types/monitor_management';
-import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
-import type { TelemetryEventsSender } from '../../telemetry/sender';
 import { createMockTelemetryEventsSender } from '../../telemetry/__mocks__';
+import type { TelemetryEventsSender } from '../../telemetry/sender';
 
-import { MONITOR_UPDATE_CHANNEL, MONITOR_CURRENT_CHANNEL } from '../../telemetry/constants';
+import { MONITOR_CURRENT_CHANNEL, MONITOR_UPDATE_CHANNEL } from '../../telemetry/constants';
 
 import {
+  formatTelemetryDeleteEvent,
   formatTelemetryEvent,
   formatTelemetryUpdateEvent,
-  formatTelemetryDeleteEvent,
   sendTelemetryEvents,
 } from './monitor_upgrade_sender';
 

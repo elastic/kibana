@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiLoadingElastic,
   EuiLoadingSpinner,
@@ -13,14 +12,15 @@ import {
   EuiPageBody,
   EuiPageSection,
 } from '@elastic/eui';
+import React from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { containerCss, wrapperCss } from './layouts/default';
-import { OsqueryAppRoutes } from '../routes';
 import { useOsqueryIntegrationStatus } from '../common/hooks';
+import { OsqueryAppRoutes } from '../routes';
 import { OsqueryAppEmptyState } from './empty_state';
+import { containerCss, wrapperCss } from './layouts/default';
 import { MainNavigation } from './main_navigation';
 
 const OsqueryAppComponent = () => {

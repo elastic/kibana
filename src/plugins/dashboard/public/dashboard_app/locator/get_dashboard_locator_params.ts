@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isFilterPinned, type Query } from '@kbn/es-query';
+import { type Query, isFilterPinned } from '@kbn/es-query';
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 import type { DashboardLocatorParams } from '../../dashboard_container';

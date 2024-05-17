@@ -7,8 +7,8 @@
  */
 
 import {
-  securityResponseHeadersSchema as schema,
   parseRawSecurityResponseHeadersConfig as parse,
+  securityResponseHeadersSchema as schema,
 } from './security_response_headers_config';
 
 describe('parseRawSecurityResponseHeadersConfig', () => {

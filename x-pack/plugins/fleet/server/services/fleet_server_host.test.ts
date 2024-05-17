@@ -12,9 +12,9 @@ import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import {
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   DEFAULT_FLEET_SERVER_HOST_ID,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 import { appContextService } from './app_context';

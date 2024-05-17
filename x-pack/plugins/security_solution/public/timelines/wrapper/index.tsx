@@ -6,16 +6,16 @@
  */
 
 import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
-import React, { useMemo, useCallback, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
+import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { TimelineBottomBar } from '../components/bottom_bar';
-import { getTimelineShowStatusByIdSelector } from '../store/selectors';
-import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
+import { TimelineModal } from '../components/modal';
 import { timelineActions } from '../store';
+import { getTimelineShowStatusByIdSelector } from '../store/selectors';
 
 interface TimelineWrapperProps {
   /**

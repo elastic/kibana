@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup } from '@kbn/core/server';
-import { getSAMLResponse, getSAMLRequestId } from './saml_tools';
+import { getSAMLRequestId, getSAMLResponse } from './saml_tools';
 
 export function initRoutes(core: CoreSetup) {
   const serverInfo = core.http.getServerInfo();

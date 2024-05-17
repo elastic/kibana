@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
+import { DistributiveOmit } from '@elastic/eui';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import {
-  Logger,
-  SavedObjectsClientContract,
-  PluginInitializerContext,
   ISavedObjectsRepository,
+  Logger,
+  PluginInitializerContext,
+  SavedObjectsClientContract,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { KueryNode } from '@kbn/es-query';
+import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import { DistributiveOmit } from '@elastic/eui';
-import { RegistryRuleType } from '../rule_type_registry';
-import {
-  RuleTypeRegistry,
-  IntervalSchedule,
-  SanitizedRule,
-  RuleSnoozeSchedule,
-  RawRuleAlertsFilter,
-  RuleSystemAction,
-  RuleAction,
-} from '../types';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { AlertsService } from '../alerts_service';
 import { AlertingAuthorization } from '../authorization';
+import { BackfillClient } from '../backfill_client/backfill_client';
 import { AlertingRulesConfig } from '../config';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { GetAlertIndicesAlias } from '../lib';
-import { AlertsService } from '../alerts_service';
-import { BackfillClient } from '../backfill_client/backfill_client';
+import { RegistryRuleType } from '../rule_type_registry';
+import {
+  IntervalSchedule,
+  RawRuleAlertsFilter,
+  RuleAction,
+  RuleSnoozeSchedule,
+  RuleSystemAction,
+  RuleTypeRegistry,
+  SanitizedRule,
+} from '../types';
 
 export type {
   BulkEditOperation,

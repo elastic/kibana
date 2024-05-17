@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { readLogFile, assertLogContains } from '../test_utils';
+import { assertLogContains, readLogFile } from '../test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

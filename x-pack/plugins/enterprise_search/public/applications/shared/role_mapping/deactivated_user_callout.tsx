@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiText, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 
 interface Props {
   isNew: boolean;
 }
 
-import { DEACTIVATED_USER_CALLOUT_LABEL, DEACTIVATED_USER_CALLOUT_DESCRIPTION } from './constants';
+import { DEACTIVATED_USER_CALLOUT_DESCRIPTION, DEACTIVATED_USER_CALLOUT_LABEL } from './constants';
 
 export const DeactivatedUserCallout: React.FC<Props> = ({ isNew }) => (
   <>

@@ -19,13 +19,13 @@ import { EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 
-import { AllTab } from './all_tab';
-import { CustomTab } from './custom_tab';
-import { getCustomColor } from './custom_tab/helpers';
-import { EcsCompliantTab } from './ecs_compliant_tab';
 import { getSizeInBytes } from '../../helpers';
-import { IncompatibleTab } from './incompatible_tab';
-import { getIncompatibleColor, getSameFamilyColor } from './incompatible_tab/helpers';
+import type {
+  EnrichedFieldMetadata,
+  IlmPhase,
+  MeteringStatsIndex,
+  PartitionedFieldMetadata,
+} from '../../types';
 import {
   ALL_TAB_ID,
   ECS_COMPLIANT_TAB_ID,
@@ -35,15 +35,15 @@ import {
 } from '../index_properties/helpers';
 import { getMarkdownComment } from '../index_properties/markdown/helpers';
 import * as i18n from '../index_properties/translations';
+import { AllTab } from './all_tab';
+import { CustomTab } from './custom_tab';
+import { getCustomColor } from './custom_tab/helpers';
+import { EcsCompliantTab } from './ecs_compliant_tab';
+import { IncompatibleTab } from './incompatible_tab';
+import { getIncompatibleColor, getSameFamilyColor } from './incompatible_tab/helpers';
 import { SameFamilyTab } from './same_family_tab';
 import { SummaryTab } from './summary_tab';
 import { getFillColor } from './summary_tab/helpers';
-import type {
-  EnrichedFieldMetadata,
-  IlmPhase,
-  MeteringStatsIndex,
-  PartitionedFieldMetadata,
-} from '../../types';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({

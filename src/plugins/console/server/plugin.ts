@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
-import { ProxyConfigCollection } from './lib';
-import { SpecDefinitionsService, EsLegacyConfigService } from './services';
 import { ConsoleConfig, ConsoleConfig7x } from './config';
+import { ProxyConfigCollection } from './lib';
+import { EsLegacyConfigService, SpecDefinitionsService } from './services';
 
 import { registerRoutes } from './routes';
 
-import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 import { handleEsError } from './shared_imports';
+import { ConsoleSetup, ConsoleStart, ESConfigForProxy } from './types';
 
 interface PluginsSetup {
   cloud?: CloudSetup;

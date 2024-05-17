@@ -8,7 +8,10 @@
 /* eslint-disable max-classes-per-file */
 
 export class FetchMetricsExplorerViewError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'FetchMetricsExplorerViewError';
@@ -16,7 +19,10 @@ export class FetchMetricsExplorerViewError extends Error {
 }
 
 export class UpsertMetricsExplorerViewError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'UpsertMetricsExplorerViewError';
@@ -24,7 +30,10 @@ export class UpsertMetricsExplorerViewError extends Error {
 }
 
 export class DeleteMetricsExplorerViewError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'DeleteMetricsExplorerViewError';

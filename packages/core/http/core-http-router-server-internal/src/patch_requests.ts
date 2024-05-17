@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error not in the definition file
-import HapiRequest from '@hapi/hapi/lib/request.js';
 import { IncomingMessage } from 'http';
 import { inspect } from 'util';
+// @ts-expect-error not in the definition file
+import HapiRequest from '@hapi/hapi/lib/request.js';
 
 export const patchRequest = () => {
   // HAPI request

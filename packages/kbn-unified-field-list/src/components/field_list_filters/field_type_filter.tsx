@@ -6,41 +6,41 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFilterButton,
   EuiIcon,
-  EuiLoadingSpinner,
-  EuiPopover,
-  EuiPanel,
-  EuiText,
-  EuiLink,
-  EuiPopoverTitle,
-  EuiPopoverFooter,
-  EuiNotificationBadge,
   EuiIconTip,
-  EuiButtonEmpty,
-  useEuiTheme,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiPanel,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
+  EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import {
+  FieldIcon,
   type FieldTypeKnown,
+  KNOWN_FIELD_TYPE_LIST,
   getFieldIconType,
   getFieldTypeDescription,
   getFieldTypeName,
   isKnownFieldType,
-  KNOWN_FIELD_TYPE_LIST,
-  FieldIcon,
 } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FieldListItem, GetCustomFieldType } from '../../types';
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears

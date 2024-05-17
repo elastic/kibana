@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { INDEX, SERVICE_NAME, TIER } from '../../../common/es_fields/apm';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getTotalIndicesStats, getEstimatedSizeForDocumentsInIndex } from './indices_stats_helpers';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { ApmPluginRequestHandlerContext } from '../typings';
+import { getEstimatedSizeForDocumentsInIndex, getTotalIndicesStats } from './indices_stats_helpers';
 
 export type SizeTimeseriesResponse = Array<{
   serviceName: string;

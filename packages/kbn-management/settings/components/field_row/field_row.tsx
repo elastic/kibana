@@ -9,29 +9,29 @@
 import React, { useRef } from 'react';
 
 import {
-  EuiScreenReaderOnly,
   EuiDescribedFormGroup,
-  EuiFormRow,
   EuiErrorBoundary,
+  EuiFormRow,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FieldInput } from '@kbn/management-settings-components-field-input';
+import { isImageFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
   FieldDefinition,
+  OnFieldChangeFn,
+  OnInputChangeFn,
   ResetInputRef,
   SettingType,
   UnsavedFieldChange,
-  OnInputChangeFn,
-  OnFieldChangeFn,
 } from '@kbn/management-settings-types';
-import { isImageFieldDefinition } from '@kbn/management-settings-field-definition';
-import { FieldInput } from '@kbn/management-settings-components-field-input';
 
 import { hasUnsavedChange } from '@kbn/management-settings-utilities';
 import { FieldDescription } from './description';
-import { FieldTitle } from './title';
 import { useFieldStyles } from './field_row.styles';
 import { FieldInputFooter } from './footer';
+import { FieldTitle } from './title';
 
 export const DATA_TEST_SUBJ_SCREEN_READER_MESSAGE = 'fieldRowScreenReaderMessage';
 

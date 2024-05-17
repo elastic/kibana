@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { pluginsServiceMock } from '@kbn/core-plugins-browser-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
-import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
-import { coreAppsMock } from '@kbn/core-apps-browser-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
-import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
-import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();

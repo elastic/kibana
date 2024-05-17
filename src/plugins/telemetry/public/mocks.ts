@@ -7,16 +7,16 @@
  */
 
 import {
-  overlayServiceMock,
   analyticsServiceMock,
   httpServiceMock,
   i18nServiceMock,
   notificationServiceMock,
+  overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import type { TelemetryConstants } from '.';
-import type { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
-import { TelemetryService, TelemetryNotifications } from './services';
+import type { TelemetryPluginConfig, TelemetryPluginSetup, TelemetryPluginStart } from './plugin';
+import { TelemetryNotifications, TelemetryService } from './services';
 
 // The following is to be able to access private methods
 /* eslint-disable dot-notation */

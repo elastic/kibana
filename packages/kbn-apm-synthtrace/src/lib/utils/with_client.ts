@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
+import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
 
 export type SynthtraceEsClient = ApmSynthtraceEsClient | LogsSynthtraceEsClient;

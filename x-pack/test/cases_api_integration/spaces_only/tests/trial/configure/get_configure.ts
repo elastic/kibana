@@ -6,21 +6,21 @@
  */
 
 import http from 'http';
-import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   createConfiguration,
-  getConfiguration,
-  getConfigurationRequest,
-  removeServerGeneratedPropertiesFromSavedObject,
-  getConfigurationOutput,
-  getAuthWithSuperUser,
-  getServiceNowConnector,
   createConnector,
+  getAuthWithSuperUser,
+  getConfiguration,
+  getConfigurationOutput,
+  getConfigurationRequest,
+  getServiceNowConnector,
   getServiceNowSimulationServer,
+  removeServerGeneratedPropertiesFromSavedObject,
 } from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 

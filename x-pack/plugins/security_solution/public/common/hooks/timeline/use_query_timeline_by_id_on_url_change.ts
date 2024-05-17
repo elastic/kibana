@@ -7,12 +7,12 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { safeDecode } from '@kbn/rison';
 import { useLocation } from 'react-router-dom';
 import usePrevious from 'react-use/lib/usePrevious';
-import { safeDecode } from '@kbn/rison';
-import type { TimelineUrl } from '../../../timelines/store/model';
-import { timelineSelectors } from '../../../timelines/store';
 import { TimelineId, TimelineTabs } from '../../../../common/types';
+import { timelineSelectors } from '../../../timelines/store';
+import type { TimelineUrl } from '../../../timelines/store/model';
 import { useShallowEqualSelector } from '../use_selector';
 
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
@@ -20,8 +20,8 @@ import {
   getParamFromQueryString,
   getQueryStringFromLocation,
 } from '../../utils/global_query_string/helpers';
-import { URL_PARAM_KEY } from '../use_url_state';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
+import { URL_PARAM_KEY } from '../use_url_state';
 
 /**
  * After the initial load of the security solution, timeline is not updated when the timeline URL search value is changed

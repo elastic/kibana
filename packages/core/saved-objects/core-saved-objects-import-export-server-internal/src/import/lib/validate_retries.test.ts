@@ -7,8 +7,8 @@
  */
 
 import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
-import { validateRetries } from './validate_retries';
 import { SavedObjectsImportError } from '../errors';
+import { validateRetries } from './validate_retries';
 
 import { getNonUniqueEntries } from './get_non_unique_entries';
 jest.mock('./get_non_unique_entries');

@@ -5,46 +5,46 @@
  * 2.0.
  */
 
-import semver from 'semver';
-import { isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import { stringify } from '../../../utils/stringify';
-import { QueueProcessor } from '../../../utils/queue_processor';
-import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { isEmpty, isEqual, keyBy } from 'lodash';
+import semver from 'semver';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import {
-  manifestDispatchSchema,
   type ManifestSchema,
+  manifestDispatchSchema,
 } from '../../../../../common/endpoint/schema/manifest';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
+import { QueueProcessor } from '../../../utils/queue_processor';
+import { stringify } from '../../../utils/stringify';
 
 import {
   ArtifactConstants,
   type ArtifactListId,
+  Manifest,
   buildArtifact,
   convertExceptionsToEndpointFormat,
   getAllItemsFromEndpointExceptionList,
   getArtifactId,
-  Manifest,
 } from '../../../lib/artifacts';
 
+import { EndpointError } from '../../../../../common/endpoint/errors';
 import {
-  internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
   type WrappedTranslatedExceptionList,
+  internalArtifactCompleteSchema,
 } from '../../../schemas/artifacts';
-import type { EndpointArtifactClientInterface } from '../artifact_client';
-import { ManifestClient } from '../manifest_client';
-import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
-import { EndpointError } from '../../../../../common/endpoint/errors';
+import type { EndpointArtifactClientInterface } from '../artifact_client';
+import { InvalidInternalManifestError } from '../errors';
+import { ManifestClient } from '../manifest_client';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];

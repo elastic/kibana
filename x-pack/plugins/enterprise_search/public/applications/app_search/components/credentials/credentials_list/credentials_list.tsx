@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
+import { DELETE_BUTTON_LABEL, EDIT_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 import { API_KEYS_DOCS_URL } from '../../../routes';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';
 import { ApiToken } from '../types';
-import { getModeDisplayText, getEnginesDisplayText } from '../utils';
+import { getEnginesDisplayText, getModeDisplayText } from '../utils';
 import { apiTokenSort } from '../utils/api_token_sort';
 
 import { Key } from './key';

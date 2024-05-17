@@ -5,10 +5,22 @@
  * 2.0.
  */
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
+import { useGetUrlParams } from '../../../hooks';
+import { useMonitorId } from '../../../hooks';
+import {
+  createMLJobAction,
+  getExistingMLJobAction,
+  setAlertFlyoutType,
+  setAlertFlyoutVisible,
+} from '../../../state/actions';
+import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
+import { kibanaService } from '../../../state/kibana_service';
 import {
   canCreateMLJobSelector,
   hasMLJobSelector,
@@ -16,21 +28,9 @@ import {
   isMLJobCreatingSelector,
   selectDynamicSettings,
 } from '../../../state/selectors';
-import {
-  createMLJobAction,
-  getExistingMLJobAction,
-  setAlertFlyoutType,
-  setAlertFlyoutVisible,
-} from '../../../state/actions';
+import { MLFlyoutView } from './ml_flyout';
 import { MLJobLink } from './ml_job_link';
 import * as labels from './translations';
-import { MLFlyoutView } from './ml_flyout';
-import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
-import { useGetUrlParams } from '../../../hooks';
-import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
-import { useMonitorId } from '../../../hooks';
-import { kibanaService } from '../../../state/kibana_service';
-import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
 
 interface Props {
   onClose: () => void;

@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
-import type { AwaitedProperties } from '@kbn/utility-types';
-import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
-import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { KibanaResponseFactory } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import type { License } from '@kbn/licensing-plugin/common/license';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import { Subject } from 'rxjs';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import { LicenseService } from '../../../../common/license';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
   createMockEndpointAppContext,
   createMockEndpointAppContextServiceSetupContract,
@@ -17,21 +31,7 @@ import {
   createRouteHandlerContext,
   getRegisteredVersionedRouteMock,
 } from '../../mocks';
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import type { KibanaResponseFactory } from '@kbn/core/server';
-import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import { LicenseService } from '../../../../common/license';
-import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { registerActionListRoutes } from './list';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 interface CallApiRouteInterface {
   query?: EndpointActionListRequestQuery;

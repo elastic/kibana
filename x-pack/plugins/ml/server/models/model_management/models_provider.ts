@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
-import { flatten } from 'lodash';
 import type {
   InferenceModelConfig,
   InferenceTaskType,
@@ -21,13 +17,17 @@ import type {
   IngestSimulateRequest,
   NodesInfoResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
+import Boom from '@hapi/boom';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import {
   ELASTIC_MODEL_DEFINITIONS,
   type GetModelDownloadConfigOptions,
   type ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
+import { flatten } from 'lodash';
 import type { PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
@@ -104,7 +104,7 @@ export class ModelsProvider {
 
   private getNodeId(
     elementOriginalId: string,
-    nodeType: typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES]
+    nodeType: (typeof JOB_MAP_NODE_TYPES)[keyof typeof JOB_MAP_NODE_TYPES]
   ): string {
     return `${elementOriginalId}-${nodeType}`;
   }

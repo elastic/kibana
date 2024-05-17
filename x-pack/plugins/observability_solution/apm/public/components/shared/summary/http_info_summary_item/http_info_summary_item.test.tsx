@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { shallow, mount } from 'enzyme';
 import { HttpInfoSummaryItem } from '.';
 import * as exampleTransactions from '../__fixtures__/transactions';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 describe('HttpInfoSummaryItem', () => {
   describe('render', () => {

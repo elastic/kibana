@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
 import { ExceptionsAddToRulesOptions } from '.';
-import { TestProviders } from '../../../../../common/mock';
-import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { TestProviders } from '../../../../../common/mock';
 import type { Rule } from '../../../../rule_management/logic/types';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 
 jest.mock('../../../../rule_management/logic/use_find_rules');
 

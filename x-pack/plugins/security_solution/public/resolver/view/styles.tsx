@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { NodeSubMenuComponents } from './submenu';
 

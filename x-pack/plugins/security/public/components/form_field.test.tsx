@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { Formik } from 'formik';
 import React from 'react';
 
-import { createFieldValidator, FormField } from './form_field';
+import { FormField, createFieldValidator } from './form_field';
 
 const onSubmit = jest.fn();
 

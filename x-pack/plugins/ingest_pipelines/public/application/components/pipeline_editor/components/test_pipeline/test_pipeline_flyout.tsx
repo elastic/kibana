@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import {
+  EuiCallOut,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 
 import { FormHook } from '../../../../../shared_imports';
 import { Document } from '../../types';
 
-import { Tabs, TestPipelineFlyoutTab, OutputTab, DocumentsTab } from './test_pipeline_tabs';
 import { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
+import { DocumentsTab, OutputTab, Tabs, TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   onClose: () => void;

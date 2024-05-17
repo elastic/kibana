@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { StatusMessage } from './status_message';
-import { IndicesList } from './indices_list';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
+import { IndicesList } from './indices_list';
+import { StatusMessage } from './status_message';
 
 import { MatchedIndicesSet } from '../../types';
 

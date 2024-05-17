@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 interface ConvertedResult {
   formattedString: string;

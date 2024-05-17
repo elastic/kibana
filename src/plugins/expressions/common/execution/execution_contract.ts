@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { of, Observable } from 'rxjs';
-import { catchError } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { Execution, ExecutionResult } from './execution';
-import { ExpressionValueError } from '../expression_types/specs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs';
 import { ExpressionAstExpression } from '../ast';
+import { ExpressionValueError } from '../expression_types/specs';
+import { Execution, ExecutionResult } from './execution';
 
 /**
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
@@ -20,7 +20,7 @@ import { ExpressionAstExpression } from '../ast';
 export class ExecutionContract<
   Input = unknown,
   Output = unknown,
-  InspectorAdapters extends Adapters = object
+  InspectorAdapters extends Adapters = object,
 > {
   public get isPending(): boolean {
     const { state, result } = this.execution.state.get();

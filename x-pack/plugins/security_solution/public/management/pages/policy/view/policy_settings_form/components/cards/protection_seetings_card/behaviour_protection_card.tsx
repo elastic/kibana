@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EuiSpacer } from '@elastic/eui';
-import { useGetProtectionsUnavailableComponent } from '../../../hooks/use_get_protections_unavailable_component';
-import { ReputationService } from './components/reputation_service';
-import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
-import { SettingCard } from '../../setting_card';
-import { NotifyUserOption } from '../../notify_user_option';
-import { DetectPreventProtectionLevel } from '../../detect_prevent_protection_level';
-import { ProtectionSettingCardSwitch } from '../../protection_setting_card_switch';
+import React, { memo } from 'react';
 import type { Immutable } from '../../../../../../../../../common/endpoint/types';
 import {
   PolicyOperatingSystem,
   ProtectionModes,
 } from '../../../../../../../../../common/endpoint/types';
-import type { BehaviorProtectionOSes } from '../../../../../types';
 import { useLicense } from '../../../../../../../../common/hooks/use_license';
-import { SettingLockedCard } from '../../setting_locked_card';
+import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
+import type { BehaviorProtectionOSes } from '../../../../../types';
+import { useGetProtectionsUnavailableComponent } from '../../../hooks/use_get_protections_unavailable_component';
 import type { PolicyFormComponentCommonProps } from '../../../types';
+import { DetectPreventProtectionLevel } from '../../detect_prevent_protection_level';
+import { NotifyUserOption } from '../../notify_user_option';
+import { ProtectionSettingCardSwitch } from '../../protection_setting_card_switch';
+import { SettingCard } from '../../setting_card';
+import { SettingLockedCard } from '../../setting_locked_card';
+import { ReputationService } from './components/reputation_service';
 
 export const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',

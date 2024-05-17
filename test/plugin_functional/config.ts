@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 import path from 'path';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));

@@ -6,7 +6,10 @@
  */
 
 export class ErrorWithStatusCode extends Error {
-  constructor(message: string, public readonly statusCode: string) {
+  constructor(
+    message: string,
+    public readonly statusCode: string
+  ) {
     super(message);
   }
 }

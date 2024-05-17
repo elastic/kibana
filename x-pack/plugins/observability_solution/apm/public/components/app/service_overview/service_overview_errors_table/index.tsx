@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
+import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { ErrorGroupList } from '../../error_group_overview/error_group_list';
 
 interface Props {

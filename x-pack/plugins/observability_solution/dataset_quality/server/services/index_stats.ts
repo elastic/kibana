@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { chain, sumBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { chain, sumBy } from 'lodash';
 import { extractIndexNameFromBackingIndex } from '../../common/utils';
 
 interface IndexStatsResponse {

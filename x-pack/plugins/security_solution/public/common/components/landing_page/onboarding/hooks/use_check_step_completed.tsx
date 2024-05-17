@@ -8,10 +8,10 @@
 import { useEffect, useRef } from 'react';
 import { useKibana } from '../../../../lib/kibana';
 import type {
-  StepId,
   CardId,
-  SectionId,
   CheckIfStepCompleted,
+  SectionId,
+  StepId,
   ToggleTaskCompleteStatus,
 } from '../types';
 

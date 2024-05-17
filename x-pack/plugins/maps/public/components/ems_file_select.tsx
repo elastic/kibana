@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@elastic/eui';
+import React, { Component } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { FileLayer } from '@elastic/ems-client';
+import { i18n } from '@kbn/i18n';
 import { getEmsFileLayers } from '../util';
 import { getEmsUnavailableMessage } from './ems_unavailable_message';
 

@@ -1,3 +1,4 @@
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +8,11 @@
  */
 import { BehaviorSubject, Subject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { getFetch$ } from './get_fetch_observable';
-import { FetchStatus } from '../../types';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { createSearchSessionMock } from '../../../__mocks__/search_session';
-import { DataRefetch$ } from '../state_management/discover_data_state_container';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import { createSearchSessionMock } from '../../../__mocks__/search_session';
+import { FetchStatus } from '../../types';
+import { DataRefetch$ } from '../state_management/discover_data_state_container';
+import { getFetch$ } from './get_fetch_observable';
 
 function createDataMock(
   queryString$: Subject<unknown>,

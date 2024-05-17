@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import moment from 'moment';
-import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { filter, isEmpty, isNumber, map, omit, pick, pickBy, some } from 'lodash';
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
-import { createDynamicQueries, replacedQueries } from './create_queries';
-import { getInternalSavedObjectsClient } from '../../routes/utils';
-import { parseAgentSelection } from '../../lib/parse_agent_groups';
-import { packSavedObjectType } from '../../../common/types';
-import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { ACTIONS_INDEX, QUERY_TIMEOUT } from '../../../common/constants';
-import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
-import type { PackSavedObject } from '../../common/types';
+import { packSavedObjectType } from '../../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
+import type { PackSavedObject } from '../../common/types';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { parseAgentSelection } from '../../lib/parse_agent_groups';
+import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
+import { convertSOQueriesToPack } from '../../routes/pack/utils';
+import { getInternalSavedObjectsClient } from '../../routes/utils';
+import { createDynamicQueries, replacedQueries } from './create_queries';
 
 interface Metadata {
   currentUser: string | undefined;

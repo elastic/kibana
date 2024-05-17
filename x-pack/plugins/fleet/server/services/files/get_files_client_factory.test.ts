@@ -9,9 +9,9 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
-import type { FilesClientFactory } from './types';
 import { FleetFromHostFilesClient } from './client_from_host';
 import { FleetToHostFilesClient } from './client_to_host';
+import type { FilesClientFactory } from './types';
 
 import { getFilesClientFactory } from './get_files_client_factory';
 

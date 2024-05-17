@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiText,
-  EuiSwitch,
   EuiButton,
-  EuiLoadingSpinner,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
 import { Document } from '../../../types';
 import { TestPipelineConfig } from '../test_pipeline_flyout.container';

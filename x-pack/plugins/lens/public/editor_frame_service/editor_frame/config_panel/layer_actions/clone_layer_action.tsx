@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LayerAction } from '../../../../types';
 import type { Visualization } from '../../../..';
+import type { LayerAction } from '../../../../types';
 import { FIRST_ACTION_ORDER } from './order_bounds';
 
 interface CloneLayerAction {

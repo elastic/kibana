@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Duration, duration as momentDuration, DurationInputArg2, isDuration } from 'moment';
+import { Duration, DurationInputArg2, isDuration, duration as momentDuration } from 'moment';
 export type { Duration };
 export { isDuration };
 

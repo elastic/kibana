@@ -20,13 +20,13 @@ import {
 } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time';
 import { RowExpansionButton } from '../../../../../components/basic_table';
+import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
+import { ChangeSortOptions, SortOptions } from '../../use_log_entry_categories_results';
 import { AnomalySeverityIndicatorList } from './anomaly_severity_indicator_list';
 import { CategoryDetailsRow } from './category_details_row';
-import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
 import { DatasetActionsList } from './datasets_action_list';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
-import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
 export const TopCategoriesTable = euiStyled(
   ({

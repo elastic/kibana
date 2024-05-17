@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SummaryCountField } from '../summary_count_field';
+import { isAdvancedJobCreator } from '../../../../../common/job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationField } from '../categorization_field';
 import { CategorizationPerPartitionField } from '../categorization_partition_field';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { isAdvancedJobCreator } from '../../../../../common/job_creator';
+import { SummaryCountField } from '../summary_count_field';
 
 export const ExtraSettings: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);

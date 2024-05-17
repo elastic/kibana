@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import Fs from 'fs';
 import { fork } from 'child_process';
+import Fs from 'fs';
+import Path from 'path';
 
-import * as Rx from 'rxjs';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { OptimizerConfig } from '@kbn/optimizer';
 import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { observeLines } from '@kbn/stdio-dev-helpers';
+import * as Rx from 'rxjs';
 
 import { TaskContext } from '../task_context';
 

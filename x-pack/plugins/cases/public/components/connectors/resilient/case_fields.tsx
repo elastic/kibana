@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 
-import {
-  getFieldValidityAndErrorMessage,
-  UseField,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import {
+  UseField,
+  getFieldValidityAndErrorMessage,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';

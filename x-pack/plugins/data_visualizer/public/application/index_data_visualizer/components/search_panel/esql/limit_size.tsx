@@ -1,3 +1,6 @@
+import { EuiSelect, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import React, { type ChangeEvent } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiSelect, EuiText, useGeneratedHtmlId } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ESQLDefaultLimitSizeOption } from '../../../embeddables/grid_embeddable/types';
 
 const options = [

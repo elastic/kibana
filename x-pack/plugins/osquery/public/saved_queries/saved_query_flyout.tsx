@@ -6,25 +6,25 @@
  */
 
 import {
-  EuiFlyout,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlyoutFooter,
-  EuiPortal,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiPortal,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 
-import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 
-import type { SavedQuerySOFormData, SavedQueryFormData } from './form/use_saved_query_form';
-import { useSavedQueryForm } from './form/use_saved_query_form';
 import { SavedQueryForm } from './form';
+import type { SavedQueryFormData, SavedQuerySOFormData } from './form/use_saved_query_form';
+import { useSavedQueryForm } from './form/use_saved_query_form';
 import { useCreateSavedQuery } from './use_create_saved_query';
 
 interface AddQueryFlyoutProps {

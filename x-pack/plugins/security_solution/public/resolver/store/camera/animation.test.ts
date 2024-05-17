@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { Store, Reducer, AnyAction } from 'redux';
+import type { AnyAction, Reducer, Store } from 'redux';
 import { createStore } from 'redux';
-import { cameraReducer } from './reducer';
-import type { AnalyzerById, Vector2 } from '../../types';
-import * as selectors from './selectors';
-import { animatePanning } from './methods';
 import { lerp } from '../../lib/math';
-import { panAnimationDuration } from './scaling_constants';
+import type { AnalyzerById, Vector2 } from '../../types';
 import { EMPTY_RESOLVER } from '../helpers';
+import { animatePanning } from './methods';
+import { cameraReducer } from './reducer';
+import { panAnimationDuration } from './scaling_constants';
+import * as selectors from './selectors';
 
 describe('when the camera is created', () => {
   let store: Store<AnalyzerById, AnyAction>;

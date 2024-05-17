@@ -53,11 +53,11 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { LAYER_TYPE } from '../../../common/constants';
-import { ILayer } from '../../classes/layers/layer';
 import { mockVectorLayer } from '../../classes/layers/__fixtures__/mock_vector_layer';
+import { ILayer } from '../../classes/layers/layer';
 import { EditLayerPanel } from './edit_layer_panel';
 
 const mockLayer = {

@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiTabs,
-  EuiTab,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useEffect, useState } from 'react';
 
 import { Form, FormDataProvider, FormHook } from '../../../../../shared_imports';
-import { ProcessorInternal } from '../../types';
 import { useTestPipelineContext } from '../../context';
+import { ProcessorInternal } from '../../types';
 import { getProcessorDescriptor } from '../shared';
 
-import { ProcessorSettingsFields } from './processor_settings_fields';
 import { DocumentationButton } from './documentation_button';
-import { ProcessorOutput } from './processor_output';
 import { Fields } from './processor_form.container';
+import { ProcessorOutput } from './processor_output';
+import { ProcessorSettingsFields } from './processor_settings_fields';
 
 export interface Props {
   isOnFailure: boolean;

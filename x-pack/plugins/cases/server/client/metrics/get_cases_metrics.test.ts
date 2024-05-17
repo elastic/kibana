@@ -8,7 +8,7 @@
 import { CaseMetricsFeature } from '../../../common/types/api';
 import type { CasesClientMock } from '../mocks';
 import { getCasesMetrics } from './get_cases_metrics';
-import { createMockClientArgs, createMockClient } from './test_utils/client';
+import { createMockClient, createMockClientArgs } from './test_utils/client';
 
 describe('getCasesMetrics', () => {
   let client: CasesClientMock;
@@ -60,8 +60,9 @@ describe('getCasesMetrics', () => {
         client,
         clientArgs
       );
-      expect(mockServices.services.caseService.executeAggregations.mock.calls[0][0])
-        .toMatchInlineSnapshot(`
+      expect(
+        mockServices.services.caseService.executeAggregations.mock.calls[0][0]
+      ).toMatchInlineSnapshot(`
         Object {
           "aggregationBuilders": Array [
             AverageDuration {},

@@ -1,3 +1,4 @@
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,12 +10,11 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v4';
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
+import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v4';
 import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {

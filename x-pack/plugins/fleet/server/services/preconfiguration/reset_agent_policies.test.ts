@@ -7,12 +7,12 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { agentPolicyService } from '../agent_policy';
-import { packagePolicyService } from '../package_policy';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../constants';
+import { agentPolicyService } from '../agent_policy';
+import { forceUnenrollAgent, getAgentsByKuery } from '../agents';
+import { deleteEnrollmentApiKey, listEnrollmentApiKeys } from '../api_keys';
+import { packagePolicyService } from '../package_policy';
 import { setupFleet } from '../setup';
-import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
-import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 
 import { resetPreconfiguredAgentPolicies } from './reset_agent_policies';
 

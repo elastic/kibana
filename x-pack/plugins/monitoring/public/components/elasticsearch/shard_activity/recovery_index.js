@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { Snapshot } from './snapshot';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { Snapshot } from './snapshot';
 
 export const RecoveryIndex = (props) => {
   const { name, shard, relocationType } = props;

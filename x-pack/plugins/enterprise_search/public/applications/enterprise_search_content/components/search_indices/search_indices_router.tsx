@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { SEARCH_INDICES_PATH, SEARCH_INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
+import { NEW_INDEX_PATH, SEARCH_INDEX_PATH, SEARCH_INDICES_PATH } from '../../routes';
 
 import { NewIndexRouter } from '../new_index/new_index_router';
 import { SearchIndexRouter } from '../search_index/search_index_router';

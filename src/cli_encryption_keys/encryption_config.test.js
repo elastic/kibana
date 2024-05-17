@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EncryptionConfig } from './encryption_config';
 import crypto from 'crypto';
 import fs from 'fs';
+import { EncryptionConfig } from './encryption_config';
 
 describe('encryption key configuration', () => {
   let encryptionConfig = null;

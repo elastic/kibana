@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useContext, useMemo } from 'react';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { useContext, useMemo } from 'react';
 import { AlertsTableContext } from '../../../../..';
 import { Alert } from '../../../../../types';
 

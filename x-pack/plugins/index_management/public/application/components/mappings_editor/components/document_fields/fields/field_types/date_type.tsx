@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import SemVer from 'semver/classes/semver';
-import { i18n } from '@kbn/i18n';
 
-import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
+import { Field as FieldType, NormalizedField } from '../../../../types';
 
 import {
-  StoreParameter,
-  IndexParameter,
-  DocValuesParameter,
   BoostParameter,
-  NullValueParameter,
-  IgnoreMalformedParameter,
+  DocValuesParameter,
   FormatParameter,
+  IgnoreMalformedParameter,
+  IndexParameter,
   LocaleParameter,
   MetaParameter,
+  NullValueParameter,
+  StoreParameter,
 } from '../../field_parameters';
-import { BasicParametersSection, AdvancedParametersSection } from '../edit_field';
+import { AdvancedParametersSection, BasicParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {

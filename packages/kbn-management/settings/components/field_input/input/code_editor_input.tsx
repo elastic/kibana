@@ -13,10 +13,10 @@ import { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
-import { useServices } from '../services';
-import { CodeEditor, CodeEditorProps } from '../code_editor';
-import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { CodeEditor, CodeEditorProps } from '../code_editor';
+import { useServices } from '../services';
+import type { InputProps } from '../types';
 
 type Type = Extract<SettingType, 'json' | 'markdown'>;
 

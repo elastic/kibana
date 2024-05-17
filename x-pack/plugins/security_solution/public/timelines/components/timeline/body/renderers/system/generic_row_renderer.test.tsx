@@ -9,19 +9,21 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
+import type { RowRenderer } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import {
+  TestProviders,
   mockDnsEvent,
-  mockEndpointProcessExecutionMalwarePreventionAlert,
   mockEndpointLibraryLoadEvent,
+  mockEndpointProcessExecutionMalwarePreventionAlert,
   mockEndpointRegistryModificationEvent,
   mockFimFileCreatedEvent,
   mockFimFileDeletedEvent,
   mockSocketClosedEvent,
   mockSocketOpenedEvent,
   mockTimelineData,
-  TestProviders,
 } from '../../../../../../common/mock';
 import {
   mockEndgameAdminLogon,
@@ -31,38 +33,38 @@ import {
   mockEndgameFileCreateEvent,
   mockEndgameFileDeleteEvent,
   mockEndgameIpv4ConnectionAcceptEvent,
-  mockEndgameIpv6ConnectionAcceptEvent,
   mockEndgameIpv4DisconnectReceivedEvent,
+  mockEndgameIpv6ConnectionAcceptEvent,
   mockEndgameIpv6DisconnectReceivedEvent,
   mockEndgameTerminationEvent,
   mockEndgameUserLogoff,
   mockEndgameUserLogon,
   mockEndpointDisconnectReceivedEvent,
   mockEndpointFileCreationEvent,
-  mockEndpointFileCreationMalwarePreventionAlert,
   mockEndpointFileCreationMalwareDetectionAlert,
-  mockEndpointFilesEncryptedRansomwarePreventionAlert,
-  mockEndpointFilesEncryptedRansomwareDetectionAlert,
-  mockEndpointFileModificationMalwarePreventionAlert,
-  mockEndpointFileModificationMalwareDetectionAlert,
-  mockEndpointFileRenameMalwarePreventionAlert,
-  mockEndpointFileRenameMalwareDetectionAlert,
+  mockEndpointFileCreationMalwarePreventionAlert,
   mockEndpointFileDeletionEvent,
   mockEndpointFileModificationEvent,
+  mockEndpointFileModificationMalwareDetectionAlert,
+  mockEndpointFileModificationMalwarePreventionAlert,
   mockEndpointFileOverwriteEvent,
   mockEndpointFileRenameEvent,
+  mockEndpointFileRenameMalwareDetectionAlert,
+  mockEndpointFileRenameMalwarePreventionAlert,
+  mockEndpointFilesEncryptedRansomwareDetectionAlert,
+  mockEndpointFilesEncryptedRansomwarePreventionAlert,
   mockEndpointNetworkConnectionAcceptedEvent,
   mockEndpointNetworkHttpRequestEvent,
   mockEndpointNetworkLookupRequestedEvent,
   mockEndpointNetworkLookupResultEvent,
+  mockEndpointProcessEndEvent,
   mockEndpointProcessExecEvent,
   mockEndpointProcessExecutionMalwareDetectionAlert,
   mockEndpointProcessForkEvent,
   mockEndpointProcessStartEvent,
-  mockEndpointProcessEndEvent,
-  mockEndpointSecurityLogOnSuccessEvent,
-  mockEndpointSecurityLogOnFailureEvent,
   mockEndpointSecurityLogOffEvent,
+  mockEndpointSecurityLogOnFailureEvent,
+  mockEndpointSecurityLogOnSuccessEvent,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import type { EndpointAlertCriteria } from './generic_row_renderer';
@@ -73,14 +75,12 @@ import {
   createEndpointLibraryRowRenderer,
   createEndpointRegistryRowRenderer,
   createFimRowRenderer,
-  createGenericSystemRowRenderer,
   createGenericFileRowRenderer,
+  createGenericSystemRowRenderer,
   createSecurityEventRowRenderer,
   createSocketRowRenderer,
 } from './generic_row_renderer';
 import * as i18n from './translations';
-import type { RowRenderer } from '../../../../../../../common/types';
-import { TimelineId } from '../../../../../../../common/types/timeline';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality

@@ -7,10 +7,10 @@
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { LABEL_LIFECYCLE_STATE, SERVICE_NAME } from '../../../common/es_fields/apm';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface Props {
   kuery: string;

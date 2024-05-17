@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
+import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 
 describe('entity_helpers', () => {
   describe('#emptyEntity', () => {

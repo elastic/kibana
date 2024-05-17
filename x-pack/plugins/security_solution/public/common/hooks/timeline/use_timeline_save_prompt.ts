@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
-import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
+import { TimelineStatus } from '../../../../common/api/timeline';
+import { APP_ID, APP_PATH } from '../../../../common/constants';
 import type { TimelineId } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
-import { TimelineStatus } from '../../../../common/api/timeline';
-import { useKibana } from '../../lib/kibana';
-import { useDeepEqualSelector } from '../use_selector';
-import { APP_ID, APP_PATH } from '../../../../common/constants';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
 import { timelineActions } from '../../../timelines/store';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
+import { useKibana } from '../../lib/kibana';
 import {
   UNSAVED_TIMELINE_SAVE_PROMPT,
   UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
 } from '../../translations';
+import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
+import { useDeepEqualSelector } from '../use_selector';
 
 // Issue with history.block
 // https://github.com/elastic/kibana/issues/132597

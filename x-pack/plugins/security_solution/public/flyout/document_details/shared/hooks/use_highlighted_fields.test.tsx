@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
+import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import {
   mockDataFormattedForFieldBrowser,
   mockDataFormattedForFieldBrowserWithOverridenField,
 } from '../mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 

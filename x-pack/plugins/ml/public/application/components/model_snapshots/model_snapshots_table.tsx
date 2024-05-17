@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import { timeFormatter } from '@kbn/ml-date-utils';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
-import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
-import { ml } from '../../services/ml_api_service';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../common/constants/states';
-import { CloseJobConfirm } from './close_job_confirm';
 import type {
   CombinedJobWithStats,
   ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { ml } from '../../services/ml_api_service';
+import { CloseJobConfirm } from './close_job_confirm';
+import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
+import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 
 interface Props {
   job: CombinedJobWithStats;

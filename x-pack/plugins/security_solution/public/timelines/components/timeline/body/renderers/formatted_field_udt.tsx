@@ -8,8 +8,8 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React from 'react';
 
-import type { ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 
 export const getFormattedFields = ({

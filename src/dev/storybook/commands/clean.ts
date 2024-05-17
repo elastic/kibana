@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 import del from 'del';
 
 export const clean = async ({ log }: { log: ToolingLog }) => {

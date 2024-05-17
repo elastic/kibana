@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { badRequest } from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
+import { set } from '@kbn/safer-lodash-set';
 import { WATCH_TYPES } from '../../../common/constants';
 import { JsonWatch } from './json_watch';
+import { getWatchType } from './lib/get_watch_type';
 import { MonitoringWatch } from './monitoring_watch';
 import { ThresholdWatch } from './threshold_watch';
-import { getWatchType } from './lib/get_watch_type';
-import { i18n } from '@kbn/i18n';
 
 const WatchTypes = {};
 set(WatchTypes, WATCH_TYPES.JSON, JsonWatch);

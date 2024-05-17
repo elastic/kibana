@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -27,12 +26,13 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { IconPreview } from './icon_preview';
-import { getCustomIconId } from '../../symbol_utils';
-import { ValidatedRange } from '../../../../../components/validated_range';
-import { CustomIcon } from '../../../../../../common/descriptor_types';
+import React, { Component } from 'react';
 import { APP_ID } from '../../../../../../common';
+import { CustomIcon } from '../../../../../../common/descriptor_types';
+import { ValidatedRange } from '../../../../../components/validated_range';
 import { getUsageCollection } from '../../../../../kibana_services';
+import { getCustomIconId } from '../../symbol_utils';
+import { IconPreview } from './icon_preview';
 
 const strings = {
   getAdvancedOptionsLabel: () =>

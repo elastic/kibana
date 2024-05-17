@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -14,8 +13,9 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
-import { getWarningsDescription, getWarningsTitle, viewDetailsLabel } from './i18n_utils';
+import React, { useState } from 'react';
 import type { SearchResponseWarning } from '../../types';
+import { getWarningsDescription, getWarningsTitle, viewDetailsLabel } from './i18n_utils';
 
 const WARNING_PANEL_ID = 0;
 const VIEW_DETAILS_PANEL_ID = 1;

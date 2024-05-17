@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { scanCopy, Task } from '../lib';
+import { Task, scanCopy } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
 export const CreateArchivesSources: Task = {

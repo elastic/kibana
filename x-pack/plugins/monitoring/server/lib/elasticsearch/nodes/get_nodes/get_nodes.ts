@@ -6,16 +6,16 @@
  */
 
 import moment from 'moment';
-import { createQuery } from '../../../create_query';
+import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import { Globals } from '../../../../static_globals';
+import { LegacyRequest } from '../../../../types';
 import { calculateAuto } from '../../../calculate_auto';
+import { getElasticsearchDataset, getIndexPatterns } from '../../../cluster/get_index_patterns';
+import { createQuery } from '../../../create_query';
 import { ElasticsearchMetric } from '../../../metrics';
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
-import { LegacyRequest } from '../../../../types';
-import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
-import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
-import { Globals } from '../../../../static_globals';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
  * range for all the active nodes.  Every option is a key to a configuration

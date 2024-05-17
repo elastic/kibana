@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo, useCallback } from 'react';
 
 import { search } from '@kbn/data-plugin/public';
 const { isValidEsInterval } = search.aggs;

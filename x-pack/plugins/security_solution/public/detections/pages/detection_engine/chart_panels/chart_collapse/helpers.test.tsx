@@ -1,3 +1,6 @@
+import { getGroupByLabel } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/helpers';
+import * as i18n from '../../../../components/alerts_kpis/alerts_progress_bar_panel/translations';
+import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +10,6 @@
 import { parseChartCollapseData } from './helpers';
 import * as mock from './mock_data';
 import type { ChartCollapseAgg } from './types';
-import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
-import { getGroupByLabel } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/helpers';
-import * as i18n from '../../../../components/alerts_kpis/alerts_progress_bar_panel/translations';
 
 describe('parse chart collapse data', () => {
   test('parse alerts with data', () => {

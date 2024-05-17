@@ -7,13 +7,13 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
+import type { Agent } from '../../types';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
+import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 export async function updateAgentTags(

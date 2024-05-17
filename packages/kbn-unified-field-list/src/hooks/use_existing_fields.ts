@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
+import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
@@ -385,8 +385,11 @@ async function buildSafeEsQuery(
 }
 
 function booleanMap(keys: string[]) {
-  return keys.reduce((acc, key) => {
-    acc[key] = true;
-    return acc;
-  }, {} as Record<string, boolean>);
+  return keys.reduce(
+    (acc, key) => {
+      acc[key] = true;
+      return acc;
+    },
+    {} as Record<string, boolean>
+  );
 }

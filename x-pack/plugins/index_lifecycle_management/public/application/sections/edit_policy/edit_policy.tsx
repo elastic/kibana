@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { get } from 'lodash';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
 
@@ -21,35 +21,35 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiPageHeader,
   EuiSpacer,
   EuiSwitch,
-  EuiPageHeader,
   EuiTimeline,
 } from '@elastic/eui';
 
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
-import { UseField } from './form';
-import { savePolicy } from './save_policy';
 import {
   ColdPhase,
   DeletePhase,
-  HotPhase,
-  FrozenPhase,
-  PolicyJsonFlyout,
-  WarmPhase,
-  Timeline,
-  FormErrorsCallout,
   EditWarning,
+  FormErrorsCallout,
+  FrozenPhase,
+  HotPhase,
+  PolicyJsonFlyout,
+  Timeline,
+  WarmPhase,
 } from './components';
+import { useEditPolicyContext } from './edit_policy_context';
+import { UseField } from './form';
 import {
+  Form,
+  createDeserializer,
   createPolicyNameValidations,
   createSerializer,
-  createDeserializer,
-  Form,
   getSchema,
 } from './form';
-import { useEditPolicyContext } from './edit_policy_context';
+import { savePolicy } from './save_policy';
 import { FormInternal } from './types';
 
 const policyNamePath = 'name';

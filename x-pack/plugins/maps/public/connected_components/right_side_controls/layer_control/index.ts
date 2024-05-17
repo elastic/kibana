@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
 import { LayerControl } from './layer_control';
 
-import { FLYOUT_STATE } from '../../../reducers/ui';
+import { DRAW_MODE } from '../../../../common/constants';
 import {
   hideAllLayers,
-  setSelectedLayer,
-  updateFlyout,
-  setIsLayerTOCOpen,
   setDrawMode,
+  setIsLayerTOCOpen,
+  setSelectedLayer,
   showAllLayers,
+  updateFlyout,
 } from '../../../actions';
-import {
-  getIsReadOnly,
-  getIsLayerTOCOpen,
-  getFlyoutDisplay,
-} from '../../../selectors/ui_selectors';
-import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
-import { DRAW_MODE } from '../../../../common/constants';
+import { FLYOUT_STATE } from '../../../reducers/ui';
+import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
+import {
+  getFlyoutDisplay,
+  getIsLayerTOCOpen,
+  getIsReadOnly,
+} from '../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {

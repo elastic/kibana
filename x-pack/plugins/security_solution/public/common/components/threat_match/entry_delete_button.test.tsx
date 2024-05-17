@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ThreatMappingEntries } from '@kbn/securitysolution-io-ts-alerting-types';
 import { mount } from 'enzyme';
 import React from 'react';
-import type { ThreatMappingEntries } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 

@@ -6,20 +6,20 @@
  */
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-import type { ComponentStory } from '@storybook/react';
-import React, { type ComponentProps, useState } from 'react';
 import {
   MessageRole,
   type ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatState } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ComponentStory } from '@storybook/react';
+import React, { type ComponentProps, useState } from 'react';
 import {
   buildAssistantMessage,
   buildFunctionResponseMessage,
   buildSystemMessage,
   buildUserMessage,
 } from '../../utils/builders';
-import { ChatTimeline as Component, type ChatTimelineProps } from './chat_timeline';
+import { type ChatTimelineProps, ChatTimeline as Component } from './chat_timeline';
 
 export default {
   component: Component,

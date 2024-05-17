@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { sortBy } from 'lodash';
+import React from 'react';
 
-import { EuiIcon, EuiSideNavItemType, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSideNavItemType } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { ManagementApp, ManagementSection } from '../../utils';

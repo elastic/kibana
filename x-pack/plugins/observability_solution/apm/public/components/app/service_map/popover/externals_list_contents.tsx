@@ -11,14 +11,14 @@ import {
   EuiDescriptionListTitle,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { NodeDataDefinition } from 'cytoscape';
+import React, { Fragment } from 'react';
 import { ContentsProps } from '.';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_TYPE,
 } from '../../../../../common/es_fields/apm';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import {
+  IKbnUrlStateStorage,
+  createKbnUrlStateStorage,
+  syncState,
+  useContainerSelector,
+} from '@kbn/kibana-utils-plugin/public';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { isRight } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
-import {
-  createKbnUrlStateStorage,
-  syncState,
-  IKbnUrlStateStorage,
-  useContainerSelector,
-} from '@kbn/kibana-utils-plugin/public';
-import { datemathStringRT } from '../../../utils/datemath';
 import { ALERT_STATUS_ALL } from '../../../../common/constants';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
+import { datemathStringRT } from '../../../utils/datemath';
 
 import {
-  useContainer,
-  defaultState,
-  AlertSearchBarStateContainer,
   AlertSearchBarContainerState,
+  AlertSearchBarStateContainer,
+  defaultState,
+  useContainer,
 } from './state_container';
 
 export const alertSearchBarState = t.partial({

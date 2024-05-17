@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CoreAuthenticationService } from './authc';
 import type { CoreSecurityDelegateContract } from './api_provider';
 import type { CoreAuditService } from './audit';
+import type { CoreAuthenticationService } from './authc';
 /**
  * Setup contract for Core's security service.
  *

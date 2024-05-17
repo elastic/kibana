@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export type SetValidity = (modelName: string, value: boolean) => void;
 export type SetTouched = (value: boolean) => void;

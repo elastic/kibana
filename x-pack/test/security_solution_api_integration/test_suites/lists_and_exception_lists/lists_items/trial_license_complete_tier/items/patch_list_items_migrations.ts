@@ -8,16 +8,16 @@
 import expect from '@kbn/expect';
 
 import type { PatchListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { LIST_ITEM_URL, LIST_INDEX } from '@kbn/securitysolution-list-constants';
+import { LIST_INDEX, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  createListsIndex,
-  deleteListsIndex,
-  createListsIndices,
   createListBypassingChecks,
   createListItemBypassingChecks,
+  createListsIndex,
+  createListsIndices,
+  deleteListsIndex,
 } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

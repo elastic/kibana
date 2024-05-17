@@ -7,7 +7,7 @@
  */
 
 import { DEFAULT_APP_VISIBILITY } from '@kbn/core-application-browser-internal';
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 export class CorePluginDeepLinksPlugin

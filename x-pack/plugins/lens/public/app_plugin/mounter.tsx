@@ -5,56 +5,56 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
-import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
-import { History } from 'history';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  createKbnUrlStateStorage,
   Storage,
+  createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
+import { HashRouter, Route, Routes } from '@kbn/shared-ux-router';
+import { History } from 'history';
+import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { Provider } from 'react-redux';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 
-import { App } from './app';
-import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
+import { APP_ID, LENS_EDIT_BY_VALUE, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import {
-  LensEmbeddableInput,
+  LENS_SHARE_STATE_ACTION,
+  LensAppLocator,
+  MainHistoryLocationState,
+} from '../../common/locator/locator';
+import {
   LensByReferenceInput,
   LensByValueInput,
+  LensEmbeddableInput,
 } from '../embeddable/embeddable';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensAttributeService } from '../lens_attribute_service';
-import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
+import { getLensInspectorService } from '../lens_inspector_service';
+import { SavedObjectIndexStore } from '../persistence';
+import { LensPluginStartDependencies } from '../plugin';
 import {
-  makeConfigureStore,
-  navigateAway,
   LensRootStore,
   loadInitial,
+  makeConfigureStore,
+  navigateAway,
   setState,
 } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
-import { getLensInspectorService } from '../lens_inspector_service';
-import {
-  LensAppLocator,
-  LENS_SHARE_STATE_ACTION,
-  MainHistoryLocationState,
-} from '../../common/locator/locator';
-import { SavedObjectIndexStore } from '../persistence';
+import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
+import { App } from './app';
+import { HistoryLocationState, LensAppServices, RedirectToOriginProps } from './types';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as

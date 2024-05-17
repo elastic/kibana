@@ -7,10 +7,10 @@
 
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
+import { getEntryExistsMock } from './entry_exists.mock';
+import { getEntryListMock } from './entry_list.mock';
 import { getEntryMatchMock } from './entry_match.mock';
 import { getEntryMatchAnyMock } from './entry_match_any.mock';
-import { getEntryListMock } from './entry_list.mock';
-import { getEntryExistsMock } from './entry_exists.mock';
 import { getEntryNestedMock } from './entry_nested.mock';
 
 export const getListAndNonListEntriesArrayMock = (): EntriesArray => [

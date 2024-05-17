@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { MemoryRouter } from 'react-router-dom';
 
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 

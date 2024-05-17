@@ -7,28 +7,28 @@
 
 /* eslint-disable complexity */
 
-import React, { useCallback, useState } from 'react';
 import {
-  EuiText,
-  EuiHorizontalRule,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
+import React, { useCallback, useState } from 'react';
 
-import type { CaseUI, CaseConnectors } from '../../../common/ui/types';
 import type { ActionConnector, CaseConnector } from '../../../common/types/domain';
-import * as i18n from './translations';
-import { getConnectorById } from '../utils';
-import { usePushToService } from '../use_push_to_service';
+import type { CaseConnectors, CaseUI } from '../../../common/ui/types';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { ConnectorFieldsPreviewForm } from '../connectors/fields_preview_form';
+import { usePushToService } from '../use_push_to_service';
+import { getConnectorById } from '../utils';
+import { ConnectorsForm } from './connectors_form';
 import { PushButton } from './push_button';
 import { PushCallouts } from './push_callouts';
-import { ConnectorsForm } from './connectors_form';
-import { ConnectorFieldsPreviewForm } from '../connectors/fields_preview_form';
-import { useCasesContext } from '../cases_context/use_cases_context';
+import * as i18n from './translations';
 
 export interface EditConnectorProps {
   caseData: CaseUI;

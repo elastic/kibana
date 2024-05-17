@@ -8,8 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { DiscoverTransactionLink, getDiscoverQuery } from './discover_transaction_link';
 import mockTransaction from './__fixtures__/mock_transaction.json';
+import { DiscoverTransactionLink, getDiscoverQuery } from './discover_transaction_link';
 
 describe('DiscoverTransactionLink component', () => {
   it('should render with data', () => {

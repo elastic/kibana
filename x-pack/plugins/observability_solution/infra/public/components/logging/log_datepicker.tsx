@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback } from 'react';
 
 interface LogDatepickerProps {
   startDateExpression: string;

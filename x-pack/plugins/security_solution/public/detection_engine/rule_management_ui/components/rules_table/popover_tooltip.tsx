@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import type { EuiIconProps, IconColor } from '@elastic/eui';
 import { EuiIcon, EuiPopover, keys } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 interface PopoverTooltipProps {

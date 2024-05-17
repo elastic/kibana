@@ -7,9 +7,9 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import type { SuggestUsersProps } from './types';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
+import type { SuggestUsersProps } from './types';
 
 /**
  * Fetches suggested user profiles

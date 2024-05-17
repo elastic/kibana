@@ -6,8 +6,8 @@
  */
 
 import type {
-  ApplicationSetup,
   AppMountParameters,
+  ApplicationSetup,
   HttpSetup,
   StartServicesAccessor,
 } from '@kbn/core/public';

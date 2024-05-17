@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import fetch from 'node-fetch';
 import yargs from 'yargs';
 
 const DEFAULT_REGISTRY_URL = 'https://epr.elastic.co';

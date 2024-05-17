@@ -11,15 +11,15 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { EndpointAppContext } from '../../types';
-import { getArtifactId, reportErrors } from './common';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
+import { ManifestManager } from '../../services';
+import { InvalidInternalManifestError } from '../../services/artifacts/errors';
+import type { EndpointAppContext } from '../../types';
+import { wrapErrorIfNeeded } from '../../utils';
+import { getArtifactId, reportErrors } from './common';
 import type { Manifest } from './manifest';
 import { isEmptyManifestDiff } from './manifest';
-import { InvalidInternalManifestError } from '../../services/artifacts/errors';
-import { ManifestManager } from '../../services';
-import { wrapErrorIfNeeded } from '../../utils';
-import { EndpointError } from '../../../../common/endpoint/errors';
 
 export const ManifestTaskConstants = {
   /**

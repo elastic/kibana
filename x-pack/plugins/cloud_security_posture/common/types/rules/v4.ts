@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { BenchmarksCisId } from '../latest';
 import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
 export type {

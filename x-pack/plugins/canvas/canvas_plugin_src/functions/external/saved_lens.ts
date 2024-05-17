@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
+import { SavedObjectReference } from '@kbn/core/types';
 import { Filter as DataFilter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import { SavedObjectReference } from '@kbn/core/types';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType,
-  EmbeddableExpression,
-} from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
+import { EmbeddableInput, ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
+import {
+  EmbeddableExpression,
+  EmbeddableExpressionType,
+  EmbeddableTypes,
+} from '../../expression_types';
 interface Arguments {
   id: string;
   title: string | null;

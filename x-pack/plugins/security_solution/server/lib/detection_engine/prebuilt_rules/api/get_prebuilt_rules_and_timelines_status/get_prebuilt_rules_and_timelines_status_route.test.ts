@@ -7,18 +7,18 @@
 
 import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status_route';
 
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import {
+  mockCheckTimelinesStatusAfterInstallResult,
+  mockCheckTimelinesStatusBeforeInstallResult,
+} from '../../../../timeline/__mocks__/import_timelines';
+import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
+import { requestContextMock, serverMock } from '../../../routes/__mocks__';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPrepackagedRulesStatusRequest,
 } from '../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../../../routes/__mocks__';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
-import {
-  mockCheckTimelinesStatusBeforeInstallResult,
-  mockCheckTimelinesStatusAfterInstallResult,
-} from '../../../../timeline/__mocks__/import_timelines';
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
   return {

@@ -8,20 +8,20 @@
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPanel,
-  EuiLink,
-  EuiText,
-  EuiForm,
-  EuiRadioGroup,
-  EuiSpacer,
-  EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiIconTip,
+  EuiLink,
+  EuiPanel,
+  EuiRadioGroup,
+  EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { usePutSettingsMutation, useStartServices } from '../../../hooks';
 

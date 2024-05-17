@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '..';
-import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
-import { okResponse } from '../ok_response';
+import { API_ROUTE_CUSTOM_ELEMENT, CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { catchErrorHandler } from '../catch_error_handler';
+import { okResponse } from '../ok_response';
 
 export function initializeDeleteCustomElementRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

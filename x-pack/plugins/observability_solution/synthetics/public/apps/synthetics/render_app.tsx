@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { i18n as i18nFormatter } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { i18n as i18nFormatter } from '@kbn/i18n';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { SyntheticsAppProps } from './contexts';
-import { getIntegratedAppAvailability } from './utils/adapters';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES, INTEGRATED_SOLUTIONS } from '../../../common/constants';
-import { SyntheticsApp } from './synthetics_app';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
+import { SyntheticsAppProps } from './contexts';
+import { SyntheticsApp } from './synthetics_app';
+import { getIntegratedAppAvailability } from './utils/adapters';
 
 export function renderApp(
   core: CoreStart,

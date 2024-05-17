@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListFiltersProps, GenericFieldListFilters } from './field_list_filters';
+import React, { Fragment } from 'react';
 import { type FieldListItem } from '../../types';
+import type { FieldListFiltersProps, GenericFieldListFilters } from './field_list_filters';
 
 const Fallback = () => <Fragment />;
 

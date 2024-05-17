@@ -26,9 +26,7 @@
         "tags": [],
         "label": "convertTonsToKgs",
         "description": [],
-        "signature": [
-          "(value: number) => number"
-        ],
+        "signature": ["(value: number) => number"],
         "path": "packages/kbn-profiling-utils/common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -40,9 +38,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "number"
-            ],
+            "signature": ["number"],
             "path": "packages/kbn-profiling-utils/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -89,9 +85,7 @@
             "type": "Object",
             "tags": [],
             "label": "base",
-            "description": [
-              "BaseFlameGraph"
-            ],
+            "description": ["BaseFlameGraph"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -113,18 +107,14 @@
             "tags": [],
             "label": "showErrorFrames",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "ElasticFlameGraph"
-        ],
+        "returnComment": ["ElasticFlameGraph"],
         "initialIsOpen": false
       },
       {
@@ -149,12 +139,8 @@
             "type": "string",
             "tags": [],
             "label": "fileID",
-            "description": [
-              "string"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["string"],
+            "signature": ["string"],
             "path": "packages/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,12 +152,8 @@
             "type": "number",
             "tags": [],
             "label": "addressOrLine",
-            "description": [
-              "string"
-            ],
-            "signature": [
-              "number"
-            ],
+            "description": ["string"],
+            "signature": ["number"],
             "path": "packages/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -183,12 +165,8 @@
             "type": "string",
             "tags": [],
             "label": "exeFilename",
-            "description": [
-              "string"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["string"],
+            "signature": ["string"],
             "path": "packages/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -200,12 +178,8 @@
             "type": "string",
             "tags": [],
             "label": "sourceFilename",
-            "description": [
-              "string"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["string"],
+            "signature": ["string"],
             "path": "packages/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -217,21 +191,15 @@
             "type": "string",
             "tags": [],
             "label": "functionName",
-            "description": [
-              "string"
-            ],
-            "signature": [
-              "string"
-            ],
+            "description": ["string"],
+            "signature": ["string"],
             "path": "packages/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "FrameGroupID"
-        ],
+        "returnComment": ["FrameGroupID"],
         "initialIsOpen": false
       },
       {
@@ -240,9 +208,7 @@
         "type": "Function",
         "tags": [],
         "label": "createStackFrameMetadata",
-        "description": [
-          "\ncreate stackframe metadata"
-        ],
+        "description": ["\ncreate stackframe metadata"],
         "signature": [
           "(options: Partial<",
           {
@@ -271,9 +237,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "Partial<StackFrameMetadata>"
-            ],
+            "description": ["Partial<StackFrameMetadata>"],
             "signature": [
               "Partial<",
               {
@@ -291,9 +255,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "StackFrameMetadata"
-        ],
+        "returnComment": ["StackFrameMetadata"],
         "initialIsOpen": false
       },
       {
@@ -370,9 +332,7 @@
                 "tags": [],
                 "label": "events",
                 "description": [],
-                "signature": [
-                  "Map<string, number>"
-                ],
+                "signature": ["Map<string, number>"],
                 "path": "packages/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -488,9 +448,7 @@
         "type": "Function",
         "tags": [],
         "label": "decodeStackTraceResponse",
-        "description": [
-          "\nDecodes stack trace response"
-        ],
+        "description": ["\nDecodes stack trace response"],
         "signature": [
           "(response: ",
           {
@@ -519,9 +477,7 @@
             "type": "Object",
             "tags": [],
             "label": "response",
-            "description": [
-              "StackTraceResponse"
-            ],
+            "description": ["StackTraceResponse"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -543,18 +499,14 @@
             "tags": [],
             "label": "showErrorFrames",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "DecodedStackTraceResponse"
-        ],
+        "returnComment": ["DecodedStackTraceResponse"],
         "initialIsOpen": false
       },
       {
@@ -563,9 +515,7 @@
         "type": "Function",
         "tags": [],
         "label": "describeFrameType",
-        "description": [
-          "\nget frame type name"
-        ],
+        "description": ["\nget frame type name"],
         "signature": [
           "(ft: ",
           {
@@ -587,9 +537,7 @@
             "type": "Enum",
             "tags": [],
             "label": "ft",
-            "description": [
-              "FrameType"
-            ],
+            "description": ["FrameType"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -605,9 +553,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "string"
-        ],
+        "returnComment": ["string"],
         "initialIsOpen": false
       },
       {
@@ -616,9 +562,7 @@
         "type": "Function",
         "tags": [],
         "label": "getCalleeFunction",
-        "description": [
-          "\nGet callee function name"
-        ],
+        "description": ["\nGet callee function name"],
         "signature": [
           "(frame: ",
           {
@@ -640,9 +584,7 @@
             "type": "Object",
             "tags": [],
             "label": "frame",
-            "description": [
-              "StackFrameMetadata"
-            ],
+            "description": ["StackFrameMetadata"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -658,9 +600,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "string"
-        ],
+        "returnComment": ["string"],
         "initialIsOpen": false
       },
       {
@@ -693,9 +633,7 @@
             "type": "Object",
             "tags": [],
             "label": "frame",
-            "description": [
-              "StackFrameMetadata"
-            ],
+            "description": ["StackFrameMetadata"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -711,9 +649,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "string"
-        ],
+        "returnComment": ["string"],
         "initialIsOpen": false
       },
       {
@@ -722,9 +658,7 @@
         "type": "Function",
         "tags": [],
         "label": "getFieldNameForTopNType",
-        "description": [
-          "\nGet Profiling ES field based on TopN Type"
-        ],
+        "description": ["\nGet Profiling ES field based on TopN Type"],
         "signature": [
           "(type: ",
           {
@@ -746,9 +680,7 @@
             "type": "Enum",
             "tags": [],
             "label": "type",
-            "description": [
-              "TopNType"
-            ],
+            "description": ["TopNType"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -764,9 +696,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "string"
-        ],
+        "returnComment": ["string"],
         "initialIsOpen": false
       },
       {
@@ -775,9 +705,7 @@
         "type": "Function",
         "tags": [],
         "label": "getFrameSymbolStatus",
-        "description": [
-          "\nGet frame symbol status"
-        ],
+        "description": ["\nGet frame symbol status"],
         "signature": [
           "(param: FrameSymbolStatusParams) => ",
           {
@@ -798,21 +726,15 @@
             "type": "Object",
             "tags": [],
             "label": "param",
-            "description": [
-              "FrameSymbolStatusParams"
-            ],
-            "signature": [
-              "FrameSymbolStatusParams"
-            ],
+            "description": ["FrameSymbolStatusParams"],
+            "signature": ["FrameSymbolStatusParams"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "FrameSymbolStatus"
-        ],
+        "returnComment": ["FrameSymbolStatus"],
         "initialIsOpen": false
       },
       {
@@ -821,12 +743,8 @@
         "type": "Function",
         "tags": [],
         "label": "getLanguageType",
-        "description": [
-          "\nGet language type"
-        ],
-        "signature": [
-          "(param: LanguageTypeParams) => \"NATIVE\" | \"INTERPRETED\""
-        ],
+        "description": ["\nGet language type"],
+        "signature": ["(param: LanguageTypeParams) => \"NATIVE\" | \"INTERPRETED\""],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -837,21 +755,15 @@
             "type": "Object",
             "tags": [],
             "label": "param",
-            "description": [
-              "LanguageTypeParams"
-            ],
-            "signature": [
-              "LanguageTypeParams"
-            ],
+            "description": ["LanguageTypeParams"],
+            "signature": ["LanguageTypeParams"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "string"
-        ],
+        "returnComment": ["string"],
         "initialIsOpen": false
       },
       {
@@ -860,9 +772,7 @@
         "type": "Function",
         "tags": [],
         "label": "groupStackFrameMetadataByStackTrace",
-        "description": [
-          "\nGroup stackframe by stack trace"
-        ],
+        "description": ["\nGroup stackframe by stack trace"],
         "signature": [
           "(stackTraces: Map<string, ",
           {
@@ -908,9 +818,7 @@
             "type": "Object",
             "tags": [],
             "label": "stackTraces",
-            "description": [
-              "Map<StackTraceID, StackTrace>"
-            ],
+            "description": ["Map<StackTraceID, StackTrace>"],
             "signature": [
               "Map<string, ",
               {
@@ -933,9 +841,7 @@
             "type": "Object",
             "tags": [],
             "label": "stackFrames",
-            "description": [
-              "Map<StackFrameID, StackFrame>"
-            ],
+            "description": ["Map<StackFrameID, StackFrame>"],
             "signature": [
               "Map<string, ",
               {
@@ -958,9 +864,7 @@
             "type": "Object",
             "tags": [],
             "label": "executables",
-            "description": [
-              "Map<FileID, Executable>"
-            ],
+            "description": ["Map<FileID, Executable>"],
             "signature": [
               "Map<string, ",
               {
@@ -978,9 +882,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "Record<string, StackFrameMetadata[]>"
-        ],
+        "returnComment": ["Record<string, StackFrameMetadata[]>"],
         "initialIsOpen": false
       },
       {
@@ -989,9 +891,7 @@
         "type": "Function",
         "tags": [],
         "label": "normalizeFrameType",
-        "description": [
-          "\nnormalize the given frame type"
-        ],
+        "description": ["\nnormalize the given frame type"],
         "signature": [
           "(ft: ",
           {
@@ -1020,9 +920,7 @@
             "type": "Enum",
             "tags": [],
             "label": "ft",
-            "description": [
-              "FrameType"
-            ],
+            "description": ["FrameType"],
             "signature": [
               {
                 "pluginId": "@kbn/profiling-utils",
@@ -1038,9 +936,7 @@
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "FrameType"
-        ],
+        "returnComment": ["FrameType"],
         "initialIsOpen": false
       }
     ],
@@ -1051,9 +947,7 @@
         "type": "Interface",
         "tags": [],
         "label": "BaseFlameGraph",
-        "description": [
-          "\nBase Flamegraph"
-        ],
+        "description": ["\nBase Flamegraph"],
         "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1064,9 +958,7 @@
             "type": "number",
             "tags": [],
             "label": "Size",
-            "description": [
-              "size"
-            ],
+            "description": ["size"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1077,12 +969,8 @@
             "type": "Array",
             "tags": [],
             "label": "Edges",
-            "description": [
-              "edges"
-            ],
-            "signature": [
-              "number[][]"
-            ],
+            "description": ["edges"],
+            "signature": ["number[][]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1093,12 +981,8 @@
             "type": "Array",
             "tags": [],
             "label": "FileID",
-            "description": [
-              "file ids"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["file ids"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1109,12 +993,8 @@
             "type": "Array",
             "tags": [],
             "label": "FrameType",
-            "description": [
-              "frame types"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["frame types"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1125,12 +1005,8 @@
             "type": "Array",
             "tags": [],
             "label": "Inline",
-            "description": [
-              "inlines"
-            ],
-            "signature": [
-              "boolean[]"
-            ],
+            "description": ["inlines"],
+            "signature": ["boolean[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1141,12 +1017,8 @@
             "type": "Array",
             "tags": [],
             "label": "ExeFilename",
-            "description": [
-              "executable file names"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["executable file names"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1157,12 +1029,8 @@
             "type": "Array",
             "tags": [],
             "label": "AddressOrLine",
-            "description": [
-              "address or line"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["address or line"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1173,12 +1041,8 @@
             "type": "Array",
             "tags": [],
             "label": "FunctionName",
-            "description": [
-              "function names"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["function names"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1189,12 +1053,8 @@
             "type": "Array",
             "tags": [],
             "label": "FunctionOffset",
-            "description": [
-              "function offsets"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["function offsets"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1205,12 +1065,8 @@
             "type": "Array",
             "tags": [],
             "label": "SourceFilename",
-            "description": [
-              "source file names"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["source file names"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1221,12 +1077,8 @@
             "type": "Array",
             "tags": [],
             "label": "SourceLine",
-            "description": [
-              "source lines"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["source lines"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1237,12 +1089,8 @@
             "type": "Array",
             "tags": [],
             "label": "CountInclusive",
-            "description": [
-              "total cpu"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["total cpu"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1253,12 +1101,8 @@
             "type": "Array",
             "tags": [],
             "label": "CountExclusive",
-            "description": [
-              "self cpu"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["self cpu"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1269,9 +1113,7 @@
             "type": "number",
             "tags": [],
             "label": "TotalSeconds",
-            "description": [
-              "total seconds"
-            ],
+            "description": ["total seconds"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1282,9 +1124,7 @@
             "type": "number",
             "tags": [],
             "label": "SamplingRate",
-            "description": [
-              "sampling rate"
-            ],
+            "description": ["sampling rate"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1329,9 +1169,7 @@
             "tags": [],
             "label": "AnnualCO2TonsExclusive",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1343,9 +1181,7 @@
             "tags": [],
             "label": "AnnualCO2TonsInclusive",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1357,9 +1193,7 @@
             "tags": [],
             "label": "AnnualCostsUSDInclusive",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1371,9 +1205,7 @@
             "tags": [],
             "label": "AnnualCostsUSDExclusive",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1387,9 +1219,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DecodedStackTraceResponse",
-        "description": [
-          "Decoded stack trace response"
-        ],
+        "description": ["Decoded stack trace response"],
         "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1400,12 +1230,8 @@
             "type": "Object",
             "tags": [],
             "label": "events",
-            "description": [
-              "Map of Stacktrace ID and event"
-            ],
-            "signature": [
-              "Map<string, number>"
-            ],
+            "description": ["Map of Stacktrace ID and event"],
+            "signature": ["Map<string, number>"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1416,9 +1242,7 @@
             "type": "Object",
             "tags": [],
             "label": "stackTraces",
-            "description": [
-              "Map of stacktrace ID and stacktrace"
-            ],
+            "description": ["Map of stacktrace ID and stacktrace"],
             "signature": [
               "Map<string, ",
               {
@@ -1440,9 +1264,7 @@
             "type": "Object",
             "tags": [],
             "label": "stackFrames",
-            "description": [
-              "Map of stackframe ID and stackframe"
-            ],
+            "description": ["Map of stackframe ID and stackframe"],
             "signature": [
               "Map<string, ",
               {
@@ -1464,9 +1286,7 @@
             "type": "Object",
             "tags": [],
             "label": "executables",
-            "description": [
-              "Map of file ID and Executables"
-            ],
+            "description": ["Map of file ID and Executables"],
             "signature": [
               "Map<string, ",
               {
@@ -1488,9 +1308,7 @@
             "type": "number",
             "tags": [],
             "label": "totalFrames",
-            "description": [
-              "Total number of frames"
-            ],
+            "description": ["Total number of frames"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1501,9 +1319,7 @@
             "type": "number",
             "tags": [],
             "label": "samplingRate",
-            "description": [
-              "sampling rate"
-            ],
+            "description": ["sampling rate"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1517,9 +1333,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ElasticFlameGraph",
-        "description": [
-          "Elasticsearch flamegraph"
-        ],
+        "description": ["Elasticsearch flamegraph"],
         "signature": [
           {
             "pluginId": "@kbn/profiling-utils",
@@ -1548,12 +1362,8 @@
             "type": "Array",
             "tags": [],
             "label": "ID",
-            "description": [
-              "ID"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["ID"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1564,12 +1374,8 @@
             "type": "Array",
             "tags": [],
             "label": "Label",
-            "description": [
-              "Label"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["Label"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1581,9 +1387,7 @@
             "tags": [],
             "label": "SelfAnnualCO2KgsItems",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1595,9 +1399,7 @@
             "tags": [],
             "label": "TotalAnnualCO2KgsItems",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1609,9 +1411,7 @@
             "tags": [],
             "label": "SelfAnnualCostsUSDItems",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1623,9 +1423,7 @@
             "tags": [],
             "label": "TotalAnnualCostsUSDItems",
             "description": [],
-            "signature": [
-              "number[]"
-            ],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1695,9 +1493,7 @@
             "tags": [],
             "label": "topn",
             "description": [],
-            "signature": [
-              "TopNFunction[]"
-            ],
+            "signature": ["TopNFunction[]"],
             "path": "packages/kbn-profiling-utils/common/es_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1711,9 +1507,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Executable",
-        "description": [
-          "Executable"
-        ],
+        "description": ["Executable"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1724,9 +1518,7 @@
             "type": "string",
             "tags": [],
             "label": "FileName",
-            "description": [
-              "file name"
-            ],
+            "description": ["file name"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1785,9 +1577,7 @@
             "tags": [],
             "label": "unauthorized",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1801,9 +1591,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ProfilingStatusResponse",
-        "description": [
-          "Profiling status response"
-        ],
+        "description": ["Profiling status response"],
         "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1814,12 +1602,8 @@
             "type": "Object",
             "tags": [],
             "label": "profiling",
-            "description": [
-              "profiling enabled"
-            ],
-            "signature": [
-              "{ enabled: boolean; }"
-            ],
+            "description": ["profiling enabled"],
+            "signature": ["{ enabled: boolean; }"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1830,12 +1614,8 @@
             "type": "Object",
             "tags": [],
             "label": "resource_management",
-            "description": [
-              "resource management status"
-            ],
-            "signature": [
-              "{ enabled: boolean; }"
-            ],
+            "description": ["resource management status"],
+            "signature": ["{ enabled: boolean; }"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1846,12 +1626,8 @@
             "type": "Object",
             "tags": [],
             "label": "resources",
-            "description": [
-              "Indices creates / pre 8.9.1 data still available"
-            ],
-            "signature": [
-              "{ created: boolean; pre_8_9_1_data: boolean; }"
-            ],
+            "description": ["Indices creates / pre 8.9.1 data still available"],
+            "signature": ["{ created: boolean; pre_8_9_1_data: boolean; }"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1865,9 +1641,7 @@
         "type": "Interface",
         "tags": [],
         "label": "StackFrame",
-        "description": [
-          "Stack frame"
-        ],
+        "description": ["Stack frame"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1878,9 +1652,7 @@
             "type": "string",
             "tags": [],
             "label": "FileName",
-            "description": [
-              "file name"
-            ],
+            "description": ["file name"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1891,9 +1663,7 @@
             "type": "string",
             "tags": [],
             "label": "FunctionName",
-            "description": [
-              "function name"
-            ],
+            "description": ["function name"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1904,9 +1674,7 @@
             "type": "number",
             "tags": [],
             "label": "FunctionOffset",
-            "description": [
-              "function offset"
-            ],
+            "description": ["function offset"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1917,9 +1685,7 @@
             "type": "number",
             "tags": [],
             "label": "LineNumber",
-            "description": [
-              "line number"
-            ],
+            "description": ["line number"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1930,9 +1696,7 @@
             "type": "boolean",
             "tags": [],
             "label": "Inline",
-            "description": [
-              "inline"
-            ],
+            "description": ["inline"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1946,9 +1710,7 @@
         "type": "Interface",
         "tags": [],
         "label": "StackFrameMetadata",
-        "description": [
-          "Stack frame metadata"
-        ],
+        "description": ["Stack frame metadata"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1959,9 +1721,7 @@
             "type": "string",
             "tags": [],
             "label": "FrameID",
-            "description": [
-              "StackTrace.FrameID"
-            ],
+            "description": ["StackTrace.FrameID"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1972,9 +1732,7 @@
             "type": "string",
             "tags": [],
             "label": "FileID",
-            "description": [
-              "StackTrace.FileID"
-            ],
+            "description": ["StackTrace.FileID"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1985,9 +1743,7 @@
             "type": "Enum",
             "tags": [],
             "label": "FrameType",
-            "description": [
-              "StackTrace.Type"
-            ],
+            "description": ["StackTrace.Type"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1998,9 +1754,7 @@
             "type": "boolean",
             "tags": [],
             "label": "Inline",
-            "description": [
-              "StackFrame.Inline"
-            ],
+            "description": ["StackFrame.Inline"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2011,9 +1765,7 @@
             "type": "number",
             "tags": [],
             "label": "AddressOrLine",
-            "description": [
-              "StackTrace.AddressOrLine"
-            ],
+            "description": ["StackTrace.AddressOrLine"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2024,9 +1776,7 @@
             "type": "string",
             "tags": [],
             "label": "FunctionName",
-            "description": [
-              "StackFrame.FunctionName"
-            ],
+            "description": ["StackFrame.FunctionName"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2037,9 +1787,7 @@
             "type": "number",
             "tags": [],
             "label": "FunctionOffset",
-            "description": [
-              "StackFrame.FunctionOffset"
-            ],
+            "description": ["StackFrame.FunctionOffset"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2050,9 +1798,7 @@
             "type": "string",
             "tags": [],
             "label": "SourceFilename",
-            "description": [
-              "StackFrame.Filename"
-            ],
+            "description": ["StackFrame.Filename"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2063,9 +1809,7 @@
             "type": "number",
             "tags": [],
             "label": "SourceLine",
-            "description": [
-              "StackFrame.LineNumber"
-            ],
+            "description": ["StackFrame.LineNumber"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2076,9 +1820,7 @@
             "type": "string",
             "tags": [],
             "label": "ExeFileName",
-            "description": [
-              "Executable.FileName"
-            ],
+            "description": ["Executable.FileName"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2092,9 +1834,7 @@
         "type": "Interface",
         "tags": [],
         "label": "StackTrace",
-        "description": [
-          "Stack trace"
-        ],
+        "description": ["Stack trace"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2105,12 +1845,8 @@
             "type": "Array",
             "tags": [],
             "label": "FrameIDs",
-            "description": [
-              "frame ids"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["frame ids"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2121,12 +1857,8 @@
             "type": "Array",
             "tags": [],
             "label": "FileIDs",
-            "description": [
-              "file ids"
-            ],
-            "signature": [
-              "string[]"
-            ],
+            "description": ["file ids"],
+            "signature": ["string[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2137,12 +1869,8 @@
             "type": "Array",
             "tags": [],
             "label": "AddressOrLines",
-            "description": [
-              "address or lines"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["address or lines"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2153,12 +1881,8 @@
             "type": "Array",
             "tags": [],
             "label": "Types",
-            "description": [
-              "types"
-            ],
-            "signature": [
-              "number[]"
-            ],
+            "description": ["types"],
+            "signature": ["number[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2205,9 +1929,7 @@
         "type": "Interface",
         "tags": [],
         "label": "StackTraceResponse",
-        "description": [
-          "Profiling stacktrace"
-        ],
+        "description": ["Profiling stacktrace"],
         "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2218,12 +1940,8 @@
             "type": "Object",
             "tags": [],
             "label": "['stack_trace_events']",
-            "description": [
-              "stack trace events"
-            ],
-            "signature": [
-              "ProfilingEvents | undefined"
-            ],
+            "description": ["stack trace events"],
+            "signature": ["ProfilingEvents | undefined"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2234,12 +1952,8 @@
             "type": "Object",
             "tags": [],
             "label": "['stack_traces']",
-            "description": [
-              "stack traces"
-            ],
-            "signature": [
-              "ProfilingStackTraces | undefined"
-            ],
+            "description": ["stack traces"],
+            "signature": ["ProfilingStackTraces | undefined"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2250,12 +1964,8 @@
             "type": "Object",
             "tags": [],
             "label": "['stack_frames']",
-            "description": [
-              "stack frames"
-            ],
-            "signature": [
-              "ProfilingStackFrames | undefined"
-            ],
+            "description": ["stack frames"],
+            "signature": ["ProfilingStackFrames | undefined"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2266,12 +1976,8 @@
             "type": "Object",
             "tags": [],
             "label": "['executables']",
-            "description": [
-              "executables"
-            ],
-            "signature": [
-              "ProfilingExecutables | undefined"
-            ],
+            "description": ["executables"],
+            "signature": ["ProfilingExecutables | undefined"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2282,9 +1988,7 @@
             "type": "number",
             "tags": [],
             "label": "['total_frames']",
-            "description": [
-              "total frames"
-            ],
+            "description": ["total frames"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2295,9 +1999,7 @@
             "type": "number",
             "tags": [],
             "label": "['sampling_rate']",
-            "description": [
-              "sampling rate"
-            ],
+            "description": ["sampling rate"],
             "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2334,9 +2036,7 @@
             "tags": [],
             "label": "TopN",
             "description": [],
-            "signature": [
-              "TopNFunction[]"
-            ],
+            "signature": ["TopNFunction[]"],
             "path": "packages/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2407,9 +2107,7 @@
         "type": "Enum",
         "tags": [],
         "label": "FrameSymbolStatus",
-        "description": [
-          "\nFrame symbol status"
-        ],
+        "description": ["\nFrame symbol status"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2421,9 +2119,7 @@
         "type": "Enum",
         "tags": [],
         "label": "FrameType",
-        "description": [
-          "\nFrame type"
-        ],
+        "description": ["\nFrame type"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2435,9 +2131,7 @@
         "type": "Enum",
         "tags": [],
         "label": "ProfilingESField",
-        "description": [
-          "\nProfiling Elasticsearch fields"
-        ],
+        "description": ["\nProfiling Elasticsearch fields"],
         "path": "packages/kbn-profiling-utils/common/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2449,9 +2143,7 @@
         "type": "Enum",
         "tags": [],
         "label": "StackTracesDisplayOption",
-        "description": [
-          "\nStacktraces options"
-        ],
+        "description": ["\nStacktraces options"],
         "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2487,9 +2179,7 @@
         "type": "Enum",
         "tags": [],
         "label": "TopNType",
-        "description": [
-          "\nFunctions TopN types definition"
-        ],
+        "description": ["\nFunctions TopN types definition"],
         "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2504,9 +2194,7 @@
         "tags": [],
         "label": "AggregationField",
         "description": [],
-        "signature": [
-          "\"service.name\" | \"transaction.name\""
-        ],
+        "signature": ["\"service.name\" | \"transaction.name\""],
         "path": "packages/kbn-profiling-utils/common/es_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2518,12 +2206,8 @@
         "type": "Type",
         "tags": [],
         "label": "FileID",
-        "description": [
-          "\nFile ID"
-        ],
-        "signature": [
-          "string"
-        ],
+        "description": ["\nFile ID"],
+        "signature": ["string"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2535,12 +2219,8 @@
         "type": "Type",
         "tags": [],
         "label": "FrameGroupID",
-        "description": [
-          "Frame group ID"
-        ],
-        "signature": [
-          "string"
-        ],
+        "description": ["Frame group ID"],
+        "signature": ["string"],
         "path": "packages/kbn-profiling-utils/common/frame_group.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2552,12 +2232,8 @@
         "type": "Type",
         "tags": [],
         "label": "StackFrameID",
-        "description": [
-          "\nStackFrame ID"
-        ],
-        "signature": [
-          "string"
-        ],
+        "description": ["\nStackFrame ID"],
+        "signature": ["string"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2569,12 +2245,8 @@
         "type": "Type",
         "tags": [],
         "label": "StackTraceID",
-        "description": [
-          "\nStacktrace ID"
-        ],
-        "signature": [
-          "string"
-        ],
+        "description": ["\nStacktrace ID"],
+        "signature": ["string"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2588,9 +2260,7 @@
         "type": "Object",
         "tags": [],
         "label": "emptyExecutable",
-        "description": [
-          "\nEmpty exectutable"
-        ],
+        "description": ["\nEmpty exectutable"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2601,9 +2271,7 @@
             "type": "string",
             "tags": [],
             "label": "FileName",
-            "description": [
-              "/** file name */"
-            ],
+            "description": ["/** file name */"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2617,9 +2285,7 @@
         "type": "Object",
         "tags": [],
         "label": "emptyStackFrame",
-        "description": [
-          "\nEmpty stack frame"
-        ],
+        "description": ["\nEmpty stack frame"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2630,9 +2296,7 @@
             "type": "string",
             "tags": [],
             "label": "FileName",
-            "description": [
-              "/** File name */"
-            ],
+            "description": ["/** File name */"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2643,9 +2307,7 @@
             "type": "string",
             "tags": [],
             "label": "FunctionName",
-            "description": [
-              "/** Function name */"
-            ],
+            "description": ["/** Function name */"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2656,9 +2318,7 @@
             "type": "number",
             "tags": [],
             "label": "FunctionOffset",
-            "description": [
-              "/** Function offset */"
-            ],
+            "description": ["/** Function offset */"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2669,9 +2329,7 @@
             "type": "number",
             "tags": [],
             "label": "LineNumber",
-            "description": [
-              "/** Line number */"
-            ],
+            "description": ["/** Line number */"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2682,12 +2340,8 @@
             "type": "boolean",
             "tags": [],
             "label": "Inline",
-            "description": [
-              "/** Inline */"
-            ],
-            "signature": [
-              "false"
-            ],
+            "description": ["/** Inline */"],
+            "signature": ["false"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2701,9 +2355,7 @@
         "type": "Object",
         "tags": [],
         "label": "emptyStackTrace",
-        "description": [
-          "\nEmpty stack trace"
-        ],
+        "description": ["\nEmpty stack trace"],
         "path": "packages/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2714,12 +2366,8 @@
             "type": "Array",
             "tags": [],
             "label": "FrameIDs",
-            "description": [
-              "/** Frame IDs */"
-            ],
-            "signature": [
-              "never[]"
-            ],
+            "description": ["/** Frame IDs */"],
+            "signature": ["never[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2730,12 +2378,8 @@
             "type": "Array",
             "tags": [],
             "label": "FileIDs",
-            "description": [
-              "/** File IDs */"
-            ],
-            "signature": [
-              "never[]"
-            ],
+            "description": ["/** File IDs */"],
+            "signature": ["never[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2746,12 +2390,8 @@
             "type": "Array",
             "tags": [],
             "label": "AddressOrLines",
-            "description": [
-              "/** Address or lines */"
-            ],
-            "signature": [
-              "never[]"
-            ],
+            "description": ["/** Address or lines */"],
+            "signature": ["never[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2762,12 +2402,8 @@
             "type": "Array",
             "tags": [],
             "label": "Types",
-            "description": [
-              "/** Types */"
-            ],
-            "signature": [
-              "never[]"
-            ],
+            "description": ["/** Types */"],
+            "signature": ["never[]"],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { PaletteSelector } from '../palette_selector/palette_selector';
 
-import { changeGradientSortOrder } from '../../state/color_mapping';
+import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
-import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
-import { ColorMappingInputData } from '../../categorical_color_mapping';
-import { Gradient } from '../palette_selector/gradient';
 import { NeutralPalette } from '../../palettes/neutral';
+import { changeGradientSortOrder } from '../../state/color_mapping';
+import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
+import { Gradient } from '../palette_selector/gradient';
 import { ScaleMode } from '../palette_selector/scale';
-import { UnassignedTermsConfig } from './unassigned_terms_config';
 import { AssignmentsConfig } from './assigments';
+import { UnassignedTermsConfig } from './unassigned_terms_config';
 
 export function Container({
   data,

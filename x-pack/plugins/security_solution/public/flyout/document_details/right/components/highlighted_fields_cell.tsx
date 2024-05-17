@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
+import type { VFC } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   AgentStatus,
   EndpointAgentStatusById,
 } from '../../../../common/components/agents/agent_status';
-import { useRightPanelContext } from '../context';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import {
   AGENT_STATUS_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { useRightPanelContext } from '../context';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID,

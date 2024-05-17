@@ -6,30 +6,30 @@
  */
 
 import {
-  securitySolutionOnlyAll,
-  observabilityOnlyAll,
-  securitySolutionOnlyRead,
-  observabilityOnlyRead,
   globalRead as globalReadRole,
-  noKibanaPrivileges as noKibanaPrivilegesRole,
-  securitySolutionOnlyAllSpacesAll,
-  securitySolutionOnlyReadSpacesAll,
-  observabilityOnlyAllSpacesAll,
   logsOnlyAllSpacesAll,
-  observabilityOnlyReadSpacesAll,
+  noKibanaPrivileges as noKibanaPrivilegesRole,
   // trial license roles
   observabilityMinReadAlertsAll,
+  observabilityMinReadAlertsAllSpacesAll,
   observabilityMinReadAlertsRead,
   observabilityMinReadAlertsReadSpacesAll,
   observabilityMinimalRead,
   observabilityMinimalReadSpacesAll,
-  securitySolutionOnlyAllSpace2,
-  securitySolutionOnlyReadSpace2,
+  observabilityOnlyAll,
   observabilityOnlyAllSpace2,
-  observabilityOnlyReadSpace2,
-  observabilityMinReadAlertsAllSpacesAll,
+  observabilityOnlyAllSpacesAll,
   observabilityOnlyAllSpacesAllWithReadESIndices,
+  observabilityOnlyRead,
+  observabilityOnlyReadSpace2,
+  observabilityOnlyReadSpacesAll,
+  securitySolutionOnlyAll,
+  securitySolutionOnlyAllSpace2,
+  securitySolutionOnlyAllSpacesAll,
   securitySolutionOnlyAllSpacesAllWithReadESIndices,
+  securitySolutionOnlyRead,
+  securitySolutionOnlyReadSpace2,
+  securitySolutionOnlyReadSpacesAll,
 } from './roles';
 import { User } from './types';
 

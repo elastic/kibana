@@ -1,3 +1,7 @@
+import { coreMock } from '@kbn/core/public/mocks';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,15 +9,11 @@
  * 2.0.
  */
 import React from 'react';
-import { renderWithReduxStore } from '../../../mocks';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import type { Query, AggregateQuery } from '@kbn/es-query';
-import { coreMock } from '@kbn/core/public/mocks';
-import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import { renderWithReduxStore } from '../../../mocks';
+import { mockDataPlugin, mockDatasourceMap, mockVisualizationMap } from '../../../mocks';
+import type { LensPluginStartDependencies } from '../../../plugin';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import url from 'url';
 import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
-import { Location } from 'history';
 import { IBasePath } from '@kbn/core/public';
+import rison from '@kbn/rison';
+import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import rison from '@kbn/rison';
-import url from 'url';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { getTimepickerRisonData } from '../rison_helpers';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { getTimepickerRisonData } from '../rison_helpers';
 
 interface Props {
   query: {

@@ -7,12 +7,12 @@
 
 import { expect } from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
+  createIndexConnector,
   createEsQueryRule as createRule,
   createSlackConnector,
-  createIndexConnector,
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export enum RuleNotifyWhen {
   CHANGE = 'onActionGroupChange',

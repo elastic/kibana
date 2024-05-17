@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { MapConfig, mapConfigSchema } from '../config';
 export type { EMSSettings } from '../common';
 export type { MapsEmsPluginServerSetup } from './plugin';

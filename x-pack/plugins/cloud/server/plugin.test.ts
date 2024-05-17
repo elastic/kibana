@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import type { DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudConfigType } from './config';
 import { CloudPlugin } from './plugin';
-import type { DecodedCloudId } from '../common/decode_cloud_id';
+import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
 
 const baseConfig = {
   base_url: 'https://cloud.elastic.co',

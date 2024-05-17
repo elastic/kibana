@@ -6,17 +6,17 @@
  */
 
 import type React from 'react';
-import type { TimelineModel } from '../../store/model';
 import type {
+  Note,
   RowRendererId,
   SingleTimelineResolveResponse,
+  TemplateTimelineTypeLiteral,
+  TimelineStatus,
+  TimelineStatusLiteralWithNull,
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
-  TimelineStatus,
-  TemplateTimelineTypeLiteral,
-  TimelineStatusLiteralWithNull,
-  Note,
 } from '../../../../common/api/timeline';
+import type { TimelineModel } from '../../store/model';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {

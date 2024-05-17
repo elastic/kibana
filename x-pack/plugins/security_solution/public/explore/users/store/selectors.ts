@@ -11,9 +11,9 @@ import type { State } from '../../../common/store/types';
 
 import type {
   UserAssetQuery,
+  UserAssetTableType,
   UserDetailsPageModel,
   UserFlyoutQueries,
-  UserAssetTableType,
   UsersPageModel,
 } from './model';
 import { UsersTableType, UsersType } from './model';

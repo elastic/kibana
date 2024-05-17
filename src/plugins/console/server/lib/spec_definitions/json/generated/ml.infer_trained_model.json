@@ -5,15 +5,9 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "timeout": [
-        "10s",
-        "-1",
-        "0"
-      ]
+      "timeout": ["10s", "-1", "0"]
     },
-    "methods": [
-      "POST"
-    ],
+    "methods": ["POST"],
     "patterns": [
       "_ml/trained_models/{model_id}/_infer",
       "_ml/trained_models/{model_id}/deployment/_infer"

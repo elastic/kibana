@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common/types';
-import { SavedObjectReference } from '@kbn/core/types';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { ControlGroupInput, ControlPanelState } from './types';
 import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
 } from './control_group_migrations';
+import { ControlGroupInput, ControlPanelState } from './types';
 
 type ControlGroupInputWithType = Partial<ControlGroupInput> & { type: string };
 

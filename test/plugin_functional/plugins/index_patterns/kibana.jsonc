@@ -7,11 +7,7 @@
     "id": "indexPatternsTestPlugin",
     "server": true,
     "browser": false,
-    "configPath": [
-      "index_patterns_test_plugin"
-    ],
-    "requiredPlugins": [
-      "data"
-    ]
+    "configPath": ["index_patterns_test_plugin"],
+    "requiredPlugins": ["data"]
   }
 }

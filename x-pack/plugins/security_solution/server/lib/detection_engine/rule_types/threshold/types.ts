@@ -11,10 +11,10 @@ import type {
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchResponse } from '@kbn/es-types';
 import type { RuleTypeState } from '@kbn/alerting-plugin/server';
-import type { SignalSource } from '../types';
+import type { ESSearchResponse } from '@kbn/es-types';
 import type { SearchTypes } from '../../../../../common/detection_engine/types';
+import type { SignalSource } from '../types';
 import type {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,

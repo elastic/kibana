@@ -6,9 +6,9 @@
  */
 import React, { memo } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { ListPageRouteState } from '../../../../common/endpoint/types';

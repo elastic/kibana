@@ -7,16 +7,16 @@
 
 import { TestBed } from '@kbn/test-jest-helpers';
 import {
+  createDownsampleActions,
   createForceMergeActions,
-  createShrinkActions,
-  createReadonlyActions,
   createIndexPriorityActions,
-  createSearchableSnapshotActions,
   createMinAgeActions,
   createNodeAllocationActions,
+  createReadonlyActions,
   createReplicasAction,
+  createSearchableSnapshotActions,
+  createShrinkActions,
   createSnapshotPolicyActions,
-  createDownsampleActions,
 } from '.';
 
 export const createHotPhaseActions = (testBed: TestBed) => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { bulkGetCases } from './bulk_get_cases';
 import { coreMock } from '@kbn/core/public/mocks';
+import { bulkGetCases } from './bulk_get_cases';
 
 describe('Bulk Get Cases API', () => {
   const abortCtrl = new AbortController();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -13,28 +12,29 @@ import {
   EuiFlexItemProps,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
-import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
-import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
-import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import { ChartPanel } from '../../../components/chart_panel';
-import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
-import type {
-  ComplianceDashboardDataV2,
-  Evaluation,
-  PosturePolicyTemplate,
-} from '../../../../common/types_old';
-import { RisksTable } from '../compliance_charts/risks_table';
-import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   RULE_FAILED,
   RULE_PASSED,
 } from '../../../../common/constants';
+import type {
+  ComplianceDashboardDataV2,
+  Evaluation,
+  PosturePolicyTemplate,
+} from '../../../../common/types_old';
+import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
+import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
+import { ChartPanel } from '../../../components/chart_panel';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
+import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
+import { RisksTable } from '../compliance_charts/risks_table';
+import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,

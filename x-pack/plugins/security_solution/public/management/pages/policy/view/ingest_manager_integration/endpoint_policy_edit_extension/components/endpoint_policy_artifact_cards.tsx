@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
-import {
-  BLOCKLISTS_LABELS,
-  EVENT_FILTERS_LABELS,
-  HOST_ISOLATION_EXCEPTIONS_LABELS,
-  TRUSTED_APPS_LABELS,
-} from '../translations';
-import { useCanAccessSomeArtifacts } from '../../hooks/use_can_access_some_artifacts';
-import { BlocklistsApiClient } from '../../../../../blocklist/services';
-import { HostIsolationExceptionsApiClient } from '../../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
-import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
-import { TrustedAppsApiClient } from '../../../../../trusted_apps/service';
+import { useHttp } from '../../../../../../../common/lib/kibana';
 import {
   getBlocklistsListPath,
   getEventFiltersListPath,
@@ -30,13 +20,23 @@ import {
   getPolicyTrustedAppsPath,
   getTrustedAppsListPath,
 } from '../../../../../../common/routing';
+import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
+import { BlocklistsApiClient } from '../../../../../blocklist/services';
+import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
+import { EventFiltersApiClient } from '../../../../../event_filters/service/api_client';
+import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
+import { HostIsolationExceptionsApiClient } from '../../../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../../../trusted_apps/constants';
+import { TrustedAppsApiClient } from '../../../../../trusted_apps/service';
+import { useCanAccessSomeArtifacts } from '../../hooks/use_can_access_some_artifacts';
+import {
+  BLOCKLISTS_LABELS,
+  EVENT_FILTERS_LABELS,
+  HOST_ISOLATION_EXCEPTIONS_LABELS,
+  TRUSTED_APPS_LABELS,
+} from '../translations';
 import type { FleetIntegrationArtifactCardProps } from './fleet_integration_artifacts_card';
 import { FleetIntegrationArtifactsCard } from './fleet_integration_artifacts_card';
-import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../../../event_filters/constants';
-import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../../../host_isolation_exceptions/constants';
-import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../../../blocklist/constants';
-import { useHttp } from '../../../../../../../common/lib/kibana';
 
 interface PolicyArtifactCardProps {
   policyId: string;

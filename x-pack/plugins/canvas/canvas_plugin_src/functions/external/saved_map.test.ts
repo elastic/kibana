@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { savedMap } from './saved_map';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
+import { savedMap } from './saved_map';
 
 const filterContext: ExpressionValueFilter = {
   type: 'filter',

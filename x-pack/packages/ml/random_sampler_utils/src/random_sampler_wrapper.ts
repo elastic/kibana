@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { get } from 'lodash';
 import { getSampleProbability } from './get_sample_probability';
 
 const DEFAULT_AGG_NAME = 'sample';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { HttpHandler } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IdFormat, JobType } from '../../../../common/http_api/latest';
+import type { HttpHandler } from '@kbn/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
 } from '../../../../common/http_api';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';

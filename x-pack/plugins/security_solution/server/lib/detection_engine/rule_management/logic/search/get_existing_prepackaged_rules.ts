@@ -12,8 +12,8 @@ import {
   KQL_FILTER_MUTABLE_RULES,
 } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
-import { findRules } from './find_rules';
 import type { RuleAlertType } from '../../../rule_schema';
+import { findRules } from './find_rules';
 
 export const MAX_PREBUILT_RULES_COUNT = 10_000;
 

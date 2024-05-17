@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { zip, take } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
+import { take, zip } from 'lodash';
 import { ColorPalette } from '../../../../common/lib';
 import { ColorStop } from '../types';
 import { Palette, PaletteColorStops } from './types';

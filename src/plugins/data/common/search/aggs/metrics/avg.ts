@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '../../..';
+import { BaseAggParams } from '../types';
 import { aggAvgFnName } from './avg_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
 
 const averageTitle = i18n.translate('data.search.aggs.metrics.averageTitle', {
   defaultMessage: 'Average',

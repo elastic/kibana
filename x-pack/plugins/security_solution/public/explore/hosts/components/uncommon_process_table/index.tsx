@@ -10,15 +10,15 @@ import { useDispatch } from 'react-redux';
 
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import type { HostsUncommonProcessesEdges } from '../../../../../common/search_strategy';
-import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { Columns, ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
-import * as i18n from './translations';
-import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
+import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { HostsType } from '../../store/model';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import * as i18n from './translations';
 
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
 interface UncommonProcessTableProps {
@@ -40,7 +40,7 @@ export type UncommonProcessTableColumns = [
   Columns<HostsUncommonProcessesEdges>,
   Columns<HostsUncommonProcessesEdges>,
   Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>
+  Columns<HostsUncommonProcessesEdges>,
 ];
 
 const rowItems: ItemsPerRow[] = [

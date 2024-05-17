@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
-import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
+import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  BulkGetAttachmentsResponse,
-  AttachmentRequest,
-  BulkCreateAttachmentsRequest,
   AttachmentPatchRequest,
+  AttachmentRequest,
   AttachmentsFindResponse,
+  BulkCreateAttachmentsRequest,
+  BulkGetAttachmentsResponse,
 } from '@kbn/cases-plugin/common/types/api';
-import { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import { Attachment, Attachments } from '@kbn/cases-plugin/common/types/domain';
+import type SuperTest from 'supertest';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
-import { getSpaceUrlPrefix, setupAuth } from './helpers';
-import { createCase } from './case';
 import { postCaseReq } from '../mock';
+import { createCase } from './case';
+import { getSpaceUrlPrefix, setupAuth } from './helpers';
 
 export const bulkGetAttachments = async ({
   supertest,

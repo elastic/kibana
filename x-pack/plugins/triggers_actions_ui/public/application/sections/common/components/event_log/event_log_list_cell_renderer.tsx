@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
-import { useHistory } from 'react-router-dom';
 import { getRuleDetailsRoute as internalGetRuleDetailsRoute } from '@kbn/rule-data-utils';
+import moment from 'moment';
+import React, { useCallback, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { formatRuleAlertCount } from '../../../../../common/lib/format_rule_alert_count';
 import { useKibana, useSpacesData } from '../../../../../common/lib/kibana';
-import { EventLogListStatus } from './event_log_list_status';
-import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
 import {
+  CONNECTOR_EXECUTION_LOG_COLUMN_IDS,
+  RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS,
   RULE_EXECUTION_LOG_COLUMN_IDS,
   RULE_EXECUTION_LOG_DURATION_COLUMNS,
-  RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS,
-  CONNECTOR_EXECUTION_LOG_COLUMN_IDS,
 } from '../../../../constants';
+import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
+import { EventLogListStatus } from './event_log_list_status';
 
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export type ColumnId =
-  | typeof RULE_EXECUTION_LOG_COLUMN_IDS[number]
-  | typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS[number];
+  | (typeof RULE_EXECUTION_LOG_COLUMN_IDS)[number]
+  | (typeof CONNECTOR_EXECUTION_LOG_COLUMN_IDS)[number];
 
 interface EventLogListCellRendererProps {
   columnId: ColumnId;

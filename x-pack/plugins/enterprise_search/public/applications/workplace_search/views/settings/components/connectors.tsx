@@ -24,15 +24,15 @@ import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { LicenseCallout } from '../../../components/shared/license_callout';
 import { SourceIcon } from '../../../components/shared/source_icon';
 import {
-  NAV,
   CONFIGURE_BUTTON,
-  CONNECTORS_HEADER_TITLE,
   CONNECTORS_HEADER_DESCRIPTION,
+  CONNECTORS_HEADER_TITLE,
   CUSTOM_SERVICE_TYPE,
+  EXTERNAL_SERVICE_TYPE,
+  NAV,
   PRIVATE_PLATINUM_LICENSE_CALLOUT,
   PRIVATE_SOURCE,
   UPDATE_BUTTON,
-  EXTERNAL_SERVICE_TYPE,
 } from '../../../constants';
 import { getAddPath, getEditPath, getSourcesPath } from '../../../routes';
 import { SettingsLogic } from '../settings_logic';

@@ -6,8 +6,8 @@
  */
 
 import {
-  EuiFilterGroup,
   EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSearchBar,

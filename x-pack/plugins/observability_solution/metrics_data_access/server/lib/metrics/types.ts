@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../adapters/framework';
+import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../adapters/framework';
 
 export type ESSearchClient = <Hit = {}, Aggregation = undefined>(
   options: CallWithRequestParams

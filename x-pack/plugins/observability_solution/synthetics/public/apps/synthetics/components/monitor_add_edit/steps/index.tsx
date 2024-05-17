@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiPanel, EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiSteps, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { InspectMonitorPortal } from './inspect_monitor_portal';
-import { ConfigKey, FormMonitorType, StepMap } from '../types';
-import { serializeNestedFormField } from '../form/formatter';
 import { AdvancedConfig } from '../advanced';
+import { serializeNestedFormField } from '../form/formatter';
+import { ConfigKey, FormMonitorType, StepMap } from '../types';
+import { InspectMonitorPortal } from './inspect_monitor_portal';
 import { MonitorTypePortal } from './monitor_type_portal';
 import { ReadOnlyCallout } from './read_only_callout';
 

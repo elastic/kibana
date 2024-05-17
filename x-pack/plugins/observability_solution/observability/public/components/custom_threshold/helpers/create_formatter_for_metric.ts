@@ -6,8 +6,8 @@
  */
 
 import numeral from '@elastic/numeral';
-import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
+import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { metricToFormat } from './metric_to_format';
 
 export const createFormatterForMetric = (metrics: CustomThresholdExpressionMetric[]) => {

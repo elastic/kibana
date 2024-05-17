@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { z, ZodFirstPartyTypeKind } from 'zod';
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
+import { ZodFirstPartyTypeKind, z } from 'zod';
 
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';

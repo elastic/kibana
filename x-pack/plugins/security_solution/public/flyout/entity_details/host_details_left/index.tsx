@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import React, { useMemo } from 'react';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;

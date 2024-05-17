@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFieldText } from '@elastic/eui';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 import {
   PhraseValueInput,
   PhrasesValuesInput,
@@ -19,9 +19,9 @@ import {
   isRangeParams,
 } from '../../filter_bar/filter_editor';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 import { OPERATORS } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { formatDateChange } from '../../filter_bar/filter_editor/range_value_input';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export const strings = {
   getSelectFieldPlaceholderLabel: () =>

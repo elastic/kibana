@@ -6,7 +6,6 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
 import {
   CreateExceptionListItemSchema,
   ExceptionListSchema,
@@ -15,10 +14,11 @@ import {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { v4 as uuidv4 } from 'uuid';
 
-import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 import { bulkCreateExceptionListItems } from './bulk_create_exception_list_items';
 import { createExceptionList } from './create_exception_list';
+import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 
 const LISTS_ABLE_TO_DUPLICATE = [
   ExceptionListTypeEnum.DETECTION.toString(),

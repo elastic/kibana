@@ -18,13 +18,7 @@
       "unifiedSearch",
       "savedObjectsManagement"
     ],
-    "optionalPlugins": [
-      "noDataPage",
-      "spaces"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "kibanaUtils"
-    ]
+    "optionalPlugins": ["noDataPage", "spaces"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }

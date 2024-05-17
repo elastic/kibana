@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { indicesHelpers } from './lib/indices.helpers';
 import { API_BASE_PATH } from './constants';
+import { indicesHelpers } from './lib/indices.helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

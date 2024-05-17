@@ -12,28 +12,28 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
-import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import {
-  BulkActionTypeEnum,
   BulkActionEditTypeEnum,
+  BulkActionTypeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
+import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import * as detectionI18n from '../../../../../detections/pages/detection_engine/translations';
 import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
-import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../../rule_management/logic/bulk_actions/use_download_exported_rules';
+import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import type { FilterOptions } from '../../../../rule_management/logic/types';
 import { getExportedRulesDetails } from '../helpers';
 import { useRulesTableContext } from '../rules_table/rules_table_context';

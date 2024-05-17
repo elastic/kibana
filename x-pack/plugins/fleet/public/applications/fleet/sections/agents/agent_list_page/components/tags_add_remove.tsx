@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState, useMemo, useCallback } from 'react';
-import { difference, uniq } from 'lodash';
-import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -18,8 +15,11 @@ import {
   EuiSelectable,
   EuiWrappingPopover,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { difference, uniq } from 'lodash';
+import React, { Fragment, useEffect, useState, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 
 import { useUpdateTags } from '../hooks';
 

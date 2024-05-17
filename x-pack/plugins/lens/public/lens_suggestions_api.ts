@@ -1,3 +1,4 @@
+import type { DataView } from '@kbn/data-views-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,10 +6,9 @@
  * 2.0.
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
-import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
+import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 
 export enum ChartType {
   XY = 'XY',

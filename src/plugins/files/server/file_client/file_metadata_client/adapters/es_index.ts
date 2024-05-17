@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { once } from 'lodash';
-import { pipe } from 'lodash/fp';
+import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { MappingProperty, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { once } from 'lodash';
+import { pipe } from 'lodash/fp';
 import pLimit from 'p-limit';
 
-import { wrapErrorAndReThrow } from '../../utils';
-import type { FilesMetrics, FileMetadata, Pagination } from '../../../../common';
+import type { FileMetadata, FilesMetrics, Pagination } from '../../../../common';
 import type { FindFileArgs } from '../../../file_service';
+import { fileObjectType } from '../../../saved_objects/file';
+import { wrapErrorAndReThrow } from '../../utils';
 import type {
+  BulkGetArg,
   DeleteArg,
   FileDescriptor,
   FileMetadataClient,
   GetArg,
-  BulkGetArg,
   GetUsageMetricsArgs,
   UpdateArgs,
 } from '../file_metadata_client';
 import { filterArgsToKuery } from './query_filters';
-import { fileObjectType } from '../../../saved_objects/file';
 
 const filterArgsToESQuery = pipe(filterArgsToKuery, toElasticsearchQuery);
 const bulkGetConcurrency = pLimit(10);

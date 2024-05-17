@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FlamegraphLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/flamegraph_locator';
-import { TopNFunctionsLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/topn_functions_locator';
 import { StacktracesLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/stacktraces_locator';
+import { TopNFunctionsLocator } from '@kbn/observability-shared-plugin/public/locators/profiling/topn_functions_locator';
+import React from 'react';
 import { HOST_FIELD } from '../../../../../common/constants';
 
 const PROFILING_FEEDBACK_URL = 'https://ela.st/profiling-feedback';

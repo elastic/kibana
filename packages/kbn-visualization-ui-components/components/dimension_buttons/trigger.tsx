@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { EuiFlexItem, EuiText } from '@elastic/eui';
 import type { EuiTextProps } from '@elastic/eui/src/components/text/text';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { emptyTitleText } from './constants';
 
 export const defaultDimensionTriggerTooltip = (

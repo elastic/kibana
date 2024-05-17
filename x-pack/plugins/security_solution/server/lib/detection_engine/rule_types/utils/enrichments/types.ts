@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
 
 import type { ExperimentalFeatures } from '../../../../../../common';
@@ -14,8 +14,8 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../../common/api/detection_engine/model/alerts';
-import type { RuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import type { RuleServices } from '../../types';
 
 export type EnrichmentType = estypes.SearchHit<unknown>;
 

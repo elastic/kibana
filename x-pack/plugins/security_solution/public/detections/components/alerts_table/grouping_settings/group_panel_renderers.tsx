@@ -16,15 +16,15 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import type { GroupPanelRenderer } from '@kbn/securitysolution-grouping/src';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
-import type { GroupPanelRenderer } from '@kbn/securitysolution-grouping/src';
-import type { AlertsGroupingAggregation } from './types';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations';
+import type { AlertsGroupingAggregation } from './types';
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsGroupingAggregation> = (
   selectedGroup,

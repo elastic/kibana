@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useCallback } from 'react';
 import {
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiLoadingSpinner,
   EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
-import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useCallback } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import useObservable from 'react-use/lib/useObservable';
 
 import {
   DataView,
   DataViewSpec,
   Form,
+  UseField,
   useForm,
   useFormData,
   useKibana,
-  UseField,
 } from '../shared_imports';
 
 import { FlyoutPanels } from './flyout_panels';
@@ -38,25 +38,25 @@ import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
 
 import {
   DataViewEditorContext,
-  RollupIndicesCapsResponse,
-  IndexPatternConfig,
   FormInternal,
+  IndexPatternConfig,
+  RollupIndicesCapsResponse,
 } from '../types';
 
 import {
-  TimestampField,
-  TypeField,
-  TitleField,
-  NameField,
-  schema,
-  Footer,
-  SubmittingType,
   AdvancedParamsContent,
+  Footer,
+  NameField,
   PreviewPanel,
   RollupBetaWarning,
+  SubmittingType,
+  TimestampField,
+  TitleField,
+  TypeField,
+  schema,
 } from '.';
-import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 import { DataViewEditorService } from '../data_view_editor_service';
+import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 
 export interface Props {
   /**
@@ -114,10 +114,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
               : editData.timeFieldName
-              ? {
-                  timestampField: { label: editData.timeFieldName, value: editData.timeFieldName },
-                }
-              : {}),
+                ? {
+                    timestampField: {
+                      label: editData.timeFieldName,
+                      value: editData.timeFieldName,
+                    },
+                  }
+                : {}),
           }
         : {}),
     },

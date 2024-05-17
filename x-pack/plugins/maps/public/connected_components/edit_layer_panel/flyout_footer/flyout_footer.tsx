@@ -7,11 +7,11 @@
 
 import React, { Component } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { panelStrings } from '../../panel_strings';
 import { ILayer } from '../../../classes/layers/layer';
 import { RemoveLayerConfirmModal } from '../../../components/remove_layer_confirm_modal';
+import { panelStrings } from '../../panel_strings';
 
 export interface Props {
   selectedLayer?: ILayer;

@@ -9,8 +9,8 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import {
   createConnector,
-  fetchConnectorByIndexName,
   deleteConnectorById,
+  fetchConnectorByIndexName,
 } from '@kbn/search-connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';

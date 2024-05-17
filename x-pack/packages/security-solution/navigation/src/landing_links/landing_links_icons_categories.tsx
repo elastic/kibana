@@ -1,3 +1,5 @@
+import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +7,9 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiHorizontalRule, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { NavigationLink, LinkCategories } from '../types';
-import { LandingLinksIcons } from './landing_links_icons';
 import { LinkCategoryType } from '../constants';
+import type { LinkCategories, NavigationLink } from '../types';
+import { LandingLinksIcons } from './landing_links_icons';
 
 export interface LandingLinksIconsCategoriesProps {
   links: Readonly<NavigationLink[]>;

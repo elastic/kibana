@@ -24,13 +24,9 @@
         "parentPluginId": "@kbn/core-plugins-contracts-server",
         "id": "def-common.FoundPluginContractResolverResponseItem",
         "type": "Interface",
-        "tags": [
-          "see"
-        ],
+        "tags": ["see"],
         "label": "FoundPluginContractResolverResponseItem",
-        "description": [
-          "\nContract resolver response for found plugins.\n"
-        ],
+        "description": ["\nContract resolver response for found plugins.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-contracts-server",
@@ -52,9 +48,7 @@
             "tags": [],
             "label": "found",
             "description": [],
-            "signature": [
-              "true"
-            ],
+            "signature": ["true"],
             "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -66,9 +60,7 @@
             "tags": [],
             "label": "contract",
             "description": [],
-            "signature": [
-              "ContractType"
-            ],
+            "signature": ["ContractType"],
             "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -80,13 +72,9 @@
         "parentPluginId": "@kbn/core-plugins-contracts-server",
         "id": "def-common.NotFoundPluginContractResolverResponseItem",
         "type": "Interface",
-        "tags": [
-          "see"
-        ],
+        "tags": ["see"],
         "label": "NotFoundPluginContractResolverResponseItem",
-        "description": [
-          "\nContract resolver response for not found plugins.\n"
-        ],
+        "description": ["\nContract resolver response for not found plugins.\n"],
         "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -98,9 +86,7 @@
             "tags": [],
             "label": "found",
             "description": [],
-            "signature": [
-              "false"
-            ],
+            "signature": ["false"],
             "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -114,9 +100,7 @@
         "type": "Interface",
         "tags": [],
         "label": "PluginsServiceSetup",
-        "description": [
-          "\nSetup contract of Core's `plugins` service.\n"
-        ],
+        "description": ["\nSetup contract of Core's `plugins` service.\n"],
         "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -125,9 +109,7 @@
             "parentPluginId": "@kbn/core-plugins-contracts-server",
             "id": "def-common.PluginsServiceSetup.onSetup",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "onSetup",
             "description": [
               "\nReturns a promise that will resolve with the requested plugin setup contracts once all plugins have been set up.\n\nIf called when plugins are already setup, the returned promise will resolve instantly.\n\nThe API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly\ndefined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.\n\n**Important:** This API should only be used when trying to address cyclic dependency issues that can't easily\nbe solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution\nis made available.\nTherefore, by using this API, you implicitly agree to:\n- consider it as technical debt and open an issue to track the tech debt resolution\n- accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team\n"
@@ -163,9 +145,7 @@
                 "tags": [],
                 "label": "pluginNames",
                 "description": [],
-                "signature": [
-                  "(keyof T)[]"
-                ],
+                "signature": ["(keyof T)[]"],
                 "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -176,9 +156,7 @@
             "parentPluginId": "@kbn/core-plugins-contracts-server",
             "id": "def-common.PluginsServiceSetup.onStart",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "onStart",
             "description": [
               "\nReturns a promise that will resolve with the requested plugin start contracts once all plugins have been started.\n\nIf called when plugins are already started, the returned promise will resolve instantly.\n\nThe API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly\ndefined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.\n\n**Important:** This API should only be used when trying to address cyclic dependency issues that can't easily\nbe solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution\nis made available.\nTherefore, by using this API, you implicitly agree to:\n- consider it as technical debt and open an issue to track the tech debt resolution\n- accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team\n"
@@ -214,9 +192,7 @@
                 "tags": [],
                 "label": "pluginNames",
                 "description": [],
-                "signature": [
-                  "(keyof T)[]"
-                ],
+                "signature": ["(keyof T)[]"],
                 "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -232,9 +208,7 @@
         "type": "Interface",
         "tags": [],
         "label": "PluginsServiceStart",
-        "description": [
-          "\nStart contract of Core's `plugins` service.\n"
-        ],
+        "description": ["\nStart contract of Core's `plugins` service.\n"],
         "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -243,9 +217,7 @@
             "parentPluginId": "@kbn/core-plugins-contracts-server",
             "id": "def-common.PluginsServiceStart.onStart",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": ["experimental"],
             "label": "onStart",
             "description": [
               "\nReturns a promise that will resolve with the requested plugin start contracts once all plugins have been started.\n\nIf called when plugins are already started, the returned promise will resolve instantly.\n\nThe API can only be used to resolve required dependencies, optional dependencies, or dependencies explicitly\ndefined as `runtimePluginDependencies` in the calling plugin's manifest, otherwise the API will throw at call time.\n\n**Important:** This API should only be used when trying to address cyclic dependency issues that can't easily\nbe solved otherwise. This is meant to be a temporary workaround only supposed to be used until a better solution\nis made available.\nTherefore, by using this API, you implicitly agree to:\n- consider it as technical debt and open an issue to track the tech debt resolution\n- accept that this is only a temporary solution, and will comply to switching to the long term solution when asked by the Core team\n"
@@ -281,9 +253,7 @@
                 "tags": [],
                 "label": "pluginNames",
                 "description": [],
-                "signature": [
-                  "(keyof T)[]"
-                ],
+                "signature": ["(keyof T)[]"],
                 "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -300,16 +270,10 @@
         "parentPluginId": "@kbn/core-plugins-contracts-server",
         "id": "def-common.PluginContractMap",
         "type": "Type",
-        "tags": [
-          "see"
-        ],
+        "tags": ["see"],
         "label": "PluginContractMap",
-        "description": [
-          "\nA record of plugin contracts.\n"
-        ],
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
+        "description": ["\nA record of plugin contracts.\n"],
+        "signature": ["{ [x: string]: unknown; }"],
         "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -355,9 +319,7 @@
             "tags": [],
             "label": "pluginNames",
             "description": [],
-            "signature": [
-              "(keyof T)[]"
-            ],
+            "signature": ["(keyof T)[]"],
             "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -369,13 +331,9 @@
         "parentPluginId": "@kbn/core-plugins-contracts-server",
         "id": "def-common.PluginContractResolverResponse",
         "type": "Type",
-        "tags": [
-          "see"
-        ],
+        "tags": ["see"],
         "label": "PluginContractResolverResponse",
-        "description": [
-          "\nResponse from a plugin contract resolver request.\n"
-        ],
+        "description": ["\nResponse from a plugin contract resolver request.\n"],
         "signature": [
           "{ [Key in keyof ContractMap]: ",
           {
@@ -396,13 +354,9 @@
         "parentPluginId": "@kbn/core-plugins-contracts-server",
         "id": "def-common.PluginContractResolverResponseItem",
         "type": "Type",
-        "tags": [
-          "see"
-        ],
+        "tags": ["see"],
         "label": "PluginContractResolverResponseItem",
-        "description": [
-          "\nContract resolver response.\n"
-        ],
+        "description": ["\nContract resolver response.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-plugins-contracts-server",

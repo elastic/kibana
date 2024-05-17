@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiForm,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiCallOut,
+  EuiForm,
+  EuiFormRow,
   EuiSwitch,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { DashboardContainerInput } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';

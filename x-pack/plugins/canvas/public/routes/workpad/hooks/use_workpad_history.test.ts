@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useWorkpadHistory } from './use_workpad_history';
 import { encode } from '../route_state';
+import { useWorkpadHistory } from './use_workpad_history';
 
 const mockGetState = jest.fn();
 const mockGetHistory = jest.fn();

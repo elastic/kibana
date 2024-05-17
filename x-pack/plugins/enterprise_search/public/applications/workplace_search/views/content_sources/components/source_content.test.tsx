@@ -7,8 +7,8 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
-import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
+import { contentItems, fullContentSources } from '../../../__mocks__/content_sources.mock';
 import { meta } from '../../../__mocks__/meta.mock';
 
 import React from 'react';
@@ -16,12 +16,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  EuiTable,
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiLink,
+  EuiTable,
 } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';

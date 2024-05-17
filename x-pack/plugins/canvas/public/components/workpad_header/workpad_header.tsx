@@ -9,16 +9,16 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Action } from 'redux-actions';
+import { CommitFn, ElementSpec, State } from '../../../types';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
-import { canUserWrite } from '../../state/selectors/app';
-import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
-import { setWriteable } from '../../state/actions/workpad';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
-import { CommitFn, ElementSpec, State } from '../../../types';
-import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header.component';
+import { setWriteable } from '../../state/actions/workpad';
+import { canUserWrite } from '../../state/selectors/app';
+import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { AddEmbeddablePanel } from '../embeddable_flyout';
+import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header.component';
 
 interface Props {
   commit: CommitFn;

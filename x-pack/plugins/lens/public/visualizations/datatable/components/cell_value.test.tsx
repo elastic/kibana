@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { DataContext } from './table_basic';
-import { createGridCell } from './cell_value';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { DatatableArgs, ColumnConfigArg } from '../../../../common/expressions';
-import { DataContextType } from './types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { ColumnConfigArg, DatatableArgs } from '../../../../common/expressions';
+import { createGridCell } from './cell_value';
+import { DataContext } from './table_basic';
+import { DataContextType } from './types';
 
 describe('datatable cell renderer', () => {
   const table: Datatable = {

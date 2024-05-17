@@ -5,22 +5,12 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "timeout": [
-        "-1",
-        "0"
-      ],
+      "timeout": ["-1", "0"],
       "verbose": "__flag__",
-      "size": [
-        "1000"
-      ]
+      "size": ["1000"]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_health_report",
-      "_health_report/{feature}"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_health_report", "_health_report/{feature}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/health-api.html",
     "availability": {
       "stack": true,

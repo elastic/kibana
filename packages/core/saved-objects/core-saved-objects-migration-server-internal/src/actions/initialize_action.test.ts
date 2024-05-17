@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { initAction, type InitActionParams } from './initialize_action';
+import * as Either from 'fp-ts/lib/Either';
+import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import { type InitActionParams, initAction } from './initialize_action';
 
 jest.mock('./catch_retryable_es_client_errors');
 

@@ -8,9 +8,9 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
-  SecurityRequestHandlerContext,
-  AuthcRequestHandlerContext,
   AuditRequestHandlerContext,
+  AuthcRequestHandlerContext,
+  SecurityRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from './internal_contracts';
 

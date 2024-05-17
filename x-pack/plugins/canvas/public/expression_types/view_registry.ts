@@ -7,7 +7,7 @@
 
 import { Registry } from '@kbn/interpreter';
 import { View } from './view';
-import type { View as ViewType, ViewProps } from './view';
+import type { ViewProps, View as ViewType } from './view';
 
 class ViewRegistry extends Registry<ViewProps, ViewType> {
   wrapper(obj: ViewProps): ViewType {

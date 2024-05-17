@@ -9,8 +9,8 @@ import {
   euiPaletteCool,
   euiPaletteForStatus,
   euiPaletteForTemperature,
-  euiPaletteRed,
   euiPaletteGreen,
+  euiPaletteRed,
   euiPaletteWarm,
 } from '@elastic/eui';
 import { InventoryColorPalette } from '../../../../lib/lib';

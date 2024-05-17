@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import type { Output, DownloadSource, FleetServerHost, FleetProxy } from '../../../../types';
+import type { DownloadSource, FleetProxy, FleetServerHost, Output } from '../../../../types';
 
-import { FleetServerHostsSection } from './fleet_server_hosts_section';
-import { OutputSection } from './output_section';
 import { AgentBinarySection } from './agent_binary_section';
 import { FleetProxiesSection } from './fleet_proxies_section';
+import { FleetServerHostsSection } from './fleet_server_hosts_section';
+import { OutputSection } from './output_section';
 
 export interface SettingsPageProps {
   outputs: Output[];

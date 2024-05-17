@@ -7,9 +7,9 @@
 
 import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 
-import { from } from 'rxjs';
-import moment from 'moment';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import moment from 'moment';
+import { from } from 'rxjs';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 

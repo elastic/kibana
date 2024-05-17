@@ -6,8 +6,8 @@
  */
 
 import type { ResponseErrorAttributes } from '@kbn/core/server';
-import type { DataViewBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
 
 export interface ServerApiError {
   statusCode: number;

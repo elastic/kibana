@@ -8,17 +8,11 @@
       "end": [],
       "from": "",
       "job_id": "",
-      "size": [
-        "100"
-      ],
+      "size": ["100"],
       "start": []
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_ml/calendars/{calendar_id}/events"
-    ],
+    "methods": ["GET"],
+    "patterns": ["_ml/calendars/{calendar_id}/events"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-calendar-event.html",
     "availability": {
       "stack": true,

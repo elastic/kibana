@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { EmailService, EmailServiceStart, IEmailServiceProvider } from './types';
-import type { NotificationsConfigType } from '../config';
-import { LicensedEmailService } from './licensed_email_service';
-import { ConnectorsEmailService } from './connectors_email_service';
 import { PLUGIN_ID } from '../../common';
+import type { NotificationsConfigType } from '../config';
+import { ConnectorsEmailService } from './connectors_email_service';
+import { LicensedEmailService } from './licensed_email_service';
+import type { EmailService, EmailServiceStart, IEmailServiceProvider } from './types';
 
 const MINIMUM_LICENSE = 'platinum';
 
@@ -32,7 +32,10 @@ export class EmailServiceProvider
   private setupSuccessful: boolean;
   private setupError: string;
 
-  constructor(private config: NotificationsConfigType, private logger: Logger) {
+  constructor(
+    private config: NotificationsConfigType,
+    private logger: Logger
+  ) {
     this.setupSuccessful = false;
     this.setupError = 'Email Service Error: setup() has not been run';
   }

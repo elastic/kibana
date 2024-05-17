@@ -1,14 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import semverCompare from 'semver/functions/compare';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -20,19 +9,27 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
-import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
-import { assert } from '../../../common/utils/helpers';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
+import { FormattedMessage } from '@kbn/i18n-react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import semverCoerce from 'semver/functions/coerce';
+import semverCompare from 'semver/functions/compare';
+import semverLt from 'semver/functions/lt';
+import semverValid from 'semver/functions/valid';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
@@ -40,27 +37,30 @@ import {
   CSPM_POLICY_TEMPLATE,
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
-import {
-  getMaxPackageName,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
-  getVulnMgmtCloudFormationDefaultValue,
-  isPostureInput,
-  isBelowMinVersion,
-  type NewPackagePolicyPostureInput,
-  POSTURE_NAMESPACE,
-} from './utils';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
+import { assert } from '../../../common/utils/helpers';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
+import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
+import { gcpField, getInputVarsFields } from './gcp_credentials_form/gcp_credential_form';
 import {
   PolicyTemplateInfo,
   PolicyTemplateInputSelector,
   PolicyTemplateSelector,
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
-import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { gcpField, getInputVarsFields } from './gcp_credentials_form/gcp_credential_form';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
-import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import {
+  type NewPackagePolicyPostureInput,
+  POSTURE_NAMESPACE,
+  getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  getVulnMgmtCloudFormationDefaultValue,
+  isBelowMinVersion,
+  isPostureInput,
+} from './utils';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,

@@ -7,20 +7,10 @@
       "pretty": "__flag__"
     },
     "url_components": {
-      "task_type": [
-        "sparse_embedding",
-        "text_embedding",
-        "rerank",
-        "completion"
-      ]
+      "task_type": ["sparse_embedding", "text_embedding", "rerank", "completion"]
     },
-    "methods": [
-      "PUT"
-    ],
-    "patterns": [
-      "_inference/{inference_id}",
-      "_inference/{task_type}/{inference_id}"
-    ],
+    "methods": ["PUT"],
+    "patterns": ["_inference/{inference_id}", "_inference/{task_type}/{inference_id}"],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-inference-api.html",
     "availability": {
       "stack": true,

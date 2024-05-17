@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import * as rt from 'io-ts';
 
 export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = Pick<
   SavedObject<SavedObjectAttributes>,

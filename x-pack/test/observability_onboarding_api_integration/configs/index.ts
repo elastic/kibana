@@ -6,7 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { createTestConfig, CreateTestConfig } from '../common/config';
+import { CreateTestConfig, createTestConfig } from '../common/config';
 
 export const MOCKED_PUBLIC_BASE_URL = 'http://mockedPublicBaseUrl';
 // my.mocked.domain$myMockedEsUr$myKibanaMockedUrl

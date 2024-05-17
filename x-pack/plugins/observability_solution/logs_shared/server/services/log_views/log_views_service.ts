@@ -12,11 +12,11 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import {
-  defaultLogViewAttributes,
-  defaultLogViewsStaticConfig,
   LogView,
   LogViewAttributes,
   LogViewsStaticConfig,
+  defaultLogViewAttributes,
+  defaultLogViewsStaticConfig,
 } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import {

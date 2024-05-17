@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { render } from '@testing-library/react';
+import React from 'react';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import {
-  getVisitorBreakdownLensAttributes,
   VisitorBreakdownChart,
   VisitorBreakdownMetric,
+  getVisitorBreakdownLensAttributes,
 } from './visitor_breakdown_chart';
-import { useKibanaServices } from '../../../../hooks/use_kibana_services';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 jest.mock('../../../../hooks/use_kibana_services');
 jest.mock('uuid');

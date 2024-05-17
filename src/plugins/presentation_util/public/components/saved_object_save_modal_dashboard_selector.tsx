@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiRadio,
   EuiIconTip,
   EuiPanel,
+  EuiRadio,
   EuiSpacer,
-  EuiCheckbox,
 } from '@elastic/eui';
 
 import DashboardPicker, { DashboardPickerProps } from './dashboard_picker/dashboard_picker';

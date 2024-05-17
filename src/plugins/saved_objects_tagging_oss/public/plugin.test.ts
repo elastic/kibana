@@ -8,8 +8,8 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
-import { tagDecoratorConfig } from './decorator';
 import { taggingApiMock } from './api.mock';
+import { tagDecoratorConfig } from './decorator';
 import { SavedObjectTaggingOssPlugin } from './plugin';
 
 describe('SavedObjectTaggingOssPlugin', () => {

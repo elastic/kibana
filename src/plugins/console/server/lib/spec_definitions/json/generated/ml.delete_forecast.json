@@ -6,15 +6,9 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "allow_no_forecasts": "__flag__",
-      "timeout": [
-        "30s",
-        "-1",
-        "0"
-      ]
+      "timeout": ["30s", "-1", "0"]
     },
-    "methods": [
-      "DELETE"
-    ],
+    "methods": ["DELETE"],
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_forecast",
       "_ml/anomaly_detectors/{job_id}/_forecast/{forecast_id}"

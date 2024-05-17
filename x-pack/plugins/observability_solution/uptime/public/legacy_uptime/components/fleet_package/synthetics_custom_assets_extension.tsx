@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import {
-  PackageAssetsComponent,
-  CustomAssetsAccordionProps,
   CustomAssetsAccordion,
+  CustomAssetsAccordionProps,
+  PackageAssetsComponent,
 } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
 import { PLUGIN } from '../../../../common/constants/plugin';
+import { ClientPluginsStart } from '../../../plugin';
 
 export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana<ClientPluginsStart>().services;

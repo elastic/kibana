@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiSplitPanel, EuiTabs, EuiTab, EuiTitle, EuiSteps, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiSplitPanel, EuiSteps, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useEuiTheme } from '@elastic/eui';
-import {
-  INSTRUCTION_VARIANT,
-  getDisplayText,
-  InstructionVariant,
-  InstructionSet,
-} from './instruction_variants';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { push } from '../../shared/links/url_helpers';
+import {
+  INSTRUCTION_VARIANT,
+  InstructionSet,
+  InstructionVariant,
+  getDisplayText,
+} from './instruction_variants';
 
 interface AgentTab {
   id: INSTRUCTION_VARIANT;

@@ -32,10 +32,10 @@ jest.mock('../../../../app_logic', () => ({
 }));
 
 import {
+  EditableIndexingRule,
   SynchronizationLogic,
   emptyBlockedWindow,
   stripScheduleSeconds,
-  EditableIndexingRule,
 } from './synchronization_logic';
 
 describe('SynchronizationLogic', () => {

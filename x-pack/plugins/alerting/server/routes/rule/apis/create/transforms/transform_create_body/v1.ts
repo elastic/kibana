@@ -11,8 +11,8 @@ import type {
 } from '../../../../../../../common/routes/rule/apis/create';
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
 import type {
-  RuleParams,
   ActionRequest,
+  RuleParams,
   SystemActionRequest,
 } from '../../../../../../application/rule/types';
 

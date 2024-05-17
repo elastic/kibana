@@ -7,16 +7,16 @@
 
 import React, { useEffect } from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
-import { LogRetentionCallout, LogRetentionTooltip, LogRetentionOptions } from '../log_retention';
+import { LogRetentionCallout, LogRetentionOptions, LogRetentionTooltip } from '../log_retention';
 
 import { ApiLogFlyout } from './api_log';
-import { ApiLogsTable, NewApiEventsPrompt, EmptyState } from './components';
+import { ApiLogsTable, EmptyState, NewApiEventsPrompt } from './components';
 import { API_LOGS_TITLE, RECENT_API_EVENTS } from './constants';
 
 import { ApiLogsLogic } from '.';

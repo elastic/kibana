@@ -12,8 +12,8 @@
  * 2.0.
  */
 
-import { getEsHosts } from './get_es_hosts';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { getEsHosts } from './get_es_hosts';
 
 describe('getEsHostsTest', () => {
   const cloudSetup = {

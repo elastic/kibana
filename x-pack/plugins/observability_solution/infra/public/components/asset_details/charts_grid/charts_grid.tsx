@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 export const ChartsGrid = ({

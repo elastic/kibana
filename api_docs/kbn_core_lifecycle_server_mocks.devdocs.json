@@ -331,9 +331,7 @@
             "tags": [],
             "label": "createPreboot",
             "description": [],
-            "signature": [
-              "() => CorePrebootMockType"
-            ],
+            "signature": ["() => CorePrebootMockType"],
             "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
             "deprecated": false,
             "trackAdoption": false,

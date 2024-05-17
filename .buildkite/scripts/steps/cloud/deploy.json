@@ -34,10 +34,7 @@
             {
               "zone_count": 1,
               "instance_configuration_id": "gcp.coordinating.1",
-              "node_roles": [
-                "ingest",
-                "remote_cluster_client"
-              ],
+              "node_roles": ["ingest", "remote_cluster_client"],
               "id": "coordinating",
               "size": {
                 "resource": "memory",
@@ -74,10 +71,7 @@
                 }
               },
               "instance_configuration_id": "gcp.data.highstorage.1",
-              "node_roles": [
-                "data_warm",
-                "remote_cluster_client"
-              ],
+              "node_roles": ["data_warm", "remote_cluster_client"],
               "id": "warm",
               "size": {
                 "resource": "memory",
@@ -92,10 +86,7 @@
                 }
               },
               "instance_configuration_id": "gcp.data.highstorage.1",
-              "node_roles": [
-                "data_cold",
-                "remote_cluster_client"
-              ],
+              "node_roles": ["data_cold", "remote_cluster_client"],
               "id": "cold",
               "size": {
                 "resource": "memory",
@@ -110,9 +101,7 @@
                 }
               },
               "instance_configuration_id": "gcp.es.datafrozen.n1.64x10x95",
-              "node_roles": [
-                "data_frozen"
-              ],
+              "node_roles": ["data_frozen"],
               "id": "frozen",
               "size": {
                 "resource": "memory",
@@ -122,10 +111,7 @@
             {
               "zone_count": 1,
               "instance_configuration_id": "gcp.master.1",
-              "node_roles": [
-                "master",
-                "remote_cluster_client"
-              ],
+              "node_roles": ["master", "remote_cluster_client"],
               "id": "master",
               "size": {
                 "resource": "memory",
@@ -135,10 +121,7 @@
             {
               "zone_count": 1,
               "instance_configuration_id": "gcp.ml.1",
-              "node_roles": [
-                "ml",
-                "remote_cluster_client"
-              ],
+              "node_roles": ["ml", "remote_cluster_client"],
               "id": "ml",
               "size": {
                 "value": 1024,

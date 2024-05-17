@@ -9,8 +9,8 @@ import type { Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RiskScoreRequestOptions } from '../../../../../../common/api/search_strategy';
 import {
   Direction,
-  RiskScoreFields,
   RiskScoreEntity,
+  RiskScoreFields,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 

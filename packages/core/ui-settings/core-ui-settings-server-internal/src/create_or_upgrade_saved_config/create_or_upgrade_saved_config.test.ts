@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  mockTransform,
-  mockGetUpgradeableConfig,
-} from './create_or_upgrade_saved_config.test.mock';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  mockGetUpgradeableConfig,
+  mockTransform,
+} from './create_or_upgrade_saved_config.test.mock';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
@@ -32,7 +32,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           type: configType,
           id: options.id,
           version: 'foo',
-        } as any)
+        }) as any
     );
 
     async function run(options = {}) {

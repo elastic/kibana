@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { createExploratoryViewRoutePath } from '../configurations/utils';
-import { createExploratoryViewUrl } from '../configurations/exploratory_view_url';
-import { ReportViewType } from '../types';
-import { AllSeries } from '../hooks/use_series_storage';
+import { useCallback, useEffect, useState } from 'react';
 import { ObservabilityAppServices } from '../../../../application/types';
+import { createExploratoryViewUrl } from '../configurations/exploratory_view_url';
+import { createExploratoryViewRoutePath } from '../configurations/utils';
+import { AllSeries } from '../hooks/use_series_storage';
+import { ReportViewType } from '../types';
 
 export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 

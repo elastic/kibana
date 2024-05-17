@@ -6,8 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from '../../services';
 import { pageObjects } from '../../page_objects';
+import { services } from '../../services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(

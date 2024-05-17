@@ -7,15 +7,15 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConfigType } from '../../../../../../config';
-import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../../../plugin_contract';
+import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 
+import type { RuleExecutionSettings } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { LogLevelSetting } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
 } from '../../../../../../../common/constants';
-import type { RuleExecutionSettings } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import { LogLevelSetting } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 export const fetchRuleExecutionSettings = async (
   config: ConfigType,

@@ -6,6 +6,9 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
+import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';
+import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
+import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import type {
   AboutStepRule,
   ActionsStepRule,
@@ -17,9 +20,6 @@ import {
   GroupByOptions,
 } from '../../../../../detections/pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
-import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
-import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {

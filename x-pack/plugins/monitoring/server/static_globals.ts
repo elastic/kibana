@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { MonitoringConfig } from './config';
-import { PluginsSetup } from './types';
 import { mbSafeQuery } from './lib/mb_safe_query';
+import { PluginsSetup } from './types';
 type GetLogger = (...scopes: string[]) => Logger;
 
 interface InitSetupOptions {

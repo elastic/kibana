@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { get, map } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
-  EuiCodeBlock,
   EuiButtonIcon,
-  EuiToolTip,
-  EuiLoadingSpinner,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiNotificationBadge,
-  RIGHT_ALIGNMENT,
-  EuiBadge,
   EuiText,
+  EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { QueryDetailsFlyout } from './query_details_flyout';
-import { PackResultsHeader } from './pack_results_header';
+import { get, map } from 'lodash';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
-import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
-import type { PackItem } from '../../packs/types';
-import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
-import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
+import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
+import type { PackItem } from '../../packs/types';
+import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
+import { PackResultsHeader } from './pack_results_header';
+import { QueryDetailsFlyout } from './query_details_flyout';
 
 const truncateTooltipTextCss = {
   width: '100%',

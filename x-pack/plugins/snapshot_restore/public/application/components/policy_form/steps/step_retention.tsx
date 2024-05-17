@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButtonEmpty,
   EuiDescribedFormGroup,
-  EuiTitle,
-  EuiFormRow,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFieldNumber,
+  EuiFormRow,
   EuiSelect,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { SlmPolicyPayload } from '../../../../../common/types';
-import { TIME_UNITS } from '../../../../../common/constants';
 import { StepProps } from '.';
-import { textService } from '../../../services/text';
+import { TIME_UNITS } from '../../../../../common/constants';
+import { SlmPolicyPayload } from '../../../../../common/types';
 import { useCore } from '../../../app_context';
+import { textService } from '../../../services/text';
 
 const getExpirationTimeOptions = (unitSize = '0') =>
   Object.entries(TIME_UNITS).map(([_key, value]) => ({

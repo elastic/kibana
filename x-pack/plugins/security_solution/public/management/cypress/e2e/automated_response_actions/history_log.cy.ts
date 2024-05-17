@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { generateRandomStringName } from '../../tasks/utils';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
-import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
+import { generateRandomStringName } from '../../tasks/utils';
+import type { ReturnTypeFromChainable } from '../../types';
 
-import { login, ROLE } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 
 describe(
   'Response actions history page',

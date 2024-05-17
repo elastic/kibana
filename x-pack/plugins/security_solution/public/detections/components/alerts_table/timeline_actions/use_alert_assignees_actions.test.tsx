@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
-import { useAlertAssigneesActions } from './use_alert_assignees_actions';
-import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
-import type { AlertTableContextMenuItem } from '../types';
-import { render } from '@testing-library/react';
-import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { TestProviders } from '../../../../common/mock';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { render } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { TestProviders } from '../../../../common/mock';
+import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import type { AlertTableContextMenuItem } from '../types';
+import type { UseAlertAssigneesActionsProps } from './use_alert_assignees_actions';
+import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');

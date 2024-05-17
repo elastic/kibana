@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC } from 'react';
 import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
+import React, { type FC } from 'react';
 
-import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
-import { linkTab, embedTab, exportTab } from './tabs';
+import { type IShareContext, ShareTabsContext, useShareTabsContext } from './context';
+import { embedTab, exportTab, linkTab } from './tabs';
 
 export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (

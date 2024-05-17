@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import {
   EuiDelayRender,
-  EuiSkeletonText,
-  EuiFormControlLayout,
   EuiErrorBoundary,
+  EuiFormControlLayout,
+  EuiSkeletonText,
   useEuiTheme,
 } from '@elastic/eui';
+import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
+import React from 'react';
 import type { CodeEditorProps } from './code_editor';
 export type { CodeEditorProps } from './code_editor';
 export * from './languages/constants';

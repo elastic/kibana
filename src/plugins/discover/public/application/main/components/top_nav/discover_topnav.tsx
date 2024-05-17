@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useDiscoverCustomization } from '../../../../customizations';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { addLog } from '../../../../utils/add_log';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   useSavedSearch,
   useSavedSearchHasChanged,
   useSavedSearchInitial,
 } from '../../state_management/discover_state_provider';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import { onSaveSearch } from './on_save_search';
-import { useDiscoverCustomization } from '../../../../customizations';
-import { addLog } from '../../../../utils/add_log';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { onSaveSearch } from './on_save_search';
 import { useDiscoverTopNav } from './use_discover_topnav';
 
 export interface DiscoverTopNavProps {

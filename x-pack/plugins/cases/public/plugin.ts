@@ -6,37 +6,37 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { createBrowserHistory } from 'history';
 
-import { KibanaServices } from './common/lib/kibana';
-import type { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
-import { APP_TITLE, APP_DESC } from './common/translations';
-import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import type { CasesUiConfigType } from '../common/ui/types';
 import { createClientAPI } from './client/api';
+import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { canUseCases } from './client/helpers/can_use_cases';
+import { getUICapabilities } from './client/helpers/capabilities';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getAllCasesSelectorModalLazy } from './client/ui/get_all_cases_selector_modal';
 import { getCasesLazy } from './client/ui/get_cases';
 import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
-import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import { getUICapabilities } from './client/helpers/capabilities';
-import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { KibanaServices } from './common/lib/kibana';
+import { APP_DESC, APP_TITLE } from './common/translations';
+import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { registerSystemActions } from './components/system_actions';
+import { registerActions } from './components/visualizations/actions';
 import { registerCaseFileKinds } from './files';
 import { registerInternalAttachments } from './internal_attachments';
-import { registerActions } from './components/visualizations/actions';
 import type {
   CasesPublicSetup,
-  CasesPublicStart,
   CasesPublicSetupDependencies,
+  CasesPublicStart,
   CasesPublicStartDependencies,
 } from './types';
-import { registerSystemActions } from './components/system_actions';
 
 /**
  * @public
@@ -96,7 +96,7 @@ export class CasesUiPlugin
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
             CasesPublicStartDependencies,
-            unknown
+            unknown,
           ];
 
           const { renderApp } = await import('./application');

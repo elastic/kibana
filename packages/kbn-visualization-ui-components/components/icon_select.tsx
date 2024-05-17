@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiComboBox,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';

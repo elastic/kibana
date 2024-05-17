@@ -9,6 +9,7 @@ import { PickByValue } from 'utility-types';
 import { agentExplorerRouteRepository } from '../agent_explorer/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { alertsChartPreviewRouteRepository } from '../alerts/route';
+import { servicesAssetsRoutesRepository } from '../assets/services/routes';
 import { assistantRouteRepository } from '../assistant_functions/route';
 import { correlationsRouteRepository } from '../correlations/route';
 import { serviceDashboardsRouteRepository } from '../custom_dashboards/route';
@@ -29,9 +30,9 @@ import { mobileRouteRepository } from '../mobile/route';
 import { observabilityOverviewRouteRepository } from '../observability_overview/route';
 import { profilingHostsRouteRepository } from '../profiling/hosts/route';
 import { profilingRouteRepository } from '../profiling/route';
-import { serviceRouteRepository } from '../services/route';
 import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
+import { serviceRouteRepository } from '../services/route';
 import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
 import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
 import { apmIndicesRouteRepository } from '../settings/apm_indices/route';
@@ -44,7 +45,6 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { servicesAssetsRoutesRepository } from '../assets/services/routes';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {

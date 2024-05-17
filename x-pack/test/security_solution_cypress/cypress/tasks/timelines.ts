@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { SELECT_ALL_CHECKBOX } from '../screens/shared';
 import {
   BULK_ACTIONS,
   EXPORT_TIMELINE,
-  TIMELINE_CHECKBOX,
   EXPORT_TIMELINE_ACTION,
-  TIMELINES_TABLE,
   TIMELINE,
-  TIMELINE_NAME,
-  TIMELINE_ITEM_ACTION_BTN,
-  TIMELINES_OVERVIEW_SEARCH,
   TIMELINES_OVERVIEW_ONLY_FAVORITES,
+  TIMELINES_OVERVIEW_SEARCH,
+  TIMELINES_TABLE,
+  TIMELINE_CHECKBOX,
+  TIMELINE_ITEM_ACTION_BTN,
+  TIMELINE_NAME,
 } from '../screens/timelines';
-import { SELECT_ALL_CHECKBOX } from '../screens/shared';
 
 export const openTimeline = (id?: string) => {
   cy.get(id ? TIMELINE(id) : TIMELINE_NAME).click();

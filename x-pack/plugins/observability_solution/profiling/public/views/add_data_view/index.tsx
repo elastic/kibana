@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -24,14 +16,22 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useMemo, useState } from 'react';
 import major from 'semver/functions/major';
-import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
-import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
+import { AsyncStatus, useAsync } from '../../hooks/use_async';
+import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
 
 export enum AddDataTabs {
   Kubernetes = 'kubernetes',

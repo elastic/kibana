@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { applyMiddleware, Dispatch, Store } from 'redux';
-import thunkMiddleware from 'redux-thunk';
 import addons from '@storybook/addons';
 import { diff } from 'jsondiffpatch';
 import { isFunction } from 'lodash';
+import { Dispatch, Store, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk';
 
 import { EVENTS } from './constants';
 

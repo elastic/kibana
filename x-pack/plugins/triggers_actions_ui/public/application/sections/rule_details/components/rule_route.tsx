@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ToastsApi } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleWithApi as Rules } from './rule';
-import { useKibana } from '../../../../common/lib/kibana';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { RefreshToken } from './types';
 
 type WithRuleSummaryProps = {

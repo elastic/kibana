@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiButtonGroup, htmlIdGenerator, EuiSwitch } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
+import { AxisExtentMode, XScaleType, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
+import React from 'react';
 import { RangeInputField } from '../../range_input_field';
 import { validateExtent } from './helpers';
 import type { UnifiedAxisExtentConfig } from './types';

@@ -7,10 +7,10 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
-import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
-import { PieLayerState } from '../../../common/types';
-import { PieChartTypes } from '../../../common/constants';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { PieChartTypes } from '../../../common/constants';
+import { PieLayerState } from '../../../common/types';
+import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
 
 describe('render helpers', () => {
   describe('#checkTableForContainsSmallValues', () => {

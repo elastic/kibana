@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ProjectType } from '@kbn/serverless-types';
+import React from 'react';
 
 export interface Props {
   project: ProjectType;

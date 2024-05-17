@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
+import _ from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

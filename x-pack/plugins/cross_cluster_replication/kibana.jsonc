@@ -6,10 +6,7 @@
     "id": "crossClusterReplication",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "ccr"
-    ],
+    "configPath": ["xpack", "ccr"],
     "requiredPlugins": [
       "home",
       "licensing",
@@ -19,13 +16,7 @@
       "indexManagement",
       "features"
     ],
-    "optionalPlugins": [
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "kibanaReact",
-      "esUiShared",
-      "data"
-    ]
+    "optionalPlugins": ["usageCollection"],
+    "requiredBundles": ["kibanaReact", "esUiShared", "data"]
   }
 }

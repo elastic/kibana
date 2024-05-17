@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
 import { merge } from 'lodash';
+import React from 'react';
 
 import './global_mocks';
 
 import { HttpSetup } from '@kbn/core/public';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import {
-  notificationServiceMock,
-  fatalErrorsServiceMock,
   docLinksServiceMock,
   executionContextServiceMock,
+  fatalErrorsServiceMock,
+  notificationServiceMock,
 } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { init as initHttp } from '../../public/application/services/http';
-import { init as initHttpRequests } from './http_requests';
-import { init as initUiMetric } from '../../public/application/services/ui_metric';
-import { init as initNotification } from '../../public/application/services/notification';
-import { KibanaContextProvider } from '../../public/shared_imports';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { createBreadcrumbsMock } from '../../public/application/services/breadcrumbs.mock';
+import { init as initHttp } from '../../public/application/services/http';
+import { init as initNotification } from '../../public/application/services/notification';
+import { init as initUiMetric } from '../../public/application/services/ui_metric';
+import { KibanaContextProvider } from '../../public/shared_imports';
+import { init as initHttpRequests } from './http_requests';
 
 const breadcrumbService = createBreadcrumbsMock();
 const appContextMock = {

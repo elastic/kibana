@@ -11,7 +11,7 @@ import semverIsValid from 'semver/functions/valid';
 
 import { RequestDiagnosticsAdditionalMetrics } from '../../../common/types';
 
-import { SO_SEARCH_LIMIT, AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
+import { AGENTS_PREFIX, AGENT_MAPPINGS, SO_SEARCH_LIMIT } from '../../constants';
 
 import { NewAgentActionSchema } from '../models';
 

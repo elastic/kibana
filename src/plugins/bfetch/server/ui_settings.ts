@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { UiSettingsParams } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { DISABLE_BFETCH_COMPRESSION, DISABLE_BFETCH } from '../common';
+import { UiSettingsParams } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { DISABLE_BFETCH, DISABLE_BFETCH_COMPRESSION } from '../common';
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {

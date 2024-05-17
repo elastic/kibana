@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
+import React from 'react';
 
 import {
-  toMountPoint,
-  DataViewsPublicPluginStart,
   DataView,
+  DataViewsPublicPluginStart,
   UsageCollectionStart,
+  toMountPoint,
 } from './shared_imports';
 
 import { CloseEditor } from './types';

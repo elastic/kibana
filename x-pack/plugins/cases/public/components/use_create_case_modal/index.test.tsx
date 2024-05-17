@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../common/lib/kibana';
 import type { UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
 import { useCreateCaseModal } from '.';
+import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');

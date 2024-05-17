@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { ScalabilitySetup } from '@kbn/journeys';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export interface Request {
   transactionId: string;

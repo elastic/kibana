@@ -1,3 +1,8 @@
+import { readFileSync } from 'fs';
+import Path from 'path';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +11,6 @@
  * Side Public License, v 1.
  */
 import execa from 'execa';
-import { readFileSync } from 'fs';
-import Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { run } from '@kbn/dev-cli-runner';
-import { createFailError } from '@kbn/dev-cli-errors';
 
 import { FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 

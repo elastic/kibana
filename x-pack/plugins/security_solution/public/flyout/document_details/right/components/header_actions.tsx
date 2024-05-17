@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
+import { i18n } from '@kbn/i18n';
 import type { VFC } from 'react';
 import React, { memo } from 'react';
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { NewChatByTitle } from '@kbn/elastic-assistant';
-import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
-import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
-import { useAssistant } from '../hooks/use_assistant';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
 } from '../../../../common/components/event_details/translations';
+import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useRightPanelContext } from '../context';
+import { useAssistant } from '../hooks/use_assistant';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
 /**

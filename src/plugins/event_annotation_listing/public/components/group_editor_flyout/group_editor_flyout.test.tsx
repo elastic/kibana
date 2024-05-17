@@ -7,16 +7,16 @@
  */
 
 import { EuiButton, EuiFlyout } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { EmbeddableComponent } from '@kbn/lens-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/api.mock';
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
+import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
 import { GroupEditorControls } from './group_editor_controls';
 import { GroupEditorFlyout } from './group_editor_flyout';
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { QueryInputServices } from '@kbn/visualization-ui-components';
-import { EmbeddableComponent } from '@kbn/lens-plugin/public';
 
 const simulateButtonClick = (component: ShallowWrapper, selector: string) => {
   (component.find(selector) as ShallowWrapper<Parameters<typeof EuiButton>[0]>).prop('onClick')!(

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { IAggConfig } from '../agg_config';
 import { BaseParamType } from './base';
 import { JsonParamType } from './json';
-import { IAggConfig } from '../agg_config';
 
 describe('JSON', function () {
   const paramName = 'json_test';

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
   EuiTabbedContent,
   EuiTabbedContentProps,
   useEuiOverflowScroll,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Alert } from '@kbn/alerting-types';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import { css } from '@emotion/react';
+import { Alert } from '@kbn/alerting-types';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 export const search = {
   box: {
@@ -117,7 +117,7 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
         ({
           key,
           value,
-        } as AlertField)
+        }) as AlertField
     );
     if (fields?.length) {
       _items = _items.filter((f) => fields.includes(f.key));

@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import alter from '../lib/alter';
 import _ from 'lodash';
-import Chainable from '../lib/classes/chainable';
 import argType from '../handlers/lib/arg_type';
+import alter from '../lib/alter';
+import Chainable from '../lib/classes/chainable';
 
 export default new Chainable('condition', {
   args: [

@@ -1,11 +1,11 @@
 [
   {
     "model_id": "distilbert-base-uncased-finetuned-sst-2-english",
-    "model_size_stats" : {
-      "model_size_bytes" : 267386880,
-      "required_native_memory_bytes" : 534773760
+    "model_size_stats": {
+      "model_size_bytes": 267386880,
+      "required_native_memory_bytes": 534773760
     },
-    "pipeline_count" : 0,
+    "pipeline_count": 0,
     "deployment_stats": {
       "deployment_id": "distilbert-base-uncased-finetuned-sst-2-english",
       "model_id": "distilbert-base-uncased-finetuned-sst-2-english",
@@ -29,13 +29,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "ingest",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "ingest", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -55,12 +49,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -79,11 +68,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml"
-              ]
+              "roles": ["data", "master", "ml"]
             }
           },
           "routing_state": {
@@ -97,11 +82,11 @@
   },
   {
     "model_id": "elastic__distilbert-base-cased-finetuned-conll03-english",
-    "model_size_stats" : {
-      "model_size_bytes" : 260947500,
-      "required_native_memory_bytes" : 521895000
+    "model_size_stats": {
+      "model_size_bytes": 260947500,
+      "required_native_memory_bytes": 521895000
     },
-    "pipeline_count" : 0,
+    "pipeline_count": 0,
     "deployment_stats": {
       "deployment_id": "elastic__distilbert-base-cased-finetuned-conll03-english",
       "model_id": "elastic__distilbert-base-cased-finetuned-conll03-english",
@@ -125,13 +110,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "ingest",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "ingest", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -151,12 +130,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -175,11 +149,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml"
-              ]
+              "roles": ["data", "master", "ml"]
             }
           },
           "routing_state": {
@@ -193,11 +163,11 @@
   },
   {
     "model_id": "sentence-transformers__msmarco-minilm-l-12-v3",
-    "model_size_stats" : {
-      "model_size_bytes" : 133378867,
-      "required_native_memory_bytes" : 266757734
+    "model_size_stats": {
+      "model_size_bytes": 133378867,
+      "required_native_memory_bytes": 266757734
     },
-    "pipeline_count" : 0,
+    "pipeline_count": 0,
     "deployment_stats": {
       "deployment_id": "sentence-transformers__msmarco-minilm-l-12-v3",
       "model_id": "sentence-transformers__msmarco-minilm-l-12-v3",
@@ -221,13 +191,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "ingest",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "ingest", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -247,12 +211,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -271,11 +230,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml"
-              ]
+              "roles": ["data", "master", "ml"]
             }
           },
           "routing_state": {
@@ -289,11 +244,11 @@
   },
   {
     "model_id": "typeform__mobilebert-uncased-mnli",
-    "model_size_stats" : {
-      "model_size_bytes" : 100139008,
-      "required_native_memory_bytes" : 200278016
+    "model_size_stats": {
+      "model_size_bytes": 100139008,
+      "required_native_memory_bytes": 200278016
     },
-    "pipeline_count" : 0,
+    "pipeline_count": 0,
     "deployment_stats": {
       "deployment_id": "typeform__mobilebert-uncased-mnli",
       "model_id": "typeform__mobilebert-uncased-mnli",
@@ -317,13 +272,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "ingest",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "ingest", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -343,12 +292,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml",
-                "transform"
-              ]
+              "roles": ["data", "master", "ml", "transform"]
             }
           },
           "routing_state": {
@@ -367,11 +311,7 @@
                 "xpack.installed": "true",
                 "ml.max_jvm_size": "1073741824"
               },
-              "roles": [
-                "data",
-                "master",
-                "ml"
-              ]
+              "roles": ["data", "master", "ml"]
             }
           },
           "routing_state": {
@@ -384,4 +324,3 @@
     }
   }
 ]
-

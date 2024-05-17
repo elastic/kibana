@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 
 import { PluginSetupContract as ActionsSetup } from '@kbn/actions-plugin/server';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';

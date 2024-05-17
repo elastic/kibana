@@ -8,8 +8,8 @@
 
 import _ from 'lodash';
 
-import { Data } from './data';
 import { getMockUiState } from '../../fixtures/mocks';
+import { Data } from './data';
 
 const seriesData = {
   label: '',

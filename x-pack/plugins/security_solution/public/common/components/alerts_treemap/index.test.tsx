@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import { Settings } from '@elastic/charts';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import type { Props } from '.';
+import { AlertsTreemap } from '.';
 import { TestProviders } from '../../mock';
 import {
   mockAlertSearchResponse,
@@ -17,8 +19,6 @@ import {
   mockOnlyStackByField0Response,
 } from './lib/mocks/mock_alert_search_response';
 import * as i18n from './translations';
-import type { Props } from '.';
-import { AlertsTreemap } from '.';
 
 const defaultProps: Props = {
   data: mockAlertSearchResponse,

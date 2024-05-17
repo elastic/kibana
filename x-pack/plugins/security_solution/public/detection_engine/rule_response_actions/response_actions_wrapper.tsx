@@ -7,11 +7,11 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 
-import { ResponseActionsList } from './response_actions_list';
-import type { ResponseActionType } from './get_supported_response_actions';
-import { ResponseActionAddButton } from './response_action_add_button';
 import type { ArrayItem } from '../../shared_imports';
 import { useFormContext } from '../../shared_imports';
+import type { ResponseActionType } from './get_supported_response_actions';
+import { ResponseActionAddButton } from './response_action_add_button';
+import { ResponseActionsList } from './response_actions_list';
 
 interface ResponseActionsWrapperProps {
   items: ArrayItem[];

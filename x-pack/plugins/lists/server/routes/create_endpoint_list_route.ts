@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
 import { createEndpointListResponse } from '../../common/api';
+import type { ListsPluginRouter } from '../types';
 
 import { buildSiemResponse } from './utils';
 import { getExceptionListClient } from './utils/get_exception_list_client';

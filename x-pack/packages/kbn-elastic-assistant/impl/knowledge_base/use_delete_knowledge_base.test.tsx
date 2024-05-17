@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useDeleteKnowledgeBase, UseDeleteKnowledgeBaseParams } from './use_delete_knowledge_base';
-import { deleteKnowledgeBase as _deleteKnowledgeBase } from '../assistant/api';
 import { useMutation as _useMutation } from '@tanstack/react-query';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { deleteKnowledgeBase as _deleteKnowledgeBase } from '../assistant/api';
+import { UseDeleteKnowledgeBaseParams, useDeleteKnowledgeBase } from './use_delete_knowledge_base';
 
 const useMutationMock = _useMutation as jest.Mock;
 const deleteKnowledgeBaseMock = _deleteKnowledgeBase as jest.Mock;

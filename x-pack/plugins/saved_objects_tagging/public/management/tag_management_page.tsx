@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
-import { Subject } from 'rxjs';
-import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
+import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
+import useMount from 'react-use/lib/useMount';
+import { Subject } from 'rxjs';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';
-import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../services';
-import { TagBulkAction } from './types';
-import { Header, TagTable, ActionBar } from './components';
+import { ITagAssignmentService, ITagInternalClient, ITagsCache } from '../services';
 import { getTableActions } from './actions';
 import { getBulkActions } from './bulk_actions';
+import { ActionBar, Header, TagTable } from './components';
+import { TagBulkAction } from './types';
 import { getTagConnectionsUrl } from './utils';
 
 interface TagManagementPageParams {

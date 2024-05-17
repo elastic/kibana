@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { set } from '@kbn/safer-lodash-set';
 import {
   ControlGroupTelemetry,
   RawControlGroupAttributes,

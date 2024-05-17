@@ -6,9 +6,9 @@
  */
 
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import moment from 'moment';
 import React from 'react';
 import { NewEventModal } from './new_event_modal';
-import moment from 'moment';
 
 const testProps = {
   closeModal: jest.fn(),

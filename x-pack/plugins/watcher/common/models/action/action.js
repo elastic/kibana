@@ -6,16 +6,16 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { getActionType } from '../../lib/get_action_type';
 import { ACTION_TYPES } from '../../constants';
-import { LoggingAction } from './logging_action';
+import { getActionType } from '../../lib/get_action_type';
 import { EmailAction } from './email_action';
-import { SlackAction } from './slack_action';
 import { IndexAction } from './index_action';
-import { WebhookAction } from './webhook_action';
-import { PagerDutyAction } from './pagerduty_action';
 import { JiraAction } from './jira_action';
+import { LoggingAction } from './logging_action';
+import { PagerDutyAction } from './pagerduty_action';
+import { SlackAction } from './slack_action';
 import { UnknownAction } from './unknown_action';
+import { WebhookAction } from './webhook_action';
 
 const ActionTypes = {};
 set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);

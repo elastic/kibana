@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { QueryClient } from '@tanstack/react-query';
-import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
-import { createQueryObservable } from './query_observable';
-import type { CrudClient } from '../crud_client';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import { QueryClient } from '@tanstack/react-query';
 import type {
   CreateIn,
-  GetIn,
-  UpdateIn,
   DeleteIn,
-  SearchIn,
+  GetIn,
   MSearchIn,
   MSearchResult,
+  SearchIn,
+  UpdateIn,
 } from '../../common';
+import type { CrudClient } from '../crud_client';
 import type { ContentTypeRegistry } from '../registry';
+import { createQueryObservable } from './query_observable';
 
 export const queryKeyBuilder = {
   all: (type: string) => [type] as const,

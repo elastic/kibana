@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { State } from '../../../common/store';
-import { selectTimelineById } from '../../store/selectors';
-import { timelineActions } from '../../store';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { TimelineStatus } from '../../../../common/api/timeline';
+import type { State } from '../../../common/store';
+import { timelineActions } from '../../store';
+import { selectTimelineById } from '../../store/selectors';
 import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../timeline/tour/step_config';
 
 const ADD_TO_FAVORITES = i18n.translate(

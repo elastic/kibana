@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs/promises';
 import path from 'path';
+import fs from 'fs/promises';
 
 import type { PluginInitializer, PrebootPlugin } from '@kbn/core/server';
 

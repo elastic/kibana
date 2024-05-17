@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import SourceDocument from './source_document';
-import type { EsHitRecord } from '@kbn/discover-utils/src/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 
 const mockServices = {
   fieldFormats: {

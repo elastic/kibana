@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { isEmpty } from 'lodash';
 import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import type { ESFilter } from '@kbn/es-types';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
+import { isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 import { ALL_VALUES_SELECTED } from '../../configurations/constants/url_constants';
-import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { buildPhrasesFilter } from '../../configurations/utils';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { SeriesConfig, SeriesUrl } from '../../types';
 
 interface Props {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import {
-  hitsToGeoJson,
   geoPointToGeometry,
   geoShapeToGeometry,
-  roundCoordinates,
+  hitsToGeoJson,
   makeESBbox,
+  roundCoordinates,
   scaleBounds,
 } from './elasticsearch_geo_utils';
-import _ from 'lodash';
 
 const geoFieldName = 'location';
 

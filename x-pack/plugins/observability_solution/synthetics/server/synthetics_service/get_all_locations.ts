@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { toClientContract } from '../routes/settings/private_locations/helpers';
 import { getPrivateLocationsAndAgentPolicies } from '../routes/settings/private_locations/get_private_locations';
+import { toClientContract } from '../routes/settings/private_locations/helpers';
 import { SyntheticsServerSetup } from '../types';
 import { getServiceLocations } from './get_service_locations';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';

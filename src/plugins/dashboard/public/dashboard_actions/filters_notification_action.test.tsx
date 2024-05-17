@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
+import { type AggregateQuery, Filter, FilterStateStore, type Query } from '@kbn/es-query';
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';

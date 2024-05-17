@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
-import { get, last } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
-import { Query } from '@kbn/es-query';
-import { createContextSearchSourceStub } from './_stubs';
-import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
+import { Query } from '@kbn/es-query';
+import { get, last } from 'lodash';
+import moment from 'moment';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { createContextSearchSourceStub } from './_stubs';
+import { SurrDocType, fetchSurroundingDocs } from './context';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();

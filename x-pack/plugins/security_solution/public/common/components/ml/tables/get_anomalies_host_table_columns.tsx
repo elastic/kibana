@@ -7,13 +7,13 @@
 
 import React from 'react';
 import type { Columns } from '../../../../explore/components/paginated_table';
-import type { AnomaliesByHost, Anomaly } from '../types';
-import { getRowItemsWithActions } from '../../tables/helpers';
-import { createCompoundAnomalyKey } from './create_compound_key';
-import { HostDetailsLink } from '../../links';
-import * as i18n from './translations';
 import { HostsType } from '../../../../explore/hosts/store/model';
+import { HostDetailsLink } from '../../links';
+import { getRowItemsWithActions } from '../../tables/helpers';
+import type { AnomaliesByHost, Anomaly } from '../types';
+import { createCompoundAnomalyKey } from './create_compound_key';
 import { getAnomaliesDefaultTableColumns } from './get_anomalies_table_columns';
+import * as i18n from './translations';
 
 export const getAnomaliesHostTableColumns = (
   startDate: string,
@@ -24,7 +24,7 @@ export const getAnomaliesHostTableColumns = (
   Columns<Anomaly['jobId'], AnomaliesByHost>,
   Columns<Anomaly['entityValue'], AnomaliesByHost>,
   Columns<Anomaly['influencers'], AnomaliesByHost>,
-  Columns<Anomaly['time'], AnomaliesByHost>
+  Columns<Anomaly['time'], AnomaliesByHost>,
 ] => [
   {
     name: i18n.HOST_NAME,

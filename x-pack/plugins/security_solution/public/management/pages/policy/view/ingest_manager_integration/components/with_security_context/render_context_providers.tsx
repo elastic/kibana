@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import { CurrentLicense } from '../../../../../../../common/components/current_license';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
+import { SecuritySolutionStartDependenciesContext } from '../../../../../../../common/components/user_privileges/endpoint/security_solution_start_dependencies';
 import { UserPrivilegesProvider } from '../../../../../../../common/components/user_privileges/user_privileges_context';
 import type { SecuritySolutionQueryClient } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
-import { SecuritySolutionStartDependenciesContext } from '../../../../../../../common/components/user_privileges/endpoint/security_solution_start_dependencies';
-import { CurrentLicense } from '../../../../../../../common/components/current_license';
-import type { StartPlugins } from '../../../../../../../types';
 import { useKibana } from '../../../../../../../common/lib/kibana';
+import type { StartPlugins } from '../../../../../../../types';
 
 export type RenderContextProvidersProps = PropsWithChildren<{
   store: Store;

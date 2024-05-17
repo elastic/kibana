@@ -1,3 +1,5 @@
+import { DependencyNode, NodeType } from '@kbn/apm-plugin/common/connections';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +7,9 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { NodeType, DependencyNode } from '@kbn/apm-plugin/common/connections';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../../utils';
+import { dataConfig, generateData } from './generate_data';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_dependencies'>;
 

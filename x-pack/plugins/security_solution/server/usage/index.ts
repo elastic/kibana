@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CollectorDependencies } from './types';
 import { registerCollector } from './collector';
+import type { CollectorDependencies } from './types';
 
 export type InitUsageCollectors = (deps: CollectorDependencies) => void;
 

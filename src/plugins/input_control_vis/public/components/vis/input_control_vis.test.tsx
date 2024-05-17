@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { shallow } from 'enzyme';
 import React from 'react';
 import sinon from 'sinon';
-import { shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { InputControlVis } from './input_control_vis';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
+import { InputControlVis } from './input_control_vis';
 
 const mockListControl: ListControl = {
   id: 'mock-list-control',

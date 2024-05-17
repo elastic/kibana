@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { EuiDataGridColumn } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /**
  * We need to produce types and code transpilation at different folders during the build of the package.
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
 import {
-  ALERT_EVALUATION_VALUE,
-  ALERT_EVALUATION_THRESHOLD,
   ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
   ALERT_REASON,
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_INSTANCE_ID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { EuiDataGridColumn } from '@elastic/eui';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
-import { i18n } from '@kbn/i18n';
 
 /**
  * columns implements a subset of `EuiDataGrid`'s `EuiDataGridColumn` interface,

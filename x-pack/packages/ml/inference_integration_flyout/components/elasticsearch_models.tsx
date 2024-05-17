@@ -7,23 +7,23 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFlexItem,
-  EuiTitle,
-  EuiSuperSelect,
-  EuiText,
+  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState, useEffect } from 'react';
+import { elasticsearchModelsOptions, setModalConfigResponse } from '../lib/shared_values';
 import type { ElasticsearchModelDescriptions, ElasticsearchService, ModelConfig } from '../types';
 import { ElasticsearchModelDefaultOptions, Service } from '../types';
-import type { DocumentationProps, SaveMappingOnClick } from './inference_flyout_wrapper';
-import { elasticsearchModelsOptions, setModalConfigResponse } from '../lib/shared_values';
-import { ServiceOptions } from './service_options';
 import { InferenceFlyout } from './flyout_layout';
+import type { DocumentationProps, SaveMappingOnClick } from './inference_flyout_wrapper';
+import { ServiceOptions } from './service_options';
 interface ElasticsearchModelsProps
   extends Omit<DocumentationProps, 'supportedNlpModels' | 'nlpImportModel'>,
     SaveMappingOnClick {

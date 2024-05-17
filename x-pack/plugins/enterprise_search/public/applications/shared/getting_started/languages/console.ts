@@ -12,9 +12,7 @@ import { INDEX_NAME_PLACEHOLDER } from './constants';
 import { ingestKeysToJSON } from './helpers';
 
 export const consoleDefinition: Partial<LanguageDefinition> = {
-  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `POST /${
-    indexName ?? 'books'
-  }/_search?pretty
+  buildSearchQuery: ({ indexName = INDEX_NAME_PLACEHOLDER }) => `POST /${indexName ?? 'books'}/_search?pretty
   {
     "query": {
       "query_string": {

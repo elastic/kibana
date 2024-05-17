@@ -10,10 +10,10 @@ import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
 import { requestContextMock } from '../../../routes/__mocks__';
 import {
-  getRuleMock,
   getEmptyFindResult,
-  getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getFindResultWithSingleHit,
+  getRuleMock,
 } from '../../../routes/__mocks__/request_responses';
 
 import { createRules } from '../crud/create_rules';

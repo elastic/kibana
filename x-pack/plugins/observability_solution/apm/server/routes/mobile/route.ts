@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import { offsetRt } from '../../../common/comparison_rt';
+import { MobilePropertyType } from '../../../common/mobile_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { offsetRt } from '../../../common/comparison_rt';
-import { getMobileHttpRequests, HttpRequestsTimeseries } from './get_mobile_http_requests';
-import { getMobileFilters, MobileFiltersResponse } from './get_mobile_filters';
-import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
-import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
-import { getMobileLocationStatsPeriods, MobileLocationStats } from './get_mobile_location_stats';
-import { getMobileTermsByField, MobileTermsByFieldResponse } from './get_mobile_terms_by_field';
+import { mobileCrashRoutes } from './crashes/route';
+import { mobileErrorRoutes } from './errors/route';
 import {
-  getMobileMainStatisticsByField,
+  MobileDetailedStatisticsResponse,
+  getMobileDetailedStatisticsByFieldPeriods,
+} from './get_mobile_detailed_statistics_by_field';
+import { MobileFiltersResponse, getMobileFilters } from './get_mobile_filters';
+import { HttpRequestsTimeseries, getMobileHttpRequests } from './get_mobile_http_requests';
+import { MobileLocationStats, getMobileLocationStatsPeriods } from './get_mobile_location_stats';
+import {
   MobileMainStatisticsResponse,
+  getMobileMainStatisticsByField,
 } from './get_mobile_main_statistics_by_field';
 import {
-  getMobileDetailedStatisticsByFieldPeriods,
-  MobileDetailedStatisticsResponse,
-} from './get_mobile_detailed_statistics_by_field';
-import { MobilePropertyType } from '../../../common/mobile_types';
-import {
-  getMobileMostUsedCharts,
   MobileMostUsedChartResponse,
+  getMobileMostUsedCharts,
 } from './get_mobile_most_used_charts';
-import { mobileErrorRoutes } from './errors/route';
-import { mobileCrashRoutes } from './crashes/route';
+import { SessionsTimeseries, getMobileSessions } from './get_mobile_sessions';
+import { MobilePeriodStats, getMobileStatsPeriods } from './get_mobile_stats';
+import { MobileTermsByFieldResponse, getMobileTermsByField } from './get_mobile_terms_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',

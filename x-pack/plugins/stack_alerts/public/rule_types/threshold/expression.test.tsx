@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import IndexThresholdRuleTypeExpression, { DEFAULT_VALUES } from './expression';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { IndexThresholdRuleParams } from './types';
-import { validateExpression } from './validation';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import {
+  TIME_UNITS,
   builtInAggregationTypes,
   builtInComparators,
   getTimeUnitLabel,
-  TIME_UNITS,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import IndexThresholdRuleTypeExpression, { DEFAULT_VALUES } from './expression';
+import { IndexThresholdRuleParams } from './types';
+import { validateExpression } from './validation';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');

@@ -19,65 +19,65 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { TableId, dataTableSelectors } from '@kbn/securitysolution-data-table';
+import { SecurityPageName } from '../../../../app/types';
+import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
+import { FiltersGlobal } from '../../../../common/components/filters_global';
+import { HeaderPage } from '../../../../common/components/header_page';
+import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
+import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useKibana } from '../../../../common/lib/kibana';
+import { inputsSelectors } from '../../../../common/store';
+import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import {
-  useAssetCriticalityData,
-  useAssetCriticalityPrivileges,
-} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import {
   AssetCriticalitySelector,
   AssetCriticalityTitle,
 } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { SecurityPageName } from '../../../../app/types';
-import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { HeaderPage } from '../../../../common/components/header_page';
-import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import { SiemSearchBar } from '../../../../common/components/search_bar';
-import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useKibana } from '../../../../common/lib/kibana';
-import { inputsSelectors } from '../../../../common/store';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
-import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
-import { UsersDetailsTabs } from './details_tabs';
-import { navTabsUsersDetails } from './nav_tabs';
-import type { UsersDetailsProps } from './types';
-import { getUsersDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
-import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { LastEventTime } from '../../../../common/components/last_event_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { LastEventTime } from '../../../../common/components/last_event_time';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
+import { timelineDefaults } from '../../../../timelines/store/defaults';
+import { UsersDetailsTabs } from './details_tabs';
+import { getUsersDetailsPageFilters } from './helpers';
+import { navTabsUsersDetails } from './nav_tabs';
+import type { UsersDetailsProps } from './types';
 
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 import {
-  UserOverview,
   USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+  UserOverview,
 } from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { UsersType } from '../../store/model';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';

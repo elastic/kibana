@@ -6,12 +6,12 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiBadge,
+  EuiFlyoutHeader,
 } from '@elastic/eui';
 import styled from 'styled-components';
 

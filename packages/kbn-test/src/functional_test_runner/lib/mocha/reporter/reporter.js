@@ -8,17 +8,17 @@
 
 import { format } from 'util';
 
-import Mocha from 'mocha';
-import { ToolingLogTextWriter } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { ToolingLogTextWriter } from '@kbn/tooling-log';
+import Mocha from 'mocha';
 import moment from 'moment';
 
-import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
-import * as colors from './colors';
-import * as symbols from './symbols';
-import { ms } from './ms';
-import { writeEpilogue } from './write_epilogue';
+import { recordLog, setupJUnitReportGeneration, snapshotLogsForRunnable } from '../../../../mocha';
 import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
+import * as colors from './colors';
+import { ms } from './ms';
+import * as symbols from './symbols';
+import { writeEpilogue } from './write_epilogue';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');

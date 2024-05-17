@@ -13,8 +13,8 @@ import {
   UnknownError,
   VisualReportingSoftDisabledError,
 } from '@kbn/reporting-common';
-import { mapToReportingError } from './map_to_reporting_error';
 import { errors } from '@kbn/screenshotting-plugin/common';
+import { mapToReportingError } from './map_to_reporting_error';
 
 describe('mapToReportingError', () => {
   test('Non-Error values', () => {

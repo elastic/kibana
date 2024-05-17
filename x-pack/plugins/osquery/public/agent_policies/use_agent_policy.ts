@@ -7,11 +7,11 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { i18n } from '@kbn/i18n';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { API_VERSIONS } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
+import { useKibana } from '../common/lib/kibana';
 
 interface UseAgentPolicy {
   policyId?: string;

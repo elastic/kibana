@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
 import {
-  NoDataViewsPromptProvider,
   NoDataViewsPromptKibanaProvider,
+  NoDataViewsPromptProvider,
 } from '@kbn/shared-ux-prompt-no-data-views';
+import React, { FC, PropsWithChildren, useContext } from 'react';
 
-import { NoDataCardProvider, NoDataCardKibanaProvider } from '@kbn/shared-ux-card-no-data';
+import { NoDataCardKibanaProvider, NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 
 import {
-  Services,
-  KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
+  KibanaNoDataPageServices,
+  Services,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 const KibanaNoDataPageContext = React.createContext<Services | null>(null);

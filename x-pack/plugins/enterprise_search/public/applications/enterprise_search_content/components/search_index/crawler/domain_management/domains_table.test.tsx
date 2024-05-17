@@ -6,15 +6,15 @@
  */
 
 import {
-  setMockValues,
-  setMockActions,
   mockKibanaValues,
+  setMockActions,
+  setMockValues,
 } from '../../../../../__mocks__/kea_logic';
 import '../../_mocks_/index_name_logic.mock';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 

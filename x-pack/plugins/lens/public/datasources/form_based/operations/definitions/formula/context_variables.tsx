@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { partition } from 'lodash';
 import {
-  buildExpressionFunction,
-  buildExpression,
   ExpressionFunctionDefinitions,
+  buildExpression,
+  buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
-import {
-  ExpressionFunctionFormulaInterval,
-  ExpressionFunctionFormulaNow,
-  ExpressionFunctionFormulaTimeRange,
-} from '../../../../../../common/expressions/formula_context/context_fns';
+import { i18n } from '@kbn/i18n';
+import { partition } from 'lodash';
+import type { GenericOperationDefinition, OperationDefinition } from '..';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,
   GenericIndexPatternColumn,
 } from '../../../../..';
+import {
+  ExpressionFunctionFormulaInterval,
+  ExpressionFunctionFormulaNow,
+  ExpressionFunctionFormulaTimeRange,
+} from '../../../../../../common/expressions/formula_context/context_fns';
 import type { DateRange } from '../../../../../../common/types';
-import type { GenericOperationDefinition, OperationDefinition } from '..';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../../../types';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 
 // copied over from layer_helpers
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests

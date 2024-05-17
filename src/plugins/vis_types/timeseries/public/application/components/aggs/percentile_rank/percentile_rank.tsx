@@ -6,35 +6,35 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
-  htmlIdGenerator,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
   EuiSpacer,
-  EuiFlexGrid,
+  htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
-import { AggSelect } from '../agg_select';
-import { FieldSelect } from '../field_select';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 // @ts-ignore
 import { createChangeHandler } from '../../lib/create_change_handler';
-import { createSelectHandler } from '../../lib/create_select_handler';
 import { createNumberHandler } from '../../lib/create_number_handler';
+import { createSelectHandler } from '../../lib/create_select_handler';
+import { AggSelect } from '../agg_select';
+import { FieldSelect } from '../field_select';
 
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
+import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 import type {
+  IndexPatternValue,
   Metric,
   Panel,
   SanitizedFieldType,
   Series,
-  IndexPatternValue,
 } from '../../../../../common/types';
-import { TSVB_DEFAULT_COLOR } from '../../../../../common/constants';
 
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import { FieldProps } from './types';
 import { useField } from './use_field';

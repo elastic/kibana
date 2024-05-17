@@ -1,3 +1,7 @@
+import {
+  CASES_CONNECTORS_CAPABILITY,
+  GET_CONNECTORS_CONFIGURE_API_TAG,
+} from '@kbn/cases-plugin/common/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,22 +9,18 @@
  * 2.0.
  */
 import type {
+  ProductFeatureKeys,
   ProductFeatureKibanaConfig,
   ProductFeaturesCasesConfig,
-  ProductFeatureKeys,
 } from '@kbn/security-solution-features';
 import {
-  getCasesDefaultProductFeaturesConfig,
   createEnabledProductFeaturesConfigMap,
+  getCasesDefaultProductFeaturesConfig,
 } from '@kbn/security-solution-features/config';
 import type {
-  ProductFeatureCasesKey,
   CasesSubFeatureId,
+  ProductFeatureCasesKey,
 } from '@kbn/security-solution-features/keys';
-import {
-  CASES_CONNECTORS_CAPABILITY,
-  GET_CONNECTORS_CONFIGURE_API_TAG,
-} from '@kbn/cases-plugin/common/constants';
 
 export const getCasesProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesCasesConfig => {

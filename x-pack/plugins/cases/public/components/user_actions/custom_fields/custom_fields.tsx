@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CasesConfigurationUICustomField, CaseUICustomField } from '../../../../common/ui';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CustomFieldsUserAction } from '../../../../common/types/domain';
+import type { CaseUICustomField, CasesConfigurationUICustomField } from '../../../../common/ui';
 import { createCommonUpdateUserActionBuilder } from '../common';
-import type { UserActionBuilder } from '../types';
 import * as i18n from '../translations';
+import type { UserActionBuilder } from '../types';
 
 const getLabelTitle = (
   customField: CaseUICustomField,

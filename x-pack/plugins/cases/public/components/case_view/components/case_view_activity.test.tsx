@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import userEvent from '@testing-library/user-event';
-import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import type { CaseUI } from '../../../../common';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CaseMetricsFeature } from '../../../../common/types/api';
+import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
+import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
+import { waitForComponentToUpdate } from '../../../common/test_utils';
+import { useCasesFeatures } from '../../../common/use_cases_features';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import {
   alertComment,
   basicCase,
@@ -18,31 +29,20 @@ import {
   getCaseUsersMockResponse,
   getUserAction,
 } from '../../../containers/mock';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
-import { CaseViewActivity } from './case_view_activity';
-import type { CaseUI } from '../../../../common';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import type { CaseViewProps } from '../types';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
-import { usePostPushToService } from '../../../containers/use_post_push_to_service';
-import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import { useGetTags } from '../../../containers/use_get_tags';
-import { useGetCategories } from '../../../containers/use_get_categories';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
-import { useGetCaseUsers } from '../../../containers/use_get_case_users';
-import { waitForComponentToUpdate } from '../../../common/test_utils';
-import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
-import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../mocks';
 import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
+import { useGetCategories } from '../../../containers/use_get_categories';
+import { useGetTags } from '../../../containers/use_get_tags';
 import { useInfiniteFindCaseUserActions } from '../../../containers/use_infinite_find_case_user_actions';
-import { useOnUpdateField } from '../use_on_update_field';
-import { useCasesFeatures } from '../../../common/use_cases_features';
-import { ConnectorTypes, UserActionTypes } from '../../../../common/types/domain';
-import { CaseMetricsFeature } from '../../../../common/types/api';
-import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
-import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../mocks';
+import type { CaseViewProps } from '../types';
+import { useOnUpdateField } from '../use_on_update_field';
+import { CaseViewActivity } from './case_view_activity';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');

@@ -7,21 +7,21 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
+import type { Labels, Style } from '@kbn/charts-plugin/public';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Style, Labels } from '@kbn/charts-plugin/public';
 import type {
-  SchemaConfig,
+  DateHistogramParams,
   FakeParams,
   HistogramParams,
-  DateHistogramParams,
   LegendSize,
+  SchemaConfig,
 } from '@kbn/visualizations-plugin/public';
 import type { ChartType } from '../../common';
 
 import type {
-  ChartMode,
   AxisMode,
   AxisType,
+  ChartMode,
   InterpolationMode,
   ScaleType,
   ThresholdLineStyle,

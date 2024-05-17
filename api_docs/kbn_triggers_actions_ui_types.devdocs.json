@@ -70,9 +70,7 @@
             "tags": [],
             "label": "authorizedConsumers",
             "description": [],
-            "signature": [
-              "{ [x: string]: { read: boolean; all: boolean; }; }"
-            ],
+            "signature": ["{ [x: string]: { read: boolean; all: boolean; }; }"],
             "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -95,9 +93,7 @@
             "tags": [],
             "label": "hasFieldsForAAD",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -109,9 +105,7 @@
             "tags": [],
             "label": "hasAlertsMappings",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -169,9 +163,7 @@
         "tags": [],
         "label": "CONTEXT_ACTION_VARIABLES",
         "description": [],
-        "signature": [
-          "readonly [\"context\"]"
-        ],
+        "signature": ["readonly [\"context\"]"],
         "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -184,9 +176,7 @@
         "tags": [],
         "label": "OPTIONAL_ACTION_VARIABLES",
         "description": [],
-        "signature": [
-          "readonly [\"context\", \"state\"]"
-        ],
+        "signature": ["readonly [\"context\", \"state\"]"],
         "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -199,9 +189,7 @@
         "tags": [],
         "label": "REQUIRED_ACTION_VARIABLES",
         "description": [],
-        "signature": [
-          "readonly [\"params\"]"
-        ],
+        "signature": ["readonly [\"params\"]"],
         "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
         "deprecated": false,
         "trackAdoption": false,

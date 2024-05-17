@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
 import {
   FIELD_TYPES,
   Field,
-  UseField,
   UseArray,
-  fieldValidators,
+  UseField,
   ValidationFunc,
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor, InputList } from '../field_components';
+import { InputList, XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
+import { EDITOR_PX_HEIGHT, FieldsConfig, from, to } from './shared';
 
 const { isJsonField, emptyField } = fieldValidators;
 

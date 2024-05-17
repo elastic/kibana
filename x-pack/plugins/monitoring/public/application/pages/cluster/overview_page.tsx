@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { CODE_PATH_ALL } from '../../../../common/constants';
-import { PageTemplate } from '../page_template';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { TabMenuItem } from '../page_template';
-import { Overview } from '../../../components/cluster/overview';
-import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
-import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { fetchClusters } from '../../../lib/fetch_clusters';
-import { AlertsByName } from '../../../alerts/types';
-import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
+import { AlertsByName } from '../../../alerts/types';
+import { Overview } from '../../../components/cluster/overview';
+import { SetupModeProps, SetupModeRenderer } from '../../../components/renderers/setup_mode';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
+import { fetchAlerts } from '../../../lib/fetch_alerts';
+import { fetchClusters } from '../../../lib/fetch_clusters';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { PageTemplate } from '../page_template';
+import { TabMenuItem } from '../page_template';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 

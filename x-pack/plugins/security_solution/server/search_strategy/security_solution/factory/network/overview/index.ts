@@ -9,8 +9,8 @@ import { get, getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
-  NetworkQueries,
   NetworkOverviewStrategyResponse,
+  NetworkQueries,
   OverviewNetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../utils/build_query';

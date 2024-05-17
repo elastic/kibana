@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   sendPostFleetServerHost,
-  useGetFleetServerHosts,
   useComboInput,
+  useGetFleetServerHosts,
   useInput,
   useSwitchInput,
   validateInputs,
@@ -17,8 +17,8 @@ import {
 import type { FleetServerHost } from '../../../types';
 
 import {
-  validateName,
   validateFleetServerHosts,
+  validateName,
 } from '../../../sections/settings/components/fleet_server_hosts_flyout/use_fleet_server_host_form';
 
 export interface FleetServerHostForm {

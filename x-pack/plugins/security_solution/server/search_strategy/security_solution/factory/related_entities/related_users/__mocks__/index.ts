@@ -6,15 +6,15 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { IEsSearchResponse } from '@kbn/search-types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { RelatedUsersRequestOptions } from '../../../../../../../common/api/search_strategy';
+import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
+import { RelatedEntitiesQueries } from '../../../../../../../common/search_strategy/security_solution/related_entities';
 import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from '../../../../../../endpoint/types';
-import { RelatedEntitiesQueries } from '../../../../../../../common/search_strategy/security_solution/related_entities';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 import { createMockConfig } from '../../../../../../lib/detection_engine/routes/__mocks__';
-import type { RelatedUsersRequestOptions } from '../../../../../../../common/api/search_strategy';
 
 export const mockOptions: RelatedUsersRequestOptions = {
   defaultIndex: ['test_indices*'],

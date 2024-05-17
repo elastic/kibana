@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { OperationDefinition, ParamEditorProps } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
+import { updateColumnParam } from '../layer_helpers';
+import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
+import { getGroupByKey } from './get_group_by_key';
 import {
+  combineErrorMessages,
+  getFilter,
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
-  getFilter,
-  combineErrorMessages,
   isColumnOfType,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { updateColumnParam } from '../layer_helpers';
-import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-import { getGroupByKey } from './get_group_by_key';
 
 const supportedTypes = new Set([
   'string',

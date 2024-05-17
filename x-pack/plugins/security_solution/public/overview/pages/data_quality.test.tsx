@@ -9,11 +9,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
+import { useKibana } from '../../common/lib/kibana';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
-import { HOT, WARM, UNMANAGED } from './translations';
-import { useKibana } from '../../common/lib/kibana';
+import { HOT, UNMANAGED, WARM } from './translations';
 
 const mockedUseKibana = mockUseKibana();
 

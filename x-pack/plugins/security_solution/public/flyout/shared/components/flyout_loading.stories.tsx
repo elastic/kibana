@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { Story } from '@storybook/react';
+import React from 'react';
 import { FlyoutLoading } from './flyout_loading';
 
 export default {

@@ -7,11 +7,11 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 import { MVT_FIELD_TYPE } from '../../../../common/constants';
+import { MVTFieldConfigEditor } from './mvt_field_config_editor';
 
 test('should render field editor', async () => {
   const fields = [

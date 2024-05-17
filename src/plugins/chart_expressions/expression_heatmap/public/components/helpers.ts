@@ -7,15 +7,15 @@
  */
 
 import {
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
-  getPaletteStops,
-  reversePalette,
-  ColorStop,
   CUSTOM_PALETTE,
+  ColorStop,
+  CustomPaletteParams,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  PaletteOutput,
+  PaletteRegistry,
+  getPaletteStops,
+  reversePalette,
 } from '@kbn/coloring';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';

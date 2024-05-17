@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { GraphWorkspaceSavedObject, Workspace } from '../../types';
-import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
-import { createWorkspace } from '../workspace/graph_client_workspace';
-import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { outlinkEncoders } from '../../helpers/outlink_encoders';
+import { GraphWorkspaceSavedObject, Workspace } from '../../types';
+import { createWorkspace } from '../workspace/graph_client_workspace';
+import { mapFields, migrateLegacyIndexPatternRef, savedWorkspaceToAppState } from './deserialize';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;

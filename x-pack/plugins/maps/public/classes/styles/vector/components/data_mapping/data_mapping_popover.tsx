@@ -7,9 +7,9 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Component, ReactElement } from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Component, ReactElement } from 'react';
 
 type Props = {
   children: ReactElement<any>;

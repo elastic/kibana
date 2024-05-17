@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import * as i18n from './translations';
 

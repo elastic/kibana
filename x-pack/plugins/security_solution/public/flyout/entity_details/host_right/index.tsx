@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import React, { useCallback, useMemo } from 'react';
 
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import type { Refetch } from '../../../common/types';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
-import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
+import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import type { Refetch } from '../../../common/types';
+import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { HostPanelContent } from './content';
-import { HostPanelHeader } from './header';
-import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
-import type { ObservedEntityData } from '../shared/components/observed_entity/types';
-import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import type { ObservedEntityData } from '../shared/components/observed_entity/types';
+import { HostPanelContent } from './content';
+import { HostPanelHeader } from './header';
+import { useObservedHost } from './hooks/use_observed_host';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;

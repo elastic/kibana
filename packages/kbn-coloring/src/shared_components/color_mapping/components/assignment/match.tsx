@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiComboBox, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import { ColorMapping } from '../../config';
 
 export const Match: React.FC<{
@@ -36,31 +36,33 @@ export const Match: React.FC<{
     rule.type === 'auto'
       ? []
       : typeof rule.values === 'string'
-      ? [
-          {
-            label: rule.values,
-            value: rule.values,
-            append:
-              (assignmentValuesCounter.get(rule.values) ?? 0) > 1 ? (
-                <EuiToolTip position="bottom" content={duplicateWarning}>
-                  <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-                </EuiToolTip>
-              ) : undefined,
-          },
-        ]
-      : rule.values.map((value) => {
-          const ruleValues = Array.isArray(value) ? value : [value];
-          return {
-            label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_KEY_SEPARATOR),
-            value,
-            append:
-              (assignmentValuesCounter.get(value) ?? 0) > 1 ? (
-                <EuiToolTip position="bottom" content={duplicateWarning}>
-                  <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-                </EuiToolTip>
-              ) : undefined,
-          };
-        });
+        ? [
+            {
+              label: rule.values,
+              value: rule.values,
+              append:
+                (assignmentValuesCounter.get(rule.values) ?? 0) > 1 ? (
+                  <EuiToolTip position="bottom" content={duplicateWarning}>
+                    <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+                  </EuiToolTip>
+                ) : undefined,
+            },
+          ]
+        : rule.values.map((value) => {
+            const ruleValues = Array.isArray(value) ? value : [value];
+            return {
+              label: ruleValues
+                .map((v) => specialTokens.get(v) ?? v)
+                .join(MULTI_FIELD_KEY_SEPARATOR),
+              value,
+              append:
+                (assignmentValuesCounter.get(value) ?? 0) > 1 ? (
+                  <EuiToolTip position="bottom" content={duplicateWarning}>
+                    <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+                  </EuiToolTip>
+                ) : undefined,
+            };
+          });
 
   const convertedOptions = options.map((value) => {
     const ruleValues = Array.isArray(value) ? value : [value];

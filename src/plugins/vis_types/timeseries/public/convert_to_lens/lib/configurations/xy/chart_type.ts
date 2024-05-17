@@ -7,8 +7,8 @@
  */
 
 import { SeriesType, SeriesTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Series } from '../../../../../common/types';
 import { PANEL_TYPES } from '../../../../../common/enums';
+import { Series } from '../../../../../common/types';
 
 export const getChartType = (series: Series, type: PANEL_TYPES): SeriesType => {
   let layerChartType: SeriesType = SeriesTypes.LINE;

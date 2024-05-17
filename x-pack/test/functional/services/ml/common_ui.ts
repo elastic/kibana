@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';

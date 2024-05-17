@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
-import moment from 'moment';
-import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import {
   AlertsClientError,
   DEFAULT_AAD_CONFIG,
   GetViewInAppRelativeUrlFnOpts,
 } from '@kbn/alerting-plugin/server';
-import { LegacyUptimeRuleTypeFactory } from './types';
-import { updateState } from './common';
-import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
+import { schema } from '@kbn/config-schema';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
+import moment from 'moment';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { Cert, CertResult } from '../../../../common/runtime_types';
+import { updateState } from './common';
 import { commonStateTranslations, tlsTranslations } from './translations';
+import { LegacyUptimeRuleTypeFactory } from './types';
 
-import { savedObjectsAdapter } from '../saved_objects/saved_objects';
-import { UptimeEsClient } from '../lib';
 import {
   DEFAULT_FROM,
   DEFAULT_SIZE,
   DEFAULT_TO,
 } from '../../../../common/requests/get_certs_request_body';
+import { UptimeEsClient } from '../lib';
+import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
 

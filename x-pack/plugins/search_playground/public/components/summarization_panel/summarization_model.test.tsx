@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render as testingLibraryRender } from '@testing-library/react';
-import { SummarizationModel } from './summarization_model';
-import { useManagementLink } from '../../hooks/use_management_link';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render as testingLibraryRender } from '@testing-library/react';
+import React from 'react';
+import { useManagementLink } from '../../hooks/use_management_link';
 import { LLMs } from '../../types';
+import { SummarizationModel } from './summarization_model';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);

@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { NormalizedField, ParameterName, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { StoreParameter, DocValuesParameter, MetaParameter } from '../../field_parameters';
+import { Field as FieldType, NormalizedField, ParameterName } from '../../../../types';
+import { DocValuesParameter, MetaParameter, StoreParameter } from '../../field_parameters';
 import { AdvancedParametersSection } from '../edit_field';
 
 const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
+import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 import {
   RulesSettingsClient,
   RulesSettingsClientConstructorOptions,
 } from './rules_settings_client';
-import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

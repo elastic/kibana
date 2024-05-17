@@ -6,14 +6,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { SPACES } from '../../common/lib/spaces';
-import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
+import { SPACES } from '../../common/lib/spaces';
 import {
-  resolveImportErrorsTestSuiteFactory,
-  resolveImportErrorsTestCaseFailures,
   TEST_CASES as CASES,
   SPECIAL_TEST_CASES,
+  resolveImportErrorsTestCaseFailures,
+  resolveImportErrorsTestSuiteFactory,
 } from '../../common/suites/resolve_import_errors';
 
 const {
@@ -52,8 +52,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     spaceId === DEFAULT_SPACE_ID
       ? CASES.SINGLE_NAMESPACE_DEFAULT_SPACE
       : spaceId === SPACE_1_ID
-      ? CASES.SINGLE_NAMESPACE_SPACE_1
-      : CASES.SINGLE_NAMESPACE_SPACE_2;
+        ? CASES.SINGLE_NAMESPACE_SPACE_1
+        : CASES.SINGLE_NAMESPACE_SPACE_2;
   return [
     { ...singleNamespaceObject, ...failConflict(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...failConflict(!overwrite) },
@@ -140,8 +140,8 @@ export default function ({ getService }: FtrProviderContext) {
       const suffix = overwrite
         ? ' with overwrite enabled'
         : createNewCopies
-        ? ' with createNewCopies enabled'
-        : '';
+          ? ' with createNewCopies enabled'
+          : '';
       const tests = createTests(overwrite, createNewCopies, spaceId);
       addTests(`within the ${spaceId} space${suffix}`, { spaceId, tests });
     });

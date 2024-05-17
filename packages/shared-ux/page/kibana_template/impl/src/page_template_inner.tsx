@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { FC } from 'react';
 
-import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';
+import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 
 const getClasses = (template?: string, className?: string) => {
   return classNames(

@@ -7,7 +7,7 @@
  */
 
 import { AppLeaveActionType } from '@kbn/core-application-browser';
-import { isConfirmAction, getLeaveAction } from './application_leave';
+import { getLeaveAction, isConfirmAction } from './application_leave';
 
 describe('isConfirmAction', () => {
   it('returns true if action is confirm', () => {

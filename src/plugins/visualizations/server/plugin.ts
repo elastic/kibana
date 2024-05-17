@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
-import type { VisualizationsServerSetup, VisualizationsServerStart } from './types';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import type { VisualizationsServerSetup, VisualizationsServerStart } from './types';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>

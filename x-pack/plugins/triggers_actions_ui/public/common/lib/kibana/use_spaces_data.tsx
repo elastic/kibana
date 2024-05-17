@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
 import { SpacesData } from '@kbn/spaces-plugin/public';
+import { useEffect, useState } from 'react';
 import { useKibana } from './kibana_react';
 
 export const useSpacesData = () => {

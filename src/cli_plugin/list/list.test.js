@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { writeFileSync, mkdirSync } from 'fs';
 
 import del from 'del';
 

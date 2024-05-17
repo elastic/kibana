@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { DataViewsService } from '../../../../common/data_views';
+import {
+  INITIAL_REST_VERSION,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+  SERVICE_KEY_TYPE,
+  SPECIFIC_RUNTIME_FIELD_PATH,
+  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
+} from '../../../constants';
 import { ErrorIndexPatternFieldNotFound } from '../../../error';
-import { handleErrors } from '../util/handle_errors';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import {
-  SPECIFIC_RUNTIME_FIELD_PATH,
-  SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,
-  SERVICE_KEY,
-  SERVICE_KEY_LEGACY,
-  SERVICE_KEY_TYPE,
-  INITIAL_REST_VERSION,
-} from '../../../constants';
-import { responseFormatter } from './response_formatter';
-import { runtimeResponseSchema } from '../../schema';
 import type { RuntimeResponseType } from '../../route_types';
+import { runtimeResponseSchema } from '../../schema';
+import { handleErrors } from '../util/handle_errors';
+import { responseFormatter } from './response_formatter';
 
 interface GetRuntimeFieldArgs {
   dataViewsService: DataViewsService;

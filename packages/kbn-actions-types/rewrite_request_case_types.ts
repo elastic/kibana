@@ -9,8 +9,8 @@
 type RenameActionToConnector<K extends string> = K extends `actionTypeId`
   ? `connectorTypeId`
   : K extends `actionId`
-  ? `connectorId`
-  : K;
+    ? `connectorId`
+    : K;
 
 export type AsApiContract<T> = {
   [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends 'frequency'
@@ -43,9 +43,9 @@ export type RewriteResponseCase<T> = (
 type CamelToSnake<T extends string> = string extends T
   ? string
   : T extends `${infer C0}${infer C1}${infer R}`
-  ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${C1 extends Uppercase<C1>
-      ? '_'
-      : ''}${Lowercase<C1>}${CamelToSnake<R>}`
-  : T extends `${infer C0}${infer R}`
-  ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${CamelToSnake<R>}`
-  : '';
+    ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${C1 extends Uppercase<C1>
+        ? '_'
+        : ''}${Lowercase<C1>}${CamelToSnake<R>}`
+    : T extends `${infer C0}${infer R}`
+      ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${CamelToSnake<R>}`
+      : '';

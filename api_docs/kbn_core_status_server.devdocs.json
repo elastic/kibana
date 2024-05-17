@@ -26,9 +26,7 @@
         "type": "Interface",
         "tags": [],
         "label": "CoreStatus",
-        "description": [
-          "\nStatus of core services.\n"
-        ],
+        "description": ["\nStatus of core services.\n"],
         "path": "packages/core/status/core-status-common/src/core_status.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -84,9 +82,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ServiceStatus",
-        "description": [
-          "\nThe current status of a service at a point in time.\n"
-        ],
+        "description": ["\nThe current status of a service at a point in time.\n"],
         "signature": [
           {
             "pluginId": "@kbn/core-status-common",
@@ -107,9 +103,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "level",
-            "description": [
-              "\nThe current availability level of the service."
-            ],
+            "description": ["\nThe current availability level of the service."],
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
@@ -123,9 +117,7 @@
             "type": "string",
             "tags": [],
             "label": "summary",
-            "description": [
-              "\nA high-level summary of the service status."
-            ],
+            "description": ["\nA high-level summary of the service status."],
             "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -136,12 +128,8 @@
             "type": "string",
             "tags": [],
             "label": "detail",
-            "description": [
-              "\nA more detailed description of the service status."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nA more detailed description of the service status."],
+            "signature": ["string | undefined"],
             "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -155,9 +143,7 @@
             "description": [
               "\nA URL to open in a new tab about how to resolve or troubleshoot the problem."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -171,9 +157,7 @@
             "description": [
               "\nAny JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained,\nmachine-readable information about the service status. May include status information for underlying features."
             ],
-            "signature": [
-              "Meta | undefined"
-            ],
+            "signature": ["Meta | undefined"],
             "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -200,9 +184,7 @@
             "type": "Object",
             "tags": [],
             "label": "core$",
-            "description": [
-              "\nCurrent status for all Core services."
-            ],
+            "description": ["\nCurrent status for all Core services."],
             "signature": [
               "Observable",
               "<",
@@ -225,9 +207,7 @@
             "type": "Object",
             "tags": [],
             "label": "overall$",
-            "description": [
-              "\nOverall system status for all of Kibana.\n"
-            ],
+            "description": ["\nOverall system status for all of Kibana.\n"],
             "signature": [
               "Observable",
               "<",
@@ -328,9 +308,7 @@
             "type": "Object",
             "tags": [],
             "label": "derivedStatus$",
-            "description": [
-              "\nThe status of this plugin as derived from its dependencies.\n"
-            ],
+            "description": ["\nThe status of this plugin as derived from its dependencies.\n"],
             "signature": [
               "Observable",
               "<",
@@ -356,9 +334,7 @@
             "description": [
               "\nWhether or not the status HTTP APIs are available to unauthenticated users when an authentication provider is\npresent."
             ],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/core/status/core-status-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -394,12 +370,8 @@
         "type": "Type",
         "tags": [],
         "label": "ServiceStatusLevelId",
-        "description": [
-          "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
-        ],
-        "signature": [
-          "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
-        ],
+        "description": ["\nPossible values for the ID of a {@link ServiceStatusLevel}\n"],
+        "signature": ["\"degraded\" | \"unavailable\" | \"available\" | \"critical\""],
         "path": "packages/core/status/core-status-common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -413,9 +385,7 @@
         "type": "Object",
         "tags": [],
         "label": "ServiceStatusLevels",
-        "description": [
-          "\nThe current \"level\" of availability of a service.\n"
-        ],
+        "description": ["\nThe current \"level\" of availability of a service.\n"],
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],

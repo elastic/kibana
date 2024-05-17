@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import React, { memo } from 'react';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { CardComments } from './components/card_comments';
+import { CardContainerPanel } from './components/card_container_panel';
 import type { CardHeaderProps } from './components/card_header';
 import { CardHeader } from './components/card_header';
+import { CardSectionPanel } from './components/card_section_panel';
 import { CardSubHeader } from './components/card_sub_header';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
-import type { AnyArtifact, MenuItemPropsByPolicyId } from './types';
-import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { CardContainerPanel } from './components/card_container_panel';
-import { CardSectionPanel } from './components/card_section_panel';
-import { CardComments } from './components/card_comments';
-import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
-import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { DescriptionField } from './components/description_field';
+import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
+import { usePolicyNavLinks } from './hooks/use_policy_nav_links';
+import type { AnyArtifact, MenuItemPropsByPolicyId } from './types';
 
 export interface CommonArtifactEntryCardProps extends CommonProps {
   item: MaybeImmutable<AnyArtifact>;

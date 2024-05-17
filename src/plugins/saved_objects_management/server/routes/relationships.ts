@@ -9,9 +9,9 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { chain } from 'lodash';
+import type { v1 } from '../../common';
 import { findRelationships } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
-import type { v1 } from '../../common';
 
 export const registerRelationshipsRoute = (
   router: IRouter,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { FilterAggForm } from './filter_agg_form';
-import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { I18nProvider } from '@kbn/i18n-react';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
+import { CreateTransformWizardContext } from '../../../../wizard/wizard';
+import { FilterAggForm } from './filter_agg_form';
 import { FilterTermForm } from './filter_term_form';
 
 describe('FilterAggForm', () => {

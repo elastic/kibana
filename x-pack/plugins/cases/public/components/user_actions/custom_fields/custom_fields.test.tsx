@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 
-import { getUserAction } from '../../../containers/mock';
-import { TestProviders } from '../../../common/mock';
-import { createCustomFieldsUserActionBuilder } from './custom_fields';
-import { getMockBuilderArgs } from '../mock';
 import {
   CustomFieldTypes,
   UserActionActions,
   UserActionTypes,
 } from '../../../../common/types/domain';
+import { TestProviders } from '../../../common/mock';
+import { getUserAction } from '../../../containers/mock';
+import { getMockBuilderArgs } from '../mock';
+import { createCustomFieldsUserActionBuilder } from './custom_fields';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');

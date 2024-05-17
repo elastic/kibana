@@ -7,10 +7,10 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React, { memo, useCallback } from 'react';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getCommandListMock } from '../../mocks';
 import { useConsoleManager } from './console_manager';

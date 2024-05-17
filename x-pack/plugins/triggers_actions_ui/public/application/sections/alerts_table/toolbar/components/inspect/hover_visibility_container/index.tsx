@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { getOr } from 'lodash/fp';
+import React from 'react';
 
 interface StyledDivProps {
   targetClassNames: string[];

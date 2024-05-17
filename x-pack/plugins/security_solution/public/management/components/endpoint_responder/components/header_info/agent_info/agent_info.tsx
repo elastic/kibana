@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
+import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { AgentStatus } from '../../../../../../common/components/agents/agent_status';
 import { useAgentStatusHook } from '../../../../../hooks/agents/use_get_agent_status';
-import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
 import type { Platform } from '../platforms';
 

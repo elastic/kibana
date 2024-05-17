@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Story } from '@storybook/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { Story } from '@storybook/react';
+import React from 'react';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
 

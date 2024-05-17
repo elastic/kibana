@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
+  ApmAlertFields,
   createApmRule,
+  createIndexConnector,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  ApmAlertFields,
   getIndexAction,
-  createIndexConnector,
 } from './helpers/alerting_api_helper';
 import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
-import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForActiveRule } from './helpers/wait_for_active_rule';
+import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

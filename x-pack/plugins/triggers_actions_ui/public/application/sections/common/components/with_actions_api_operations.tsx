@@ -7,18 +7,18 @@
 
 import React from 'react';
 
-import { IExecutionLogResult, IExecutionKPIResult } from '@kbn/actions-plugin/common';
+import { IExecutionKPIResult, IExecutionLogResult } from '@kbn/actions-plugin/common';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ActionType } from '../../../../types';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import {
-  loadGlobalConnectorExecutionKPIAggregations,
   LoadGlobalConnectorExecutionKPIAggregationsProps,
+  loadGlobalConnectorExecutionKPIAggregations,
 } from '../../../lib/action_connector_api/load_execution_kpi_aggregations';
 import {
-  loadGlobalConnectorExecutionLogAggregations,
   LoadGlobalConnectorExecutionLogAggregationsProps,
+  loadGlobalConnectorExecutionLogAggregations,
 } from '../../../lib/action_connector_api/load_execution_log_aggregations';
-import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   loadActionTypes: () => Promise<ActionType[]>;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UserProvidedValues, UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 
 interface ValueValidation {
   valid: boolean;

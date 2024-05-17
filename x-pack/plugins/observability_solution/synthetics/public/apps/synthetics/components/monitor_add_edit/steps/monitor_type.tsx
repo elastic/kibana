@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormMonitorType } from '../types';
+import React from 'react';
 import { MONITOR_TYPE_CONFIG } from '../form/field_config';
+import { FormMonitorType } from '../types';
 
 export const MonitorType = ({ monitorType }: { monitorType: FormMonitorType }) => {
   const config = MONITOR_TYPE_CONFIG[monitorType];

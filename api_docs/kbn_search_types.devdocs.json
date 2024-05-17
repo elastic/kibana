@@ -38,10 +38,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": [
-              "ErrorCause",
-              " | undefined"
-            ],
+            "signature": ["ErrorCause", " | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -123,9 +120,7 @@
             "tags": [],
             "label": "indexType",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-types/src/es_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -160,12 +155,8 @@
             "type": "string",
             "tags": [],
             "label": "id",
-            "description": [
-              "\nAn id can be used to uniquely identify this request."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nAn id can be used to uniquely identify this request."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -177,9 +168,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Params | undefined"
-            ],
+            "signature": ["Params | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -217,9 +206,7 @@
             "description": [
               "\nSome responses may contain a unique id to identify the request this response came from."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -233,9 +220,7 @@
             "description": [
               "\nIf relevant to the search strategy, return a total number\nthat represents how progress is indicated."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -249,9 +234,7 @@
             "description": [
               "\nIf relevant to the search strategy, return a loaded number\nthat represents how progress is indicated."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -262,12 +245,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isRunning",
-            "description": [
-              "\nIndicates whether search is still in flight"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nIndicates whether search is still in flight"],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -278,12 +257,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isPartial",
-            "description": [
-              "\nIndicates whether the results returned are complete or partial"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nIndicates whether the results returned are complete or partial"],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -297,9 +272,7 @@
             "description": [
               "\nIndicates whether the results returned are from the async-search index"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -313,9 +286,7 @@
             "description": [
               "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -329,9 +300,7 @@
             "description": [
               "\nOptional warnings returned from Elasticsearch (for example, deprecation warnings)"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -345,9 +314,7 @@
             "description": [
               "\nThe raw response returned by the internal search method (usually the raw ES response)"
             ],
-            "signature": [
-              "RawResponse"
-            ],
+            "signature": ["RawResponse"],
             "path": "packages/kbn-search-types/src/kibana_search_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -358,9 +325,7 @@
             "type": "Object",
             "tags": [],
             "label": "requestParams",
-            "description": [
-              "\nHTTP request parameters from elasticsearch transport client t"
-            ],
+            "description": ["\nHTTP request parameters from elasticsearch transport client t"],
             "signature": [
               {
                 "pluginId": "@kbn/search-types",
@@ -461,9 +426,7 @@
                 "tags": [],
                 "label": "request",
                 "description": [],
-                "signature": [
-                  "SearchStrategyRequest"
-                ],
+                "signature": ["SearchStrategyRequest"],
                 "path": "packages/kbn-search-types/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -497,9 +460,7 @@
             "type": "Function",
             "tags": [],
             "label": "cancel",
-            "description": [
-              "\nUsed to cancel an in-progress search request."
-            ],
+            "description": ["\nUsed to cancel an in-progress search request."],
             "signature": [
               "(id: string, options?: ",
               {
@@ -556,9 +517,7 @@
             "type": "Function",
             "tags": [],
             "label": "extend",
-            "description": [
-              "\nUsed to extend the TTL of an in-progress search request."
-            ],
+            "description": ["\nUsed to extend the TTL of an in-progress search request."],
             "signature": [
               "(id: string, keepAlive: string, options?: ",
               {
@@ -643,9 +602,7 @@
             "description": [
               "\nAn `AbortSignal` that allows the caller of `search` to abort a search request."
             ],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
+            "signature": ["AbortSignal | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -659,9 +616,7 @@
             "description": [
               "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -675,9 +630,7 @@
             "description": [
               "\nRequest the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to\nsomething other than `true`, this should be set to `false`."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -691,9 +644,7 @@
             "description": [
               "\nA session ID, grouping multiple search requests into a single session."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -704,12 +655,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isStored",
-            "description": [
-              "\nWhether the session is already saved (i.e. sent to background)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nWhether the session is already saved (i.e. sent to background)"],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -723,9 +670,7 @@
             "description": [
               "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -739,9 +684,7 @@
             "description": [
               "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -755,9 +698,7 @@
             "description": [
               "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -791,9 +732,7 @@
             "type": "Object",
             "tags": [],
             "label": "indexPattern",
-            "description": [
-              "\nIndex pattern reference is used for better error messages"
-            ],
+            "description": ["\nIndex pattern reference is used for better error messages"],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -817,11 +756,7 @@
             "description": [
               "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
             ],
-            "signature": [
-              "Omit<",
-              "TransportRequestOptions",
-              ", \"signal\"> | undefined"
-            ],
+            "signature": ["Omit<", "TransportRequestOptions", ", \"signal\"> | undefined"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -930,9 +865,7 @@
             "tags": [],
             "label": "request",
             "description": [],
-            "signature": [
-              "SearchStrategyRequest"
-            ],
+            "signature": ["SearchStrategyRequest"],
             "path": "packages/kbn-search-types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -993,10 +926,7 @@
         "tags": [],
         "label": "ISearchRequestParams",
         "description": [],
-        "signature": [
-          "{ trackTotalHits?: boolean | undefined; } & ",
-          "SearchRequest"
-        ],
+        "signature": ["{ trackTotalHits?: boolean | undefined; } & ", "SearchRequest"],
         "path": "packages/kbn-search-types/src/es_search_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1009,9 +939,7 @@
         "tags": [],
         "label": "SanitizedConnectionRequestParams",
         "description": [],
-        "signature": [
-          "{ path: string; method: string; querystring?: string | undefined; }"
-        ],
+        "signature": ["{ path: string; method: string; querystring?: string | undefined; }"],
         "path": "packages/kbn-search-types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,

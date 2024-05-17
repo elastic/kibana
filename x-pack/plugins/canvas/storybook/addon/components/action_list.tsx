@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
 import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
 import addons from '@storybook/addons';
+import React, { FC, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EVENTS } from '../constants';

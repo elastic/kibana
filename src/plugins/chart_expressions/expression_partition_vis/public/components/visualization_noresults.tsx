@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC } from 'react';
 import { ChartTypes } from '../../common/types';
 import { getIcon } from '../utils';
 

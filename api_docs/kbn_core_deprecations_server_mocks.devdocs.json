@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<DeprecationsServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<DeprecationsServiceContract>"],
             "path": "packages/core/deprecations/core-deprecations-server-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

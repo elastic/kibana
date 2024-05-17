@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PercentFormat } from './percent';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { PercentFormat } from './percent';
 
 describe('PercentFormat', () => {
   const config: { [key: string]: string } = {

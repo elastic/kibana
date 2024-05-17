@@ -10,10 +10,10 @@ import React, { forwardRef, useCallback, useImperativeHandle } from 'react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MarkdownEditorForm } from '.';
-import { removeItemFromSessionStorage } from '../utils';
-import { getMarkdownEditorStorageKey } from './utils';
-import { EditableMarkdownFooter } from './editable_markdown_footer';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { removeItemFromSessionStorage } from '../utils';
+import { EditableMarkdownFooter } from './editable_markdown_footer';
+import { getMarkdownEditorStorageKey } from './utils';
 
 export interface EditableMarkdownRefObject {
   setComment: (newComment: string) => void;

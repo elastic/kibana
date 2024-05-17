@@ -6,8 +6,8 @@
  */
 
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from '../../sources/errors';
 import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
+import { NoSuchRemoteClusterError, isNoSuchRemoteClusterMessage } from '../../sources/errors';
 import { InfraDatabaseGetIndicesResponse } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 

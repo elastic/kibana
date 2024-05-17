@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
+import React from 'react';
 import { AppPluginStartDependencies } from './types';
 
 export const Playground = dynamic(async () => ({
@@ -29,9 +29,8 @@ export const PlaygroundHeaderDocs = dynamic(async () => ({
 
 export const getPlaygroundProvider =
   (core: CoreStart, services: AppPluginStartDependencies) =>
-  (props: React.ComponentProps<typeof PlaygroundProvider>) =>
-    (
-      <KibanaContextProvider services={{ ...core, ...services }}>
-        <PlaygroundProvider {...props} />
-      </KibanaContextProvider>
-    );
+  (props: React.ComponentProps<typeof PlaygroundProvider>) => (
+    <KibanaContextProvider services={{ ...core, ...services }}>
+      <PlaygroundProvider {...props} />
+    </KibanaContextProvider>
+  );

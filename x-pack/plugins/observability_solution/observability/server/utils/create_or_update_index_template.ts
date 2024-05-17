@@ -1,3 +1,5 @@
+import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import pRetry from 'p-retry';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export async function createOrUpdateIndexTemplate({
   indexTemplate,

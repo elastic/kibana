@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiSpacer,
-  EuiPanel,
+  EuiButton,
+  EuiCode,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCodeBlock,
-  EuiTitle,
-  EuiText,
-  EuiCode,
   EuiIcon,
-  EuiButton,
-  EuiPageTemplate,
   EuiLink,
+  EuiPageTemplate,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useState, useCallback, useEffect } from 'react';
 
-import { css } from '@emotion/react';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SectionLoading, Error } from '../../../../../shared_imports';
-import { loadIndexStatistics, documentationService } from '../../../../services';
+import { css } from '@emotion/react';
+import { Error, SectionLoading } from '../../../../../shared_imports';
+import { documentationService, loadIndexStatistics } from '../../../../services';
 
 export const DetailsPageStats: FunctionComponent<{ indexName: string; isIndexOpen: boolean }> = ({
   indexName,

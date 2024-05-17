@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React, { useState } from 'react';
 
-import { StartNewChat } from './start_new_chat';
 import { Chat } from './chat';
+import { StartNewChat } from './start_new_chat';
 
 export const App: React.FC = () => {
   const [showStartPage, setShowStartPage] = useState(true);

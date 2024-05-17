@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { range } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { range } from 'lodash';
 import { IRuleTypeAlerts } from '../types';
 import {
-  createResourceInstallationHelper,
-  errorResult,
   InitializationPromise,
   ResourceInstallationHelper,
-  successResult,
   calculateDelay,
+  createResourceInstallationHelper,
+  errorResult,
   getShouldRetry,
+  successResult,
 } from './create_resource_installation_helper';
 import { retryUntil } from './test_utils';
 
-const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
+const logger: ReturnType<(typeof loggingSystemMock)['createLogger']> =
   loggingSystemMock.createLogger();
 
 const initFn = async (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {

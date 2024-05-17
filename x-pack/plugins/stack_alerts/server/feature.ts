@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { TRANSFORM_RULE_TYPE } from '@kbn/transform-plugin/common';
+import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
-import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
+import { TRANSFORM_RULE_TYPE } from '@kbn/transform-plugin/common';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
+import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
 

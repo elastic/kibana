@@ -29,7 +29,7 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
 >;
 
 export const PresentationPanelHeader = <
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
 >({
   api,
   index,

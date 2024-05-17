@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { ReplaySubject, Subject } from 'rxjs';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ReplaySubject, Subject } from 'rxjs';
+import { AIAssistantService } from '.';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantService } from '.';
 import { retryUntil } from './create_resource_installation_helper.test';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
 }));
 
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
 const SimulateTemplateResponse = {

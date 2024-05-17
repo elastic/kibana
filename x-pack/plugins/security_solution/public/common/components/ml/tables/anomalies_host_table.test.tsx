@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { AnomaliesHostTable } from './anomalies_host_table';
-import { TestProviders } from '../../../mock';
-import React from 'react';
-import { useQueryToggle } from '../../../containers/query_toggle';
-import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HostsType } from '../../../../explore/hosts/store/model';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { useMlHref } from '@kbn/ml-plugin/public';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { HostsType } from '../../../../explore/hosts/store/model';
+import { useQueryToggle } from '../../../containers/query_toggle';
+import { TestProviders } from '../../../mock';
+import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { mockAnomalies } from '../mock';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { AnomaliesHostTable } from './anomalies_host_table';
 
 jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink, EuiButton, EuiEmptyPrompt, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { FleetPermissionsCallout, NoPermissionsTooltip } from '../../common/components/permissions';
-import { useSyntheticsSettingsContext } from '../../../contexts';
 import { LEARN_MORE, READ_DOCS } from './empty_locations';
 
 export const AgentPolicyNeeded = () => {

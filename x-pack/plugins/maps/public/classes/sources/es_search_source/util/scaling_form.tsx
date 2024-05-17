@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { Component, Fragment, ReactNode } from 'react';
 import {
   EuiConfirmModal,
   EuiFormRow,
@@ -18,14 +17,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getIndexPatternService } from '../../../../kibana_services';
+import React, { Component, Fragment, ReactNode } from 'react';
 import {
   DEFAULT_MAX_RESULT_WINDOW,
   LAYER_TYPE,
   SCALING_TYPES,
 } from '../../../../../common/constants';
-import { loadIndexSettings } from './load_index_settings';
+import { getIndexPatternService } from '../../../../kibana_services';
 import { OnSourceChangeArgs } from '../../source';
+import { loadIndexSettings } from './load_index_settings';
 import { ScalingDocumenationPopover } from './scaling_documenation_popover';
 
 interface Props {

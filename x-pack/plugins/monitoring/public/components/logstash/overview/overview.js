@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
 import {
+  EuiFlexGrid,
+  EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
   EuiScreenReaderOnly,
+  EuiSpacer,
 } from '@elastic/eui';
-import { ClusterStatus } from '../cluster_status';
-import { MonitoringTimeseriesContainer } from '../../chart';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { PureComponent } from 'react';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { ClusterStatus } from '../cluster_status';
 
 export class Overview extends PureComponent {
   render() {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { APIReturnType } from '../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import type { APIReturnType } from '../services/rest/create_call_apm_api';
+import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
-import { useApmParams } from './use_apm_params';
 
 type MetricChartApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;

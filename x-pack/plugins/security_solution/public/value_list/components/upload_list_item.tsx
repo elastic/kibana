@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiButton, EuiFilePicker, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useImportList, useInvalidateListItemQuery } from '@kbn/securitysolution-list-hooks';
 import type { Type as ListType } from '@kbn/securitysolution-io-ts-list-types';
-import { useKibana } from '../../common/lib/kibana';
+import { useImportList, useInvalidateListItemQuery } from '@kbn/securitysolution-list-hooks';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import {
-  UPLOAD_LIST_ITEM,
-  UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT,
-  UPLOAD_TOOLTIP,
-  FAILED_TO_UPLOAD_LIST_ITEM_TITLE,
-  FAILED_TO_UPLOAD_LIST_ITEM,
-  SUCCESSFULY_UPLOAD_LIST_ITEMS,
-} from '../translations';
+import { useKibana } from '../../common/lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import {
+  FAILED_TO_UPLOAD_LIST_ITEM,
+  FAILED_TO_UPLOAD_LIST_ITEM_TITLE,
+  SUCCESSFULY_UPLOAD_LIST_ITEMS,
+  UPLOAD_FILE_PICKER_INITAL_PROMT_TEXT,
+  UPLOAD_LIST_ITEM,
+  UPLOAD_TOOLTIP,
+} from '../translations';
 
 const validFileTypes = ['text/csv', 'text/plain'];
 

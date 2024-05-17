@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { v4 as uuidv4 } from 'uuid';
-import { omit, mapValues, range, flatten } from 'lodash';
-import moment from 'moment';
-import { asyncForEach } from '@kbn/std';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
+import { flatten, mapValues, omit, range } from 'lodash';
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getTestActionData, getTestAlertData } from '../../lib/get_test_data';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { FormBasedPersistedState, MetricVisualizationState } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FormBasedPersistedState, MetricVisualizationState } from '@kbn/lens-plugin/public';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
 import { METRIC_ID } from './constants';

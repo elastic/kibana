@@ -7,6 +7,7 @@
 
 import type { Subscription } from 'rxjs';
 
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
@@ -19,14 +20,13 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
+import type { PolicyData } from '../../../../common/endpoint/types';
+import type { LicenseService } from '../../../../common/license/license';
 import {
   isEndpointPolicyValidForLicense,
   unsetPolicyFeaturesAccordingToLicenseLevel,
 } from '../../../../common/license/policy_config';
-import type { LicenseService } from '../../../../common/license/license';
-import type { PolicyData } from '../../../../common/endpoint/types';
-import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 
 export class PolicyWatcher {
   private logger: Logger;

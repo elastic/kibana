@@ -9,10 +9,10 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { TestProviders } from '../../mock';
 import { HeaderPage } from '.';
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { SecurityPageName } from '../../../app/types';
+import { TestProviders } from '../../mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 jest.mock('../link_to');

@@ -14,8 +14,6 @@ import {
 } from '@kbn/test-jest-helpers';
 stubBroadcastChannel();
 
-import { createSessionExpiredMock } from './session_expired.mock';
-import { SessionTimeout, startTimer } from './session_timeout';
 import {
   SESSION_CHECK_MS,
   SESSION_EXPIRATION_WARNING_MS,
@@ -24,6 +22,8 @@ import {
   SESSION_ROUTE,
 } from '../../common/constants';
 import type { SessionInfo } from '../../common/types';
+import { createSessionExpiredMock } from './session_expired.mock';
+import { SessionTimeout, startTimer } from './session_timeout';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

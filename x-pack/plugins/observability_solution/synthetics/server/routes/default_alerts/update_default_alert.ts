@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DefaultAlertService } from './default_alert_service';
-import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { DefaultAlertService } from './default_alert_service';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',

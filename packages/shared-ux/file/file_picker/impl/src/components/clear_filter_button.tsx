@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { FunctionComponent } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
+import React from 'react';
+import type { FunctionComponent } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { useFilePickerContext } from '../context';
 
 import { i18nTexts } from '../i18n_texts';

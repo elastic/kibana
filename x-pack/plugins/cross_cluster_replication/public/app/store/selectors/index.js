@@ -6,8 +6,8 @@
  */
 
 import { createSelector } from 'reselect';
-import { objectToArray } from '../../services/utils';
 import { API_STATUS } from '../../constants';
+import { objectToArray } from '../../services/utils';
 
 // Api
 export const getApiState = (state) => state.api;

@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
-import { pick, throttle, cloneDeep } from 'lodash';
 import type { HttpFetchOptions } from '@kbn/core-http-browser';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
-import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
-  SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
-  SavedObjectsBulkDeleteResponse as SavedObjectsBulkDeleteResponseServer,
-  SavedObjectsClientContract as SavedObjectsApi,
-  SavedObjectsFindResponse as SavedObjectsFindResponseServer,
-  SavedObjectsResolveResponse,
-  SavedObjectsBulkDeleteOptions,
-} from '@kbn/core-saved-objects-api-server';
-import type {
+  ResolvedSimpleSavedObject,
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkDeleteResponse,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsBatchResponse,
   SavedObjectsFindOptions,
-  SavedObjectsUpdateOptions,
-  ResolvedSimpleSavedObject,
-  SavedObjectsBulkUpdateObject,
   SavedObjectsFindResponse,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkCreateObject,
+  SavedObjectsUpdateOptions,
   SimpleSavedObject,
-  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
+import type {
+  SavedObjectsClientContract as SavedObjectsApi,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse as SavedObjectsBulkDeleteResponseServer,
+  SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
+  SavedObjectsFindResponse as SavedObjectsFindResponseServer,
+  SavedObjectsResolveResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
+import { cloneDeep, pick, throttle } from 'lodash';
 import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -158,9 +158,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
       try {
         const { objectsToResolve, responseIndices } = getObjectsToResolve(queue);
-        const { resolved_objects: resolvedObjects } = await this.performBulkResolve(
-          objectsToResolve
-        );
+        const { resolved_objects: resolvedObjects } =
+          await this.performBulkResolve(objectsToResolve);
 
         queue.forEach((queueItem, i) => {
           // This differs from the older processBatchGetQueue approach because the resolved object IDs are *not* guaranteed to be the same.

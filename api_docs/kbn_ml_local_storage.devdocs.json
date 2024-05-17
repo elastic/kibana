@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "StorageContextProvider",
-        "description": [
-          "\nProvider to manage context for the `useStorage` hook."
-        ],
+        "description": ["\nProvider to manage context for the `useStorage` hook."],
         "signature": [
           "({\n  children,\n  storage,\n  storageKeys,\n}: React.PropsWithChildren<StorageContextProviderProps<K>>) => JSX.Element"
         ],
@@ -42,9 +40,7 @@
             "tags": [],
             "label": "{\n  children,\n  storage,\n  storageKeys,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<StorageContextProviderProps<K>>"
-            ],
+            "signature": ["React.PropsWithChildren<StorageContextProviderProps<K>>"],
             "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -60,9 +56,7 @@
         "type": "Function",
         "tags": [],
         "label": "useStorage",
-        "description": [
-          "\nHook for consuming a storage value"
-        ],
+        "description": ["\nHook for consuming a storage value"],
         "signature": [
           "(key: K, initValue: T | undefined) => [T | undefined extends undefined ? T | undefined : Exclude<T, undefined>, (value: T) => void]"
         ],
@@ -77,9 +71,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "K"
-            ],
+            "signature": ["K"],
             "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,9 +84,7 @@
             "tags": [],
             "label": "initValue",
             "description": [],
-            "signature": [
-              "T | undefined"
-            ],
+            "signature": ["T | undefined"],
             "path": "x-pack/packages/ml/local_storage/src/storage_context.tsx",
             "deprecated": false,
             "trackAdoption": false,

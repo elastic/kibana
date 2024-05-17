@@ -11,12 +11,12 @@ import type {
   RiskEngineInitResponse,
   RiskEngineInitResult,
 } from '../../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
-import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
-import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
-import { RiskEngineAuditActions } from '../audit';
+import { APP_ID, RISK_ENGINE_INIT_URL } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskEngineAuditActions } from '../audit';
+import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 export const riskEngineInitRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']

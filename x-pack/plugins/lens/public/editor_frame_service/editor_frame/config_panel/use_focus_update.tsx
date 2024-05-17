@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const getFirstFocusable = (el: HTMLElement | null) => {
   const focusableSelector = 'button, [href], input, select, textarea, [tabindex]';

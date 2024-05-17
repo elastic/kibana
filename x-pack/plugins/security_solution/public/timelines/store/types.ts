@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types';
 import type { RowRendererId } from '../../../common/api/timeline';
+import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types';
 
 import type { TimelineModel } from './model';
 

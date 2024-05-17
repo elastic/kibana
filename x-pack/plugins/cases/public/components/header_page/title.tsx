@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { isString } from 'lodash';
-import { EuiBetaBadge, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import React from 'react';
 
 import { TruncatedText } from '../truncated_text';
 import type { ReleasePhase } from '../types';

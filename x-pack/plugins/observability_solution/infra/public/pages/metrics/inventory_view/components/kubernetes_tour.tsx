@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTourStep, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import React, { ReactElement } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 interface Props {

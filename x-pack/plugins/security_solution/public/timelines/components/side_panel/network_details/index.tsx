@@ -6,11 +6,11 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlexItem,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,9 +18,9 @@ import React from 'react';
 import styled from 'styled-components';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import {
-  ExpandableNetworkDetailsTitle,
-  ExpandableNetworkDetailsPageLink,
   ExpandableNetworkDetails,
+  ExpandableNetworkDetailsPageLink,
+  ExpandableNetworkDetailsTitle,
 } from './expandable_network';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`

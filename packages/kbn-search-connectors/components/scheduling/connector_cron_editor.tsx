@@ -1,3 +1,5 @@
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +8,6 @@
  * Side Public License, v 1.
  */
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ConnectorScheduling } from '../../types/connectors';
 import { Frequency } from '../../types/cron_editor';
 import { CronEditor } from '../cron_editor';

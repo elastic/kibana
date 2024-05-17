@@ -13,8 +13,8 @@ import {
   RequestHandlerContext,
 } from '@kbn/core/server';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 export interface LicenseStatus {
   isValid: boolean;

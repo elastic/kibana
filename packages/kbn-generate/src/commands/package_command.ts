@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import Fsp from 'fs/promises';
 import Path from 'path';
+import Fsp from 'fs/promises';
 
-import normalizePath from 'normalize-path';
-import globby from 'globby';
 import { ESLint } from 'eslint';
+import globby from 'globby';
+import normalizePath from 'normalize-path';
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
-import { validateElasticTeam } from '../lib/validate_elastic_team';
-import { ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
+import { validateElasticTeam } from '../lib/validate_elastic_team';
+import { PKG_TEMPLATE_DIR, ROOT_PKG_DIR } from '../paths';
 
 const validPkgId = (id: unknown): id is string =>
   typeof id === 'string' && id.startsWith('@kbn/') && !id.includes(' ');

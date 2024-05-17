@@ -16,18 +16,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { isRight } from 'fp-ts/lib/Either';
-import { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { Dependency, DependencyRT } from '../../../common/types';
+import React, { useState } from 'react';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
+import { Dependency, DependencyRT } from '../../../common/types';
+import { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
 
 const ACTION_GROUP_OPTIONS = [
   { value: ALERT_ACTION.id, label: ALERT_ACTION.name },

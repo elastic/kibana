@@ -6,14 +6,14 @@
  */
 
 import { merge } from 'lodash';
-import { MissingRequiredError } from '../error_missing_required';
-import { calculateAvailability } from '../calculate_availability';
-import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
+import { LegacyRequest } from '../../types';
+import { calculateAvailability } from '../calculate_availability';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { MissingRequiredError } from '../error_missing_required';
+import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const legacyStats = resp.hits?.hits[0]?._source?.logstash_stats;

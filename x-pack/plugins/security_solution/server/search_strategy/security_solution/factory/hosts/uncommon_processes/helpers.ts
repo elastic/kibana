@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set/fp';
+import { get } from 'lodash/fp';
 
-import type {
-  ProcessHits,
-  HostsUncommonProcessesEdges,
-  HostsUncommonProcessHit,
-} from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import type { HostHits } from '../../../../../../common/search_strategy';
+import type {
+  HostsUncommonProcessHit,
+  HostsUncommonProcessesEdges,
+  ProcessHits,
+} from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 import { getFlattenedFields } from '../../../../helpers/get_flattened_fields';
 
 export const UNCOMMON_PROCESSES_FIELDS = [

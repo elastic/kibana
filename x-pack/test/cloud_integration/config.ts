@@ -7,8 +7,8 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from '../functional/services';
 import { pageObjects } from '../functional/page_objects';
+import { services } from '../functional/services';
 
 const FULLSTORY_ORG_ID = process.env.FULLSTORY_ORG_ID;
 const FULLSTORY_API_KEY = process.env.FULLSTORY_API_KEY;

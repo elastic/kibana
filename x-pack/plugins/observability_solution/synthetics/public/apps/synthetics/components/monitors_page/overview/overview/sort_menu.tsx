@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiPopover,
-  useGeneratedHtmlId,
-  EuiText,
-  EuiPanel,
+  EuiContextMenuPanel,
   EuiHorizontalRule,
+  EuiPanel,
+  EuiPopover,
+  EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 interface Option {
   label: string;

@@ -22,23 +22,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { capitalize, get } from 'lodash';
 import React, { Fragment } from 'react';
-import type { TableChange, Sorting, Pagination } from '../../../application/hooks/use_table';
-import type { AlertsByName } from '../../../alerts/types';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeFeature } from '../../../../common/enums';
 import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
 import { AlertsStatus } from '../../../alerts/status';
+import type { AlertsByName } from '../../../alerts/types';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
+import type { Pagination, Sorting, TableChange } from '../../../application/hooks/use_table';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import type { SetupMode } from '../../setup_mode/types';
 import { STATUS_ICON_TYPES } from '../../status_icon';
 import { EuiMonitoringTable } from '../../table';
 import { ClusterStatus } from '../cluster_status';
 import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
-import type { SetupMode } from '../../setup_mode/types';
 
 const getColumns = (
   setupMode: SetupMode,

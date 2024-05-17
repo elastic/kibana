@@ -8,8 +8,8 @@
 import React, { useCallback } from 'react';
 
 import {
-  NOTIFICATION_THROTTLE_RULE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 import { SelectField } from '../../../../shared_imports';
 

@@ -7,20 +7,20 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiPortal,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiFieldSearch,
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPortal,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -28,10 +28,10 @@ import { FlashMessages } from '../../../../../shared/flash_messages';
 
 import { SearchLogic } from '../../../search';
 import {
-  RESULT_ACTIONS_DIRECTIONS,
-  PROMOTE_DOCUMENT_ACTION,
   DEMOTE_DOCUMENT_ACTION,
   HIDE_DOCUMENT_ACTION,
+  PROMOTE_DOCUMENT_ACTION,
+  RESULT_ACTIONS_DIRECTIONS,
   SHOW_DOCUMENT_ACTION,
 } from '../../constants';
 import { CurationLogic } from '../curation_logic';

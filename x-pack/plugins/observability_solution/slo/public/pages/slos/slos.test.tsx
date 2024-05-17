@@ -8,6 +8,7 @@
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -22,11 +23,10 @@ import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
-import { SlosPage } from './slos';
 import { useGetSettings } from '../slo_settings/use_get_settings';
+import { SlosPage } from './slos';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

@@ -6,10 +6,12 @@
  */
 
 import numeral from '@elastic/numeral';
-import userEvent from '@testing-library/user-event';
 import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
+import { CheckAll } from '.';
+import { EMPTY_STAT } from '../../../../helpers';
 import { mockMappingsResponse } from '../../../../mock/mappings_response/mock_mappings_response';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { mockUnallowedValuesResponse } from '../../../../mock/unallowed_values/mock_unallowed_values';
@@ -19,8 +21,6 @@ import {
   PartitionedFieldMetadata,
   UnallowedValueRequestItem,
 } from '../../../../types';
-import { CheckAll } from '.';
-import { EMPTY_STAT } from '../../../../helpers';
 
 const defaultBytesFormat = '0,0.[0]b';
 const mockFormatBytes = (value: number | undefined) =>

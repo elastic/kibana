@@ -9,11 +9,15 @@ import { Position } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useMemo, useCallback } from 'react';
 
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import styled from 'styled-components';
+import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import {
+  eventsHistogramConfig,
+  eventsStackByOptions,
+} from '../../../common/components/events_tab/histogram_configurations';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
@@ -21,20 +25,16 @@ import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import { convertToBuildEsQuery } from '../../../common/lib/kuery';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
-import {
-  eventsStackByOptions,
-  eventsHistogramConfig,
-} from '../../../common/components/events_tab/histogram_configurations';
-import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
+import { HostsTableType } from '../../../explore/hosts/store/model';
 
-import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import * as i18n from '../../pages/translations';
 
 const DEFAULT_STACK_BY = 'event.dataset';
 

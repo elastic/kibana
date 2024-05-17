@@ -8,8 +8,8 @@
 import { EuiIcon, type EuiIconProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import linuxSvg from './logos/linux.svg';
-import windowsSvg from './logos/windows.svg';
 import macosSvg from './logos/macos.svg';
+import windowsSvg from './logos/windows.svg';
 
 export type Platform = 'macos' | 'linux' | 'windows';
 const getPlatformIcon = (platform: Platform): string | null => {

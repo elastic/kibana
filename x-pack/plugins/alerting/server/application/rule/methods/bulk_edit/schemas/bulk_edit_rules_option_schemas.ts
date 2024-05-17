@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
-import { notifyWhenSchema, actionRequestSchema, systemActionRequestSchema } from '../../../schemas';
+import { actionRequestSchema, notifyWhenSchema, systemActionRequestSchema } from '../../../schemas';
 import { validateDuration } from '../../../validation';
 import { validateSnoozeSchedule } from '../validation';
 

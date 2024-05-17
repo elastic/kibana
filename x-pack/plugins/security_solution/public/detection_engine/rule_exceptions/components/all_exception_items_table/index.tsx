@@ -29,22 +29,22 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
-import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
-import { ExceptionsViewerSearchBar } from './search_bar';
+import { useUserData } from '../../../../detections/components/user_info';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import type { ExceptionListItemIdentifiers } from '../../utils/types';
 import type { State, ViewerFlyoutName, ViewerState } from './reducer';
 import { allExceptionItemsReducer } from './reducer';
+import { ExceptionsViewerSearchBar } from './search_bar';
 
-import { ExceptionsViewerPagination } from './pagination';
-import { ExceptionsViewerUtility } from './utility_bar';
-import { ExceptionsViewerItems } from './all_items';
-import { EditExceptionFlyout } from '../edit_exception_flyout';
-import { AddExceptionFlyout } from '../add_exception_flyout';
-import * as i18n from './translations';
-import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../rule_management/logic/types';
+import { useFindExceptionListReferences } from '../../logic/use_find_references';
+import { AddExceptionFlyout } from '../add_exception_flyout';
+import { EditExceptionFlyout } from '../edit_exception_flyout';
+import { ExceptionsViewerItems } from './all_items';
+import { ExceptionsViewerPagination } from './pagination';
+import * as i18n from './translations';
+import { ExceptionsViewerUtility } from './utility_bar';
 
 const StyledText = styled(EuiText)`
   font-style: italic;

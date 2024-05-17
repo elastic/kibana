@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { TreemapSelect, TreemapTypes } from './treemap_select';
-import { TreemapChart } from '../../../../shared/charts/treemap_chart';
-import { useFetcher } from '../../../../../hooks/use_fetcher';
+import React, { useState } from 'react';
 import { DEVICE_MODEL_IDENTIFIER, SERVICE_VERSION } from '../../../../../../common/es_fields/apm';
+import { useFetcher } from '../../../../../hooks/use_fetcher';
+import { TreemapChart } from '../../../../shared/charts/treemap_chart';
+import { TreemapSelect, TreemapTypes } from './treemap_select';
 
 const ES_FIELD_MAPPING: Record<TreemapTypes, string> = {
   [TreemapTypes.Devices]: DEVICE_MODEL_IDENTIFIER,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { JobCreatorContext } from '../../../job_creator_context';
 import type { RareJobCreator } from '../../../../../common/job_creator';
-import { RareCard, RareInPopulationCard, FrequentlyRareInPopulationCard } from './detector_cards';
+import { JobCreatorContext } from '../../../job_creator_context';
 import { RARE_DETECTOR_TYPE } from '../rare_view';
+import { FrequentlyRareInPopulationCard, RareCard, RareInPopulationCard } from './detector_cards';
 
 interface Props {
   onChange(d: RARE_DETECTOR_TYPE): void;

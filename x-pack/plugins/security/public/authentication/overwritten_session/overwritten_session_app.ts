@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from '@kbn/core/public';
+import type { AppMountParameters, ApplicationSetup, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 

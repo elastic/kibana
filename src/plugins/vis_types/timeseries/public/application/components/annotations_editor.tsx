@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { EuiSpacer, EuiTitle, EuiButton, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { AnnotationRow } from './annotation_row';
-import { collectionActions, CollectionActionsProps } from './lib/collection_actions';
+import { CollectionActionsProps, collectionActions } from './lib/collection_actions';
 
-import type { Panel, Annotation } from '../../../common/types';
+import type { Annotation, Panel } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
 
 import './_annotations_editor.scss';
@@ -59,7 +59,7 @@ const getCollectionActionsProps = (props: AnnotationsEditorProps) =>
   ({
     name: 'annotations',
     ...props,
-  } as CollectionActionsProps<Panel>);
+  }) as CollectionActionsProps<Panel>;
 
 export const AnnotationsEditor = (props: AnnotationsEditorProps) => {
   const { annotations } = props.model;

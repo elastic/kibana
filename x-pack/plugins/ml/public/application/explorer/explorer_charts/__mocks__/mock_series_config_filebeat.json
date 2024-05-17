@@ -9,9 +9,7 @@
     "job_id": "population-03",
     "query_delay": "60s",
     "frequency": "600s",
-    "indices": [
-      "filebeat-7.0.0*"
-    ],
+    "indices": ["filebeat-7.0.0*"],
     "query": {
       "match_all": {
         "boost": 1

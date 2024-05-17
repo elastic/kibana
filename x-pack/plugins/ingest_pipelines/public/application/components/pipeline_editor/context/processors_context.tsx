@@ -19,16 +19,16 @@ import React, {
 import { Processor } from '../../../../../common/types';
 
 import {
+  ContextValue,
+  ContextValueState,
   EditorMode,
   FormValidityState,
   OnFormUpdateArg,
   OnUpdateHandlerArg,
-  ContextValue,
-  ContextValueState,
   ProcessorInternal,
 } from '../types';
 
-import { useProcessorsState, isOnFailureSelector } from '../processors_reducer';
+import { isOnFailureSelector, useProcessorsState } from '../processors_reducer';
 
 import { deserialize } from '../deserialize';
 
@@ -37,10 +37,10 @@ import { serialize } from '../serialize';
 import { OnActionHandler } from '../components/processors_tree';
 
 import {
-  ProcessorRemoveModal,
+  OnSubmitHandler,
   PipelineProcessorsItemTooltip,
   ProcessorForm,
-  OnSubmitHandler,
+  ProcessorRemoveModal,
 } from '../components';
 
 import { getValue } from '../utils';

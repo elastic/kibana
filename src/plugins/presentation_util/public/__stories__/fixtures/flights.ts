@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { map, uniq } from 'lodash';
 import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
 import {
   FieldFormatsGetConfigFn,
   NumberFormat,
   StringFormat,
 } from '@kbn/field-formats-plugin/common';
+import { map, uniq } from 'lodash';
 import { flights } from './flights_data';
 
-export type Flight = typeof flights[number];
+export type Flight = (typeof flights)[number];
 export type FlightField = keyof Flight;
 
 export const flightFieldNames: FlightField[] = [

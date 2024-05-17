@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useMemo } from 'react';
-import { isString } from 'lodash/fp';
 import type { AppError } from '@kbn/securitysolution-t-grid';
 import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
+import { isString } from 'lodash/fp';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { type IEsError, isEsError } from '@kbn/search-errors';
 
-import type { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
+import type { ErrorToastOptions, Toast, ToastsStart } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';
 
 export type UseAppToasts = Pick<ToastsStart, 'addSuccess' | 'addWarning' | 'remove'> & {
@@ -94,8 +94,8 @@ export const esErrorToErrorStack = (error: IEsError & MaybeESError): Error => {
     error.err?.statusCode != null
       ? `(${error.err.statusCode})`
       : error.statusCode != null
-      ? `(${error.statusCode})`
-      : '';
+        ? `(${error.statusCode})`
+        : '';
   const stringifiedError = getStringifiedStack(maybeUnWrapped);
   const adaptedError = new Error(
     `${error.attributes?.error?.reason ?? error.message} ${statusCode}`
@@ -125,8 +125,8 @@ export const appErrorToErrorStack = (error: AppError): Error => {
   const statusCode = isKibanaError(error)
     ? `(${error.body.statusCode})`
     : isSecurityAppError(error)
-    ? `(${error.body.status_code})`
-    : '';
+      ? `(${error.body.status_code})`
+      : '';
   const stringifiedError = getStringifiedStack(error);
   const adaptedError = new Error(
     `${String(error.body.message).trim() !== '' ? error.body.message : error.message} ${statusCode}`
@@ -167,8 +167,8 @@ export const unknownToErrorStack = (error: unknown): Error => {
   const message = isString(error)
     ? error
     : error instanceof Object && stringifiedError != null
-    ? stringifiedError
-    : String(error);
+      ? stringifiedError
+      : String(error);
   const adaptedError = new Error(message);
   adaptedError.name = message;
   if (stringifiedError != null) {

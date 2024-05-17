@@ -5,25 +5,25 @@
  * 2.0.
  */
 import React, { useMemo, useCallback, useState } from 'react';
-import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
+import type { ChangeEvent, FunctionComponent, ReactNode } from 'react';
 import sytled, { useTheme } from 'styled-components';
 
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiFieldText,
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiFormHelpText,
-  euiDragDropReorder,
   EuiFormErrorText,
+  EuiFormHelpText,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
   EuiTextArea,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

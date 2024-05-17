@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,12 +20,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getEuiIconType } from '../../../../../services/icons';
 
+import { queryClient } from '..';
 import {
   sendGetPackages,
   sendInstallPackage,
@@ -34,9 +35,8 @@ import {
   useLink,
   useStartServices,
 } from '../../../hooks';
-import type { PackageListItem } from '../../../types';
-import { queryClient } from '..';
 import { pkgKeyFromPackageInfo } from '../../../services';
+import type { PackageListItem } from '../../../types';
 
 const fetchInstalledIntegrations = async () => {
   const response = await sendGetPackages({ prerelease: true });

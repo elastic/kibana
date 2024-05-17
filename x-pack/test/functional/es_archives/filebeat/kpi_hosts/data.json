@@ -119,9 +119,7 @@
           "in_iface": "eth0"
         }
       },
-      "tags": [
-        "suricata"
-      ],
+      "tags": ["suricata"],
       "url": {
         "domain": "s3-iad-2.cf.dash.row.aiv-cdn.net",
         "original": "/dm/2$XTMWANo0Q2RZKlH-95UoAahZrOg~/8cdf/ad98/e000/4b0d-8f72-8faf9aa1a35a/c3d5b471-4e36-45e0-8ca7-d789366f3b31_audio_13.mp4",

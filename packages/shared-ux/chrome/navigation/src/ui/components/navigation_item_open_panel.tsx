@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, type FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
-import { css } from '@emotion/css';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,14 +13,18 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   type EuiThemeComputed,
-  useEuiTheme,
   transparentize,
+  useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
+import React, { useCallback, type FC } from 'react';
 import { useNavigation as useServices } from '../../services';
-import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
+import { isActiveFromUrl } from '../../utils';
 import { usePanel } from './panel';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`

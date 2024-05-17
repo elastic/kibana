@@ -11,30 +11,30 @@ import {
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
 import type {
-  RequestHandler,
-  RequestHandlerContextBase,
+  AddVersionOpts,
+  ApiVersion,
+  IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
-  ApiVersion,
-  AddVersionOpts,
+  RequestHandler,
+  RequestHandlerContextBase,
+  RouteConfigOptions,
   VersionedRoute,
   VersionedRouteConfig,
-  IKibanaResponse,
-  RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { Method, VersionedRouterRoute } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
+import type { Method, VersionedRouterRoute } from './types';
 
-import { validate } from './validate';
+import { injectResponseHeaders } from './inject_response_headers';
 import {
+  hasQueryVersion,
   isAllowedPublicVersion,
   isValidRouteVersion,
-  hasQueryVersion,
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectResponseHeaders } from './inject_response_headers';
+import { validate } from './validate';
 
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';

@@ -1,3 +1,5 @@
+import { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
-import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { getFilters } from './get_filters';
 
 describe('Get Filters', () => {

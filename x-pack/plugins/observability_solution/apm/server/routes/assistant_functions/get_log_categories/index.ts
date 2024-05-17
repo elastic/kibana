@@ -9,15 +9,15 @@ import datemath from '@elastic/datemath';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core/server';
 import { aiAssistantLogsIndexPattern } from '@kbn/observability-ai-assistant-plugin/server';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
-  SERVICE_NAME,
   CONTAINER_ID,
   HOST_NAME,
   KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
+  SERVICE_NAME,
   TRACE_ID,
 } from '../../../../common/es_fields/apm';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getHistogramInterval } from './get_histogram_interval';
 import { assertCloseTo } from './assert_close_to';
+import { getHistogramInterval } from './get_histogram_interval';
 
 describe('getHistogramInterval', () => {
   it('specifies the interval necessary to divide a given timespan into equal buckets, rounded to the nearest integer, expressed in ms', () => {

@@ -8,8 +8,8 @@
 import type { IEsSearchResponse } from '@kbn/search-types';
 import type {
   ActionDetails,
-  ActionDetailsStrategyResponse,
   ActionDetailsRequestOptions,
+  ActionDetailsStrategyResponse,
   OsqueryQueries,
 } from '../../../../../../common/search_strategy/osquery';
 

@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import { SinonSpy, spy, assert } from 'sinon';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { shallow } from 'enzyme';
+import React from 'react';
+import { assert, SinonSpy, spy } from 'sinon';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { RangeControlEditor } from './range_control_editor';
 import { ControlParams } from '../../editor_utils';
-import { getDepsMock } from '../../test_utils/get_deps_mock';
 import { getIndexPatternMock, updateComponent } from '../../test_utils';
+import { getDepsMock } from '../../test_utils/get_deps_mock';
+import { RangeControlEditor } from './range_control_editor';
 
 const controlParams: ControlParams = {
   id: '1',

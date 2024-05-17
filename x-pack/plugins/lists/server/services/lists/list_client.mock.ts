@@ -7,11 +7,6 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { getFoundAllListItemsSchemaMock } from '../../../common/schemas/response/found_all_list_items_schema.mock';
-import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
-import { getFoundListSchemaMock } from '../../../common/schemas/response/found_list_schema.mock';
-import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
-import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import {
   IMPORT_BUFFER_SIZE,
   IMPORT_TIMEOUT,
@@ -20,6 +15,11 @@ import {
   MAX_IMPORT_PAYLOAD_BYTES,
   MAX_IMPORT_SIZE,
 } from '../../../common/constants.mock';
+import { getFoundAllListItemsSchemaMock } from '../../../common/schemas/response/found_all_list_items_schema.mock';
+import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
+import { getFoundListSchemaMock } from '../../../common/schemas/response/found_list_schema.mock';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
 import { ListClient } from './list_client';
 

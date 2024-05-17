@@ -5,25 +5,25 @@
  * 2.0.
  */
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  CloudDefendPluginSetup,
-  CloudDefendPluginStart,
-  CloudDefendPluginStartDeps,
-  CloudDefendPluginSetupDeps,
-} from './types';
-import { setupRoutes } from './routes/setup_routes';
+import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { isCloudDefendPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { onPackagePolicyPostCreateCallback } from './lib/fleet_util';
 import { registerCloudDefendUsageCollector } from './lib/telemetry/collectors/register';
+import { setupRoutes } from './routes/setup_routes';
+import {
+  CloudDefendPluginSetup,
+  CloudDefendPluginSetupDeps,
+  CloudDefendPluginStart,
+  CloudDefendPluginStartDeps,
+} from './types';
 
 export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
   private readonly logger: Logger;

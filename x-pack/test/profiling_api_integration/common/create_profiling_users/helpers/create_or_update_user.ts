@@ -9,8 +9,8 @@
 
 import { difference, union } from 'lodash';
 import { Elasticsearch, Kibana } from '..';
-import { callKibana, isAxiosError } from './call_kibana';
 import { SecurityService } from '../../../../../../test/common/services/security/security';
+import { callKibana, isAxiosError } from './call_kibana';
 
 interface User {
   username: string;

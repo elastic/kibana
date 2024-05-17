@@ -10,16 +10,16 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
-import type { SpacesReactContext, SpacesReactContextValue } from './types';
 import type { SpacesManager } from '../spaces_manager';
 import type { SpacesData } from '../types';
+import type { SpacesReactContext, SpacesReactContextValue } from './types';
 
 const { useContext, createElement, createContext } = React;
 
 const context = createContext<Partial<SpacesReactContextValue<Partial<CoreStart>>>>({});
 
 export const useSpaces = <
-  Services extends Partial<CoreStart>
+  Services extends Partial<CoreStart>,
 >(): SpacesReactContextValue<Services> =>
   useContext(context as unknown as React.Context<SpacesReactContextValue<Services>>);
 

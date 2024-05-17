@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ObservabilityStatusBox } from './observability_status_box';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { ObservabilityStatusBox } from './observability_status_box';
 
 const application = applicationServiceMock.createStartContract();
 

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { createReducer } from '@reduxjs/toolkit';
 
 import {
-  MonitorManagementListResult,
-  MonitorFiltersResult,
   EncryptedSyntheticsSavedMonitor,
+  MonitorFiltersResult,
+  MonitorManagementListResult,
 } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
-import { MonitorListPageState } from './models';
 import { getMonitorListPageStateWithDefaults } from './helpers';
+import { MonitorListPageState } from './models';
 
 import {
   cleanMonitorListState,
   clearMonitorUpsertStatus,
   enableMonitorAlertAction,
+  fetchMonitorFiltersAction,
   fetchMonitorListAction,
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
   updateManagementPageStateAction,
-  fetchMonitorFiltersAction,
 } from './actions';
 
 export interface MonitorListState {

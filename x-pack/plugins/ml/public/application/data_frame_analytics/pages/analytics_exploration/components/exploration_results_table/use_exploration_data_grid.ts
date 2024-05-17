@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
+import { INIT_MAX_COLUMNS, useDataGrid } from '@kbn/ml-data-grid';
+import { useCallback, useMemo } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import { useDataGrid, INIT_MAX_COLUMNS } from '@kbn/ml-data-grid';
 import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,

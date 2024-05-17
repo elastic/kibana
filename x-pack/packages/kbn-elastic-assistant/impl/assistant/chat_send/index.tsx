@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { UseChatSend } from './use_chat_send';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 import { useAutosizeTextArea } from './use_autosize_textarea';
+import { UseChatSend } from './use_chat_send';
 
 export interface Props extends Omit<UseChatSend, 'abortStream'> {
   isDisabled: boolean;

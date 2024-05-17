@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useLocation, Redirect } from 'react-router-dom';
 import qs from 'query-string';
 import React from 'react';
+import { Redirect, useLocation } from 'react-router-dom';
 
 export function RedirectDependenciesToDependenciesInventory({
   children,

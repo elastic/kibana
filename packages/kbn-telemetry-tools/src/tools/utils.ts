@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import ts from 'typescript';
+import * as path from 'path';
+import { Optional } from '@kbn/utility-types';
 import {
-  pick,
-  pickBy,
-  isObject,
   forEach,
   isArray,
-  reduce,
   isEmpty,
-  merge,
-  transform,
   isEqual,
+  isObject,
+  merge,
+  pick,
+  pickBy,
+  reduce,
+  transform,
 } from 'lodash';
-import * as path from 'path';
 import normalize from 'normalize-path';
-import { Optional } from '@kbn/utility-types';
+import ts from 'typescript';
 
 export function isPropertyWithKey(property: ts.Node, identifierName: string) {
   if (ts.isPropertyAssignment(property) || ts.isMethodDeclaration(property)) {

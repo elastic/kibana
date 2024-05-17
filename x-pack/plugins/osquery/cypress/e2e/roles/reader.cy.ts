@@ -11,7 +11,7 @@ import {
   customActionRunSavedQuerySelector,
   formFieldInputSelector,
 } from '../../screens/packs';
-import { navigateTo } from '../../tasks/navigation';
+import { ServerlessRoleName } from '../../support/roles';
 import {
   cleanupPack,
   cleanupSavedQuery,
@@ -19,7 +19,7 @@ import {
   loadPack,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import { ServerlessRoleName } from '../../support/roles';
+import { navigateTo } from '../../tasks/navigation';
 
 describe('Reader - only READ', { tags: ['@ess'] }, () => {
   let savedQueryName: string;

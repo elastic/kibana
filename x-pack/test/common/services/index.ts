@@ -7,11 +7,11 @@
 
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
 import { services as kibanaCommonServices } from '../../../../test/common/services';
-import { InfraLogViewsServiceProvider } from './infra_log_views';
-import { SpacesServiceProvider } from './spaces';
-import { BsearchSecureService } from './bsearch_secure';
 import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
+import { BsearchSecureService } from './bsearch_secure';
+import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { InfraSynthtraceKibanaClientProvider } from './infra_synthtrace_kibana_client';
+import { SpacesServiceProvider } from './spaces';
 
 export const services = {
   ...kibanaCommonServices,

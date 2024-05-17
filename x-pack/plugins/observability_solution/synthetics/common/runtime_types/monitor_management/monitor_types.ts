@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
-import { AlertConfigsCodec } from './alert_config';
+import * as t from 'io-ts';
 import { secretKeys } from '../../constants/monitor_management';
+import {
+  InlineScriptString,
+  NameSpaceString,
+  TimeoutString,
+  getNonEmptyStringCodec,
+} from '../common';
+import { AlertConfigsCodec } from './alert_config';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
-  MonitorTypeEnum,
-  MonitorTypeCodec,
   FormMonitorTypeCodec,
   ModeCodec,
+  MonitorTypeCodec,
+  MonitorTypeEnum,
+  RequestBodyCheckCodec,
   ResponseBodyIndexPolicyCodec,
   ResponseCheckJSONCodec,
   ScheduleUnitCodec,
   SourceTypeCodec,
   TLSVersionCodec,
   VerificationModeCodec,
-  RequestBodyCheckCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
-import {
-  getNonEmptyStringCodec,
-  InlineScriptString,
-  NameSpaceString,
-  TimeoutString,
-} from '../common';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -424,7 +424,7 @@ export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;
 export type MonitorOverviewItem = t.TypeOf<typeof MonitorOverviewItemCodec>;
 export type MonitorOverviewResult = t.TypeOf<typeof MonitorOverviewResultCodec>;
-export type Secret = typeof secretKeys[number];
+export type Secret = (typeof secretKeys)[number];
 export type SyntheticsMonitorWithSecrets = Omit<
   t.TypeOf<typeof SyntheticsMonitorWithSecretsCodec>,
   Secret

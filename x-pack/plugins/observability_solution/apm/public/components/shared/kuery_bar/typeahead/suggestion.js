@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { EuiIcon } from '@elastic/eui';
-import { unit } from '../../../../utils/style';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { tint } from 'polished';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { unit } from '../../../../utils/style';
 
 function getIconColor(type, theme) {
   switch (type) {

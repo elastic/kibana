@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { MouseEvent } from 'react';
-import { getClosestLink, hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { NavigateToUrl } from '@kbn/shared-ux-link-redirect-app-types';
+import { getClosestLink, hasActiveModifierKey } from '@kbn/shared-ux-utility';
+import { MouseEvent } from 'react';
 
 interface CreateCrossAppClickHandlerOptions {
   event: MouseEvent<HTMLElement>;

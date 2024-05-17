@@ -14,12 +14,12 @@ import { EuiComboBox, EuiFormRow, EuiHorizontalRule, EuiRadioGroup } from '@elas
 import { RoleOptionLabel } from '../../../shared/role_mapping';
 
 import {
+  ALL_GROUPS_DESCRIPTION,
+  ALL_GROUPS_LABEL,
   GROUP_ASSIGNMENT_INVALID_ERROR,
   GROUP_ASSIGNMENT_LABEL,
-  ALL_GROUPS_LABEL,
-  ALL_GROUPS_DESCRIPTION,
-  SPECIFIC_GROUPS_LABEL,
   SPECIFIC_GROUPS_DESCRIPTION,
+  SPECIFIC_GROUPS_LABEL,
 } from './constants';
 
 import { RoleMappingsLogic } from './role_mappings_logic';

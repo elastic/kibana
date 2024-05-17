@@ -8,17 +8,17 @@
 
 import React, { useMemo, useCallback } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { SelectOption } from '@kbn/vis-default-editor-plugin/public';
 
+import { ChangeValueAxis, SetParamByIndex } from '.';
+import { ChartType } from '../../../../../common';
 import { SeriesParam, ValueAxis } from '../../../../types';
+import { getConfigCollections } from '../../../collections';
 import { LineOptions } from './line_options';
 import { PointOptions } from './point_options';
-import { SetParamByIndex, ChangeValueAxis } from '.';
-import { ChartType } from '../../../../../common';
-import { getConfigCollections } from '../../../collections';
 
 const collections = getConfigCollections();
 

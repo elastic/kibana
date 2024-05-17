@@ -1,3 +1,6 @@
+import { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
-import { DataViewType } from '@kbn/data-views-plugin/common';
 
 // elasticsearch index.max_result_window default value
 const ES_MAX_RESULT_WINDOW_DEFAULT_VALUE = 1000;

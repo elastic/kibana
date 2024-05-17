@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { act, fireEvent, getByTestId } from '@testing-library/react';
 import React from 'react';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { TrustedApp } from '../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { ArtifactEntryCardProps } from './artifact_entry_card';
 import { ArtifactEntryCard } from './artifact_entry_card';
-import { act, fireEvent, getByTestId } from '@testing-library/react';
+import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
+import { getExceptionProviderMock, getTrustedAppProviderMock } from './test_utils';
 import type { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
-import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
-import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
-import type { TrustedApp } from '../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 jest.mock('../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;

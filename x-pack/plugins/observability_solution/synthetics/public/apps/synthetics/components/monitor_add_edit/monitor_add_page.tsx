@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { useEnablement } from '../../hooks';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 
-import { useKibanaSpace } from './hooks';
-import { MonitorSteps } from './steps';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { MonitorForm } from './form';
+import { useKibanaSpace } from './hooks';
 import { LocationsLoadingError } from './locations_loading_error';
+import { MonitorSteps } from './steps';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
-import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 
 export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });

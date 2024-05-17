@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { OasConverter } from '.';
 import { schema } from '@kbn/config-schema';
+import { OasConverter } from '.';
 
 describe('OasConverter', () => {
   it('converts schemas with refs', () => {

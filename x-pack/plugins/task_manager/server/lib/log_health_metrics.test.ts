@@ -1,3 +1,5 @@
+import { Logger } from '@kbn/core/server';
+import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +7,11 @@
  * 2.0.
  */
 import { merge } from 'lodash';
-import { loggingSystemMock, docLinksServiceMock } from '@kbn/core/server/mocks';
-import { configSchema, TaskManagerConfig } from '../config';
+import { TaskManagerConfig, configSchema } from '../config';
 import { HealthStatus } from '../monitoring';
 import { MonitoredHealth } from '../routes/health';
-import { logHealthMetrics, resetLastLogLevel } from './log_health_metrics';
-import { Logger } from '@kbn/core/server';
 import { TaskPersistence } from '../task_events';
+import { logHealthMetrics, resetLastLogLevel } from './log_health_metrics';
 
 jest.mock('./calculate_health_status', () => ({
   calculateHealthStatus: jest.fn(),

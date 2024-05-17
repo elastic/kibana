@@ -6,19 +6,19 @@
  */
 
 import {
-  EuiPanel,
-  EuiTitle,
+  EuiCallOut,
   EuiCode,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
   EuiText,
-  EuiCallOut,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorStatus } from '@kbn/search-connectors';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useElasticsearchUrl } from '../../../hooks/use_elastisearch_url';
 
 interface ConnectionDetailsProps {

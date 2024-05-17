@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { SetupPlugins, StartPlugins, TimelinesPluginUI, TimelinesPluginStart } from './types';
+import { indexFieldsProvider } from './search_strategy/index_fields';
 import { timelineSearchStrategyProvider } from './search_strategy/timeline';
 import { timelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
-import { indexFieldsProvider } from './search_strategy/index_fields';
+import { SetupPlugins, StartPlugins, TimelinesPluginStart, TimelinesPluginUI } from './types';
 
 export class TimelinesPlugin
   implements Plugin<TimelinesPluginUI, TimelinesPluginStart, SetupPlugins, StartPlugins>

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 export type ContentManagementServiceFactory = PluginServiceFactory<ContentManagementPublicStart>;
 

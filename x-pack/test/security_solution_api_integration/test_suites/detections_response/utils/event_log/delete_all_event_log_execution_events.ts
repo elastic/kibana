@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { countDownES } from '../count_down_es';
 

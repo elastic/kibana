@@ -8,38 +8,38 @@
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { InputsModelId } from './constants';
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
+  addLinkTo,
   deleteAllQuery,
+  deleteOneQuery,
+  removeLinkTo,
   setAbsoluteRangeDatePicker,
   setDuration,
+  setFilterQuery,
   setFullScreen,
   setInspectionParameter,
   setQuery,
   setRelativeRangeDatePicker,
+  setSavedQuery,
+  setSearchBarFilter,
   setTimelineRangeDatePicker,
   startAutoReload,
   stopAutoReload,
-  toggleTimelineLinkTo,
-  deleteOneQuery,
-  setFilterQuery,
-  setSavedQuery,
-  setSearchBarFilter,
-  removeLinkTo,
-  addLinkTo,
   toggleSocTrendsLinkTo,
+  toggleTimelineLinkTo,
 } from './actions';
+import { InputsModelId } from './constants';
 import {
+  addInputLink,
+  deleteOneQuery as helperDeleteOneQuery,
+  removeInputLink,
   setIsInspected,
+  toggleLockSocTrends,
   toggleLockTimeline,
+  updateInputFullScreen,
   updateInputTimerange,
   upsertQuery,
-  addInputLink,
-  removeInputLink,
-  deleteOneQuery as helperDeleteOneQuery,
-  updateInputFullScreen,
-  toggleLockSocTrends,
 } from './helpers';
 import type { InputsModel, TimeRange } from './model';
 

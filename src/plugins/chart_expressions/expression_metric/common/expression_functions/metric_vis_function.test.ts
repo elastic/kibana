@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { metricVisFunction } from './metric_vis_function';
-import type { MetricArguments } from '..';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type { MetricArguments } from '..';
 import { EXPRESSION_METRIC_NAME } from '../constants';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { metricVisFunction } from './metric_vis_function';
 
 describe('interpreter/functions#metricVis', () => {
   const fn = functionWrapper(metricVisFunction());

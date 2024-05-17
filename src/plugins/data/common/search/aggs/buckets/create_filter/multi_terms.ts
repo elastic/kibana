@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Filter, buildPhraseFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { MultiFieldKey } from '../multi_field_key';
 

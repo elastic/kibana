@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ExplainCollectionInterval } from './collection_interval';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { ExplainCollectionInterval } from './collection_interval';
 
 const enabler = {};
 const reason = {

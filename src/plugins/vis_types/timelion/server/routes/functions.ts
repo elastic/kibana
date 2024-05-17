@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { IRouter } from '@kbn/core/server';
+import _ from 'lodash';
 import { LoadFunctions } from '../lib/load_functions';
 
 export function functionsRoute(router: IRouter, { functions }: { functions: LoadFunctions }) {

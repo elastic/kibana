@@ -17,20 +17,20 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type {
+  EventAnnotationConfig,
+  EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
+import {
+  AnnotationEditorControls,
+  EVENT_ANNOTATION_APP_NAME,
+} from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
 import React, { useCallback, useMemo } from 'react';
-import type {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-} from '@kbn/event-annotation-common';
-import {
-  EVENT_ANNOTATION_APP_NAME,
-  AnnotationEditorControls,
-} from '@kbn/event-annotation-components';
 import { AnnotationList } from './annotation_list';
 
 const isTitleValid = (title: string) => Boolean(title.length);

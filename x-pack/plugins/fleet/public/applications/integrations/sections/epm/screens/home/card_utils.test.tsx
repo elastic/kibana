@@ -8,8 +8,8 @@
 import React from 'react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
-import type { PackageListItem } from '../../../../types';
 import { ExperimentalFeaturesService } from '../../../../services';
+import type { PackageListItem } from '../../../../types';
 
 import { getIntegrationLabels, mapToCard } from './card_utils';
 

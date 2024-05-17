@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import expect from '@kbn/expect';
 import { ALERT_FLAPPING, ALERT_FLAPPING_HISTORY, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { Spaces } from '../../../../scenarios';
 import {
+  ObjectRemover,
+  TaskManagerDoc,
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../../common/lib';
+import { Spaces } from '../../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {

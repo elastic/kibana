@@ -11,34 +11,34 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  sortExplorationResultsFields,
+  DEFAULT_RESULTS_FIELD,
+  type DataFrameAnalyticsConfig,
+  FEATURE_INFLUENCE,
   ML__ID_COPY,
   ML__INCREMENTAL_ID,
-  DEFAULT_RESULTS_FIELD,
-  FEATURE_INFLUENCE,
-  type DataFrameAnalyticsConfig,
+  sortExplorationResultsFields,
 } from '@kbn/ml-data-frame-analytics-utils';
 import {
-  getFieldType,
+  type UseIndexDataReturnType,
   getDataGridSchemasFromFieldTypes,
+  getFieldType,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
-  useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
+  useColorRange,
 } from '../../../../../components/color_range_legend';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields } from '../../../../common';
 
-import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
+import { getFeatureCount, getOutlierScoreFieldName } from './common';
 
 export const useOutlierData = (
   dataView: DataView | undefined,

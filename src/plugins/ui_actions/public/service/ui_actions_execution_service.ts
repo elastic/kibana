@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
-import { defer as createDefer, Defer } from '@kbn/kibana-utils-plugin/public';
+import { Defer, defer as createDefer } from '@kbn/kibana-utils-plugin/public';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import { uniqBy } from 'lodash';
 import { Action } from '../actions';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 

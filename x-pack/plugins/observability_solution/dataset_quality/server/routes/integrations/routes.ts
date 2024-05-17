@@ -9,8 +9,8 @@ import * as t from 'io-ts';
 import { Integration, IntegrationDashboards } from '../../../common/api_types';
 import { typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
-import { getIntegrations } from './get_integrations';
 import { getIntegrationDashboards } from './get_integration_dashboards';
+import { getIntegrations } from './get_integrations';
 
 const integrationsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/integrations',

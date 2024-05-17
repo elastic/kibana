@@ -6,22 +6,22 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { omit, partition, isEqual, cloneDeep } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import semverLt from 'semver/functions/lt';
-import { getFlattenedObject } from '@kbn/std';
 import type {
-  KibanaRequest,
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  KibanaRequest,
   Logger,
   RequestHandlerContext,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
+import { i18n } from '@kbn/i18n';
+import { getFlattenedObject } from '@kbn/std';
 import { safeLoad } from 'js-yaml';
+import { cloneDeep, isEqual, omit, partition } from 'lodash';
+import semverLt from 'semver/functions/lt';
+import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -33,105 +33,105 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
+import type { ExternalCallback } from '..';
 import {
-  packageToPackagePolicy,
-  packageToPackagePolicyInputs,
-  isPackageLimited,
+  DATASET_VAR_NAME,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../common/constants';
+import {
   doesAgentPolicyAlreadyIncludePackage,
-  validatePackagePolicy,
-  validationHasErrors,
-  isInputOnlyPolicyTemplate,
   getNormalizedDataStreams,
   getNormalizedInputs,
+  isInputOnlyPolicyTemplate,
+  isPackageLimited,
+  packageToPackagePolicy,
+  packageToPackagePolicyInputs,
+  validatePackagePolicy,
+  validationHasErrors,
 } from '../../common/services';
-import {
-  SO_SEARCH_LIMIT,
-  PACKAGES_SAVED_OBJECT_TYPE,
-  DATASET_VAR_NAME,
-} from '../../common/constants';
 import type {
-  PostDeletePackagePoliciesResponse,
-  UpgradePackagePolicyResponse,
-  PackagePolicyInput,
-  NewPackagePolicyInput,
-  PackagePolicyConfigRecordEntry,
-  PackagePolicyInputStream,
-  PackageInfo,
-  ListWithKuery,
-  ListResult,
-  UpgradePackagePolicyDryRunResponseItem,
-  RegistryDataStream,
-  PackagePolicyPackage,
-  Installation,
-  ExperimentalDataStreamFeature,
-  DeletePackagePoliciesResponse,
-  PolicySecretReference,
   AssetsMap,
+  DeletePackagePoliciesResponse,
+  ExperimentalDataStreamFeature,
+  Installation,
+  ListResult,
+  ListWithKuery,
+  NewPackagePolicyInput,
+  PackageInfo,
+  PackagePolicyConfigRecordEntry,
+  PackagePolicyInput,
+  PackagePolicyInputStream,
+  PackagePolicyPackage,
+  PolicySecretReference,
+  PostDeletePackagePoliciesResponse,
+  RegistryDataStream,
+  UpgradePackagePolicyDryRunResponseItem,
+  UpgradePackagePolicyResponse,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
-  FleetError,
-  fleetErrorToResponseOptions,
-  PackagePolicyIneligibleForUpgradeError,
-  PackagePolicyValidationError,
-  PackagePolicyRestrictionRelatedError,
-  PackagePolicyNotFoundError,
-  HostedAgentPolicyRestrictionRelatedError,
-  FleetUnauthorizedError,
-  PackagePolicyNameExistsError,
   AgentPolicyNotFoundError,
+  FleetError,
+  FleetUnauthorizedError,
+  HostedAgentPolicyRestrictionRelatedError,
   InputNotFoundError,
+  PackagePolicyIneligibleForUpgradeError,
+  PackagePolicyNameExistsError,
+  PackagePolicyNotFoundError,
+  PackagePolicyRestrictionRelatedError,
+  PackagePolicyValidationError,
   StreamNotFoundError,
+  fleetErrorToResponseOptions,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
+  DryRunPackagePolicy,
   NewPackagePolicy,
-  UpdatePackagePolicy,
   PackagePolicy,
   PackagePolicySOAttributes,
-  DryRunPackagePolicy,
   PostPackagePolicyCreateCallback,
   PostPackagePolicyPostCreateCallback,
+  UpdatePackagePolicy,
 } from '../types';
-import type { ExternalCallback } from '..';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
 
-import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
+import { doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } from './security';
 
-import { storedPackagePolicyToAgentInputs } from './agent_policies';
-import { agentPolicyService } from './agent_policy';
-import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
-import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
-import { compileTemplate } from './epm/agent/agent';
-import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
+import { storedPackagePolicyToAgentInputs } from './agent_policies';
+import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
+import { agentPolicyService } from './agent_policy';
+import { auditLoggingService } from './audit_logging';
+import { compileTemplate } from './epm/agent/agent';
+import { ensureInstalledPackage, getInstallation, getPackageInfo } from './epm/packages';
+import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { removeOldAssets } from './epm/packages/cleanup';
-import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
-import { sendTelemetryEvents } from './upgrade_sender';
+import { getPackageAssetsMap } from './epm/packages/get';
+import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import {
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
 } from './package_policies';
-import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type {
   PackagePolicyClient,
   PackagePolicyClientFetchAllItemsOptions,
   PackagePolicyService,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/install';
-import { auditLoggingService } from './audit_logging';
+import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import {
+  deleteSecretsIfNotReferenced as deleteSecrets,
   extractAndUpdateSecrets,
   extractAndWriteSecrets,
-  deleteSecretsIfNotReferenced as deleteSecrets,
   isSecretStorageEnabled,
 } from './secrets';
-import { getPackageAssetsMap } from './epm/packages/get';
-import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
-import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
+import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
+import { sendTelemetryEvents } from './upgrade_sender';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -483,9 +483,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: createdObjects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      policiesToCreate
-    );
+    const { saved_objects: createdObjects } =
+      await soClient.bulkCreate<PackagePolicySOAttributes>(policiesToCreate);
 
     // Filter out invalid SOs
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
@@ -1072,9 +1071,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
-      policiesToUpdate
-    );
+    const { saved_objects: updatedPolicies } =
+      await soClient.bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate);
 
     const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
 
@@ -1134,7 +1132,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             id: soPolicy.id,
             version: soPolicy.version,
             ...soPolicy.attributes,
-          } as PackagePolicy)
+          }) as PackagePolicy
       );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
@@ -1728,12 +1726,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy: A extends 'packagePolicyDelete'
       ? DeletePackagePoliciesResponse
       : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never,
+        ? PostDeletePackagePoliciesResponse
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyCreate'
+            ? NewPackagePolicy
+            : never,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
@@ -1742,12 +1740,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     A extends 'packagePolicyDelete'
       ? void
       : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never
+        ? void
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyCreate'
+            ? NewPackagePolicy
+            : never
   >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],

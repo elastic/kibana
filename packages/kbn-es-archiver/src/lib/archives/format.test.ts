@@ -9,7 +9,7 @@
 import Stream, { Readable, Writable } from 'stream';
 import { createGunzip } from 'zlib';
 
-import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 
 import { createFormatArchiveStreams } from './format';
 

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { StartDependencies, AiAssistantManagementObservabilityPluginStart } from './plugin';
-import { aIAssistantManagementObservabilityRouter } from './routes/config';
-import { RedirectToHomeIfUnauthorized } from './routes/components/redirect_to_home_if_unauthorized';
+import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { AppContextProvider } from './context/app_context';
+import { AiAssistantManagementObservabilityPluginStart, StartDependencies } from './plugin';
+import { RedirectToHomeIfUnauthorized } from './routes/components/redirect_to_home_if_unauthorized';
+import { aIAssistantManagementObservabilityRouter } from './routes/config';
 
 interface MountParams {
   core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>;

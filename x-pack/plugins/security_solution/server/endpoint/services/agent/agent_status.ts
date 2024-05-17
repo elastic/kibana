@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import type { Logger } from '@kbn/core/server';
 import {
   SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import type { Logger } from '@kbn/core/server';
-import { keyBy, merge } from 'lodash';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import { stringify } from '../../utils/stringify';
+import { keyBy, merge } from 'lodash';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { AgentStatusInfo } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { stringify } from '../../utils/stringify';
 
 export interface GetAgentStatusOptions {
   // NOTE: only sentinel_one currently supported

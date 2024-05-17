@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { type ActionMap, nextActionMap } from './next';
 import {
   ActionMocks,
-  setMetaDocMigrationStartedMock,
   setMetaDocMigrationCompleteMock,
+  setMetaDocMigrationStartedMock,
   setMetaMappingMigrationCompleteMock,
 } from './next.test.mocks';
-import { nextActionMap, type ActionMap } from './next';
-import {
-  createContextMock,
-  type MockedMigratorContext,
-  createPostInitState,
-  createPostDocInitState,
-} from './test_helpers';
 import type {
+  CreateTargetIndexState,
   SetDocMigrationStartedState,
-  UpdateMappingModelVersionState,
   UpdateDocumentModelVersionsState,
   UpdateIndexMappingsState,
-  CreateTargetIndexState,
+  UpdateMappingModelVersionState,
 } from './state';
+import {
+  type MockedMigratorContext,
+  createContextMock,
+  createPostDocInitState,
+  createPostInitState,
+} from './test_helpers';
 
 describe('actions', () => {
   let context: MockedMigratorContext;

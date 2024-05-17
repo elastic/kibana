@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiIcon } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { Phases } from '../../../../../../common/types';
 import './phase_icon.scss';
 interface Props {

@@ -7,13 +7,13 @@
  */
 
 import { Request } from '@hapi/hapi';
-import type {
-  KibanaRequest,
-  AuthHeaders,
-  IAuthHeadersStorage,
-  GetAuthHeaders,
-} from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
+import type {
+  AuthHeaders,
+  GetAuthHeaders,
+  IAuthHeadersStorage,
+  KibanaRequest,
+} from '@kbn/core-http-server';
 
 /** @internal */
 export class AuthHeadersStorage implements IAuthHeadersStorage {

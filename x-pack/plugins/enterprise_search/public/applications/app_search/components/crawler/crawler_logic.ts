@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
@@ -15,12 +15,12 @@ import { EngineLogic } from '../engine';
 import { CrawlerDomainsLogic } from './crawler_domains_logic';
 
 import {
-  CrawlerData,
-  CrawlerDomain,
   CrawlEvent,
   CrawlRequest,
-  CrawlerStatus,
+  CrawlerData,
   CrawlerDataFromServer,
+  CrawlerDomain,
+  CrawlerStatus,
 } from './types';
 import { crawlerDataServerToClient } from './utils';
 

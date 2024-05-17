@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 
 describe('PluginsConfig', () => {

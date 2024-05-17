@@ -6,14 +6,14 @@
  */
 import expect from '@kbn/expect';
 import {
+  AGENTS_INDEX,
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
-  AGENTS_INDEX,
   AGENT_POLICY_INDEX,
 } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { setupFleetAndAgents } from './services';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 

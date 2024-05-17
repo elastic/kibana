@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
   EuiDescriptionList,
@@ -17,7 +16,10 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ALERT_DURATION,
   ALERT_RULE_NAME,
@@ -29,10 +31,6 @@ import { pick } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
-import { PanelHeaderItems } from '../../components/collapsible_panel';
-import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_TIMESTAMP,
@@ -42,12 +40,14 @@ import {
   getAlertEntryFormatter,
   getAlertFormatters,
 } from '../../../alerting/anomaly_detection_alerts_table/render_cell_value';
+import { PanelHeaderItems } from '../../components/collapsible_panel';
 import { useMlKibana } from '../../contexts/kibana';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
+import { Y_AXIS_LABEL_WIDTH } from '../constants';
 import type { AppStateSelectedCells, SwimlaneData } from '../explorer_utils';
 import { CELL_HEIGHT } from '../swimlane_container';
+import type { AnomalyDetectionAlert } from './anomaly_detection_alerts_state_service';
 import { statusNameMap } from './const';
-import { Y_AXIS_LABEL_WIDTH } from '../constants';
 
 export interface SwimLaneWrapperProps {
   selection?: AppStateSelectedCells | null;

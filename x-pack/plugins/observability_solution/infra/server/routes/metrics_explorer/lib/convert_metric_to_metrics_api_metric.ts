@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
+import { isEmpty } from 'lodash';
 import { MetricsAPIMetric, MetricsExplorerMetric } from '../../../../common/http_api';
 import { createCustomMetricsAggregations } from '../../../lib/create_custom_metrics_aggregations';
 

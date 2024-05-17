@@ -72,9 +72,7 @@
         "tags": [],
         "label": "INGEST_PIPELINES_APP_LOCATOR",
         "description": [],
-        "signature": [
-          "\"INGEST_PIPELINES_APP_LOCATOR\""
-        ],
+        "signature": ["\"INGEST_PIPELINES_APP_LOCATOR\""],
         "path": "x-pack/plugins/ingest_pipelines/public/locator.ts",
         "deprecated": false,
         "trackAdoption": false,

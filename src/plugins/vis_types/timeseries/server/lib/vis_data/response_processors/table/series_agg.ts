@@ -12,8 +12,8 @@ import { calculateLabel } from '../../../../../common/calculate_label';
 import { SERIES_SEPARATOR } from '../../../../../common/constants';
 import { SeriesAgg } from './_series_agg';
 
-import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
+import type { TableResponseProcessorsFunction } from './types';
 
 export const seriesAgg: TableResponseProcessorsFunction =
   ({ series, meta, extractFields }) =>

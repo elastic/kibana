@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
 
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { UseStats, useStats } from '.';
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
 import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
 import { ERROR_LOADING_STATS } from '../translations';
-import { useStats, UseStats } from '.';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();

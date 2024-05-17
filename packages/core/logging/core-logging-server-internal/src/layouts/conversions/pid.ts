@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { LogRecord } from '@kbn/logging';
 import type { Conversion } from '@kbn/core-logging-common-internal';
+import type { LogRecord } from '@kbn/logging';
 
 export const PidConversion: Conversion = {
   pattern: /%pid/g,

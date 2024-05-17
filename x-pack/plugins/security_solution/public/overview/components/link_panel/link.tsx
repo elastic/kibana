@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
 
 export const Link: React.FC<{ path?: string; copy: string }> = ({ path, copy }) =>
   path ? (

@@ -1,3 +1,4 @@
+import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +6,12 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
-import { useBaseConversations } from '.';
-import { useLinkAuthorized } from '../../common/links';
-import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
-import { useKibana } from '../../common/lib/kibana';
-import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { unset } from 'lodash/fp';
+import { useBaseConversations } from '.';
+import { useKibana } from '../../common/lib/kibana';
+import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+import { useLinkAuthorized } from '../../common/links';
+import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 
 const BASE_CONVERSATIONS_WITHOUT_DATA_QUALITY = unset(
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,

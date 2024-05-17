@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { isUndefined, omitBy } from 'lodash';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { omitBy, isUndefined } from 'lodash';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type {
   ErrorToastOptions,
@@ -23,7 +21,9 @@ import type {
   ToastInputFields,
   ToastOptions,
 } from '@kbn/core-notifications-browser';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ErrorToast } from './error_toast';
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {

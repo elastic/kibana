@@ -9,16 +9,16 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 // The color picker is not yet accessible.
 
-import React, { useState } from 'react';
 import {
-  EuiIconTip,
   EuiColorPicker,
   EuiColorPickerProps,
   EuiColorPickerSwatch,
+  EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 const COMMAS_NUMS_ONLY_RE = /[^0-9,]/g;
 

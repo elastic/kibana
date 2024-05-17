@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { schema } from '@kbn/config-schema';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IRouter } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+import { Observable } from 'rxjs';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
 export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {

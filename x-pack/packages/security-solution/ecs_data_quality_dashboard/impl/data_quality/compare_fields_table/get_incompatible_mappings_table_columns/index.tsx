@@ -10,8 +10,8 @@ import React from 'react';
 
 import { SameFamily } from '../../data_quality_panel/same_family';
 import { CodeDanger, CodeSuccess } from '../../styles';
-import * as i18n from '../translations';
 import type { EnrichedFieldMetadata } from '../../types';
+import * as i18n from '../translations';
 
 export const EMPTY_PLACEHOLDER = '--';
 

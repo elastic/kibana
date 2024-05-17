@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getKnowledgeBaseStatusRoute } from './get_knowledge_base_status';
-import { serverMock } from '../../__mocks__/server';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { getGetKnowledgeBaseStatusRequest } from '../../__mocks__/request';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { getGetKnowledgeBaseStatusRequest } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { serverMock } from '../../__mocks__/server';
+import { getKnowledgeBaseStatusRoute } from './get_knowledge_base_status';
 
 describe('Get Knowledge Base Status Route', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -17,6 +17,7 @@ import {
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -24,16 +25,15 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { createRule } from '../../../../../../../common/utils/security_solution';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   getAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
 } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

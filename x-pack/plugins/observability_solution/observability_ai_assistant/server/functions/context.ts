@@ -12,11 +12,11 @@ import dedent from 'dedent';
 import { encode } from 'gpt-tokenizer';
 import * as t from 'io-ts';
 import { compact, last, omit } from 'lodash';
-import { lastValueFrom, Observable } from 'rxjs';
+import { Observable, lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { MessageAddEvent } from '../../common/conversation_complete';
 import { FunctionVisibility } from '../../common/functions/types';
-import { MessageRole, type Message } from '../../common/types';
+import { type Message, MessageRole } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { RecallRanking, RecallRankingEventType } from '../analytics/recall_ranking';
@@ -223,8 +223,7 @@ async function scoreSuggestions({
     id: index,
   }));
 
-  const newUserMessageContent =
-    dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
+  const newUserMessageContent = dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
     0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
     answering the question. Judge it according to the following criteria:
 

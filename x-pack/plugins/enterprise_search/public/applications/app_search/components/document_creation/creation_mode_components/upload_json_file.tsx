@@ -7,14 +7,14 @@
 
 import React from 'react';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';

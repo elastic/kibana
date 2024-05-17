@@ -7,8 +7,8 @@
  */
 
 import Path from 'path';
-import del from 'del';
 import Axios from 'axios';
+import del from 'del';
 import Fsp from 'fs/promises';
 import { Task, downloadToDisk, downloadToString } from '../lib';
 

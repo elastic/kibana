@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useCallback, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { ConfigKey, PingStatus } from '../../../../../../common/runtime_types';
 import {
@@ -15,8 +15,8 @@ import {
   selectPingStatusesForMonitorAndLocationAsc,
 } from '../../../state';
 
-import { useSelectedMonitor } from './use_selected_monitor';
 import { useSelectedLocation } from './use_selected_location';
+import { useSelectedMonitor } from './use_selected_monitor';
 
 export const usePingStatuses = ({
   from,

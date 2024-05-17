@@ -1,3 +1,4 @@
+import { fireEvent, render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +6,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { AssetCriticalityFilePickerStep } from './file_picker_step';
 import { TestProviders } from '../../../../common/mock';
+import { AssetCriticalityFilePickerStep } from './file_picker_step';
 
 describe('AssetCriticalityFilePickerStep', () => {
   const mockOnFileChange = jest.fn();

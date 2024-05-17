@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiPopover,
   EuiBottomBar,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { Links } from '../../links';
 
 interface Props {

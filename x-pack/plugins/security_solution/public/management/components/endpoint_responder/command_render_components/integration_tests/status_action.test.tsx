@@ -1,3 +1,9 @@
+import React from 'react';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,20 +12,14 @@
  */
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import { useGetEndpointDetails } from '../../../../hooks';
+import { useGetEndpointPendingActionsSummary } from '../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
-import React from 'react';
-import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { enterConsoleCommand } from '../../../console/mocks';
-import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
-import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { useGetEndpointPendingActionsSummary } from '../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
-import { useGetEndpointDetails } from '../../../../hooks';
-import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
+import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 
 jest.mock('../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 jest.mock('../../../../hooks');

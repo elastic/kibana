@@ -1,3 +1,8 @@
+import type {
+  IntervalHistogram,
+  MetricsCollector,
+  OpsProcessMetrics,
+} from '@kbn/core-metrics-server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +11,6 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import type {
-  MetricsCollector,
-  IntervalHistogram,
-  OpsProcessMetrics,
-} from '@kbn/core-metrics-server';
 import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 
 // internal duplicate of metricsCollectorMock

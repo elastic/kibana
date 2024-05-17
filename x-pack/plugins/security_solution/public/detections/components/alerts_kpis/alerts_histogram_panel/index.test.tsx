@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
-import { mount } from 'enzyme';
 import type { Filter } from '@kbn/es-query';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { mount } from 'enzyme';
+import React from 'react';
 
 import { SecurityPageName } from '../../../../app/types';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { mockAlertSearchResponse } from './mock_data';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 import { AlertsHistogramPanel } from '.';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/containers/query_toggle');
 

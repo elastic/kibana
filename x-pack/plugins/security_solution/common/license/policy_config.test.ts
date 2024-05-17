@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  isEndpointPolicyValidForLicense,
-  unsetPolicyFeaturesAccordingToLicenseLevel,
-} from './policy_config';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
   policyFactory,
-  policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
+  policyFactoryWithoutPaidFeatures,
 } from '../endpoint/models/policy_config';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { ProtectionModes } from '../endpoint/types';
+import {
+  isEndpointPolicyValidForLicense,
+  unsetPolicyFeaturesAccordingToLicenseLevel,
+} from './policy_config';
 
 describe('policy_config and licenses', () => {
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });

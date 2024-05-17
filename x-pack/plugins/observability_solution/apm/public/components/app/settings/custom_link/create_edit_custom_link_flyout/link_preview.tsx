@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
-  EuiPanel,
-  EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiToolTip,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
-import { replaceTemplateVariables, convertFiltersToQuery } from './helper';
+import { convertFiltersToQuery, replaceTemplateVariables } from './helper';
 
 export interface LinkPreviewProps {
   label: string;

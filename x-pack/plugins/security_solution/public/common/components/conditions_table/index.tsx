@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import styled from 'styled-components';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
+import React from 'react';
+import styled from 'styled-components';
 
 import type { AndOr } from '../and_or_badge';
 import { AndOrBadge } from '../and_or_badge';

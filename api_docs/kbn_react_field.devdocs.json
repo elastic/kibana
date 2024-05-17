@@ -72,9 +72,7 @@
         "type": "Function",
         "tags": [],
         "label": "FieldIcon",
-        "description": [
-          "\nField token icon used across the app"
-        ],
+        "description": ["\nField token icon used across the app"],
         "signature": [
           "({\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}: ",
           {
@@ -144,9 +142,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldName",
-            "description": [
-              "\nLabel for the button"
-            ],
+            "description": ["\nLabel for the button"],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
@@ -160,9 +156,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldIcon",
-            "description": [
-              "\nIcon representing the field type.\nRecommend using FieldIcon"
-            ],
+            "description": ["\nIcon representing the field type.\nRecommend using FieldIcon"],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
@@ -176,9 +170,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fieldInfoIcon",
-            "description": [
-              "\nAn optional node to place inside and at the end of the <button>"
-            ],
+            "description": ["\nAn optional node to place inside and at the end of the <button>"],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
@@ -208,12 +200,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isActive",
-            "description": [
-              "\nAdds a forced focus ring to the whole component"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nAdds a forced focus ring to the whole component"],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -224,9 +212,7 @@
             "type": "Object",
             "tags": [],
             "label": "dragHandle",
-            "description": [
-              "\nCustom drag handle element"
-            ],
+            "description": ["\nCustom drag handle element"],
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
@@ -240,12 +226,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "size",
-            "description": [
-              "\nUse the xs size in condensed areas"
-            ],
-            "signature": [
-              "\"s\" | \"xs\""
-            ],
+            "description": ["\nUse the xs size in condensed areas"],
+            "signature": ["\"s\" | \"xs\""],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -256,12 +238,8 @@
             "type": "string",
             "tags": [],
             "label": "flush",
-            "description": [
-              "\nWhether to skip side paddings"
-            ],
-            "signature": [
-              "\"both\" | undefined"
-            ],
+            "description": ["\nWhether to skip side paddings"],
+            "signature": ["\"both\" | undefined"],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -272,12 +250,8 @@
             "type": "string",
             "tags": [],
             "label": "className",
-            "description": [
-              "\nCustom class name"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nCustom class name"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -288,12 +262,8 @@
             "type": "Function",
             "tags": [],
             "label": "onClick",
-            "description": [
-              "\nThe component will render a `<button>` when provided an `onClick`"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
+            "description": ["\nThe component will render a `<button>` when provided an `onClick`"],
+            "signature": ["(() => void) | undefined"],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -306,12 +276,8 @@
             "type": "string",
             "tags": [],
             "label": "dataTestSubj",
-            "description": [
-              "\nApplies to the inner `<button>`  or `<div>`"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nApplies to the inner `<button>`  or `<div>`"],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -322,9 +288,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "buttonProps",
-            "description": [
-              "\nPass more button props to the `<button>` element"
-            ],
+            "description": ["\nPass more button props to the `<button>` element"],
             "signature": [
               "(React.ButtonHTMLAttributes<HTMLButtonElement> & ",
               "CommonProps",
@@ -378,9 +342,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -392,9 +354,7 @@
             "tags": [],
             "label": "scripted",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -412,9 +372,7 @@
         "tags": [],
         "label": "ButtonSize",
         "description": [],
-        "signature": [
-          "\"s\" | \"xs\""
-        ],
+        "signature": ["\"s\" | \"xs\""],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
         "trackAdoption": false,

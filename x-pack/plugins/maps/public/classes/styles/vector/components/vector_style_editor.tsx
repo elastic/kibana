@@ -8,19 +8,19 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { VectorStyleColorEditor } from './color/vector_style_color_editor';
-import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
-import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
-import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
-import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
-import { LabelZoomRangeEditor } from './label/label_zoom_range_editor';
-import { LabelPositionEditor } from './label/label_position_editor';
-import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
-import { OrientationEditor } from './orientation/orientation_editor';
-import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_FILL_COLORS, DEFAULT_LINE_COLORS } from '../../color_palettes';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../vector_style_defaults';
+import { VectorStyleColorEditor } from './color/vector_style_color_editor';
+import { LabelPositionEditor } from './label/label_position_editor';
+import { LabelZoomRangeEditor } from './label/label_zoom_range_editor';
+import { VectorStyleLabelBorderSizeEditor } from './label/vector_style_label_border_size_editor';
+import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
+import { OrientationEditor } from './orientation/orientation_editor';
+import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
+import { VectorStyleIconEditor } from './symbol/vector_style_icon_editor';
+import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
 
 import {
   LABEL_BORDER_SIZES,
@@ -28,7 +28,6 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { createStyleFieldsHelper, StyleField, StyleFieldsHelper } from '../style_fields_helper';
 import {
   ColorDynamicOptions,
   ColorStaticOptions,
@@ -44,15 +43,16 @@ import {
   StylePropertyOptions,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
-import { IStyleProperty } from '../properties/style_property';
-import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
-import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
-import { StaticTextProperty } from '../properties/static_text_property';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { DynamicTextProperty } from '../properties/dynamic_text_property';
-import { StaticSizeProperty } from '../properties/static_size_property';
+import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
 import { LabelPositionProperty } from '../properties/label_position_property';
 import { LabelZoomRangeProperty } from '../properties/label_zoom_range_property';
-import { IVectorLayer } from '../../../layers/vector_layer';
+import { StaticSizeProperty } from '../properties/static_size_property';
+import { StaticTextProperty } from '../properties/static_text_property';
+import { IStyleProperty } from '../properties/style_property';
+import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
+import { StyleField, StyleFieldsHelper, createStyleFieldsHelper } from '../style_fields_helper';
 import { getHasLabel } from '../style_util';
 
 export interface StyleProperties {

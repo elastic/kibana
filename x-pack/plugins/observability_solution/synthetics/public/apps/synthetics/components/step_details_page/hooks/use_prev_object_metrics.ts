@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import moment from 'moment';
-import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useParams } from 'react-router-dom';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';

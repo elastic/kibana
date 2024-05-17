@@ -15,15 +15,15 @@ import React, { Component } from 'react';
 import {
   EuiCheckbox,
   EuiExpression,
-  EuiPopoverTitle,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
+  EuiPopoverTitle,
   EuiSelect,
 } from '@elastic/eui';
 
-import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 
 import { filterTypeToText } from './utils';
 

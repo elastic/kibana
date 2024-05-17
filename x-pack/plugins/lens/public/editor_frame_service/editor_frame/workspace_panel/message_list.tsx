@@ -8,18 +8,18 @@
 import './workspace_panel_wrapper.scss';
 import './message_list.scss';
 
-import React, { useState } from 'react';
 import {
-  EuiPopover,
-  EuiText,
   EuiButton,
-  EuiIcon,
-  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
+import { SerializedStyles, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { css, SerializedStyles } from '@emotion/react';
+import React, { useState } from 'react';
 import { UserMessage } from '../../../types';
 
 export const MessageList = ({
@@ -53,18 +53,18 @@ export const MessageList = ({
           },
         })
       : errorCount > 0
-      ? i18n.translate('xpack.lens.messagesButton.label.errors', {
-          defaultMessage: '{errorCount} {errorCount, plural, one {error} other {errors}}',
-          values: {
-            errorCount,
-          },
-        })
-      : i18n.translate('xpack.lens.messagesButton.label.warnings', {
-          defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
-          values: {
-            warningCount,
-          },
-        });
+        ? i18n.translate('xpack.lens.messagesButton.label.errors', {
+            defaultMessage: '{errorCount} {errorCount, plural, one {error} other {errors}}',
+            values: {
+              errorCount,
+            },
+          })
+        : i18n.translate('xpack.lens.messagesButton.label.warnings', {
+            defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
+            values: {
+              warningCount,
+            },
+          });
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);

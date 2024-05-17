@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { initializeTitles, SerializedTitles } from './titles_api';
+import { SerializedTitles, initializeTitles } from './titles_api';
 
 describe('titles api', () => {
   const rawState: SerializedTitles = {

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiButtonGroup, EuiProgress } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
-import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
+import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { StepAboutRuleToggleDetails } from '.';
-import {
-  mockRule,
-  mockAboutStepRule,
-} from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { StepAboutRule } from '../../../rule_creation_ui/components/step_about_rule';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
+import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { StepAboutRule } from '../../../rule_creation_ui/components/step_about_rule';
+import {
+  mockAboutStepRule,
+  mockRule,
+} from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 
 jest.mock('../../../../common/lib/kibana');
 

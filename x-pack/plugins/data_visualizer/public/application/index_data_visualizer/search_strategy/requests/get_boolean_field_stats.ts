@@ -1,3 +1,12 @@
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ISearchStart } from '@kbn/data-plugin/public';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,29 +14,20 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { catchError, map } from 'rxjs';
-import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-} from '@kbn/search-types';
-import type { ISearchStart } from '@kbn/data-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
 
-import { processTopValues } from './utils';
-import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import type {
-  Field,
-  BooleanFieldStats,
   Aggs,
+  BooleanFieldStats,
+  Field,
   FieldStatsCommonRequestParams,
   FieldStatsError,
 } from '../../../../../common/types/field_stats';
 import { isIKibanaSearchResponse } from '../../../../../common/types/field_stats';
+import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
+import { processTopValues } from './utils';
 
 export const getBooleanFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,

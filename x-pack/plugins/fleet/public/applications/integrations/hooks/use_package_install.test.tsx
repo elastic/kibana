@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, type WrapperComponent } from '@testing-library/react-hooks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { type WrapperComponent, act } from '@testing-library/react-hooks';
+import React from 'react';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';
 
-import { useInstallPackage, PackageInstallProvider } from './use_package_install';
+import { PackageInstallProvider, useInstallPackage } from './use_package_install';
 
 describe('usePackageInstall', () => {
   const coreStart = coreMock.createStart();

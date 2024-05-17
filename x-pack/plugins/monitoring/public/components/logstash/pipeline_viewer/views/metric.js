@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiBadge, EuiText } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
+import React from 'react';
 import './metric.scss';
 
 export function Metric({ className, warning, value }) {

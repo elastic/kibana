@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
-import { DataViewBase } from '@kbn/es-query';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { DataViewBase } from '@kbn/es-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';

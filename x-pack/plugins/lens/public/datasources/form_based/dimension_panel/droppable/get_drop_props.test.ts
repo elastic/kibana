@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { generateId } from '../../../../id_generator';
 import { DragDropOperation, OperationMetadata } from '../../../../types';
 import { TermsIndexPatternColumn } from '../../operations';
 import { getDropProps } from './get_drop_props';
 import {
   mockDataViews,
-  mockedLayers,
-  mockedDraggedField,
-  mockedDndOperations,
   mockedColumns,
+  mockedDndOperations,
+  mockedDraggedField,
+  mockedLayers,
 } from './mocks';
-import { generateId } from '../../../../id_generator';
 
 const getDefaultProps = () => ({
   indexPatterns: mockDataViews(),

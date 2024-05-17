@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { firstValueFrom, ReplaySubject, Subject } from 'rxjs';
-import type { ILicense } from './types';
+import { ReplaySubject, Subject, firstValueFrom } from 'rxjs';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
+import type { ILicense } from './types';
 
 describe('registerAnalyticsContextProvider', () => {
   const analyticsClientMock = {

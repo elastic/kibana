@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "readYarnLock",
-        "description": [
-          "\nParse any yarn.lock content into a YarnLock map"
-        ],
+        "description": ["\nParse any yarn.lock content into a YarnLock map"],
         "signature": [
           "() => Promise<",
           {
@@ -145,9 +143,7 @@
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }",
-            "description": [
-              "a simple map of `name@versionrange` tags to metadata about a package"
-            ],
+            "description": ["a simple map of `name@versionrange` tags to metadata about a package"],
             "signature": [
               "[key: string]:  { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }"
             ],

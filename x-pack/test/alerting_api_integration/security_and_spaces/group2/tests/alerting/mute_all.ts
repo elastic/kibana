@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
-  checkAAD,
-  getUrlPrefix,
-  getTestRuleData,
   ObjectRemover,
+  checkAAD,
+  getTestRuleData,
   getUnauthorizedErrorMessage,
+  getUrlPrefix,
 } from '../../../../common/lib';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createMuteAlertTests({ getService }: FtrProviderContext) {

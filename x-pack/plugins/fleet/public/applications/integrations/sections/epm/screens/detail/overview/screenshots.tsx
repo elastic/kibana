@@ -1,3 +1,6 @@
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPagination, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,11 +9,8 @@
  */
 import React, { useState, useMemo, memo } from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiPagination } from '@elastic/eui';
 
-import type { RegistryImage, PackageSpecScreenshot } from '../../../../../../../../common/types';
+import type { PackageSpecScreenshot, RegistryImage } from '../../../../../../../../common/types';
 import { useLinks } from '../../../../../hooks';
 
 type ScreenshotItem = RegistryImage | PackageSpecScreenshot;

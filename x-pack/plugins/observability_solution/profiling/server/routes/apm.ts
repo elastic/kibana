@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';

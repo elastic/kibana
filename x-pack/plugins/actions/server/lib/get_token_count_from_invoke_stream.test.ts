@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { Transform } from 'stream';
-import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
 
 function createStreamMock() {
   const transform: Transform = new Transform({});

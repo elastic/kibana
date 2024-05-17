@@ -10,15 +10,15 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Suggestion } from '@kbn/lens-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
-import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { UnifiedHistogramFetchStatus } from '../../types';
 import {
-  createStateService,
   UnifiedHistogramState,
   UnifiedHistogramStateOptions,
+  createStateService,
 } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 

@@ -6,9 +6,9 @@
  */
 
 import React, { createContext, FunctionComponent, useContext } from 'react';
+import { useGlobalFields } from '.';
 import { useFormData } from '../../../../shared_imports';
 import { FormInternal } from '../types';
-import { useGlobalFields } from '.';
 
 export interface PhaseTimingConfiguration {
   /**

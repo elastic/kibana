@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createAction, PayloadAction } from '@reduxjs/toolkit';
+import { PayloadAction, createAction } from '@reduxjs/toolkit';
 import type { IHttpSerializedFetchError } from './http_error';
 
 export function createAsyncAction<
   Payload,
   SuccessPayload,
-  FailurePayload = IHttpSerializedFetchError<Payload>
+  FailurePayload = IHttpSerializedFetchError<Payload>,
 >(actionStr: string) {
   return {
     get: createAction(actionStr, (payload: Payload) => prepareForTimestamp(payload)),

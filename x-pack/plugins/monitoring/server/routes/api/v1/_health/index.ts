@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { LegacyRequest, MonitoringCore } from '../../../../types';
-import type { MonitoringConfig } from '../../../../config';
-import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getIndexPatterns, getDsIndexPattern } from '../../../../lib/cluster/get_index_patterns';
 import { getHealthRequestQueryRT } from '../../../../../common/http_api/_health';
 import type { TimeRange } from '../../../../../common/http_api/shared';
+import type { MonitoringConfig } from '../../../../config';
+import { getDsIndexPattern, getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import type { LegacyRequest, MonitoringCore } from '../../../../types';
 
-import { fetchMonitoredClusters } from './monitored_clusters';
 import { fetchMetricbeatErrors } from './metricbeat';
-import type { FetchParameters } from './types';
+import { fetchMonitoredClusters } from './monitored_clusters';
 import { fetchPackageErrors } from './package/fetch_package_errors';
+import type { FetchParameters } from './types';
 
 const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;

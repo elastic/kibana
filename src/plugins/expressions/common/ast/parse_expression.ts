@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression } from './types';
 import { parse } from './parse';
+import { ExpressionAstExpression } from './types';
 
 /**
  * Given expression pipeline string, returns parsed AST.

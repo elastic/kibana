@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { riskEngineRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { riskEngineRouteHelpersFactory } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

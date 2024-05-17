@@ -7,12 +7,12 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { HttpSetup } from '@kbn/core-http-browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
-import { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
+import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 
 const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
 

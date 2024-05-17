@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import type { FrameworkRequest } from '../../framework';
 
 import {
-  mockUniqueParsedObjects,
-  mockUniqueParsedTemplateTimelineObjects,
   mockGetTemplateTimelineValue,
   mockGetTimelineValue,
+  mockUniqueParsedObjects,
+  mockUniqueParsedTemplateTimelineObjects,
 } from '../__mocks__/import_timelines';
 
+import { TimelineStatusActions } from './common';
 import type { CompareTimelinesStatus as TimelinesStatusType } from './compare_timelines_status';
 import {
+  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   EMPTY_TITLE_ERROR_MESSAGE,
+  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
   UPDATE_STATUS_ERROR_MESSAGE,
   UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
-  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   getImportExistingTimelineError,
 } from './failure_cases';
-import { TimelineStatusActions } from './common';
 
 describe('CompareTimelinesStatus', () => {
   describe('timeline', () => {

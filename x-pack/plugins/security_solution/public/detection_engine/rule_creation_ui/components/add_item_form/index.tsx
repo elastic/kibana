@@ -8,10 +8,10 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';

@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { useRouteMatch, useLocation } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React, { useMemo, useCallback } from 'react';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 
-import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
+import { Error, Loading } from '../../../components';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
-import { Loading, Error } from '../../../components';
 import {
+  useBreadcrumbs,
   useGetOneAgent,
   useGetOneAgentPolicy,
-  useLink,
-  useBreadcrumbs,
-  useStartServices,
   useIntraAppState,
+  useLink,
+  useStartServices,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
+import type { Agent, AgentDetailsReassignPolicyAction, AgentPolicy } from '../../../types';
 
 import { ExperimentalFeaturesService } from '../../../services';
 
-import { AgentRefreshContext } from './hooks';
 import {
-  AgentLogs,
   AgentDetailsActionMenu,
   AgentDetailsContent,
   AgentDiagnosticsTab,
+  AgentLogs,
 } from './components';
+import { AgentRefreshContext } from './hooks';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {

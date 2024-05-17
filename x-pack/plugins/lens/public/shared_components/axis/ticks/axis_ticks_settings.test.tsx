@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { AxisTicksSettings, AxisTicksSettingsProps } from './axis_ticks_settings';
-import { render, screen } from '@testing-library/react';
 
 const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTicksSettingsProps>) => {
   return render(

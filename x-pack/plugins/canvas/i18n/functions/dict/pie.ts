@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { pieFunctionFactory } from '../../../public/functions/pie';
-import { FunctionFactoryHelp } from '../function_help';
 import { Legend } from '../../../types';
-import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';
+import { BOOLEAN_FALSE, CSS, FONT_FAMILY, FONT_WEIGHT } from '../../constants';
+import { FunctionFactoryHelp } from '../function_help';
 
 export const help: FunctionFactoryHelp<typeof pieFunctionFactory> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {

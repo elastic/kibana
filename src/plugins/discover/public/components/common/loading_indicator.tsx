@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 interface Props {

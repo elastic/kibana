@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useKibanaServices } from '../hooks/use_kibana';

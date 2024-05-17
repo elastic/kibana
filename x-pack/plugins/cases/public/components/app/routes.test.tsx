@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { MemoryRouterProps } from 'react-router';
-import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import type { CasesPermissions } from '../../../common';
 import {
+  TestProviders,
   noCasesSettingsPermission,
   noCreateCasesPermissions,
   readCasesPermissions,
-  TestProviders,
 } from '../../common/mock';
-import { CasesRoutes } from './routes';
-import type { CasesPermissions } from '../../../common';
 import { useGetCase } from '../../containers/use_get_case';
 import { defaultGetCase } from '../case_view/mocks';
+import { CasesRoutes } from './routes';
 
 jest.mock('../../containers/use_get_case');
 

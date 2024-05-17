@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import React, { FC, useState } from 'react';
 import Debug from '../debug';
 import { Props } from './error';
 

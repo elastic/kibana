@@ -8,8 +8,8 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Operations, TermsParams } from '@kbn/visualizations-plugin/common';
-import { Column } from '../convert';
 import { createPanel, createSeries } from '../__mocks__';
+import { Column } from '../convert';
 import { getBucketsColumns, isSplitWithDateHistogram } from './buckets_columns';
 
 describe('isSplitWithDateHistogram', () => {
@@ -111,7 +111,7 @@ describe('getBucketsColumns', () => {
     [
       string,
       Parameters<typeof getBucketsColumns>,
-      Array<Partial<Exclude<Column, 'params'> & { params: Partial<Column['params']> }>> | null
+      Array<Partial<Exclude<Column, 'params'> & { params: Partial<Column['params']> }>> | null,
     ]
   >([
     [

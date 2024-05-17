@@ -8,11 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
+import { ES_SCROLL_SETTINGS, INDEX_NAMES } from '../../../../common/constants';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
-import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { RouteDependencies } from '../../../types';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item';
+import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
   watchId: schema.string(),

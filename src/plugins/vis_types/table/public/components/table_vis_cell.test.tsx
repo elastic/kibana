@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { createTableVisCell } from './table_vis_cell';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { FormattedColumns } from '../types';
+import { createTableVisCell } from './table_vis_cell';
 
 describe('table vis cell', () => {
   it('should return a cell component with data in scope', () => {

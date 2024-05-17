@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
-import { waitFor, act, fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { noop } from 'lodash/fp';
+import React from 'react';
 
-import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import { TestProviders, createAppMockRenderer, noCreateCasesPermissions } from '../../common/mock';
 
-import { AttachmentType } from '../../../common/types/domain';
-import { SECURITY_SOLUTION_OWNER, MAX_COMMENT_LENGTH } from '../../../common/constants';
-import { createAttachments } from '../../containers/api';
 import type { AddCommentProps, AddCommentRefObject } from '.';
 import { AddComment } from '.';
-import { CasesTimelineIntegrationProvider } from '../timeline_context';
-import { timelineIntegrationMock } from '../__mock__/timeline';
-import type { CaseAttachmentWithoutOwner } from '../../types';
+import { MAX_COMMENT_LENGTH, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { AttachmentType } from '../../../common/types/domain';
 import type { AppMockRenderer } from '../../common/mock';
+import { createAttachments } from '../../containers/api';
+import type { CaseAttachmentWithoutOwner } from '../../types';
+import { timelineIntegrationMock } from '../__mock__/timeline';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
 
 jest.mock('../../containers/api', () => ({
   createAttachments: jest.fn(),

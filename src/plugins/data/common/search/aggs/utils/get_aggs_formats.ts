@@ -19,8 +19,8 @@ import {
 import { SerializableRecord } from '@kbn/utility-types';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
-import { convertIPPrefixToString, IpPrefixKey } from '../buckets/lib/ip_prefix';
-import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
+import { IpPrefixKey, convertIPPrefixToString } from '../buckets/lib/ip_prefix';
+import { IpRangeKey, convertIPRangeToString } from '../buckets/lib/ip_range';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 
 type GetFieldFormat = (mapping: SerializedFieldFormat) => IFieldFormat;

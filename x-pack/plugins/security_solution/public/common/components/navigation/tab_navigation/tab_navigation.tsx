@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiTab, EuiTabs } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import deepEqual from 'fast-deep-equal';
 
 import { useNavigation } from '../../../lib/kibana';
-import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
-import type { TabNavigationProps, TabNavigationItemProps } from './types';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 import { BETA } from '../../../translations';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import type { TabNavigationItemProps, TabNavigationProps } from './types';
 
 const TabNavigationItemComponent = ({
   disabled,

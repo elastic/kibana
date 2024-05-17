@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import {
-  UserActionTypes,
   CommentUserAction,
   ConnectorTypes,
+  UserActionTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import expect from '@kbn/expect';
+import {
+  bulkCreateAttachments,
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  findCaseUserActions,
+  getCaseUserActions,
+  updateCase,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -30,15 +39,6 @@ import {
   postCommentUserReq,
   postExternalReferenceESReq,
 } from '../../../../common/lib/mock';
-import {
-  deleteAllCaseItems,
-  createCase,
-  updateCase,
-  createComment,
-  bulkCreateAttachments,
-  findCaseUserActions,
-  getCaseUserActions,
-} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

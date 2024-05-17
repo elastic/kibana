@@ -6,11 +6,11 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { merge, type Observable } from 'rxjs';
+import { type Observable, merge } from 'rxjs';
 import { map } from 'rxjs';
 
-import { useMemo } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { useMemo } from 'react';
 import { annotationsRefresh$ } from '../services/annotations_service';
 
 export interface Refresh {

@@ -6,15 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { sortBy } from 'lodash';
 import {
-  TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
+  TimelineEventsQueries,
   TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import { sortBy } from 'lodash';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { timelineDetailsFilebeatExpectedResults as EXPECTED_DATA } from '../mocks/timeline_details';
 
 // typical values that have to change after an update from "scripts/es_archiver"

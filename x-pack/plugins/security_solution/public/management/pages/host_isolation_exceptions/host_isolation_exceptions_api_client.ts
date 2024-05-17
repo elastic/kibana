@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
+import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from './constants';
 

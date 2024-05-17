@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
 import { svlServices } from './services';
 

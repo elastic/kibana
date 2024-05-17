@@ -12,21 +12,21 @@ import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
 import {
+  EuiCard,
   EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiScreenReaderOnly,
-  EuiSpacer,
   EuiIcon,
-  EuiCard,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiScreenReaderOnly,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { memoizeLast } from '../../legacy/memoize';
-import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { BaseVisType, TypesStart } from '../../vis_types';
+import { VisGroups } from '../../vis_types/vis_groups_enum';
 import { DialogNavigation } from '../dialog_navigation';
 
 interface VisTypeListEntry {

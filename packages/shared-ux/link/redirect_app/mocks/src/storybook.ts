@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { RedirectAppLinksProps } from '@kbn/shared-ux-link-redirect-app-types';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
+import { action } from '@storybook/addon-actions';
 
 export class StorybookMock extends AbstractStorybookMock<RedirectAppLinksProps, {}> {
   propArguments = {};

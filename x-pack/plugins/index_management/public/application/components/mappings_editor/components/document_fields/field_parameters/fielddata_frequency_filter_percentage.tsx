@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDualRange, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { FieldHook } from '../../../shared_imports';
 

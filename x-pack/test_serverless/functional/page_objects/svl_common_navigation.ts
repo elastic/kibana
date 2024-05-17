@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import expect from '@kbn/expect';
 
-import type { NavigationID as MlNavId } from '@kbn/default-nav-ml';
 import type { NavigationID as AlNavId } from '@kbn/default-nav-analytics';
-import type { NavigationID as MgmtNavId } from '@kbn/default-nav-management';
 import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
+import type { NavigationID as MgmtNavId } from '@kbn/default-nav-management';
+import type { NavigationID as MlNavId } from '@kbn/default-nav-ml';
 
 // use this for nicer type suggestions, but allow any string anyway
 type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;

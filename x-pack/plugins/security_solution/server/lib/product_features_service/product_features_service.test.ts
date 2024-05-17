@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { ProductFeaturesService } from './product_features_service';
-import { ProductFeatures } from './product_features';
 import type {
-  ProductFeaturesConfig,
-  BaseKibanaFeatureConfig,
-} from '@kbn/security-solution-features';
-import { loggerMock } from '@kbn/logging-mocks';
-import type { ExperimentalFeatures } from '../../../common';
+  KibanaRequest,
+  LifecycleResponseFactory,
+  OnPostAuthHandler,
+} from '@kbn/core-http-server';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type { ProductFeaturesConfigurator } from './types';
+import { loggerMock } from '@kbn/logging-mocks';
+import type {
+  BaseKibanaFeatureConfig,
+  ProductFeaturesConfig,
+} from '@kbn/security-solution-features';
 import type {
   AssistantSubFeatureId,
   CasesSubFeatureId,
   SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import type {
-  KibanaRequest,
-  LifecycleResponseFactory,
-  OnPostAuthHandler,
-} from '@kbn/core-http-server';
+import type { ExperimentalFeatures } from '../../../common';
+import { ProductFeatures } from './product_features';
+import { ProductFeaturesService } from './product_features_service';
+import type { ProductFeaturesConfigurator } from './types';
 
 jest.mock('./product_features');
 const MockedProductFeatures = ProductFeatures as unknown as jest.MockedClass<
@@ -173,7 +173,7 @@ describe('ProductFeaturesService', () => {
       ({
         route: { options: { tags } },
         url: { pathname: '', search: '' },
-      } as unknown as KibanaRequest);
+      }) as unknown as KibanaRequest;
     const res = { notFound: jest.fn() } as unknown as LifecycleResponseFactory;
     const toolkit = { next: jest.fn() };
 

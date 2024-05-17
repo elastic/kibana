@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createAutoRefreshLoop, AutoRefreshDoneFn } from './auto_refresh_loop';
+import { AutoRefreshDoneFn, createAutoRefreshLoop } from './auto_refresh_loop';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 

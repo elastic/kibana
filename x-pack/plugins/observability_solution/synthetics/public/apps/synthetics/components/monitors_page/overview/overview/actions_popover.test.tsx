@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { fireEvent } from '@testing-library/react';
-import { render } from '../../../../utils/testing/rtl_helpers';
-import { ActionsPopover } from './actions_popover';
+import React from 'react';
 import * as editMonitorLocatorModule from '../../../../hooks/use_edit_monitor_locator';
 import * as monitorDetailLocatorModule from '../../../../hooks/use_monitor_detail_locator';
 import * as monitorEnableHandlerModule from '../../../../hooks/use_monitor_enable_handler';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { render } from '../../../../utils/testing/rtl_helpers';
 import { MonitorOverviewItem } from '../types';
+import { ActionsPopover } from './actions_popover';
 
 describe('ActionsPopover', () => {
   let testMonitor: MonitorOverviewItem;

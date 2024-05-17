@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 
 import {
-  SnapshotNodeResponse,
   SnapshotMetricInput,
+  SnapshotNodeResponse,
   SnapshotRequest,
 } from '@kbn/infra-plugin/common/http_api/snapshot_api';
 import { FtrProviderContext } from '../../ftr_provider_context';

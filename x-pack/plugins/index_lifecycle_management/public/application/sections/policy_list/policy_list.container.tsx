@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
 import { EuiButton, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PolicyList as PresentationComponent } from './policy_list';
+import React, { useEffect } from 'react';
 import { useKibana } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
+import { PolicyList as PresentationComponent } from './policy_list';
 import { PolicyListContextProvider } from './policy_list_context';
 
 export const PolicyList: React.FunctionComponent = () => {

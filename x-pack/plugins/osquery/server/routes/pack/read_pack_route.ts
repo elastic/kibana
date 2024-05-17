@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { filter, map } from 'lodash';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { filter, map } from 'lodash';
+import { PLUGIN_ID } from '../../../common';
 import type { ReadPacksRequestParamsSchema } from '../../../common/api';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { PackSavedObject } from '../../common/types';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 
+import { readPacksRequestParamsSchema } from '../../../common/api';
 import { packSavedObjectType } from '../../../common/types';
-import { convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
-import { readPacksRequestParamsSchema } from '../../../common/api';
+import { convertSOQueriesToPack } from './utils';
 
 export const readPackRoute = (router: IRouter) => {
   router.versioned

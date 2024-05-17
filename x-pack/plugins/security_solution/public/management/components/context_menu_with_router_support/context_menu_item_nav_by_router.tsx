@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
 import type { NavigateToAppOptions } from '@kbn/core/public';
+import React, { memo, useMemo } from 'react';
+import styled from 'styled-components';
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 

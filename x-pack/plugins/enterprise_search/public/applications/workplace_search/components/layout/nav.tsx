@@ -11,11 +11,11 @@ import { generateNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
   API_KEYS_PATH,
-  SOURCES_PATH,
-  SECURITY_PATH,
-  USERS_AND_ROLES_PATH,
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
+  SECURITY_PATH,
+  SOURCES_PATH,
+  USERS_AND_ROLES_PATH,
 } from '../../routes';
 import { useSourceSubNav } from '../../views/content_sources/components/source_sub_nav';
 import { useGroupSubNav } from '../../views/groups/components/group_sub_nav';

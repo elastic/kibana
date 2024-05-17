@@ -16,15 +16,15 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
   EuiPageSection,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiPanel,
-  EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';

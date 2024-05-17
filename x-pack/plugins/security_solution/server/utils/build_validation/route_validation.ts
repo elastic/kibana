@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type {
+  RouteValidationError,
+  RouteValidationFunction,
+  RouteValidationResultFactory,
+} from '@kbn/core/server';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import type * as rt from 'io-ts';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import type {
-  RouteValidationFunction,
-  RouteValidationResultFactory,
-  RouteValidationError,
-} from '@kbn/core/server';
 import type { TypeOf, ZodType } from 'zod';
-import { stringifyZodError } from '@kbn/zod-helpers';
 import type { GenericIntersectionC } from '../runtime_types';
 import { excess } from '../runtime_types';
 
@@ -55,7 +55,7 @@ export const buildRouteValidationNonExact =
 export const buildRouteValidationWithExcess =
   <
     T extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,
-    A = rt.TypeOf<T>
+    A = rt.TypeOf<T>,
   >(
     schema: T
   ): RouteValidationFunction<A> =>

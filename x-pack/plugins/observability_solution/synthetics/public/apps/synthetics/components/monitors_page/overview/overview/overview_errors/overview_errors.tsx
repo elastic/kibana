@@ -8,19 +8,19 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
   EuiPanel,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
-import { useMonitorQueryIds } from '../overview_alerts';
+import { useGetUrlParams, useRefreshedRange } from '../../../../../hooks';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
-import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
+import { useMonitorQueryIds } from '../overview_alerts';
 import { OverviewErrorsCount } from './overview_errors_count';
+import { OverviewErrorsSparklines } from './overview_errors_sparklines';
 
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);

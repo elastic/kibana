@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiHeaderLinks, EuiToolTip, EuiHeaderLink } from '@elastic/eui';
+import { EuiHeaderLink, EuiHeaderLinks, EuiToolTip } from '@elastic/eui';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
-import { LastRefreshed } from '../components/last_refreshed';
-import { AutoRefreshButton } from '../components/auto_refresh_button';
+import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
-import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
-import { InspectorHeaderLink } from './inspector_header_link';
 import { ToggleAlertFlyoutButton } from '../../alerts/toggle_alert_flyout_button';
+import { AutoRefreshButton } from '../components/auto_refresh_button';
+import { LastRefreshed } from '../components/last_refreshed';
+import { InspectorHeaderLink } from './inspector_header_link';
 
 const ANALYZE_DATA = i18n.translate('xpack.synthetics.analyzeDataButtonLabel', {
   defaultMessage: 'Explore data',

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useRef } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
+import React, { FunctionComponent, useRef } from 'react';
 
 export interface Props {
   json: Record<string, any>;

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { EuiComboBoxOptionOption, EuiLink } from '@elastic/eui';
+import { DocLinksStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
@@ -13,13 +15,11 @@ import {
   SimpleConnectorForm,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiComboBoxOptionOption, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinksStart } from '@kbn/core/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { debounce, isEmpty, isEqual } from 'lodash';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { debounce, isEmpty, isEqual } from 'lodash';
 import * as i18n from './translations';
 import { useValidChannels } from './use_valid_channels';
 

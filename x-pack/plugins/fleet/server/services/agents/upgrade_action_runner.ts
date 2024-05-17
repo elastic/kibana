@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
-  getRecentUpgradeInfoForAgent,
   getNotUpgradeableMessage,
+  getRecentUpgradeInfoForAgent,
   isAgentUpgradeableToVersion,
 } from '../../../common/services';
 
 import type { Agent } from '../../types';
 
-import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
+import { getCancelledActions } from './action_status';
+import { createAgentAction, createErrorActionResults } from './actions';
+import { BulkActionTaskType } from './bulk_action_types';
 import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
-import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-import { BulkActionTaskType } from './bulk_action_types';
-import { getCancelledActions } from './action_status';
 import { getLatestAvailableAgentVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {

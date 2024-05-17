@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash/fp';
+import React, { useCallback } from 'react';
 
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';

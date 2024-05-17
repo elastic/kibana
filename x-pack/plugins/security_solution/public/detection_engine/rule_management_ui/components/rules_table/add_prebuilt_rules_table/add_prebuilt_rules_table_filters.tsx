@@ -9,10 +9,10 @@ import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import * as i18n from './translations';
-import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { RuleSearchField } from '../rules_table_filters/rule_search_field';
+import { TagsFilterPopover } from '../rules_table_filters/tags_filter_popover';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
+import * as i18n from './translations';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeM};

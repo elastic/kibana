@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { TestProviders } from '../../../../../common/mock';
+import { mockTimelineResults } from '../../../../../common/mock/timeline_results';
 import { appActions } from '../../../../../common/store/app';
 import { timelineActions } from '../../../../store';
-import { TimelineId } from '../../../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { mockTimelineResults } from '../../../../../common/mock/timeline_results';
-import { TestProviders } from '../../../../../common/mock';
 import { useDeleteNote } from './use_delete_note';
 
 const mockDispatch = jest.fn();

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
-import type { CasesSearchRequest } from '../../../common/types/api';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import type { CasesSearchRequest } from '../../../common/types/api';
+import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,

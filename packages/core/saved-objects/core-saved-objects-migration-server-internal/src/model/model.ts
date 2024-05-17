@@ -6,14 +6,47 @@
  * Side Public License, v 1.
  */
 
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
-import type { AllActionStates, State } from '../state';
+import {
+  CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
+  FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
+} from '../common/constants';
+import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
 import type { ResponseType } from '../next';
+import type { AllActionStates, State } from '../state';
+import type { MigrationLog } from '../types';
+import { buildTempIndexMap, createBatches } from './create_batches';
+import {
+  extractDiscardedCorruptDocs,
+  extractDiscardedUnknownDocs,
+  extractTransformFailuresReason,
+  extractUnknownDocFailureReason,
+  fatalReasonDocumentExceedsMaxBatchSizeBytes,
+} from './extract_errors';
+import {
+  MigrationType,
+  REINDEX_TEMP_SUFFIX,
+  addExcludedTypesToBoolQuery,
+  addMustClausesToBoolQuery,
+  addMustNotClausesToBoolQuery,
+  aliasVersion,
+  buildRemoveAliasActions,
+  getAliases,
+  getMigrationType,
+  hasLaterVersionAlias,
+  increaseBatchSize,
+  indexBelongsToLaterVersion,
+  indexVersion,
+  mergeMappingMeta,
+  throwBadControlState,
+  throwBadResponse,
+  versionMigrationCompleted,
+} from './helpers';
 import {
   createInitialProgress,
   incrementProcessedProgress,
@@ -21,40 +54,7 @@ import {
   setProgressTotal,
 } from './progress';
 import { delayRetryState, resetRetryState } from './retry_state';
-import {
-  extractTransformFailuresReason,
-  extractUnknownDocFailureReason,
-  fatalReasonDocumentExceedsMaxBatchSizeBytes,
-  extractDiscardedUnknownDocs,
-  extractDiscardedCorruptDocs,
-} from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
-import {
-  addExcludedTypesToBoolQuery,
-  addMustClausesToBoolQuery,
-  addMustNotClausesToBoolQuery,
-  getAliases,
-  getMigrationType,
-  indexBelongsToLaterVersion,
-  indexVersion,
-  mergeMappingMeta,
-  throwBadControlState,
-  throwBadResponse,
-  versionMigrationCompleted,
-  buildRemoveAliasActions,
-  MigrationType,
-  increaseBatchSize,
-  hasLaterVersionAlias,
-  aliasVersion,
-  REINDEX_TEMP_SUFFIX,
-} from './helpers';
-import { buildTempIndexMap, createBatches } from './create_batches';
-import type { MigrationLog } from '../types';
-import {
-  CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
-  FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
-} from '../common/constants';
-import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action

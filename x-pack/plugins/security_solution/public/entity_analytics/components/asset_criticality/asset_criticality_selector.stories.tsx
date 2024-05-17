@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { euiLightVars } from '@kbn/ui-theme';
 import type { Story } from '@storybook/react';
 import { addDecorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { euiLightVars } from '@kbn/ui-theme';
 
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';

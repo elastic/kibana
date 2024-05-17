@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import pRetry from 'p-retry';
-import type { SuperTest, Test } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import pRetry from 'p-retry';
+import type { SuperTest, Test } from 'supertest';
 import { runRule } from './alerting_api_helper';
 
 export async function waitForDocumentInIndex({

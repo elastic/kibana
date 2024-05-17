@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { APM_TELEMETRY_TASK_NAME } from '../../lib/apm_telemetry';
-import { APMTelemetry } from '../../lib/apm_telemetry/types';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+import { APM_TELEMETRY_TASK_NAME } from '../../lib/apm_telemetry';
+import { APMTelemetry } from '../../lib/apm_telemetry/types';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 export const debugTelemetryRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/debug-telemetry',
   options: {

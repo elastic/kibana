@@ -10,7 +10,7 @@ jest.mock('fs');
 
 import { Bundle } from '../common';
 
-import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
+import { Assignments, assignBundlesToWorkers } from './assign_bundles_to_workers';
 
 const hasWorkUnits = (b: Bundle) => b.cache.getWorkUnits() !== undefined;
 const noWorkUnits = (b: Bundle) => b.cache.getWorkUnits() === undefined;

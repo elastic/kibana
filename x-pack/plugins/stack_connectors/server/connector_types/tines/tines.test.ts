@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import axios, { AxiosInstance } from 'axios';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { TinesConnector } from './tines';
-import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import axios, { AxiosInstance } from 'axios';
 import { API_MAX_RESULTS, TINES_CONNECTOR_ID } from '../../../common/tines/constants';
+import { TinesConnector } from './tines';
 
 jest.mock('axios');
 (axios as jest.Mocked<typeof axios>).create.mockImplementation(

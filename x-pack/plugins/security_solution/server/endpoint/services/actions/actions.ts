@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger } from '@kbn/core/server';
 import type {
   ActivityLog,
   ActivityLogEntry,
@@ -17,6 +16,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { getActionRequestsResult, getActionResponsesResult, getTimeSortedData } from '../../utils';
 
 import { categorizeActionResults, categorizeResponseResults, getUniqueLogData } from './utils';

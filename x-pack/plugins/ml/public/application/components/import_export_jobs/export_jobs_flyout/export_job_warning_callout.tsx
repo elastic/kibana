@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiText, EuiAccordion, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import type { JobDependencies } from './jobs_export_service';
 
 interface Props {

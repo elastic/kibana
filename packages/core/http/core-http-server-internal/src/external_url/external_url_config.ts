@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { createSHA256Hash } from '@kbn/crypto';
 import type { IExternalUrlPolicy } from '@kbn/core-http-common';
 import type { IExternalUrlConfig } from '@kbn/core-http-server';
+import { createSHA256Hash } from '@kbn/crypto';
 import { externalUrlConfig } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(externalUrlConfig.schema.validate({}));

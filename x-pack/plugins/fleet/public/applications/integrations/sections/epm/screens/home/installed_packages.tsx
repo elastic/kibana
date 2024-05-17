@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { useLocation, useHistory, useParams } from 'react-router-dom';
-import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useState } from 'react';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
+import semverLt from 'semver/functions/lt';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
+import { installationStatuses } from '../../../../../../../common/constants';
 import { pagePathGetters } from '../../../../constants';
 import {
   useBreadcrumbs,
+  useGetPackageVerificationKeyId,
   useLink,
   useStartServices,
-  useGetPackageVerificationKeyId,
 } from '../../../../hooks';
-import { PackageListGrid } from '../../components/package_list_grid';
-import { installationStatuses } from '../../../../../../../common/constants';
 import type { PackageListItem } from '../../../../types';
+import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { IntegrationsURLParameters } from './hooks/use_available_packages';
 
@@ -34,14 +34,14 @@ import {
 import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
-import { getParams, categoryExists, mapToCard } from '.';
+import { categoryExists, getParams, mapToCard } from '.';
 import {
   ALL_INSTALLED_CATEGORY,
-  UPDATES_AVAILABLE,
   INSTALL_FAILED,
+  INSTALL_FAILED_CATEGORY,
+  UPDATES_AVAILABLE,
   UPDATES_AVAILABLE_CATEGORY,
   UPDATE_FAILED_CATEGORY,
-  INSTALL_FAILED_CATEGORY,
 } from './category_facets';
 
 const AnnouncementLink = () => {

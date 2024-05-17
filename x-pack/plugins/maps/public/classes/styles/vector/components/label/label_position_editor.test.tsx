@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 import { LABEL_POSITIONS } from '../../../../../../common/constants';
-import { LabelPositionEditor } from './label_position_editor';
 import { LabelPositionProperty } from '../../properties/label_position_property';
+import { LabelPositionEditor } from './label_position_editor';
 
 const defaultProps = {
   handlePropertyChange: () => {},

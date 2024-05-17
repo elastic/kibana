@@ -6,9 +6,9 @@
  */
 
 import type {
-  ResolverRelatedEvents,
-  ResolverNode,
   ResolverEntityIndex,
+  ResolverNode,
+  ResolverRelatedEvents,
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { useEffect } from 'react';
 import type { Rule } from '../../../rule_management/logic';
 
 export interface UseLegacyUrlRedirectParams {

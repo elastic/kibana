@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { ArtifactListPageProps } from '../artifact_list_page';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { getFormComponentMock } from '../mocks';
-import { getArtifactListPageRenderingSetup } from '../mocks';
 import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../common/endpoint/service/artifacts';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import type { trustedAppsAllHttpMocks } from '../../../mocks';
-import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { entriesToConditionEntries } from '../../../../common/utils/exception_list_items/mappers';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { trustedAppsAllHttpMocks } from '../../../mocks';
 import { getDeferred } from '../../../mocks/utils';
+import type { ArtifactListPageProps } from '../artifact_list_page';
+import type { getFormComponentMock } from '../mocks';
+import { getArtifactListPageRenderingSetup } from '../mocks';
 
 jest.mock('../../../../common/components/user_privileges');
 const useUserPrivileges = _useUserPrivileges as jest.Mock;
@@ -143,7 +143,7 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
 
     describe('and user clicks submit', () => {
       let releaseApiUpdateResponse: () => void;
-      let getByTestId: typeof renderResult['getByTestId'];
+      let getByTestId: (typeof renderResult)['getByTestId'];
 
       beforeEach(async () => {
         await act(async () => {

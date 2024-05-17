@@ -8,8 +8,8 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../../common/constants';
+import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 interface LinkToListDetailsProps {
   linkTitle: string;

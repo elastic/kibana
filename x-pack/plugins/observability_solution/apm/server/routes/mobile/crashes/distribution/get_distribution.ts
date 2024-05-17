@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { getOffsetInMs } from '../../../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
+import { Maybe } from '../../../../../typings/common';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { BUCKET_TARGET_COUNT } from '../../../transactions/constants';
 import { getBuckets } from './get_buckets';
-import { getOffsetInMs } from '../../../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { Maybe } from '../../../../../typings/common';
 
 function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { getPathListItemSchemaMock } from './index.mock';
 import { PatchListItemSchema, patchListItemSchema } from '.';
+import { getPathListItemSchemaMock } from './index.mock';
 
 describe('patch_list_item_schema', () => {
   test('it should validate a typical list item request', () => {

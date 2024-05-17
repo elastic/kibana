@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { TypeOf } from '@kbn/config-schema';
+import { OpsgenieSubActions } from '../../../common';
 import {
-  CreateAlertParamsSchema,
   CloseAlertParamsSchema,
   ConfigSchema,
-  SecretsSchema,
+  CreateAlertParamsSchema,
   FailureResponse,
+  SecretsSchema,
 } from './schema';
-import { OpsgenieSubActions } from '../../../common';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;

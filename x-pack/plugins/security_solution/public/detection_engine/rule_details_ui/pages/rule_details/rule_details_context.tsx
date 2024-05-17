@@ -8,11 +8,11 @@
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DurationRange } from '@elastic/eui/src/components/date_picker/types';
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
 } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../common/constants';
 import { invariant } from '../../../../../common/utils/invariant';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleDetailTabs } from './use_rule_details_tabs';

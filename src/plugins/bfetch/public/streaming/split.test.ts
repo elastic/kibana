@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { split } from './split';
 import { Subject } from 'rxjs';
+import { split } from './split';
 
 test('splits a single IP address', () => {
   const ip = '127.0.0.1';

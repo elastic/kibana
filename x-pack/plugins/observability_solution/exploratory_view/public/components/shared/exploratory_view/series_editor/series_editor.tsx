@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { rgba } from 'polished';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { AppDataType, ReportViewType, BuilderItem } from '../types';
-import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
-import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
+import { rgba } from 'polished';
+import React, { useEffect, useState } from 'react';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { ReportTypesSelect } from './columns/report_type_select';
-import { ViewActions } from '../views/view_actions';
-import { Series } from './series';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
+import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
+import { AppDataType, BuilderItem, ReportViewType } from '../types';
+import { ViewActions } from '../views/view_actions';
+import { ReportTypesSelect } from './columns/report_type_select';
+import { Series } from './series';
 
 export interface ReportTypeItem {
   id: string;

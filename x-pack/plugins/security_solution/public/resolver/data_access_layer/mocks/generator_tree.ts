@@ -8,14 +8,14 @@
 import type { TreeOptions } from '../../../../common/endpoint/generate_data';
 import type { DataAccessLayer, GeneratedTreeMetadata, TimeRange } from '../../types';
 
-import type {
-  ResolverRelatedEvents,
-  ResolverEntityIndex,
-  SafeResolverEvent,
-  ResolverNode,
-  ResolverSchema,
-} from '../../../../common/endpoint/types';
 import * as eventModel from '../../../../common/endpoint/models/event';
+import type {
+  ResolverEntityIndex,
+  ResolverNode,
+  ResolverRelatedEvents,
+  ResolverSchema,
+  SafeResolverEvent,
+} from '../../../../common/endpoint/types';
 import { generateTree } from '../../mocks/generator';
 
 /**

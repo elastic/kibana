@@ -7,11 +7,11 @@
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useLocation } from 'react-router-dom';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
@@ -20,32 +20,32 @@ import { PaginatedContent } from '../paginated_content';
 
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
-import type { ArtifactListPageLabels } from './translations';
-import { artifactListPageLabels } from './translations';
+import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
+import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import { useToasts } from '../../../common/lib/kibana';
+import { useMemoizedRouteState } from '../../common/hooks';
+import { getLoadPoliciesError } from '../../common/translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useUrlParams } from '../../hooks/use_url_params';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import { useGetEndpointSpecificPolicies } from '../../services/policies/hooks';
+import { BackToExternalAppButton } from '../back_to_external_app_button';
+import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { ManagementPageLoader } from '../management_page_loader';
 import type { SearchExceptionsProps } from '../search_exceptions';
 import { SearchExceptions } from '../search_exceptions';
-import type { UseArtifactCardPropsProviderProps } from './hooks/use_artifact_card_props_provider';
-import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
-import { NoDataEmptyState } from './components/no_data_empty_state';
+import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import type { ArtifactFlyoutProps } from './components/artifact_flyout';
 import { ArtifactFlyout } from './components/artifact_flyout';
+import { NoDataEmptyState } from './components/no_data_empty_state';
+import type { UseArtifactCardPropsProviderProps } from './hooks/use_artifact_card_props_provider';
+import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
 import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
-import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { ArtifactListPageLabels } from './translations';
+import { artifactListPageLabels } from './translations';
 import type { ArtifactListPageUrlParams } from './types';
-import { useUrlParams } from '../../hooks/use_url_params';
-import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
-import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { ArtifactDeleteModal } from './components/artifact_delete_modal';
-import { useGetEndpointSpecificPolicies } from '../../services/policies/hooks';
-import { getLoadPoliciesError } from '../../common/translations';
-import { useToasts } from '../../../common/lib/kibana';
-import { useMemoizedRouteState } from '../../common/hooks';
-import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
-import { BackToExternalAppButton } from '../back_to_external_app_button';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEffect, useState } from 'react';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 
 import {
   sendCreateAgentPolicy,
-  sendGetOneAgentPolicy,
   sendGetEnrollmentAPIKeys,
+  sendGetOneAgentPolicy,
 } from '../../../../../../../hooks';
 
-import type { AgentPolicy, NewAgentPolicy, EnrollmentAPIKey } from '../../../../../../../types';
+import type { AgentPolicy, EnrollmentAPIKey, NewAgentPolicy } from '../../../../../../../types';
 
 interface UseGetAgentPolicyOrDefaultResponse {
   isLoading: boolean;

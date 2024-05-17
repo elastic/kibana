@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { EuiIcon } from '@elastic/eui';
+import { mount, shallow } from 'enzyme';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { DragDropBuckets, DraggableBucketContainer } from './buckets';
 
 jest.mock('@elastic/eui', () => {

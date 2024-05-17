@@ -11,10 +11,10 @@ jest.mock('./tile_request_tab', () => ({
   },
 }));
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { RESPONSE_VIEW_ID, VectorTileInspector } from './vector_tile_inspector';
+import React from 'react';
 import { VectorTileAdapter } from '../vector_tile_adapter';
+import { RESPONSE_VIEW_ID, VectorTileInspector } from './vector_tile_inspector';
 
 describe('VectorTileInspector', () => {
   let vectorTileAdapter: VectorTileAdapter | undefined;

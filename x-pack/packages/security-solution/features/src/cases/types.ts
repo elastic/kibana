@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
-import type { ProductFeatureCasesKey, CasesSubFeatureId } from '../product_features_keys';
+import type { CasesApiTags, CasesUiCapabilities } from '@kbn/cases-plugin/common';
+import type { CasesSubFeatureId, ProductFeatureCasesKey } from '../product_features_keys';
 import type { ProductFeatureKibanaConfig } from '../types';
 
 export interface CasesFeatureParams {

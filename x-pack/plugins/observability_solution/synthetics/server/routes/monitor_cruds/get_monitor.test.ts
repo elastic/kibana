@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getOverviewConfigsPerLocation } from './get_monitor';
 import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { getOverviewConfigsPerLocation } from './get_monitor';
 
 describe('getOverviewConfigsPerLocation', () => {
   it('returns a map of locations to monitor configs', () => {

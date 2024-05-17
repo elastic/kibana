@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { ObjectRemover, getEventLog, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function createCappedActionsTests({ getService }: FtrProviderContext) {

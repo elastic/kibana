@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import {
+  RiskScoreEntity,
   buildHostNamesFilter,
   buildUserNamesFilter,
-  RiskScoreEntity,
 } from '../../../../common/search_strategy';
-import { useRiskScore } from './use_risk_score';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import type { HostRisk, UserRisk } from '../types';
+import { useRiskScore } from './use_risk_score';
 
 export const ONLY_FIRST_ITEM_PAGINATION = {
   cursorStart: 0,

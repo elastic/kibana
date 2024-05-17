@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiTitle, EuiText, EuiSelect, EuiIconTip } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import {
   ActionParamsProps,
   JsonEditorWithMessageVariables,
@@ -16,11 +15,12 @@ import {
   TextFieldWithMessageVariables,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 
+import { choicesToEuiOptions, isFieldInvalid } from '../lib/servicenow/helpers';
 import * as i18n from '../lib/servicenow/translations';
 import { useChoices } from '../lib/servicenow/use_choices';
 import { ServiceNowITOMActionParams } from './types';
-import { choicesToEuiOptions, isFieldInvalid } from '../lib/servicenow/helpers';
 
 const choicesFields = ['severity'];
 

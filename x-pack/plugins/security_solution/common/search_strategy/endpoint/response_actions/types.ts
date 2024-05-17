@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest } from '@kbn/search-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
-import type { LogsEndpointActionWithHosts } from '../../../endpoint/types';
+import type { IEsSearchRequest } from '@kbn/search-types';
 import type { ResponseActionsQueries } from '.';
+import type { LogsEndpointActionWithHosts } from '../../../endpoint/types';
 
 export enum SortOrder {
   asc = 'asc',

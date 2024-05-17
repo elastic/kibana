@@ -8,10 +8,10 @@
 import { applyMiddleware, compose as reduxCompose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { getWindow } from '../../lib/get_window';
-import { inFlight } from './in_flight';
-import { workpadUpdate } from './workpad_update';
 import { elementStats } from './element_stats';
+import { inFlight } from './in_flight';
 import { resolvedArgs } from './resolved_args';
+import { workpadUpdate } from './workpad_update';
 
 const middlewares = [
   applyMiddleware(thunkMiddleware, elementStats, resolvedArgs, inFlight, workpadUpdate),

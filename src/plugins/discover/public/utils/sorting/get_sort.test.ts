@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getSortForEmbeddable } from './get_sort';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
+import { getSortForEmbeddable } from './get_sort';
 
 describe('getSortForEmbeddable', function () {
   describe('getSortForEmbeddable function', function () {

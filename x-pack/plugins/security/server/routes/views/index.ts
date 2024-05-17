@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RouteDefinitionParams } from '..';
 import { defineAccessAgreementRoutes } from './access_agreement';
 import { defineAccountManagementRoutes } from './account_management';
 import { defineCaptureURLRoutes } from './capture_url';
@@ -12,7 +13,6 @@ import { defineLoggedOutRoutes } from './logged_out';
 import { defineLoginRoutes } from './login';
 import { defineLogoutRoutes } from './logout';
 import { defineOverwrittenSessionRoutes } from './overwritten_session';
-import type { RouteDefinitionParams } from '..';
 
 export function defineViewRoutes(params: RouteDefinitionParams) {
   defineAccountManagementRoutes(params);

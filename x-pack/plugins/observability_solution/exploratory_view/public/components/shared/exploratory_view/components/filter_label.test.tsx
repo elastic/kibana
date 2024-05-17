@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
+import * as useSeriesHook from '../hooks/use_series_filters';
 import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
-import * as useSeriesHook from '../hooks/use_series_filters';
-import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 import 'jest-canvas-mock';
 
 jest.setTimeout(10 * 1000);

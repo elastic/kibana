@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import { KibanaRequest } from '@kbn/core/server';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import { searchSourceCommonMock } from '../../../common/search/search_source/mocks';
-import type { ISearchStart, ISearchSetup } from '../types';
+import type { ISearchSetup, ISearchStart } from '../types';
 
 function createSetupContract(): MockedKeys<ISearchSetup['searchSource']> {
   return {

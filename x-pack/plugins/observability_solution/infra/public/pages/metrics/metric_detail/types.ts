@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import rt from 'io-ts';
-import { PropsWithChildren } from 'react';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
-import { MetricsTimeInput } from './hooks/use_metrics_time';
+import rt from 'io-ts';
+import { PropsWithChildren } from 'react';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
+import { MetricsTimeInput } from './hooks/use_metrics_time';
 
 export interface LayoutProps {
   metrics?: NodeDetailsMetricData[];

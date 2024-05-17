@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { isUntitled } from '../../../../timelines/components/open_timeline/helpers';

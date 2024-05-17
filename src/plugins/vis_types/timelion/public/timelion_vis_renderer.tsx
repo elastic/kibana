@@ -9,16 +9,16 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaExecutionContext } from '@kbn/core/public';
 import { RangeFilterParams } from '@kbn/es-query';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaExecutionContext } from '@kbn/core/public';
+import { getCoreStart, getUsageCollection } from './helpers/plugin_services';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
-import { getCoreStart, getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>
   import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import { getIntegrationCard } from '../screens/integrations';
+import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
+import { createAgentPolicy, navigateToTab } from '../tasks/fleet';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { FLEET, INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import {
-  createUsersAndRoles,
   FleetAllIntegrReadRole,
   FleetAllIntegrReadUser,
+  createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../tasks/privileges';
-import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
-import { navigateToTab, createAgentPolicy } from '../tasks/fleet';
-import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
-import { getIntegrationCard } from '../screens/integrations';
 
 import {
+  ADD_PACKAGE_POLICY_BTN,
   AGENT_POLICIES_TAB,
   AGENT_POLICY_SAVE_INTEGRATION,
-  ADD_PACKAGE_POLICY_BTN,
 } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN, AGENT_POLICY_NAME_LINK } from '../screens/integrations';
 import { scrollToIntegration } from '../tasks/integrations';

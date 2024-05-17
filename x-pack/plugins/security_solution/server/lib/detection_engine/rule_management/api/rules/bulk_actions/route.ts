@@ -8,7 +8,6 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ConfigType } from '../../../../../../config';
 import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -20,6 +19,7 @@ import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
+import type { ConfigType } from '../../../../../../config';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';

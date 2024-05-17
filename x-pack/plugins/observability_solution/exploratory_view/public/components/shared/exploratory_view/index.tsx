@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
   createKbnUrlStateStorage,
-  withNotifyOnErrors,
   createSessionStorageStateStorage,
+  withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useBreadcrumbs, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { ExploratoryView } from './exploratory_view';
-import { useKibana } from './hooks/use_kibana';
-import { DataViewContextProvider } from './hooks/use_app_data_view';
-import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { RefreshButton } from './header/refresh_button';
+import { DataViewContextProvider } from './hooks/use_app_data_view';
+import { useKibana } from './hooks/use_kibana';
+import { UrlStorageContextProvider } from './hooks/use_series_storage';
 
 const PAGE_TITLE = i18n.translate('xpack.exploratoryView.expView.heading.label', {
   defaultMessage: 'Explore data',

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { getAnonymizedValue } from '@kbn/elastic-assistant-common';
 import { getAnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_data';
 import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_anonymization/get_anonymized_values';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
-import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React, { useMemo } from 'react';
 import { SelectedPromptContext } from '../assistant/prompt_context/types';
 
 const Strong = styled.strong<{ showRealValues: boolean }>`

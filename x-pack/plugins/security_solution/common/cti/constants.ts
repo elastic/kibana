@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENRICHMENT_DESTINATION_PATH, DEFAULT_INDICATOR_SOURCE_PATH } from '../constants';
+import { DEFAULT_INDICATOR_SOURCE_PATH, ENRICHMENT_DESTINATION_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';

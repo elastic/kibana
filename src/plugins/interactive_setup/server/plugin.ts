@@ -19,12 +19,12 @@ import type {
 import { unsafeConsole } from '@kbn/security-hardening';
 import { getDataPath } from '@kbn/utils';
 
+import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { KibanaConfigWriter } from './kibana_config_writer';
 import { defineRoutes } from './routes';
 import { VerificationService } from './verification_service';
-import { ElasticsearchConnectionStatus } from '../common';
 
 // List of the Elasticsearch hosts Kibana uses by default.
 const DEFAULT_ELASTICSEARCH_HOSTS = [
@@ -78,8 +78,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
       const reason = core.elasticsearch.config.credentialsSpecified
         ? 'Kibana system user credentials are specified'
         : core.elasticsearch.config.hosts.length > 1
-        ? 'more than one Elasticsearch host is specified'
-        : 'non-default Elasticsearch host is used';
+          ? 'more than one Elasticsearch host is specified'
+          : 'non-default Elasticsearch host is used';
       this.#logger.debug(
         `Interactive setup mode will not be activated since Elasticsearch connection is already configured: ${reason}.`
       );

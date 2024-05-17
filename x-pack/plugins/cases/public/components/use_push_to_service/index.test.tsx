@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
 
 import type { ReturnUsePushToService, UsePushToService } from '.';
 import { usePushToService } from '.';
-import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { actionLicenses } from '../../containers/mock';
-import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 import type { CaseConnector } from '../../../common/types/domain';
+import { TestProviders, noPushCasesPermissions, readCasesPermissions } from '../../common/mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { actionLicenses } from '../../containers/mock';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 
 jest.mock('../../containers/use_get_action_license', () => {
   return {

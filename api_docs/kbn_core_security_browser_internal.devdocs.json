@@ -64,9 +64,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/core/security/core-security-browser-internal/src/security_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -78,9 +76,7 @@
                 "tags": [],
                 "label": "coreContext",
                 "description": [],
-                "signature": [
-                  "CoreContext"
-                ],
+                "signature": ["CoreContext"],
                 "path": "packages/core/security/core-security-browser-internal/src/security_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -142,9 +138,7 @@
             "tags": [],
             "label": "stop",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/core/security/core-security-browser-internal/src/security_service.ts",
             "deprecated": false,
             "trackAdoption": false,

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { DataViewCache } from './data_view_cache';
 import type {
+  Chart,
   LensAttributes,
   LensVisualizationState,
-  Chart,
   VisualizationAttributesBuilder,
 } from './types';
-import { DataViewCache } from './data_view_cache';
 import { getAdhocDataView } from './utils';
 
 export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>

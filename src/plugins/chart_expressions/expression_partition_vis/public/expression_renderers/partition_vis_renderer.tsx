@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import type {
-  Datatable,
-  ExpressionRenderDefinition,
-  IInterpreterRenderHandlers,
-} from '@kbn/expressions-plugin/public';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
   type ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
   isOnAggBasedEditor,
 } from '@kbn/chart-expressions-common';
-import { VisTypePieDependencies } from '../plugin';
+import type {
+  Datatable,
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import React, { lazy } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
+import { ChartTypes, type PartitionChartProps, type PartitionVisParams } from '../../common/types';
+import { VisTypePieDependencies } from '../plugin';
 import { CellValueAction, GetCompatibleCellValueActions } from '../types';
-import { ChartTypes, type PartitionVisParams, type PartitionChartProps } from '../../common/types';
 
 export const strings = {
   getDisplayName: () =>

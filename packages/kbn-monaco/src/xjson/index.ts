@@ -10,8 +10,8 @@
  * This import registers the XJSON monaco language contribution
  */
 import './language';
-import { ID } from './constants';
-import { lexerRules, languageConfiguration } from './lexer_rules';
 import { LangModuleType } from '../types';
+import { ID } from './constants';
+import { languageConfiguration, lexerRules } from './lexer_rules';
 
 export const XJsonLang: LangModuleType = { ID, lexerRules, languageConfiguration };

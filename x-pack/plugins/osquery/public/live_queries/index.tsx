@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { castArray, isEmpty, pickBy } from 'lodash';
-import { EuiCode, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useContext, useMemo } from 'react';
+import { EuiCode, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { castArray, isEmpty, pickBy } from 'lodash';
+import React, { useContext, useMemo } from 'react';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { replaceParamsQuery } from '../../common/utils/replace_params_query';
-import { AlertAttachmentContext } from '../common/contexts';
-import { LiveQueryForm } from './form';
-import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
-import { OsqueryIcon } from '../components/osquery_icon';
+import { replaceParamsQuery } from '../../common/utils/replace_params_query';
+import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import type { AgentSelection } from '../agents/types';
+import { AlertAttachmentContext } from '../common/contexts';
+import { OsqueryIcon } from '../components/osquery_icon';
+import { LiveQueryForm } from './form';
 
 interface LiveQueryProps {
   agentId?: string;

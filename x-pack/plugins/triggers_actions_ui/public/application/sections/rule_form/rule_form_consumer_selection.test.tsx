@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
+import React from 'react';
 import { RuleCreationValidConsumer } from '../../../types';
+import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 
 const mockConsumers: RuleCreationValidConsumer[] = ['logs', 'infrastructure', 'stackAlerts'];
 

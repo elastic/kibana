@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import {
-  VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginSetup,
+  VisTypeVegaPluginSetupDependencies,
   VisTypeVegaPluginStart,
 } from './types';
 

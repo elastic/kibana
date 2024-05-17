@@ -6,25 +6,25 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import type {
-  CrowdstrikeConfig,
-  CrowdstrikeSecrets,
-  CrowdstrikeGetAgentsResponse,
-  CrowdstrikeGetAgentsParams,
-  CrowdstrikeBaseApiResponse,
-  CrowdstrikeHostActionsParams,
-  CrowdstrikeGetTokenResponse,
-} from '../../../common/crowdstrike/types';
+import type { AxiosError } from 'axios';
+import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import {
-  CrowdstrikeGetAgentsResponseSchema,
-  CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
+  CrowdstrikeGetAgentsResponseSchema,
   CrowdstrikeGetTokenResponseSchema,
+  CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeHostActionsResponseSchema,
 } from '../../../common/crowdstrike/schema';
-import { SUB_ACTION } from '../../../common/crowdstrike/constants';
+import type {
+  CrowdstrikeBaseApiResponse,
+  CrowdstrikeConfig,
+  CrowdstrikeGetAgentsParams,
+  CrowdstrikeGetAgentsResponse,
+  CrowdstrikeGetTokenResponse,
+  CrowdstrikeHostActionsParams,
+  CrowdstrikeSecrets,
+} from '../../../common/crowdstrike/types';
 import { CrowdstrikeError } from './error';
 
 const paramsSerializer = (params: Record<string, string>) => {
@@ -139,9 +139,12 @@ export class CrowdstrikeConnector extends SubActionConnector<
       clearTimeout(CrowdstrikeConnector.tokenExpiryTimeout);
 
       // Set a timeout to reset the token after 29 minutes (it expires after 30 minutes)
-      CrowdstrikeConnector.tokenExpiryTimeout = setTimeout(() => {
-        CrowdstrikeConnector.token = null;
-      }, 29 * 60 * 1000);
+      CrowdstrikeConnector.tokenExpiryTimeout = setTimeout(
+        () => {
+          CrowdstrikeConnector.token = null;
+        },
+        29 * 60 * 1000
+      );
     }
     return token;
   }

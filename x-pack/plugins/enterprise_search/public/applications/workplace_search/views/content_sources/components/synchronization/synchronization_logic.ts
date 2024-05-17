@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 import { cloneDeep, isEqual } from 'lodash';
 import moment from 'moment';
 
@@ -21,20 +21,20 @@ import {
 import { ItemWithAnID } from '../../../../../shared/tables/types';
 import { AppLogic } from '../../../../app_logic';
 import {
-  SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
+  SYNC_FREQUENCY_PATH,
   getContentSourcePath,
 } from '../../../../routes';
 
 import {
   BlockedWindow,
-  DayOfWeek,
-  IndexingSchedule,
-  IndexingRule,
   ContentSourceFullData,
+  DayOfWeek,
+  IndexingRule,
+  IndexingRuleInclude,
+  IndexingSchedule,
   SyncJobType,
   TimeUnit,
-  IndexingRuleInclude,
 } from '../../../../types';
 
 import { SYNC_SETTINGS_UPDATED_MESSAGE } from '../../constants';

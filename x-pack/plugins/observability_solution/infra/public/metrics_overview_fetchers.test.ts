@@ -6,8 +6,8 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
+import moment from 'moment';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { createInfraPluginStartMock } from './mocks';
 import { FAKE_OVERVIEW_RESPONSE } from './test_utils';

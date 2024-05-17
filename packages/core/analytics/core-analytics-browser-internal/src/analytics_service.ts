@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { of, Subscription } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
-import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { trackPerformanceMeasureEntries } from './track_performance_measure_entries';
+import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
+import { Subscription, of } from 'rxjs';
 import { trackClicks } from './track_clicks';
+import { trackPerformanceMeasureEntries } from './track_performance_measure_entries';
 
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';

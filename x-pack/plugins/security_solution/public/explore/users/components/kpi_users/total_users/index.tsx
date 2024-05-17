@@ -7,12 +7,12 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import React from 'react';
-import type { StatItems } from '../../../../components/stat_items';
-import { KpiBaseComponent } from '../../../../components/kpi';
-import { kpiTotalUsersMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
 import { kpiTotalUsersAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_area';
-import * as i18n from './translations';
+import { kpiTotalUsersMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/users/kpi_total_users_metric';
+import { KpiBaseComponent } from '../../../../components/kpi';
+import type { StatItems } from '../../../../components/stat_items';
 import type { UsersKpiProps } from '../types';
+import * as i18n from './translations';
 
 const euiVisColorPalette = euiPaletteColorBlind();
 const euiColorVis1 = euiVisColorPalette[1];

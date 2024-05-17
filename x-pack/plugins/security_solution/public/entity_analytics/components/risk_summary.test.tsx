@@ -8,12 +8,12 @@
 import React from 'react';
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
-import type { RiskEntity } from './risk_summary';
-import * as i18n from '../../common/components/event_details/cti_details/translations';
-import { RiskSummary } from './risk_summary';
 import { RiskScoreEntity, RiskSeverity } from '../../../common/search_strategy';
 import { getEmptyValue } from '../../common/components/empty_value';
+import * as i18n from '../../common/components/event_details/cti_details/translations';
+import { TestProviders } from '../../common/mock';
+import type { RiskEntity } from './risk_summary';
+import { RiskSummary } from './risk_summary';
 
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'RiskSummary entityType: %s',

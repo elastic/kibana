@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { ActionType } from '@kbn/actions-plugin/common';
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import React from 'react';
 import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;

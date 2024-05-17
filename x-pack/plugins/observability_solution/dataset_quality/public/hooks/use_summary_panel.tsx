@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import createContainer from 'constate';
 import { useSelector } from '@xstate/react';
-import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import createContainer from 'constate';
 import { useDatasetQualityTable } from '.';
+import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
 

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { useCallback, useEffect, useMemo } from 'react';
-import { catchError, map, Observable, of, startWith, tap } from 'rxjs';
-import createContainer from 'constate';
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ITelemetryClient } from '../../../../services/telemetry';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import createContainer from 'constate';
+import * as rt from 'io-ts';
+import { useCallback, useEffect, useMemo } from 'react';
+import { Observable, catchError, map, of, startWith, tap } from 'rxjs';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import type { ITelemetryClient } from '../../../../services/telemetry';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
 import { useMetricsDataViewContext } from './use_metrics_data_view';
 import { useUnifiedSearchContext } from './use_unified_search';

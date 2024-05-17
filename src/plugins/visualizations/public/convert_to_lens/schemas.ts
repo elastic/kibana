@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { IAggConfig, METRIC_TYPES, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AggBasedColumn, PercentageModeConfig, SchemaConfig, VisParams } from '../../common';
+import { BucketColumn } from '../../common/convert_to_lens/lib';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import {
   getAggIdAndValue,
   getCustomBucketsFromSiblingAggs,
 } from '../../common/convert_to_lens/lib/utils';
-import { BucketColumn } from '../../common/convert_to_lens/lib';
 import type { Vis } from '../types';
-import { getVisSchemas, Schemas } from '../vis_schemas';
+import { Schemas, getVisSchemas } from '../vis_schemas';
 import {
   getBucketCollapseFn,
   getBucketColumns,
-  getCustomBucketColumns,
   getColumnIds,
   getColumnsWithoutReferenced,
+  getCustomBucketColumns,
   getMetricsWithoutDuplicates,
   isValidVis,
   sortColumns,

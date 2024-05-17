@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { usePodMetricsTable } from './use_pod_metrics_table';
-import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react-hooks';
+import { useInfrastructureNodeMetrics } from '../shared';
 import { createMetricsClientMock } from '../test_helpers';
+import { usePodMetricsTable } from './use_pod_metrics_table';
 
 jest.mock('../shared', () => ({
   ...jest.requireActual('../shared'),

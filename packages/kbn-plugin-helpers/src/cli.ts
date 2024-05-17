@@ -8,15 +8,15 @@
 
 import Path from 'path';
 
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { RunWithCommands } from '@kbn/dev-cli-runner';
-import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 
+import { loadConfig } from './config';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
-import * as Tasks from './tasks';
-import { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
-import { loadConfig } from './config';
+import { TaskContext } from './task_context';
+import * as Tasks from './tasks';
 
 export function runCli() {
   new RunWithCommands({

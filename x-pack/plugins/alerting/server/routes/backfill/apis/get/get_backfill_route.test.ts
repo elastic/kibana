@@ -6,13 +6,13 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { getBackfillRoute } from './get_backfill_route';
 import { Backfill } from '../../../../application/backfill/result/types';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { transformBackfillToBackfillResponseV1 } from '../../transforms';
+import { getBackfillRoute } from './get_backfill_route';
 
 const rulesClient = rulesClientMock.create();
 

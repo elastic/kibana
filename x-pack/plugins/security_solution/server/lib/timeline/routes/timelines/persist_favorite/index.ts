@@ -10,15 +10,15 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
 
+import type { ConfigType } from '../../../../..';
 import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { buildFrameworkRequest } from '../../../utils/common';
-import { persistFavorite } from '../../../saved_object/timelines';
 import { TimelineType, persistFavoriteSchema } from '../../../../../../common/api/timeline';
+import { persistFavorite } from '../../../saved_object/timelines';
+import { buildFrameworkRequest } from '../../../utils/common';
 
 export const persistFavoriteRoute = (
   router: SecuritySolutionPluginRouter,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { ReactChild, useMemo } from 'react';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import React, { ReactChild, useMemo } from 'react';
 import { ProfilingDependenciesContextProvider } from '../components/contexts/profiling_dependencies/profiling_dependencies_context';
-import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from '../types';
 import { Services } from '../services';
+import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from '../types';
 
 export interface ProfilingEmbeddablesDependencies {
   coreStart: CoreStart;

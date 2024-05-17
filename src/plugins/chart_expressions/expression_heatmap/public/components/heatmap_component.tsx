@@ -6,55 +6,55 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
 import {
-  Chart,
-  ElementClickListener,
   BrushEndListener,
+  Chart,
+  ESCalendarIntervalUnit,
+  ESFixedIntervalUnit,
+  ElementClickListener,
   Heatmap,
   HeatmapBrushEvent,
   HeatmapElementEvent,
   HeatmapSpec,
-  ScaleType,
-  Settings,
-  TooltipType,
-  ESFixedIntervalUnit,
-  ESCalendarIntervalUnit,
   PartialTheme,
+  ScaleType,
+  SeriesIdentifier,
+  Settings,
   SettingsProps,
   Tooltip,
-  SeriesIdentifier,
+  TooltipType,
   TooltipValue,
 } from '@elastic/charts';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { IconChartHeatmap } from '@kbn/chart-icons';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { EmptyPlaceholder, LegendToggle, useActiveCursor } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import {
-  getAccessorByDimension,
-  getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
-import { i18n } from '@kbn/i18n';
-import { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { IconChartHeatmap } from '@kbn/chart-icons';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
-import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
+import {
+  getAccessorByDimension,
+  getFormatByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import React, { memo, FC, useMemo, useState, useCallback, useRef } from 'react';
+import type { BrushEvent, FilterEvent, HeatmapRenderProps } from '../../common';
+import { defaultPaletteParams } from '../constants';
+import {
+  LegendColorPickerWrapper,
+  LegendColorPickerWrapperContext,
+} from '../utils/get_color_picker';
+import { createSplitPoint, getSplitDimensionAccessor } from '../utils/get_split_dimension_utils';
+import { ChartSplit } from './chart_split';
 import {
   applyPaletteParams,
   findMinMaxByColumnId,
   getFormattedTable,
   getSortPredicate,
 } from './helpers';
-import {
-  LegendColorPickerWrapperContext,
-  LegendColorPickerWrapper,
-} from '../utils/get_color_picker';
-import { defaultPaletteParams } from '../constants';
-import { ChartSplit } from './chart_split';
-import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
 import './index.scss';
 
 declare global {

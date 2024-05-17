@@ -6,21 +6,21 @@
  */
 
 import type SuperTest from 'supertest';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
+import { Cookie, parse as parseCookie } from 'tough-cookie';
 
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
+import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/types/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import type {
   UserProfile,
   UserProfileAvatarData,
   UserProfileWithAvatar,
 } from '@kbn/user-profile-components';
-import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/types/api';
-import { superUser } from '../authentication/users';
-import { User } from '../authentication/types';
-import { getSpaceUrlPrefix } from './helpers';
 import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
 import { getUserInfo } from '../authentication';
+import { User } from '../authentication/types';
+import { superUser } from '../authentication/users';
+import { getSpaceUrlPrefix } from './helpers';
 
 interface BulkGetUserProfilesParams<T> {
   uids: string[];

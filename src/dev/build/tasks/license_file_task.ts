@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { write, read, Task } from '../lib';
+import { Task, read, write } from '../lib';
 
 export const UpdateLicenseFile: Task = {
   description: 'Updating LICENSE.txt file',

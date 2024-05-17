@@ -7,8 +7,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { migrateToTextObjects } from './data_migration';
 import { useEditorActionContext, useServicesContext } from '../../contexts';
+import { migrateToTextObjects } from './data_migration';
 
 export const useDataInit = () => {
   const [error, setError] = useState<Error | null>(null);

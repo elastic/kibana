@@ -6,15 +6,6 @@
  */
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RouteContext } from '../../routes/types';
-import { SyntheticsServerSetup } from '../../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { normalizeSecrets } from '../utils';
-import {
-  PrivateConfig,
-  SyntheticsPrivateLocation,
-} from '../private_location/synthetics_private_location';
-import { SyntheticsService } from '../synthetics_service';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitorAttributes,
@@ -25,12 +16,21 @@ import {
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { RouteContext } from '../../routes/types';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { SyntheticsServerSetup } from '../../types';
 import {
   ConfigData,
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,
 } from '../formatters/public_formatters/format_configs';
-import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import {
+  PrivateConfig,
+  SyntheticsPrivateLocation,
+} from '../private_location/synthetics_private_location';
+import { SyntheticsService } from '../synthetics_service';
+import { normalizeSecrets } from '../utils';
 export const LIGHTWEIGHT_TEST_NOW_RUN = 'LIGHTWEIGHT_SYNTHETICS_TEST_NOW_RUN';
 export const BROWSER_TEST_NOW_RUN = 'BROWSER_SYNTHETICS_TEST_NOW_RUN';
 const LONG_TIME_MONTH = '43800';

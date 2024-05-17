@@ -6,13 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
-import { useGetCases } from './use_get_cases';
-import * as api from './api';
+import { OWNERS } from '../../common/constants';
+import { useToasts } from '../common/lib/kibana/hooks';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import { useToasts } from '../common/lib/kibana/hooks';
-import { OWNERS } from '../../common/constants';
+import * as api from './api';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
+import { useGetCases } from './use_get_cases';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');

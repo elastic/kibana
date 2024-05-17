@@ -9,18 +9,18 @@ import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
+import type { DescriptionList } from '../../../../../common/utility_types';
 import {
   AgentStatus,
   EndpointAgentStatus,
 } from '../../../../common/components/agents/agent_status';
-import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import * as i18n from './translations';
-import type { EndpointFields } from '../../../../../common/search_strategy/security_solution/hosts';
-import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 
 interface Props {
   contextID?: string;

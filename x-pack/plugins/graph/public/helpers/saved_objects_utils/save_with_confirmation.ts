@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import type { CoreStart, SavedObjectsCreateOptions } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { CoreStart, SavedObjectsCreateOptions } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import { CONTENT_ID, GraphCreateIn, GraphCreateOut } from '../../../common/content_management';
-import { OVERWRITE_REJECTED } from './constants';
-import { confirmModalPromise } from './confirm_modal_promise';
-import { GraphSavedObjectAttributes, GraphSavedObject } from '../../../common/content_management';
+import { GraphSavedObject, GraphSavedObjectAttributes } from '../../../common/content_management';
 import { GraphWorkspaceSavedObject } from '../../types';
+import { confirmModalPromise } from './confirm_modal_promise';
+import { OVERWRITE_REJECTED } from './constants';
 
 /**
  * Attempts to create the current object using the serialized source. If an object already

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../../common/constants';
+import { getIndexPatternService, getSpaceId } from '../../../../../kibana_services';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
-import { getIndexPatternService, getSpaceId } from '../../../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.OBSERVABILITY,

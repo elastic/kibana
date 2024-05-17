@@ -8,47 +8,16 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
-import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  getHostVmClient,
-  createVm,
-  generateVmName,
-} from '../../../../scripts/endpoint/common/vm_services';
-import { setupStackServicesUsingCypressConfig } from './common';
-import type { KibanaKnownUserAccounts } from '../common/constants';
-import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
-import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
-import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
-import type { LoadedRoleAndUser } from '../../../../scripts/endpoint/common/role_and_user_loader';
-import { EndpointSecurityTestRolesLoader } from '../../../../scripts/endpoint/common/role_and_user_loader';
-import {
-  sendEndpointActionResponse,
-  sendFleetActionResponse,
-} from '../../../../scripts/endpoint/common/response_actions';
-import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
-import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
-import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
-import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import {
-  createAndEnrollEndpointHost,
-  destroyEndpointHost,
-  startEndpointHost,
-  stopEndpointHost,
-} from '../../../../scripts/endpoint/common/endpoint_host_services';
+import execa from 'execa';
+import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
+import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
 import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
   deleteIndexedEndpointPolicyResponse,
   indexEndpointPolicyResponse,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
-import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
-import type {
-  IndexEndpointHostsCyTaskOptions,
-  LoadUserAndRoleCyTaskOptions,
-  CreateUserAndRoleCyTaskOptions,
-  LogItTaskOptions,
-} from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
   IndexedEndpointRuleAlerts,
@@ -57,32 +26,63 @@ import {
   deleteIndexedEndpointRuleAlerts,
   indexEndpointRuleAlerts,
 } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import {
+  deleteIndexedFleetEndpointPolicies,
+  indexFleetEndpointPolicy,
+} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
 import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
-import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
+import type { ActionDetails, HostPolicyResponse } from '../../../../common/endpoint/types';
+import type { DeleteAllEndpointDataResponse } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
+import { deleteAllEndpointData } from '../../../../scripts/endpoint/common/delete_all_endpoint_data';
+import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
+import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import {
-  installSentinelOneAgent,
-  S1Client,
-} from '../../../../scripts/endpoint/sentinelone_host/common';
+  createAndEnrollEndpointHost,
+  destroyEndpointHost,
+  startEndpointHost,
+  stopEndpointHost,
+} from '../../../../scripts/endpoint/common/endpoint_host_services';
+import { waitForEndpointToStreamData } from '../../../../scripts/endpoint/common/endpoint_metadata_services';
 import {
   addSentinelOneIntegrationToAgentPolicy,
   deleteAgentPolicy,
   fetchAgentPolicyEnrollmentKey,
   getOrCreateDefaultAgentPolicy,
 } from '../../../../scripts/endpoint/common/fleet_services';
-import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
-  deleteIndexedFleetEndpointPolicies,
-  indexFleetEndpointPolicy,
-} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
+  sendEndpointActionResponse,
+  sendFleetActionResponse,
+} from '../../../../scripts/endpoint/common/response_actions';
+import type { LoadedRoleAndUser } from '../../../../scripts/endpoint/common/role_and_user_loader';
+import { EndpointSecurityTestRolesLoader } from '../../../../scripts/endpoint/common/role_and_user_loader';
+import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
+import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
+import {
+  createVm,
+  generateVmName,
+  getHostVmClient,
+} from '../../../../scripts/endpoint/common/vm_services';
+import {
+  S1Client,
+  installSentinelOneAgent,
+} from '../../../../scripts/endpoint/sentinelone_host/common';
+import type { KibanaKnownUserAccounts } from '../common/constants';
+import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
+import type {
+  CreateUserAndRoleCyTaskOptions,
+  IndexEndpointHostsCyTaskOptions,
+  LoadUserAndRoleCyTaskOptions,
+  LogItTaskOptions,
+} from '../types';
+import { setupStackServicesUsingCypressConfig } from './common';
 import type {
   CreateAndEnrollEndpointHostCIOptions,
   CreateAndEnrollEndpointHostCIResponse,
 } from './create_and_enroll_endpoint_host_ci';
 import { createAndEnrollEndpointHostCI } from './create_and_enroll_endpoint_host_ci';
+import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
 
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate

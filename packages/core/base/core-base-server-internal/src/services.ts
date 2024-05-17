@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { MaybePromise } from '@kbn/utility-types';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type { Type } from '@kbn/config-schema';
+import { MaybePromise } from '@kbn/utility-types';
 
 /**
  * Descriptor of a core service configuration

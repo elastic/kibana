@@ -8,9 +8,9 @@
 
 import { StartServicesAccessor } from '@kbn/core/server';
 import { getKibanaContextFn } from '../../common';
-import { SavedSearchServerStartDeps } from '../plugin';
 import { getSavedSearch } from '../../common/service/get_saved_searches';
 import { SavedSearchAttributes } from '../../common/types';
+import { SavedSearchServerStartDeps } from '../plugin';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies

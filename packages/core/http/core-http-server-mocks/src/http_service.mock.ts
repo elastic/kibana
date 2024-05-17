@@ -7,23 +7,23 @@
  */
 
 import type { Server } from '@hapi/hapi';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { configMock } from '@kbn/config-mocks';
+import { RouterMock, mockRouter } from '@kbn/core-http-router-server-mocks';
 import type {
-  RequestHandlerContextBase,
-  OnPreRoutingToolkit,
   AuthToolkit,
-  OnPostAuthToolkit,
-  OnPreAuthToolkit,
-  OnPreResponseToolkit,
-  IAuthHeadersStorage,
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  IAuthHeadersStorage,
   IStaticAssets,
+  OnPostAuthToolkit,
+  OnPreAuthToolkit,
+  OnPreResponseToolkit,
+  OnPreRoutingToolkit,
+  RequestHandlerContextBase,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { CspConfig, ExternalUrlConfig } from '@kbn/core-http-server-internal';
 import type {
@@ -44,7 +44,7 @@ export type InternalHttpServicePrebootMock = jest.Mocked<
   Omit<InternalHttpServicePreboot, 'basePath' | 'staticAssets'>
 > & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked };
 export type HttpServiceSetupMock<
-  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
+  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase,
 > = jest.Mocked<Omit<HttpServiceSetup<ContextType>, 'basePath' | 'createRouter'>> & {
   basePath: BasePathMocked;
   staticAssets: StaticAssetsMocked;
@@ -198,7 +198,7 @@ const createInternalSetupContractMock = () => {
 };
 
 const createSetupContractMock = <
-  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase
+  ContextType extends RequestHandlerContextBase = RequestHandlerContextBase,
 >() => {
   const internalMock = createInternalSetupContractMock();
 

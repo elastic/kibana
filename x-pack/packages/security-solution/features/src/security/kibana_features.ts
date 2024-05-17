@@ -18,14 +18,14 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type { BaseKibanaFeatureConfig } from '../types';
 import {
   APP_ID,
-  SERVER_APP_ID,
-  LEGACY_NOTIFICATIONS_ID,
-  CLOUD_POSTURE_APP_ID,
   CLOUD_DEFEND_APP_ID,
+  CLOUD_POSTURE_APP_ID,
+  LEGACY_NOTIFICATIONS_ID,
+  SERVER_APP_ID,
 } from '../constants';
+import type { BaseKibanaFeatureConfig } from '../types';
 import type { SecurityFeatureParams } from './types';
 
 const SECURITY_RULE_TYPES = [

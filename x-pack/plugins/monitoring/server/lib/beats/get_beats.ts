@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { upperFirst } from 'lodash';
-import { checkParam } from '../error_missing_required';
-import { createBeatsQuery } from './create_beats_query';
-import { calculateRate } from '../calculate_rate';
-import { getDiffCalculation } from './_beats_stats';
-import { LegacyRequest } from '../../types';
+import moment from 'moment';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest } from '../../types';
+import { calculateRate } from '../calculate_rate';
+import { checkParam } from '../error_missing_required';
+import { getDiffCalculation } from './_beats_stats';
+import { createBeatsQuery } from './create_beats_query';
 
 interface Beat {
   uuid?: string;

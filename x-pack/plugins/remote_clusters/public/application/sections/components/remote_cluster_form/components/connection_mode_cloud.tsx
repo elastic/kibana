@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent } from 'react';
 
 import {
-  EuiDescribedFormGroup,
-  EuiTitle,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSpacer,
-  EuiFieldText,
-  EuiLink,
-  EuiFieldNumber,
   EuiCode,
+  EuiDescribedFormGroup,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { proxySettingsUrl } from '../../../../services/documentation';
 
-import { ClusterErrors } from '../validators';
 import { FormFields } from '../remote_cluster_form';
+import { ClusterErrors } from '../validators';
 
 export interface Props {
   fields: FormFields;

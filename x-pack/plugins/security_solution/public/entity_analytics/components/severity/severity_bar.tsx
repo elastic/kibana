@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import styled from 'styled-components';
 
-import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { SeverityCount } from './types';
 
 const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`

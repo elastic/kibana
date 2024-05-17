@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 import { coreMock } from '@kbn/core/public/mocks';
-import { homePluginMock } from '@kbn/home-plugin/public/mocks';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { isSyntheticsMonitorMock } from './plugin.test.mock';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
+import { of } from 'rxjs';
 import { TelemetryPlugin } from './plugin';
+import { isSyntheticsMonitorMock } from './plugin.test.mock';
 
 describe('TelemetryPlugin', () => {
   let screenshotMode: ScreenshotModePluginSetup;

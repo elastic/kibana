@@ -7,22 +7,22 @@
 
 import { API_BASE_PATH } from '../../../../common/constants';
 import {
+  PolicyFeaturesResponse,
+  PolicyIndicesResponse,
   SlmPolicy,
   SlmPolicyPayload,
-  PolicyIndicesResponse,
-  PolicyFeaturesResponse,
 } from '../../../../common/types';
 import {
-  UIM_POLICY_EXECUTE,
+  UIM_POLICY_CREATE,
   UIM_POLICY_DELETE,
   UIM_POLICY_DELETE_MANY,
-  UIM_POLICY_CREATE,
+  UIM_POLICY_EXECUTE,
   UIM_POLICY_UPDATE,
-  UIM_RETENTION_SETTINGS_UPDATE,
   UIM_RETENTION_EXECUTE,
+  UIM_RETENTION_SETTINGS_UPDATE,
 } from '../../constants';
 import { UiMetricService } from '../ui_metric';
-import { useRequest, sendRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 // Temporary hack to provide the uiMetricService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context

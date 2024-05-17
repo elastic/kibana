@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { inspect } from 'util';
 import { PluginOrPackage } from '@kbn/docs-utils/src/types';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Project } from 'ts-morph';
-import { inspect } from 'util';
 import { createTable } from './create_table';
 import { getDependencySummary } from './get_dependency_summary';
 import { getPluginInfo } from './get_plugin_info';

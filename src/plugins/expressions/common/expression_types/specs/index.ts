@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { AnyExpressionTypeDefinition } from '../types';
 import { boolean } from './boolean';
 import { datatable } from './datatable';
 import { error } from './error';
@@ -20,7 +21,6 @@ import { render } from './render';
 import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
-import { AnyExpressionTypeDefinition } from '../types';
 import { uiSetting } from './ui_setting';
 
 export const typeSpecs: AnyExpressionTypeDefinition[] = [

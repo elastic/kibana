@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import { MakeLogicType, kea } from 'kea';
 
 import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   FieldMapping,
+  ML_INFERENCE_PREFIX,
   formatPipelineName,
   generateMlInferencePipelineBody,
   getMlInferencePrefixedFieldName,
-  ML_INFERENCE_PREFIX,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
 import { MlModel } from '../../../../../../../common/types/ml';
@@ -62,8 +62,8 @@ import {
 } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
 import {
   FetchPipelineApiLogic,
-  FetchPipelineResponse,
   FetchPipelineApiLogicActions,
+  FetchPipelineResponse,
 } from '../../../../api/pipelines/fetch_pipeline';
 
 import { isConnectorIndex } from '../../../../utils/indices';

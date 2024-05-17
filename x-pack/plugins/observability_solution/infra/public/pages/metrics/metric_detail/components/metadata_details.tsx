@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback, useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { get } from 'lodash';
+import React, { useContext, useState, useCallback, useMemo } from 'react';
 import { InfraMetadata } from '../../../../../common/http_api';
 import { MetadataContext } from '../containers/metadata_context';
 

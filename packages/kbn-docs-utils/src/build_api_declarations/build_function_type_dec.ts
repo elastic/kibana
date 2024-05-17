@@ -8,10 +8,10 @@
 import { PropertySignature } from 'ts-morph';
 
 import { FunctionTypeNode } from 'ts-morph';
-import { buildApiDecsForParameters } from './build_parameter_decs';
 import { ApiDeclaration, TypeKind } from '../types';
-import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
+import { buildApiDecsForParameters } from './build_parameter_decs';
+import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
 import { BuildApiDecOpts } from './types';
 
 /**

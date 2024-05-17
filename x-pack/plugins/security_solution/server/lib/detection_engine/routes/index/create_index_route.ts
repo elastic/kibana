@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
-  transformError,
+  createBootstrapIndex,
   getBootstrapIndexExists,
   getPolicyExists,
   setPolicy,
-  createBootstrapIndex,
+  transformError,
 } from '@kbn/securitysolution-es-utils';
+import { chunk, get } from 'lodash';
+import type { CreateIndexResponse } from '../../../../../common/api/detection_engine';
+import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
 } from '../../../../types';
-import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import type { CreateIndexResponse } from '../../../../../common/api/detection_engine';
-import { buildSiemResponse } from '../utils';
-import {
-  getSignalsTemplate,
-  SIGNALS_TEMPLATE_VERSION,
-  createBackwardsCompatibilityMapping,
-  ALIAS_VERSION_FIELD,
-  SIGNALS_FIELD_ALIASES_VERSION,
-} from './get_signals_template';
+import { isOutdated } from '../../migrations/helpers';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
-import signalsPolicy from './signals_policy.json';
+import { buildSiemResponse } from '../utils';
 import { templateNeedsUpdate } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
-import { isOutdated } from '../../migrations/helpers';
+import {
+  ALIAS_VERSION_FIELD,
+  SIGNALS_FIELD_ALIASES_VERSION,
+  SIGNALS_TEMPLATE_VERSION,
+  createBackwardsCompatibilityMapping,
+  getSignalsTemplate,
+} from './get_signals_template';
+import signalsPolicy from './signals_policy.json';
 
 export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

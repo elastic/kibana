@@ -7,21 +7,21 @@
 
 import type { Filter } from '@kbn/es-query';
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../common/types/timeline';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import {
   alertEvents,
   allEvents,
   defaultOptions,
+  detectionAlertsTables,
   getOptions,
   getSourcererScopeName,
   isDetectionsAlertsTable,
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
-  detectionAlertsTables,
 } from './helpers';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { TableId } from '@kbn/securitysolution-data-table';
 
 /** the following scopes are NOT detection alert tables */
 const otherScopes = [

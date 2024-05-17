@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export type GetRuleManagementFiltersResponse = t.TypeOf<typeof GetRuleManagementFiltersResponse>;
 export const GetRuleManagementFiltersResponse = t.exact(

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { FC, PropsWithChildren } from 'react';
 
 interface DetailPageLinkProps {
   configId: string;

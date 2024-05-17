@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { URL } from 'url';
 import { Socket } from 'net';
-import { stringify } from 'query-string';
-import { hapiMocks } from '@kbn/hapi-mocks';
+import { URL } from 'url';
 import { schema } from '@kbn/config-schema';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   KibanaRequest,
-  RouteMethod,
-  RouteValidationSpec,
-  KibanaRouteOptions,
   KibanaRequestState,
   KibanaResponseFactory,
+  KibanaRouteOptions,
+  RouteMethod,
+  RouteValidationSpec,
 } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
+import { hapiMocks } from '@kbn/hapi-mocks';
+import { stringify } from 'query-string';
+import { type MockedVersionedRouter, createVersionedRouterMock } from './versioned_router.mock';
 
 export type RouterMock = jest.Mocked<IRouter<any>> & { versioned: MockedVersionedRouter };
 

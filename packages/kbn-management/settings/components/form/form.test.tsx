@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
-import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
+import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
+import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 
+import { DATA_TEST_SUBJ_CANCEL_BUTTON, DATA_TEST_SUBJ_SAVE_BUTTON } from './bottom_bar/bottom_bar';
 import { Form, FormProps } from './form';
-import { wrap, createFormServicesMock, uiSettingsClientMock } from './mocks';
-import { DATA_TEST_SUBJ_SAVE_BUTTON, DATA_TEST_SUBJ_CANCEL_BUTTON } from './bottom_bar/bottom_bar';
+import { createFormServicesMock, uiSettingsClientMock, wrap } from './mocks';
 import { FormServices } from './types';
 
 const settingsMock = getSettingsMock();

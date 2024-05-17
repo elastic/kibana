@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DeepPartial } from 'utility-types';
-import { merge } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { BaseDataGenerator } from './base_data_generator';
+import { merge } from 'lodash';
+import type { DeepPartial } from 'utility-types';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 import type {
   ActivityLogAction,
   ActivityLogActionResponse,
@@ -17,7 +17,7 @@ import type {
   EndpointActionResponse,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import { BaseDataGenerator } from './base_data_generator';
 
 export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */

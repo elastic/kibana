@@ -8,10 +8,10 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
+  UserProfile,
   UserProfileData,
   UserProfileLabels,
   UserProfileWithSecurity,
-  UserProfile,
 } from '@kbn/core-user-profile-common';
 
 /**

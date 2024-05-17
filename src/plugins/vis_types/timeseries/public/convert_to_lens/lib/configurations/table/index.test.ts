@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createSeries } from '../../__mocks__';
 import { getColumnState } from '.';
+import { createSeries } from '../../__mocks__';
 
 const mockGetPalette = jest.fn();
 

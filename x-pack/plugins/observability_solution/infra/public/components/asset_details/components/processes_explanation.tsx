@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import React from 'react';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 
 export const ProcessesExplanationMessage = () => {

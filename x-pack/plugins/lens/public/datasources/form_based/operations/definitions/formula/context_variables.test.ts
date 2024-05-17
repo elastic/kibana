@@ -10,8 +10,8 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import {
   ConstantsIndexPatternColumn,
-  nowOperation,
   intervalOperation,
+  nowOperation,
   timeRangeOperation,
 } from './context_variables';
 

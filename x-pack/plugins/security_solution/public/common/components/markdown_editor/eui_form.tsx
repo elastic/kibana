@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { forwardRef, useState } from 'react';
 import styled from 'styled-components';
-import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { FieldHook } from '../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../shared_imports';
 

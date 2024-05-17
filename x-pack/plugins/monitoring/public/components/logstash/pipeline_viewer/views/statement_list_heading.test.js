@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
 import { StatementListHeading } from './statement_list_heading';
-import { shallow } from 'enzyme';
 
 describe('StatementListHeading component', () => {
   let props;

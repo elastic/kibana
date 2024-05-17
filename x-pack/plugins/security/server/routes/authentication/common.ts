@@ -12,12 +12,12 @@ import { parseNextURL } from '@kbn/std';
 import type { RouteDefinitionParams } from '..';
 import {
   BasicAuthenticationProvider,
-  canRedirectRequest,
   OIDCAuthenticationProvider,
   OIDCLogin,
   SAMLAuthenticationProvider,
   SAMLLogin,
   TokenAuthenticationProvider,
+  canRedirectRequest,
 } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';

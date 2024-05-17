@@ -8,9 +8,9 @@
 
 import { CommonProps } from '@elastic/eui';
 import {
+  NoDataCardKibanaDependencies,
   NoDataCardProps,
   NoDataCardServices,
-  NoDataCardKibanaDependencies,
 } from '@kbn/shared-ux-card-no-data-types';
 
 export type NoDataPageActions = NoDataCardProps;

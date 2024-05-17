@@ -12,20 +12,20 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { UptimeConfig } from '../../common/config';
+import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
+import { DynamicSettingsAttributes } from '../runtime_types/settings';
+import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
+import { syntheticsServiceApiKey } from './service_api_key';
+import {
+  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+  getSyntheticsMonitorSavedObjectType,
+} from './synthetics_monitor';
 import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
-import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
-import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
-import { DynamicSettingsAttributes } from '../runtime_types/settings';
-import { UptimeConfig } from '../../common/config';
 import { settingsObjectId, settingsObjectType } from './uptime_settings';
-import {
-  getSyntheticsMonitorSavedObjectType,
-  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-} from './synthetics_monitor';
-import { syntheticsServiceApiKey } from './service_api_key';
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
   client: SavedObjectsClientContract,

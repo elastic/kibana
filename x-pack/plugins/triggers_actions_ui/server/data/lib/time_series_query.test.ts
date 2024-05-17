@@ -6,10 +6,10 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { TimeSeriesQuery, timeSeriesQuery, getResultFromEs } from './time_series_query';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { TimeSeriesQuery, getResultFromEs, timeSeriesQuery } from './time_series_query';
 
 const DefaultQueryParams: TimeSeriesQuery = {
   index: 'index-name',

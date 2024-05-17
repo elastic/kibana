@@ -108,9 +108,7 @@
         "tags": [],
         "label": "AlertInstanceContext",
         "description": [],
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
+        "signature": ["{ [x: string]: unknown; }"],
         "path": "x-pack/packages/kbn-alerting-state-types/src/alert_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -138,9 +136,7 @@
         "tags": [],
         "label": "LatestAlertInstanceStateSchema",
         "description": [],
-        "signature": [
-          "{ [x: string]: any; }"
-        ],
+        "signature": ["{ [x: string]: any; }"],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -198,9 +194,7 @@
         "tags": [],
         "label": "LatestThrottledActionSchema",
         "description": [],
-        "signature": [
-          "{ [x: string]: Readonly<{} & { date: string; }>; }"
-        ],
+        "signature": ["{ [x: string]: Readonly<{} & { date: string; }>; }"],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -243,9 +237,7 @@
         "tags": [],
         "label": "RuleTaskParams",
         "description": [],
-        "signature": [
-          "{ alertId: string; } & { spaceId?: string | undefined; }"
-        ],
+        "signature": ["{ alertId: string; } & { spaceId?: string | undefined; }"],
         "path": "x-pack/packages/kbn-alerting-state-types/src/rule_task_instance.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -339,9 +331,7 @@
             "tags": [],
             "label": "previousStartedAt",
             "description": [],
-            "signature": [
-              "null"
-            ],
+            "signature": ["null"],
             "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -7,19 +7,19 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { AttributeService } from '@kbn/embeddable-plugin/public';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import type { LensPluginStartDependencies } from './plugin';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { DOC_TYPE } from '../common/constants';
 import type { LensSavedObjectAttributes as LensSavedObjectAttributesWithoutReferences } from '../common/content_management';
 import type {
-  LensSavedObjectAttributes,
+  LensByReferenceInput,
   LensByValueInput,
+  LensSavedObjectAttributes,
   LensUnwrapMetaInfo,
   LensUnwrapResult,
-  LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
-import { DOC_TYPE } from '../common/constants';
+import type { LensPluginStartDependencies } from './plugin';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,

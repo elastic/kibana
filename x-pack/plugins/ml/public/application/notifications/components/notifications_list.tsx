@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconColor, Query, SearchFilterConfig } from '@elastic/eui';
-import { EuiBadge, EuiCallOut, EuiBasicTable, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useTimeRangeUpdates, useTimefilter } from '@kbn/ml-date-picker';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import moment from 'moment';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useMount from 'react-use/lib/useMount';
-import { usePageUrlState } from '@kbn/ml-url-state';
-import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { EntityFilter } from './entity_filter';
-import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
-import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
-import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { useToastNotificationService } from '../../services/toast_notification_service';
-import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
-import { useRefresh } from '../../routing/use_refresh';
-import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import type { ListingPageUrlState } from '../../../../common/types/common';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
+import type { ListingPageUrlState } from '../../../../common/types/common';
 import type {
   MlNotificationMessageLevel,
   NotificationItem,
 } from '../../../../common/types/notifications';
+import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { useMlKibana } from '../../contexts/kibana';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
+import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
+import { useRefresh } from '../../routing/use_refresh';
+import { useToastNotificationService } from '../../services/toast_notification_service';
+import { EntityFilter } from './entity_filter';
 
 const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR]: 'danger',

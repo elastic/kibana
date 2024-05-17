@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { FeatureImportance } from '@kbn/ml-data-frame-analytics-utils';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import {
   buildClassificationDecisionPathData,
   buildRegressionDecisionPathData,
 } from './use_classification_path_data';
-import type { FeatureImportance } from '@kbn/ml-data-frame-analytics-utils';
-import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 
 describe('buildClassificationDecisionPathData()', () => {
   test('returns correct prediction probability for binary classification', () => {

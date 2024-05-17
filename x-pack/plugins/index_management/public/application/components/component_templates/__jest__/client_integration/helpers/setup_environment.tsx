@@ -7,19 +7,19 @@
 
 import React from 'react';
 
-import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
-import { notificationServiceMock, applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import { applicationServiceMock, coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
-import { breadcrumbService } from '../../../../../services/breadcrumbs';
 import { AppContextProvider } from '../../../../../app_context';
+import { breadcrumbService } from '../../../../../services/breadcrumbs';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
 
-import { init as initHttpRequests } from './http_requests';
 import { API_BASE_PATH } from './constants';
+import { init as initHttpRequests } from './http_requests';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -50,16 +50,15 @@ export const setupEnvironment = () => {
 };
 
 export const WithAppDependencies =
-  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) =>
-    (
-      <AppContextProvider value={appDependencies}>
-        <MappingsEditorProvider>
-          <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
-            <GlobalFlyoutProvider>
-              <Comp {...props} />
-            </GlobalFlyoutProvider>
-          </ComponentTemplatesProvider>
-        </MappingsEditorProvider>
-        /
-      </AppContextProvider>
-    );
+  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) => (
+    <AppContextProvider value={appDependencies}>
+      <MappingsEditorProvider>
+        <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </ComponentTemplatesProvider>
+      </MappingsEditorProvider>
+      /
+    </AppContextProvider>
+  );

@@ -7,8 +7,8 @@
  */
 
 import { orderXValues } from './ordered_x_keys';
-import { createZeroFilledArray } from './zero_filled_array';
 import { zeroFillDataArray } from './zero_fill_data_array';
+import { createZeroFilledArray } from './zero_filled_array';
 
 /*
  * A Kibana data object may have multiple series with different array lengths.

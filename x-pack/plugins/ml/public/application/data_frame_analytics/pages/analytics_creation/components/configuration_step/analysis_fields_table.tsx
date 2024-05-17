@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { Fragment, useEffect, useState } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -16,16 +14,18 @@ import {
   LEFT_ALIGNMENT,
   SortableProperties,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { FieldSelectionItem } from '@kbn/ml-data-frame-analytics-utils';
-import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
-import { FieldStatsInfoButton } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { isEqual } from 'lodash';
+import type { FC } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
+import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { FieldStatsInfoButton } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+import { useFieldStatsTrigger } from '../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
 const minimumFieldsMessage = i18n.translate(
   'xpack.ml.dataframe.analytics.create.analysisFieldsTable.minimumFieldsMessage',

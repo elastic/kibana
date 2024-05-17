@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EuiPaddingSize, EuiTitleSize } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
+import type { EuiPaddingSize, EuiTitleSize } from '@elastic/eui';
 import type { ESQuery } from '../../../../common/typed_json';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 

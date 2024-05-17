@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { i18n } from '@kbn/i18n';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
@@ -19,15 +21,13 @@ import {
   ALERT_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { AlertsTableConfigurationRegistry, RenderCustomActionsRowArgs } from '../../../types';
+import { ALERT_TABLE_GENERIC_CONFIG_ID, ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
 import { FEATURE_LABEL } from '../translations';
 import { getDefaultAlertFlyout } from './alerts_flyout/default_alerts_flyout';
-import { AlertActionsCell } from './row_actions/alert_actions_cell';
-import { AlertsTableConfigurationRegistry, RenderCustomActionsRowArgs } from '../../../types';
 import { getAlertFormatters, getRenderCellValue } from './cells/render_cell_value';
-import { ALERT_TABLE_GENERIC_CONFIG_ID, ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
+import { AlertActionsCell } from './row_actions/alert_actions_cell';
 
 const columns = [
   {

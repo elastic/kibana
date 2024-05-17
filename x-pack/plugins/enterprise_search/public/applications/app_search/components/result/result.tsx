@@ -11,7 +11,7 @@ import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 
 import './result.scss';
 
-import { EuiPanel, EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiPanel } from '@elastic/eui';
 
 import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';

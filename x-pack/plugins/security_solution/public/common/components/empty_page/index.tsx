@@ -8,10 +8,10 @@
 import type { IconType } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCard,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCard,
   EuiText,
 } from '@elastic/eui';
 import type { MouseEventHandler, ReactNode } from 'react';

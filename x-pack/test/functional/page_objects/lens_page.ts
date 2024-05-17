@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { DebugState } from '@elastic/charts';
+import expect from '@kbn/expect';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -365,8 +365,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         metaKey === 'shift'
           ? browser.keys.SHIFT
           : metaKey === 'alt'
-          ? browser.keys.ALT
-          : browser.keys.COMMAND;
+            ? browser.keys.ALT
+            : browser.keys.COMMAND;
       log.debug(`Press ${metaKey} with keyboard`);
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
@@ -1365,9 +1365,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         value: await (
           await this.getMetricElementIfExists('.echMetricText__value', tile)
         )?.getVisibleText(),
-        color: await (
-          await this.getMetricElementIfExists('.echMetric', tile)
-        )?.getComputedStyle('background-color'),
+        color: await (await this.getMetricElementIfExists('.echMetric', tile))?.getComputedStyle(
+          'background-color'
+        ),
         trendlineColor: await (
           await this.getMetricElementIfExists('.echSingleMetricSparkline__svg > rect', tile, 500)
         )?.getAttribute('fill'),

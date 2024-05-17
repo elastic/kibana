@@ -6,12 +6,7 @@
     "id": "globalSearchTest",
     "server": false,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "global_search_test"
-    ],
-    "requiredPlugins": [
-      "globalSearch"
-    ]
+    "configPath": ["xpack", "global_search_test"],
+    "requiredPlugins": ["globalSearch"]
   }
 }

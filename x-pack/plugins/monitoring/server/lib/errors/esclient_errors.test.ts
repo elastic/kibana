@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { isESClientError, handleESClientError } from './esclient_errors';
+import { handleESClientError, isESClientError } from './esclient_errors';
 
 describe('Error handling for ESClient errors', () => {
   it('ignores an unknown type', () => {

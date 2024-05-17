@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { EuiFormRow, EuiSelect, EuiSelectOption } from '@elastic/eui';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiSelect, EuiSelectOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { getEmsTmsServices } from '../../../util';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { getEmsTmsServices } from '../../../util';
 
 const AUTO_SELECT = 'auto_select';
 

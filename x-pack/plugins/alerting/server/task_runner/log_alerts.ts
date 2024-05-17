@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
+import apm from 'elastic-apm-node';
 import { Alert } from '../alert';
-import { EVENT_LOG_ACTIONS } from '../plugin';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
+import { EVENT_LOG_ACTIONS } from '../plugin';
+import { AlertInstanceContext, AlertInstanceState } from '../types';
 
 export interface LogAlertsParams<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
@@ -34,7 +34,7 @@ export function logAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   logger,
   alertingEventLogger,

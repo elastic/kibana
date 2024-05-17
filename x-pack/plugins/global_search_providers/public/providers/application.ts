@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { from, of } from 'rxjs';
-import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs';
 import { ApplicationStart } from '@kbn/core/public';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
+import { from, of } from 'rxjs';
+import { map, mergeMap, shareReplay, take, takeUntil } from 'rxjs';
 import { getAppResults } from './get_app_results';
 
 const applicationType = 'application';

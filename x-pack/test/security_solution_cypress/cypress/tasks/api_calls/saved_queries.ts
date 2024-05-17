@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SavedQuery } from '@kbn/data-plugin/public';
-import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common/constants';
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import { rootRequest } from './common';
 
 export const createSavedQuery = (

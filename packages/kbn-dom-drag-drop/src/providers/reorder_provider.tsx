@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useReducer, Reducer, Dispatch } from 'react';
 import classNames from 'classnames';
+import React, { useReducer, Reducer, Dispatch } from 'react';
 import { DEFAULT_DATA_TEST_SUBJ, REORDER_ITEM_HEIGHT } from '../constants';
 
 /**

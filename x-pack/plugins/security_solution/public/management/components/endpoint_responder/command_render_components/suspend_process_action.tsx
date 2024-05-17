@@ -6,14 +6,14 @@
  */
 
 import { memo, useMemo } from 'react';
-import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import type {
   KillOrSuspendProcessRequestBody,
   SuspendProcessActionOutputContent,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
-import type { ActionRequestComponentProps } from '../types';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
+import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import type { ActionRequestComponentProps } from '../types';
 
 export const SuspendProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>

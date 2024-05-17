@@ -7,13 +7,7 @@
     "id": "expressions",
     "server": true,
     "browser": true,
-    "requiredBundles": [
-      "kibanaUtils",
-      "inspector"
-    ],
-    "extraPublicDirs": [
-      "common",
-      "common/fonts"
-    ]
+    "requiredBundles": ["kibanaUtils", "inspector"],
+    "extraPublicDirs": ["common", "common/fonts"]
   }
 }

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsImportRetry } from '@kbn/core-saved-objects-common';
 import {
@@ -13,7 +14,6 @@ import {
   type SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { checkConflicts } from './check_conflicts';
 
 jest.mock('uuid', () => ({
@@ -63,7 +63,7 @@ const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
 
 describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let socCheckConflicts: typeof savedObjectsClient['checkConflicts'];
+  let socCheckConflicts: (typeof savedObjectsClient)['checkConflicts'];
 
   const setupParams = (partial: {
     objects: SavedObjectType[];

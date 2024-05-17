@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import {
-  stubDataViewWithoutTimeField,
-  stubLogstashDataView as dataView,
-} from '@kbn/data-views-plugin/common/data_view.stub';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import {
+  stubLogstashDataView as dataView,
+  stubDataViewWithoutTimeField,
+} from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
-import { type GroupedFieldsParams, useGroupedFields } from './use_grouped_fields';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../types';
 import * as ExistenceApi from './use_existing_fields';
 import { type ExistingFieldsReader } from './use_existing_fields';
-import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../types';
+import { type GroupedFieldsParams, useGroupedFields } from './use_grouped_fields';
 
 describe('UnifiedFieldList useGroupedFields()', () => {
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];

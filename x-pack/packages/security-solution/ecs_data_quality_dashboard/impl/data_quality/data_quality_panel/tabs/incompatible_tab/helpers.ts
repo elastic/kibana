@@ -8,30 +8,30 @@
 import { EcsVersion } from '@elastic/ecs';
 
 import {
-  getSummaryMarkdownComment,
+  DOCUMENT_VALUES_ACTUAL,
+  ECS_MAPPING_TYPE_EXPECTED,
+  ECS_VALUES_EXPECTED,
+  FIELD,
+  INDEX_MAPPING_TYPE_ACTUAL,
+} from '../../../compare_fields_table/translations';
+import { getIsInSameFamily } from '../../../helpers';
+import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import {
+  escape,
   getIncompatibleMappingsMarkdownTableRows,
   getIncompatibleValuesMarkdownTableRows,
   getMarkdownComment,
   getMarkdownTable,
+  getSummaryMarkdownComment,
   getSummaryTableMarkdownComment,
   getTabCountsMarkdownComment,
-  escape,
 } from '../../index_properties/markdown/helpers';
-import { getFillColor } from '../summary_tab/helpers';
 import * as i18n from '../../index_properties/translations';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../../types';
+import { getFillColor } from '../summary_tab/helpers';
 import {
   INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE,
   INCOMPATIBLE_FIELD_VALUES_TABLE_TITLE,
 } from './translations';
-import {
-  FIELD,
-  ECS_MAPPING_TYPE_EXPECTED,
-  INDEX_MAPPING_TYPE_ACTUAL,
-  DOCUMENT_VALUES_ACTUAL,
-  ECS_VALUES_EXPECTED,
-} from '../../../compare_fields_table/translations';
-import { getIsInSameFamily } from '../../../helpers';
 
 export const getIncompatibleFieldsMarkdownComment = (incompatible: number): string =>
   getMarkdownComment({

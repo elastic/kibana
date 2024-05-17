@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import styled from 'styled-components';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
-import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
+import { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
+import { useRightPanelContext } from './context';
 
 const ContainerDiv = styled('div')`
   .side-panel-flyout-footer {

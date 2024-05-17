@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useCallback, useState } from 'react';
-import {
-  ActionParamsProps,
-  TextAreaWithMessageVariables,
-  TextFieldWithMessageVariables,
-  SectionLoading,
-} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -21,17 +14,24 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
+import {
+  ActionParamsProps,
+  SectionLoading,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import React, { lazy, Suspense, useCallback, useState } from 'react';
 import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertParams,
 } from '../../../../server/connector_types';
-import * as i18n from './translations';
-import { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
+import { EditActionCallback } from '../types';
 import { AdditionalOptions } from './additional_options';
-import { Tags } from './tags';
-import { Priority } from './priority';
 import type { JsonEditorProps } from './json_editor';
+import { Priority } from './priority';
+import { Tags } from './tags';
+import * as i18n from './translations';
 
 const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor'));
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { act, renderHook, type RenderHookResult } from '@testing-library/react-hooks';
+import { type RenderHookResult, act, renderHook } from '@testing-library/react-hooks';
 import { Subject } from 'rxjs';
 import {
   MessageRole,
@@ -13,11 +13,11 @@ import {
   type ObservabilityAIAssistantService,
 } from '..';
 import {
-  createInternalServerError,
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
+  createInternalServerError,
 } from '../../common';
-import { ChatState, useChat, type UseChatProps, type UseChatResult } from './use_chat';
+import { ChatState, type UseChatProps, type UseChatResult, useChat } from './use_chat';
 import * as useKibanaModule from './use_kibana';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;

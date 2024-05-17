@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
+import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { perfomanceMarkers } from '../performance_markers';
 import { PerformanceApi, PerformanceContext } from './use_performance_context';

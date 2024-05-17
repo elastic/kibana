@@ -9,45 +9,45 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
 import {
-  pointInTimeFinderMock,
   mockGetCurrentTime,
-  mockPreflightCheckForCreate,
   mockGetSearchDsl,
+  mockPreflightCheckForCreate,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type SavedObjectUnsanitizedDoc,
   MAIN_SAVED_OBJECT_INDEX,
+  type SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  NAMESPACE_AGNOSTIC_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   HIDDEN_TYPE,
-  mockVersionProps,
-  mockTimestampFields,
-  mockTimestamp,
-  mappings,
-  mockVersion,
-  createRegistry,
-  createDocumentMigrator,
-  getMockGetResponse,
-  createSpySerializer,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  NAMESPACE_AGNOSTIC_TYPE,
   createBadRequestErrorPayload,
-  createUnsupportedTypeErrorPayload,
   createConflictErrorPayload,
+  createDocumentMigrator,
+  createRegistry,
+  createSpySerializer,
+  createUnsupportedTypeErrorPayload,
+  getMockGetResponse,
+  mappings,
+  mockTimestamp,
+  mockTimestampFields,
+  mockVersion,
+  mockVersionProps,
 } from '../../test_helpers/repository.test.common';
 
 describe('#incrementCounter', () => {
@@ -149,10 +149,13 @@ describe('#incrementCounter', () => {
                 type,
                 ...mockTimestampFields,
                 [type]: {
-                  ...fields.reduce((acc, field) => {
-                    acc[typeof field === 'string' ? field : field.fieldName] = 8468;
-                    return acc;
-                  }, {} as Record<string, number>),
+                  ...fields.reduce(
+                    (acc, field) => {
+                      acc[typeof field === 'string' ? field : field.fieldName] = 8468;
+                      return acc;
+                    },
+                    {} as Record<string, number>
+                  ),
                   defaultIndex: 'logstash-*',
                 },
               },

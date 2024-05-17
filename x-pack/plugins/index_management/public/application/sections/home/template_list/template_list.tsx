@@ -5,48 +5,48 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ScopedHistory } from '@kbn/core/public';
-import {
-  EuiEmptyPrompt,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButton,
-  EuiLink,
-} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
+import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import {
   APP_WRAPPER_CLASS,
-  PageLoading,
   PageError,
+  PageLoading,
   attemptToURIDecode,
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
-import { LegacyIndexTemplatesDeprecation } from '../../../components';
-import { useLoadIndexTemplates } from '../../../services/api';
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
-import { documentationService } from '../../../services/documentation';
 import { useAppContext, useServices } from '../../../app_context';
+import { LegacyIndexTemplatesDeprecation } from '../../../components';
+import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
+import { useLoadIndexTemplates } from '../../../services/api';
+import { IndexManagementBreadcrumb, breadcrumbService } from '../../../services/breadcrumbs';
+import { documentationService } from '../../../services/documentation';
 import {
+  getTemplateCloneLink,
   getTemplateEditLink,
   getTemplateListLink,
-  getTemplateCloneLink,
 } from '../../../services/routing';
-import { getIsLegacyFromQueryParams } from '../../../lib/index_templates';
 import { FilterListButton, Filters } from '../components';
-import { TemplateTable } from './template_table';
-import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
+import { TemplateDetails } from './template_details';
+import { TemplateTable } from './template_table';
 
 type FilterName = 'managed' | 'deprecated' | 'cloudManaged' | 'system';
 interface MatchParams {

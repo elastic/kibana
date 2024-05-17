@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   GaugeArguments,
   GaugeExpressionFunctionDefinition,
   GaugeShape,
   GaugeShapes,
 } from '@kbn/expression-gauge-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
+import { SchemaConfig, VisToExpressionAst, getVisSchemas } from '@kbn/visualizations-plugin/public';
 import { Gauge, GaugeType, GaugeVisParams } from './types';
 
 const gaugeTypeToShape = (type: GaugeType): GaugeShape => {

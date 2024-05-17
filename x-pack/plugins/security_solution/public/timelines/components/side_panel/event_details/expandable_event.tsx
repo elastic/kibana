@@ -5,42 +5,42 @@
  * 2.0.
  */
 
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
-import {
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiTextColor,
-  EuiSkeletonText,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiCopy,
-} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
-import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
-import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import type { TimelineTabs } from '../../../../../common/types/timeline';
-import type { BrowserFields } from '../../../../common/containers/source';
-import { EventDetails } from '../../../../common/components/event_details/event_details';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
-import * as i18n from './translations';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { EventDetails } from '../../../../common/components/event_details/event_details';
 import {
   ALERT_SUMMARY_CONVERSATION_ID,
   EVENT_SUMMARY_CONVERSATION_ID,
 } from '../../../../common/components/event_details/translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
+import type { BrowserFields } from '../../../../common/containers/source';
+import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
+import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import { useRefetchByScope } from './flyout/use_refetch_by_scope';
+import * as i18n from './translations';
+import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
 
 export type HandleOnEventClosed = () => void;
 interface Props {

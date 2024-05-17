@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LogsExplorerLocatorDefinition, LogsExplorerLocators } from '../common/locators';
 import { uiSettings } from '../common/ui_settings';

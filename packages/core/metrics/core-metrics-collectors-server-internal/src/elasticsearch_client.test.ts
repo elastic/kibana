@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { createAgentStatsProviderMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { ElasticsearchClientsMetricsCollector } from './elasticsearch_client';
 
 jest.mock('@kbn/core-elasticsearch-client-server-internal');

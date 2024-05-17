@@ -6,11 +6,11 @@
  */
 
 import type {
-  ResolverRelatedEvents,
   ResolverEntityIndex,
-  SafeResolverEvent,
   ResolverNode,
+  ResolverRelatedEvents,
   ResolverSchema,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';

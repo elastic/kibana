@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '@kbn/es-query';
 import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType, Percentile } from './panel_model';

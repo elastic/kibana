@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import {
-  Plugin,
-  CoreSetup,
-  AppUpdater,
-  AppUpdatableFields,
-  CoreStart,
   AppMountParameters,
+  AppUpdatableFields,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
 } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { renderApp } from './application';
 import './types';
 

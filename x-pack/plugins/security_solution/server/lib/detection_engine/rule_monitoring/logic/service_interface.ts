@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type {
-  PublicRuleResultService,
   PublicRuleMonitoringService,
+  PublicRuleResultService,
   RulesClientApi,
 } from '@kbn/alerting-plugin/server/types';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
@@ -21,11 +21,11 @@ import type {
 } from '../../../../plugin_contract';
 
 import type { IDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client_interface';
-import type { IRuleExecutionLogForRoutes } from './rule_execution_log/client_for_routes/client_interface';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
 } from './rule_execution_log/client_for_executors/client_interface';
+import type { IRuleExecutionLogForRoutes } from './rule_execution_log/client_for_routes/client_interface';
 
 export interface IRuleMonitoringService {
   setup(

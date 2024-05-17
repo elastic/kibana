@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SecurityPageName, ExternalPageName } from '@kbn/security-solution-navigation';
-import { ASSETS_PATH, CLOUD_DEFEND_PATH } from '../../../../../common/constants';
+import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
 import { SERVER_APP_ID } from '../../../../../common';
-import type { LinkItem } from '../../../../common/links/types';
+import { ASSETS_PATH, CLOUD_DEFEND_PATH } from '../../../../../common/constants';
 import type { SolutionNavLink } from '../../../../common/links';
-import { IconEcctlLazy, IconFleetLazy } from './lazy_icons';
+import type { LinkItem } from '../../../../common/links/types';
 import * as i18n from './assets_translations';
+import { IconEcctlLazy, IconFleetLazy } from './lazy_icons';
 
 // appLinks configures the Security Solution pages links
 const assetsAppLink: LinkItem = {

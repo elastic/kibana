@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import type { UsersKpiProps } from './types';
 import { UsersKpiAuthentications } from './authentications';
 import { TotalUsersKpi } from './total_users';
+import type { UsersKpiProps } from './types';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(({ from, to }) => (
   <EuiFlexGroup wrap>

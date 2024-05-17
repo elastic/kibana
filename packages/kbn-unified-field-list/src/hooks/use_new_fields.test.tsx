@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { useNewFields, type UseNewFieldsParams } from './use_new_fields';
-import { type ExistingFieldsReader } from './use_existing_fields';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { renderHook } from '@testing-library/react-hooks';
 import { ExistenceFetchStatus } from '../types';
+import { type ExistingFieldsReader } from './use_existing_fields';
+import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
 
 const fieldsExistenceReader: ExistingFieldsReader = {
   hasFieldData: (dataViewId) => {

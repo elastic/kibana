@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 
-import type { Type, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ListSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import { useImportList } from '@kbn/securitysolution-list-hooks';
 
-import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
+import * as i18n from './translations';
 
 export const listFormOptions: EuiSelectOption[] = [
   {

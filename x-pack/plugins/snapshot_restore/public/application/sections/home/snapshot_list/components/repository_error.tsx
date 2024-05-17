@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiLink, EuiPageTemplate } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 

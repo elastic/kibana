@@ -7,26 +7,26 @@
 
 import type {
   ElasticsearchClient,
-  SavedObjectsClientContract,
   SavedObject,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import {
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   DEFAULT_FLEET_SERVER_HOST_ID,
+  FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../constants';
 
+import { FleetServerHostNotFoundError, FleetServerHostUnauthorizedError } from '../errors';
 import type {
-  SettingsSOAttributes,
-  FleetServerHostSOAttributes,
-  FleetServerHost,
-  NewFleetServerHost,
   AgentPolicy,
+  FleetServerHost,
+  FleetServerHostSOAttributes,
+  NewFleetServerHost,
+  SettingsSOAttributes,
 } from '../types';
-import { FleetServerHostUnauthorizedError, FleetServerHostNotFoundError } from '../errors';
 
 import { appContextService } from './app_context';
 

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import * as cp from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as cp from 'child_process';
 
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { extractMigrationInfo, getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { mkdirp } from '../build/lib';
-import type { MigrationSnapshot, MigrationInfoRecord, MigrationSnapshotMeta } from './types';
+import type { MigrationInfoRecord, MigrationSnapshot, MigrationSnapshotMeta } from './types';
 
 type ServerHandles = Awaited<ReturnType<typeof startServers>> | undefined;
 
@@ -40,18 +40,21 @@ async function takeSnapshot({ log, outputPath }: { log: ToolingLog; outputPath: 
     const typeRegistry = serverHandles.coreStart.savedObjects.getTypeRegistry();
     const allTypes = typeRegistry.getAllTypes();
 
-    const migrationInfoMap = allTypes.reduce((map, type) => {
-      const migrationInfo = extractMigrationInfo(type);
-      map[type.name] = {
-        name: migrationInfo.name,
-        migrationVersions: migrationInfo.migrationVersions,
-        hash: getMigrationHash(type),
-        modelVersions: migrationInfo.modelVersions,
-        schemaVersions: migrationInfo.schemaVersions,
-        mappings: migrationInfo.mappings,
-      };
-      return map;
-    }, {} as Record<string, MigrationInfoRecord>);
+    const migrationInfoMap = allTypes.reduce(
+      (map, type) => {
+        const migrationInfo = extractMigrationInfo(type);
+        map[type.name] = {
+          name: migrationInfo.name,
+          migrationVersions: migrationInfo.migrationVersions,
+          hash: getMigrationHash(type),
+          modelVersions: migrationInfo.modelVersions,
+          schemaVersions: migrationInfo.schemaVersions,
+          mappings: migrationInfo.mappings,
+        };
+        return map;
+      },
+      {} as Record<string, MigrationInfoRecord>
+    );
 
     const payload: MigrationSnapshot = {
       meta: collectSOSnapshotMeta(),

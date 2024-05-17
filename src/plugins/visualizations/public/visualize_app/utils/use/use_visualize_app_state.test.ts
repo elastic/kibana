@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { Observable } from 'rxjs';
 
-import { useVisualizeAppState } from './use_visualize_app_state';
-import { VisualizeServices, SavedVisInstance } from '../../types';
-import { visualizeAppStateStub } from '../stubs';
 import { VisualizeConstants } from '../../../../common/constants';
+import { SavedVisInstance, VisualizeServices } from '../../types';
 import { createVisualizeServicesMock } from '../mocks';
+import { visualizeAppStateStub } from '../stubs';
+import { useVisualizeAppState } from './use_visualize_app_state';
 
 jest.mock('../utils');
 jest.mock('../create_visualize_app_state');

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createCopyToClipboardDiscoverCellActionFactory } from './copy_to_clipboard';
-import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { BehaviorSubject } from 'rxjs';
 import { APP_UI_ID } from '../../../../../common';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { createCopyToClipboardDiscoverCellActionFactory } from './copy_to_clipboard';
 
 const services = createStartServicesMock();
 const mockSuccessToast = services.notifications.toasts.addSuccess;

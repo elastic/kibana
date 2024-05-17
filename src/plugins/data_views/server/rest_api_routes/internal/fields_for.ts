@@ -8,8 +8,9 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 import { VersionedRouteValidation } from '@kbn/core-http-server';
+import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -17,7 +18,6 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 
 /**
  * Accepts one of the following:

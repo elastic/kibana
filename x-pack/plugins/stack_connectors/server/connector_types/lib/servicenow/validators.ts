@@ -7,9 +7,9 @@
 
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
+  ExternalServiceValidation,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
-  ExternalServiceValidation,
 } from './types';
 
 import * as i18n from './translations';

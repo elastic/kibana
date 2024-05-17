@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import moment from 'moment';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import moment from 'moment';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RulesListNotifyBadge } from './notify_badge';
 
 jest.mock('../../../../../common/lib/kibana');

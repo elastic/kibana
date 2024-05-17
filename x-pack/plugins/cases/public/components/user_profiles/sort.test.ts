@@ -78,8 +78,9 @@ describe('sort', () => {
     });
 
     it('returns a sorted list of users with the current user at the beginning', () => {
-      expect(bringCurrentUserToFrontAndSort(userProfiles[2], unsortedProfiles))
-        .toMatchInlineSnapshot(`
+      expect(
+        bringCurrentUserToFrontAndSort(userProfiles[2], unsortedProfiles)
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "data": Object {},
@@ -124,8 +125,9 @@ describe('sort', () => {
     it('returns a sorted list of users with null', () => {
       const unsortedProfiles = [...userProfiles].reverse();
 
-      expect(orderAssigneesIncludingNone(userProfiles[0], [null, ...unsortedProfiles]))
-        .toMatchInlineSnapshot(`
+      expect(
+        orderAssigneesIncludingNone(userProfiles[0], [null, ...unsortedProfiles])
+      ).toMatchInlineSnapshot(`
         Array [
           null,
           Object {
@@ -204,8 +206,9 @@ describe('sort', () => {
     it('adds null in the front', () => {
       const unsortedProfiles = [...userProfiles].reverse();
 
-      expect(orderAssigneesIncludingNone(userProfiles[0], [...unsortedProfiles, null]))
-        .toMatchInlineSnapshot(`
+      expect(
+        orderAssigneesIncludingNone(userProfiles[0], [...unsortedProfiles, null])
+      ).toMatchInlineSnapshot(`
         Array [
           null,
           Object {

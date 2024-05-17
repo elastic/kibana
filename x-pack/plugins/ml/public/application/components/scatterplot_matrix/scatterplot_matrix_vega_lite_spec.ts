@@ -11,7 +11,7 @@ import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
 import type { euiLightVars as euiThemeLight } from '@kbn/ui-theme';
 
-import { euiPaletteColorBlind, euiPaletteRed, euiPaletteGreen } from '@elastic/eui';
+import { euiPaletteColorBlind, euiPaletteGreen, euiPaletteRed } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

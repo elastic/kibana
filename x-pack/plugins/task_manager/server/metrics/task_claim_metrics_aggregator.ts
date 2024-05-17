@@ -9,7 +9,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { isOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRun } from '../task_events';
-import { type SerializedHistogram, SimpleHistogram, MetricCounterService } from './lib';
+import { MetricCounterService, type SerializedHistogram, SimpleHistogram } from './lib';
 import { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds

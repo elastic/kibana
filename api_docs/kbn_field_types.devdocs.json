@@ -91,9 +91,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-field-types/src/kbn_field_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -133,13 +131,9 @@
         "parentPluginId": "@kbn/field-types",
         "id": "def-common.castEsToKbnFieldTypeName",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "castEsToKbnFieldTypeName",
-        "description": [
-          "\n Get the KbnFieldType name for an esType string\n"
-        ],
+        "description": ["\n Get the KbnFieldType name for an esType string\n"],
         "signature": [
           "(esType: string) => ",
           {
@@ -161,9 +155,7 @@
             "tags": [],
             "label": "esType",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-field-types/src/kbn_field_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -201,9 +193,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-field-types/src/kbn_field_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -217,16 +207,10 @@
         "parentPluginId": "@kbn/field-types",
         "id": "def-common.getFilterableKbnTypeNames",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "getFilterableKbnTypeNames",
-        "description": [
-          "\n Get filterable KbnFieldTypes\n"
-        ],
-        "signature": [
-          "() => string[]"
-        ],
+        "description": ["\n Get filterable KbnFieldTypes\n"],
+        "signature": ["() => string[]"],
         "path": "packages/kbn-field-types/src/kbn_field_types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -238,13 +222,9 @@
         "parentPluginId": "@kbn/field-types",
         "id": "def-common.getKbnFieldType",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "getKbnFieldType",
-        "description": [
-          "\n Get a type object by name\n"
-        ],
+        "description": ["\n Get a type object by name\n"],
         "signature": [
           "(typeName: string) => ",
           {
@@ -266,9 +246,7 @@
             "tags": [],
             "label": "typeName",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-field-types/src/kbn_field_types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -282,16 +260,10 @@
         "parentPluginId": "@kbn/field-types",
         "id": "def-common.getKbnTypeNames",
         "type": "Function",
-        "tags": [
-          "return"
-        ],
+        "tags": ["return"],
         "label": "getKbnTypeNames",
-        "description": [
-          "\n Get the esTypes known by all kbnFieldTypes\n"
-        ],
-        "signature": [
-          "() => string[]"
-        ],
+        "description": ["\n Get the esTypes known by all kbnFieldTypes\n"],
+        "signature": ["() => string[]"],
         "path": "packages/kbn-field-types/src/kbn_field_types.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 
 import type { CalloutMessage } from '../../../../../../../common/constants/validation';
 import { Callout } from '../../../../../components/callout';

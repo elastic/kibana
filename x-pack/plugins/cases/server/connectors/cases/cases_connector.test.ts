@@ -6,18 +6,18 @@
  */
 
 import Boom from '@hapi/boom';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { CasesConnector } from './cases_connector';
-import { CasesConnectorExecutor } from './cases_connector_executor';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { CASES_CONNECTOR_ID } from '../../../common/constants';
+import { CaseError } from '../../common/error';
+import { CasesConnector } from './cases_connector';
+import { CasesConnectorError } from './cases_connector_error';
+import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
-import { CasesConnectorError } from './cases_connector_error';
-import { CaseError } from '../../common/error';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
-import { CoreKibanaRequest } from '@kbn/core/server';
 
 jest.mock('./cases_connector_executor');
 jest.mock('./full_jitter_backoff');

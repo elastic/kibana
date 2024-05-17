@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { EuiRadioGroup, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTextColor, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 
 import { get } from 'lodash';
@@ -16,10 +16,10 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField, useGlobalFields } from '../../../form';
 import { i18nTexts } from '../../../i18n_texts';
 
-import { LearnMoreLink, DescribedFormRow } from '../..';
+import { DescribedFormRow, LearnMoreLink } from '../..';
+import { useKibana } from '../../../../../../shared_imports';
 import { byteSizeUnits } from '../../../constants';
 import { UnitField } from './unit_field';
-import { useKibana } from '../../../../../../shared_imports';
 
 interface Props {
   phase: 'hot' | 'warm';

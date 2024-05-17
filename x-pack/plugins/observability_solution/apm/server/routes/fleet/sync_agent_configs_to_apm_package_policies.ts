@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
 import { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { TelemetryUsageCounter } from '../typings';
-import { APMPluginStartDependencies } from '../../types';
+import { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
+import { APMPluginStartDependencies } from '../../types';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
+import { TelemetryUsageCounter } from '../typings';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithAgentConfigurations } from './get_package_policy_decorators';
-import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 export async function syncAgentConfigsToApmPackagePolicies({
   coreStartPromise,

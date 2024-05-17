@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { Plugin as PluginClass } from '@kbn/core/public';
-import type { MetricsDataClient } from './lib/metrics_client';
 import type { NodeMetricsTableProps } from './components/infrastructure_node_metrics_tables/shared';
+import type { MetricsDataClient } from './lib/metrics_client';
 
 export interface MetricsDataPluginSetup {
   metricsClient: MetricsDataClient;

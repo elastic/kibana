@@ -7,13 +7,13 @@
  */
 
 import Fs from 'fs';
-import Fsp from 'fs/promises';
 import Path from 'path';
+import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { asyncMapWithLimit } from '@kbn/std';
-import { RepoPath } from '@kbn/repo-path';
 import { type PluginPackageManifest } from '@kbn/repo-packages';
+import { RepoPath } from '@kbn/repo-path';
+import { asyncMapWithLimit } from '@kbn/std';
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;

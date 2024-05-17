@@ -6,8 +6,8 @@
  */
 import { useContext, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { usePlatformService } from '../../../services';
 import { WorkpadRoutingContext } from '..';
+import { usePlatformService } from '../../../services';
 
 const fullscreenClass = 'canvas-isFullscreen';
 

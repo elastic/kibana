@@ -6,7 +6,7 @@
  */
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import { schema, offeringBasedSchema, type TypeOf } from '@kbn/config-schema';
+import { type TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),

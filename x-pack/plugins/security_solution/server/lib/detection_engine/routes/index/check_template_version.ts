@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { get } from 'lodash';
 import { isOutdated } from '../../migrations/helpers';
 import {
   ALIAS_VERSION_FIELD,

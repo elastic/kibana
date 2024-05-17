@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestSuiteFactory } from '../../common/suites/get';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getSpaceTestSuite({ getService }: FtrProviderContext) {

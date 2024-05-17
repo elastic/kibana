@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
-import { hasMinLengthString } from '../../../validators/string';
 import { hasMinLengthArray } from '../../../validators/array';
+import { hasMinLengthString } from '../../../validators/string';
+import { ValidationError, ValidationFunc } from '../../hook_form_lib';
 import { ERROR_CODE } from './types';
 
 export const minLengthField =

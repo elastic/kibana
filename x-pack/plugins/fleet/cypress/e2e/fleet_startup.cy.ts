@@ -6,19 +6,19 @@
  */
 
 import {
-  AGENTS_TAB,
   ADD_AGENT_BUTTON_TOP,
-  AGENT_FLYOUT,
-  CREATE_FLEET_SERVER_POLICY_BTN,
-  AGENT_POLICY_CREATE_STATUS_CALLOUT,
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
+  AGENTS_TAB,
+  AGENT_FLYOUT,
+  AGENT_POLICY_CREATE_STATUS_CALLOUT,
+  CREATE_FLEET_SERVER_POLICY_BTN,
   FLEET_SERVER_SETUP,
   LANDING_PAGE_ADD_FLEET_SERVER_BUTTON,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { request } from '../tasks/common';
-import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
+import { navigateToTab, verifyAgentPackage, verifyPolicy } from '../tasks/fleet';
 import { deleteFleetServer, setFleetServerHost } from '../tasks/fleet_server';
 import { login } from '../tasks/login';
 import { FLEET, navigateTo } from '../tasks/navigation';

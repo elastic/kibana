@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { JobCreatorContext } from '../../../job_creator_context';
-import type { RareJobCreator } from '../../../../../common/job_creator';
-import type { Results, Anomaly } from '../../../../../common/results_loader';
 import type { LineChartPoint } from '../../../../../common/chart_loader';
+import type { RareJobCreator } from '../../../../../common/job_creator';
+import type { Anomaly, Results } from '../../../../../common/results_loader';
 import { EventRateChart } from '../../../charts/event_rate_chart';
+import { JobCreatorContext } from '../../../job_creator_context';
 
-import { RARE_DETECTOR_TYPE } from './rare_view';
 import { DetectorDescription } from './detector_description';
+import { RARE_DETECTOR_TYPE } from './rare_view';
 
 const DTR_IDX = 0;
 

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
-import { SemVer } from 'semver';
 import {
   IScopedClusterClient,
   KibanaRequest,
@@ -14,6 +12,8 @@ import {
   RequestHandler,
   RequestHandlerContext,
 } from '@kbn/core/server';
+import { uniq } from 'lodash';
+import { SemVer } from 'semver';
 import { versionService } from './version';
 
 /**

@@ -8,8 +8,8 @@
 
 import Path from 'path';
 
-import { focusBundles } from './focus_bundles';
 import { Bundle } from '../common';
+import { focusBundles } from './focus_bundles';
 
 function createBundle(id: string, deps: ReturnType<Bundle['readBundleDeps']>) {
   const bundle = new Bundle({

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
 import Fs from 'fs';
+import Path from 'path';
 
-import MarkdownIt from 'markdown-it';
-import cheerio from 'cheerio';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
+import cheerio from 'cheerio';
+import MarkdownIt from 'markdown-it';
 
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 

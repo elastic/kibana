@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiBadge } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 
 export const JobGroup: FC<{ name: string }> = ({ name }) => (

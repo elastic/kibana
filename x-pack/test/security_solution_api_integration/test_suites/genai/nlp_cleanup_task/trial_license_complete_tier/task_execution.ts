@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { waitFor } from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');

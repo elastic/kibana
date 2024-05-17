@@ -1,3 +1,7 @@
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
+import { shallow } from 'enzyme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +9,7 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import { useTabs } from './use_tabs';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { CoreStart } from '@kbn/core/public';
-import { shallow } from 'enzyme';
 
 const KibanaReactContext = createKibanaReactContext({
   metricsDataAccess: {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { getAlertsForNotification } from '.';
+import { DEFAULT_FLAPPING_SETTINGS, DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import { Alert } from '../alert';
 import { alertsWithAnyUUID } from '../test_utils';
 
@@ -125,8 +125,9 @@ describe('getAlertsForNotification', () => {
         },
       }
     `);
-    expect(Object.values(activeAlerts).map((a) => a.getScheduledActionOptions()))
-      .toMatchInlineSnapshot(`
+    expect(
+      Object.values(activeAlerts).map((a) => a.getScheduledActionOptions())
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "actionGroup": "default",
@@ -150,8 +151,9 @@ describe('getAlertsForNotification', () => {
         },
       }
     `);
-    expect(Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions()))
-      .toMatchInlineSnapshot(`
+    expect(
+      Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions())
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "actionGroup": "default",
@@ -395,8 +397,9 @@ describe('getAlertsForNotification', () => {
         },
       }
     `);
-    expect(Object.values(activeAlerts).map((a) => a.getScheduledActionOptions()))
-      .toMatchInlineSnapshot(`
+    expect(
+      Object.values(activeAlerts).map((a) => a.getScheduledActionOptions())
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "actionGroup": "default",

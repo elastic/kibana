@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mkdirp, Task } from '../lib';
+import { Task, mkdirp } from '../lib';
 
 export const CreateEmptyDirsAndFiles: Task = {
   description: 'Creating some empty directories and files to prevent file-permission issues',

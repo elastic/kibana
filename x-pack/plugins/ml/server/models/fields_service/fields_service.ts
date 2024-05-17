@@ -8,15 +8,15 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { duration } from 'moment';
 import type { AggCardinality } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { parseInterval } from '../../../common/util/parse_interval';
-import { initCardinalityFieldsCache } from './fields_aggs_cache';
-import { isValidAggregationField } from '../../../common/util/validation_utils';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { duration } from 'moment';
 import type { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { parseInterval } from '../../../common/util/parse_interval';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { initCardinalityFieldsCache } from './fields_aggs_cache';
 
 /**
  * Service for carrying out queries to obtain data
@@ -197,11 +197,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       return {};
     }
 
-    const aggResult = fieldsToAgg.reduce((obj, field) => {
-      // @ts-expect-error incorrect search response type
-      obj[field] = (aggregations[field] || { value: 0 }).value;
-      return obj;
-    }, {} as { [field: string]: number });
+    const aggResult = fieldsToAgg.reduce(
+      (obj, field) => {
+        // @ts-expect-error incorrect search response type
+        obj[field] = (aggregations[field] || { value: 0 }).value;
+        return obj;
+      },
+      {} as { [field: string]: number }
+    );
 
     fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
       overallCardinality: aggResult,
@@ -379,19 +382,25 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     const getSafeAggName = (field: string) => field.replace(/\W/g, '');
     const getMaxBucketAggKey = (field: string) => `max_bucket_${field}`;
 
-    const fieldsCardinalityAggs = fieldsToAgg.reduce((obj, field) => {
-      obj[getSafeAggName(field)] = { cardinality: { field } };
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    const fieldsCardinalityAggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        obj[getSafeAggName(field)] = { cardinality: { field } };
+        return obj;
+      },
+      {} as { [field: string]: { cardinality: { field: string } } }
+    );
 
-    const maxBucketCardinalitiesAggs = Object.keys(fieldsCardinalityAggs).reduce((acc, field) => {
-      acc[getMaxBucketAggKey(field)] = {
-        max_bucket: {
-          buckets_path: `${dateHistogramAggKey}>${field}`,
-        },
-      };
-      return acc;
-    }, {} as { [key: string]: { max_bucket: { buckets_path: string } } });
+    const maxBucketCardinalitiesAggs = Object.keys(fieldsCardinalityAggs).reduce(
+      (acc, field) => {
+        acc[getMaxBucketAggKey(field)] = {
+          max_bucket: {
+            buckets_path: `${dateHistogramAggKey}>${field}`,
+          },
+        };
+        return acc;
+      },
+      {} as { [key: string]: { max_bucket: { buckets_path: string } } }
+    );
 
     const body = {
       query: {
@@ -425,11 +434,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       return cachedValues;
     }
 
-    const aggResult = fieldsToAgg.reduce((obj, field) => {
-      // @ts-expect-error incorrect search response type
-      obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
-      return obj;
-    }, {} as { [field: string]: number });
+    const aggResult = fieldsToAgg.reduce(
+      (obj, field) => {
+        // @ts-expect-error incorrect search response type
+        obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
+        return obj;
+      },
+      {} as { [field: string]: number }
+    );
 
     fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
       maxBucketCardinality: aggResult,

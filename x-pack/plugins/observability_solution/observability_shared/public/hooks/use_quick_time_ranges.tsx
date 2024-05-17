@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 export interface TimePickerQuickRange {
   from: string;

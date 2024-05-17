@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ALERT_CASE_IDS,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   MAX_CASES_PER_ALERT,
 } from '@kbn/rule-data-utils';
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_plugin_service.mock';
+import { AlertsClient, ConstructorOptions } from '../alerts_client';
 
 describe('bulkUpdateCases', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();

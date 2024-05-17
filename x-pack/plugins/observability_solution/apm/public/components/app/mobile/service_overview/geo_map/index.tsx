@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { EmbeddedMap } from './embedded_map';
+import React, { useState } from 'react';
 import { MapTypes } from '../../../../../../common/mobile/constants';
+import { EmbeddedMap } from './embedded_map';
 import { EmbeddedMapSelect } from './embedded_map_select';
 
 export function GeoMap({

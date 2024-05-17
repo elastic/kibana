@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiToken } from '@elastic/eui';
 
-import { SchemaType, InternalSchemaType } from '../../../shared/schema/types';
+import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
 
 import { FieldType } from './types';
 

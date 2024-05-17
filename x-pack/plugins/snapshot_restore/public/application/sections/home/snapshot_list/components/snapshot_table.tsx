@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState } from 'react';
 
 import {
+  Criteria,
+  EuiBasicTable,
+  EuiButtonIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiToolTip,
-  EuiButtonIcon,
-  Criteria,
-  EuiBasicTable,
 } from '@elastic/eui';
 import { SnapshotDetails } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
-import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
+import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
+import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
+import { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
 import {
   linkToRepository,
   linkToRestoreSnapshot,
   linkToSnapshot as openSnapshotDetailsUrl,
 } from '../../../../services/navigation';
-import { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
-import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotSearchBar } from './snapshot_search_bar';
 
 const getLastSuccessfulManagedSnapshot = (
@@ -188,18 +188,18 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
                   defaultMessage: 'Restore',
                 })
               : state === SNAPSHOT_STATE.IN_PROGRESS
-              ? i18n.translate(
-                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInProgressTooltip',
-                  {
-                    defaultMessage: `Can't restore in-progress snapshot`,
-                  }
-                )
-              : i18n.translate(
-                  'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInvalidTooltip',
-                  {
-                    defaultMessage: `Can't restore invalid snapshot`,
-                  }
-                );
+                ? i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInProgressTooltip',
+                    {
+                      defaultMessage: `Can't restore in-progress snapshot`,
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.snapshotRestore.snapshotList.table.actionRestoreDisabledInvalidTooltip',
+                    {
+                      defaultMessage: `Can't restore invalid snapshot`,
+                    }
+                  );
             return (
               <EuiToolTip content={label}>
                 <EuiButtonIcon
@@ -319,7 +319,10 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
         columns={columns}
         sorting={sorting}
         onChange={(criteria: Criteria<SnapshotDetails>) => {
-          const { page: { index, size } = {}, sort: { field, direction } = {} } = criteria;
+          const {
+            page: { index, size } = {},
+            sort: { field, direction } = {},
+          } = criteria;
 
           setListParams({
             ...listParams,

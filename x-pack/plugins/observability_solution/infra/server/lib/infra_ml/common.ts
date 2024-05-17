@@ -8,14 +8,14 @@
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { NoLogAnalysisMlJobError } from './errors';
 
+import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
+import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   CompositeDatasetKey,
-  createLogEntryDatasetsQuery,
   LogEntryDatasetBucket,
+  createLogEntryDatasetsQuery,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
-import { decodeOrThrow } from '../../../common/runtime_types';
-import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 
 export interface MappedAnomalyHit {
   id: string;

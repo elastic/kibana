@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
-import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
+import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;

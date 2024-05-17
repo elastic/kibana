@@ -6,38 +6,38 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
-import { getCertsListEffect } from './certs';
-import { addGlobalParamEffect, editGlobalParamEffect, getGlobalParamEffect } from './global_params';
-import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
 import {
   enableDefaultAlertingEffect,
   enableDefaultAlertingSilentlyEffect,
   getDefaultAlertingEffect,
   updateDefaultAlertingEffect,
 } from './alert_rules/effects';
+import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
+import { getCertsListEffect } from './certs';
 import { executeEsQueryEffect } from './elasticsearch';
+import { addGlobalParamEffect, editGlobalParamEffect, getGlobalParamEffect } from './global_params';
+import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
+import { fetchSyntheticsMonitorEffect } from './monitor_details';
+import {
+  enableMonitorAlertEffect,
+  fetchMonitorFiltersEffect,
+  fetchMonitorListEffect,
+  upsertMonitorEffect,
+} from './monitor_list';
+import { fetchNetworkEventsEffect } from './network_events/effects';
+import { fetchMonitorOverviewEffect } from './overview';
+import { fetchOverviewStatusEffect } from './overview_status';
+import { fetchPingStatusesEffect } from './ping_status';
+import { fetchAgentPoliciesEffect, fetchPrivateLocationsEffect } from './private_locations';
+import { fetchServiceLocationsEffect } from './service_locations';
+import { syncGlobalParamsEffect } from './settings';
 import {
   fetchAlertConnectorsEffect,
   fetchDynamicSettingsEffect,
   fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
-import { syncGlobalParamsEffect } from './settings';
-import { fetchAgentPoliciesEffect, fetchPrivateLocationsEffect } from './private_locations';
-import { fetchNetworkEventsEffect } from './network_events/effects';
-import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
-import {
-  enableMonitorAlertEffect,
-  fetchMonitorListEffect,
-  upsertMonitorEffect,
-  fetchMonitorFiltersEffect,
-} from './monitor_list';
-import { fetchMonitorOverviewEffect } from './overview';
-import { fetchServiceLocationsEffect } from './service_locations';
-import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
-import { fetchPingStatusesEffect } from './ping_status';
-import { fetchOverviewStatusEffect } from './overview_status';
 
 export const rootEffect = function* root(): Generator {
   yield all([

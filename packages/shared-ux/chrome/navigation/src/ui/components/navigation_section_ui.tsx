@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
-import { css } from '@emotion/css';
 import {
-  EuiTitle,
-  EuiCollapsibleNavItem,
-  EuiSpacer,
   type EuiAccordionProps,
+  EuiCollapsibleNavItem,
   type EuiCollapsibleNavItemProps,
   type EuiCollapsibleNavSubItemProps,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/css';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
+import classNames from 'classnames';
+import classnames from 'classnames';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useNavigation as useServices } from '../../services';
-import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
+import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
 import { useNavigation } from '../navigation';
-import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
+import { PanelContext, usePanel } from './panel';
 
 type EuiCollapsibleNavSubItemPropsEnhanced = EuiCollapsibleNavSubItemProps & { path?: string };
 

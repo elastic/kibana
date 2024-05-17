@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPopover,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiButtonEmpty,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { Ping } from '../../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
 

@@ -7,21 +7,21 @@
  */
 
 import ace, { type Annotation } from 'brace';
-import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
+import { IEditSession as IAceEditSession, Editor as IAceEditor } from 'brace';
 import $ from 'jquery';
+import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import {
+  AutoCompleterFunction,
   CoreEditor,
+  EditorEvent,
   Position,
   Range,
   Token,
   TokensProvider,
-  EditorEvent,
-  AutoCompleterFunction,
 } from '../../../types';
-import { AceTokensProvider } from '../../../lib/ace_token_provider';
 import * as curl from '../sense_editor/curl';
-import smartResize from './smart_resize';
 import * as InputMode from './mode/input';
+import smartResize from './smart_resize';
 
 const _AceRange = ace.acequire('ace/range').Range;
 
@@ -33,7 +33,10 @@ export class LegacyCoreEditor implements CoreEditor {
   $actions: JQuery<HTMLElement>;
   resize: () => void;
 
-  constructor(private readonly editor: IAceEditor, actions: HTMLElement) {
+  constructor(
+    private readonly editor: IAceEditor,
+    actions: HTMLElement
+  ) {
     this.$actions = $(actions);
     this.editor.setShowPrintMargin(false);
 

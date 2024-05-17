@@ -7,7 +7,7 @@
  */
 
 import { createPanel } from '../../__mocks__';
-import { getConfigurationForTopN, getConfigurationForTimeseries } from './configuration';
+import { getConfigurationForTimeseries, getConfigurationForTopN } from './configuration';
 
 describe('getConfigurationForTimeseries', () => {
   test('should return correct configuration for timeseries', () => {

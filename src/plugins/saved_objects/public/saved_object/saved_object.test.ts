@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { createSavedObjectClass } from './saved_object';
 import {
   SavedObject,
   SavedObjectConfig,
@@ -14,17 +13,18 @@ import {
   SavedObjectSaveOpts,
 } from '../types';
 import { SavedObjectDecorator } from './decorators';
+import { createSavedObjectClass } from './saved_object';
 
+import { SavedObjectAttributes, SimpleSavedObject } from '@kbn/core/public';
 import {
   analyticsServiceMock,
   coreMock,
   i18nServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
-import { dataPluginMock, createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { SavedObjectAttributes, SimpleSavedObject } from '@kbn/core/public';
 import { DataView } from '@kbn/data-plugin/common';
+import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { savedObjectsDecoratorRegistryMock } from './decorators/registry.mock';
 
 describe('Saved Object', () => {

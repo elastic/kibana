@@ -13,8 +13,8 @@ import styled from 'styled-components';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
-import { SuricataSignature } from './suricata_signature';
 import { SuricataRefs } from './suricata_refs';
+import { SuricataSignature } from './suricata_signature';
 
 const Details = styled.div`
   margin: 5px 0;

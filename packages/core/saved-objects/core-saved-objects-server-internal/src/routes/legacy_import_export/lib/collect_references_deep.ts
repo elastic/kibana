@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 const MAX_BULK_GET_SIZE = 10000;
 

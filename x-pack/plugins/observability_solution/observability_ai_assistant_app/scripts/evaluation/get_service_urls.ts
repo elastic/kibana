@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Url, format, parse } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
 import { omit } from 'lodash';
 import fetch from 'node-fetch';
-import { format, parse, Url } from 'url';
 
 async function discoverAuth(parsedTarget: Url, log: ToolingLog) {
   const possibleCredentials = [`admin:changeme`, `elastic:changeme`];

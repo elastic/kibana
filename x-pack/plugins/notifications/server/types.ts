@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EmailServiceStart, EmailServiceSetupDeps, EmailServiceStartDeps } from './services';
+import type { EmailServiceSetupDeps, EmailServiceStart, EmailServiceStartDeps } from './services';
 
 // The 'notifications' plugin is currently only exposing an email service.
 // If we want to expose other services in the future, we should update these types accordingly

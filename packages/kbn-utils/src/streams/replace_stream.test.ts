@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Writable, Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 
 import {
-  createReplaceStream,
   createConcatStream,
-  createPromiseFromStreams,
   createListStream,
   createMapStream,
+  createPromiseFromStreams,
+  createReplaceStream,
 } from '.';
 
 async function concatToString(streams: [Readable, ...Writable[]]) {

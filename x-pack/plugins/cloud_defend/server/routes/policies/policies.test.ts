@@ -1,3 +1,4 @@
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,22 +6,21 @@
  * 2.0.
  */
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { policiesQueryParamsSchema } from '../../../common';
 import { DEFAULT_POLICIES_PER_PAGE } from '../../../common/constants';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  getCloudDefendPackagePolicies,
   getCloudDefendAgentPolicies,
+  getCloudDefendPackagePolicies,
 } from '../../lib/fleet_util';
 import { defineGetPoliciesRoute } from './policies';
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   createMockAgentPolicyService,
   createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { createCloudDefendRequestHandlerContextMock } from '../../mocks';
 
 describe('policies API', () => {

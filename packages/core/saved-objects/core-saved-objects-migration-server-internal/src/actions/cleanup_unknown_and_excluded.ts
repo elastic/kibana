@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/function';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
-import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import {
-  checkForUnknownDocs,
-  type DocumentIdAndType,
-  type UnknownDocsFound,
-} from './check_for_unknown_docs';
+import * as Either from 'fp-ts/lib/Either';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/lib/function';
 import { isTypeof } from '.';
 import { CalculatedExcludeFilter, calculateExcludeFilters } from './calculate_exclude_filters';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import {
+  type DocumentIdAndType,
+  type UnknownDocsFound,
+  checkForUnknownDocs,
+} from './check_for_unknown_docs';
 import { deleteByQuery } from './delete_by_query';
 
 /** @internal */

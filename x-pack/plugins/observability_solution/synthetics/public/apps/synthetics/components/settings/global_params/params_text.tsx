@@ -6,8 +6,8 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 
 export const ParamsText = ({ text }: { text: string }) => {
   const [isViewing, setIsViewing] = useState(false);

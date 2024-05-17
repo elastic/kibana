@@ -10,7 +10,7 @@ import React, { useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
 import { EuiButtonEmpty, EuiCodeBlock, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
-import { getAggregateQueryMode, isOfQueryType, type AggregateQuery } from '@kbn/es-query';
+import { type AggregateQuery, getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { hasEditCapabilities } from '@kbn/presentation-publishing';

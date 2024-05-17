@@ -7,24 +7,24 @@
  */
 
 import './empty_index_list_prompt.scss';
-import React from 'react';
-import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPanel,
-  EuiPageHeader,
-  EuiTitle,
-  EuiIcon,
-  EuiSpacer,
-  EuiFlexItem,
+  EuiCard,
   EuiDescriptionList,
   EuiFlexGrid,
-  EuiCard,
-  EuiLink,
-  EuiText,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPageHeader,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ApplicationStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,

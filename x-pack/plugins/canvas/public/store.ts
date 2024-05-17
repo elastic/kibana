@@ -6,15 +6,15 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
+// @ts-expect-error untyped local
+import { getInitialState } from './state/initial_state';
 import {
+  cloneStore,
   createStore as createReduxStore,
   destroyStore as destroy,
   getStore,
-  cloneStore,
   // @ts-expect-error untyped local
 } from './state/store';
-// @ts-expect-error untyped local
-import { getInitialState } from './state/initial_state';
 
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 

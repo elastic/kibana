@@ -5,43 +5,43 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import datemath from '@kbn/datemath';
 import {
+  EuiDataGridColumn,
+  EuiDataGridSorting,
   EuiFieldSearch,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
-  EuiDataGridSorting,
   EuiSuperDatePicker,
-  OnTimeChangeProps,
   EuiSwitch,
-  EuiDataGridColumn,
+  OnTimeChangeProps,
 } from '@elastic/eui';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { IExecutionLog } from '@kbn/actions-plugin/common';
+import datemath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
-  CONNECTOR_LOCKED_COLUMNS,
-} from '../../../constants';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import {
-  ComponentOpts as ConnectorApis,
-  withActionOperations,
-} from '../../common/components/with_actions_api_operations';
-import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
-import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
+  CONNECTOR_LOCKED_COLUMNS,
+  GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+} from '../../../constants';
+import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
+import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api/load_execution_log_aggregations';
 import {
   EventLogDataGrid,
   type EventLogDataGrid as EventLogDataGridProps,
   EventLogListStatusFilter,
   getIsColumnSortable,
 } from '../../common/components/event_log';
-import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
+import {
+  ComponentOpts as ConnectorApis,
+  withActionOperations,
+} from '../../common/components/with_actions_api_operations';
+import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -104,8 +104,8 @@ export type ConnectorEventLogListTableProps<T extends ConnectorEventLogListOptio
   T extends 'default'
     ? ConnectorEventLogListCommonProps
     : T extends 'stackManagement'
-    ? ConnectorEventLogListCommonProps
-    : never;
+      ? ConnectorEventLogListCommonProps
+      : never;
 
 export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOptions>(
   props: ConnectorEventLogListTableProps<T>

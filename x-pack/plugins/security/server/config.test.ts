@@ -261,22 +261,25 @@ describe('config schema', () => {
         }
       `);
 
-      expect(ConfigSchema.validate({ public: { protocol: 'https' } }).public)
-        .toMatchInlineSnapshot(`
+      expect(
+        ConfigSchema.validate({ public: { protocol: 'https' } }).public
+      ).toMatchInlineSnapshot(`
         Object {
           "protocol": "https",
         }
       `);
 
-      expect(() => ConfigSchema.validate({ public: { protocol: 'ftp' } }))
-        .toThrowErrorMatchingInlineSnapshot(`
+      expect(() =>
+        ConfigSchema.validate({ public: { protocol: 'ftp' } })
+      ).toThrowErrorMatchingInlineSnapshot(`
         "[public.protocol]: types that failed validation:
         - [public.protocol.0]: expected value to equal [http]
         - [public.protocol.1]: expected value to equal [https]"
       `);
 
-      expect(() => ConfigSchema.validate({ public: { protocol: 'some-protocol' } }))
-        .toThrowErrorMatchingInlineSnapshot(`
+      expect(() =>
+        ConfigSchema.validate({ public: { protocol: 'some-protocol' } })
+      ).toThrowErrorMatchingInlineSnapshot(`
         "[public.protocol]: types that failed validation:
         - [public.protocol.0]: expected value to equal [http]
         - [public.protocol.1]: expected value to equal [https]"
@@ -284,15 +287,17 @@ describe('config schema', () => {
     });
 
     it('properly validates `hostname`', async () => {
-      expect(ConfigSchema.validate({ public: { hostname: 'elastic.co' } }).public)
-        .toMatchInlineSnapshot(`
+      expect(
+        ConfigSchema.validate({ public: { hostname: 'elastic.co' } }).public
+      ).toMatchInlineSnapshot(`
         Object {
           "hostname": "elastic.co",
         }
       `);
 
-      expect(ConfigSchema.validate({ public: { hostname: '192.168.1.1' } }).public)
-        .toMatchInlineSnapshot(`
+      expect(
+        ConfigSchema.validate({ public: { hostname: '192.168.1.1' } }).public
+      ).toMatchInlineSnapshot(`
         Object {
           "hostname": "192.168.1.1",
         }
@@ -435,8 +440,9 @@ describe('config schema', () => {
 
   describe('authc.saml', () => {
     it('does not fail if authc.providers includes `saml`, but `saml.realm` is not specified', async () => {
-      expect(ConfigSchema.validate({ authc: { providers: ['saml'] } }).authc)
-        .toMatchInlineSnapshot(`
+      expect(
+        ConfigSchema.validate({ authc: { providers: ['saml'] } }).authc
+      ).toMatchInlineSnapshot(`
         Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -454,8 +460,9 @@ describe('config schema', () => {
         }
       `);
 
-      expect(ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } }).authc)
-        .toMatchInlineSnapshot(`
+      expect(
+        ConfigSchema.validate({ authc: { providers: ['saml'], saml: {} } }).authc
+      ).toMatchInlineSnapshot(`
         Object {
           "http": Object {
             "autoSchemesEnabled": true,
@@ -1581,8 +1588,9 @@ describe('config schema', () => {
     });
 
     it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
-      expect(ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session)
-        .toMatchInlineSnapshot(`
+      expect(
+        ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session
+      ).toMatchInlineSnapshot(`
         Object {
           "cleanupInterval": "PT1H",
           "concurrentSessions": Object {
@@ -2063,8 +2071,9 @@ describe('createConfig()', () => {
     }
 
     it('returns default values if neither global nor provider specific settings are set', async () => {
-      expect(createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        createMockConfig().session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "P30D",
@@ -2178,15 +2187,17 @@ describe('createConfig()', () => {
         },
         session: { idleTimeout: null },
       });
-      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "P30D",
         }
       `);
-      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "P30D",
@@ -2202,15 +2213,17 @@ describe('createConfig()', () => {
         },
         session: { idleTimeout: 123 },
       });
-      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "P30D",
         }
       `);
-      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "P30D",
@@ -2228,15 +2241,17 @@ describe('createConfig()', () => {
         },
         session: { lifespan: null },
       });
-      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);
-      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT11M5.544S",
@@ -2252,15 +2267,17 @@ describe('createConfig()', () => {
         },
         session: { lifespan: 456 },
       });
-      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "P3D",
           "lifespan": "PT0.654S",
         }
       `);
-      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT11M5.544S",
           "lifespan": "PT0.456S",
@@ -2284,15 +2301,17 @@ describe('createConfig()', () => {
         },
         session: { idleTimeout: null, lifespan: null },
       });
-      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithoutGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "PT0.654S",
         }
       `);
-      expect(configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithoutGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "PT11M5.544S",
@@ -2314,15 +2333,17 @@ describe('createConfig()', () => {
         },
         session: { idleTimeout: 123, lifespan: 456 },
       });
-      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithGlobal.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT0.321S",
           "lifespan": "PT0.654S",
         }
       `);
-      expect(configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        configWithGlobal.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "PT11M5.544S",
@@ -2346,15 +2367,17 @@ describe('createConfig()', () => {
         },
         session: { idleTimeout: 123, lifespan: 456 },
       });
-      expect(config.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        config.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": null,
         }
       `);
-      expect(config.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        config.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' })
+      ).toMatchInlineSnapshot(`
         Object {
           "idleTimeout": null,
           "lifespan": null,

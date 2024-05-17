@@ -6,8 +6,8 @@
  */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrientationDynamicOptions } from '../../../../../common/descriptor_types';
+import { DynamicStyleProperty } from './dynamic_style_property';
 
 export class DynamicOrientationProperty extends DynamicStyleProperty<OrientationDynamicOptions> {
   syncIconRotationWithMb(symbolLayerId: string, mbMap: MbMap) {

@@ -26,9 +26,9 @@ jest.mock('../kibana_services', () => {
   };
 });
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import { DataView } from '@kbn/data-plugin/common';
+import { shallow } from 'enzyme';
+import React from 'react';
 import { GeoIndexPatternSelect } from './geo_index_pattern_select';
 
 const defaultProps = {

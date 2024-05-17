@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import React from 'react';
 import { CollapseFunction } from '../../../common/expressions';
-import type { LayerType } from '../../../common/types';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
+import type { LayerType } from '../../../common/types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
-import { getSuggestions } from './suggestions';
+import { generateId } from '../../id_generator';
 import {
-  Visualization,
   OperationMetadata,
-  VisualizationConfigProps,
-  VisualizationDimensionGroupConfig,
   Suggestion,
   UserMessage,
+  Visualization,
+  VisualizationConfigProps,
+  VisualizationDimensionGroupConfig,
 } from '../../types';
+import { nonNullable } from '../../utils';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
-import { Toolbar } from './toolbar';
-import { generateId } from '../../id_generator';
+import { getSuggestions } from './suggestions';
 import { toExpression } from './to_expression';
-import { nonNullable } from '../../utils';
+import { Toolbar } from './toolbar';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -700,8 +700,8 @@ export const getMetricVisualization = ({
           palette: (hasDynamicColoring
             ? stops.map(({ color }) => color)
             : hasStaticColoring
-            ? [state.color]
-            : [getDefaultColor(state, isMetricNumeric)]
+              ? [state.color]
+              : [getDefaultColor(state, isMetricNumeric)]
           ).filter(nonNullable),
         },
       ],

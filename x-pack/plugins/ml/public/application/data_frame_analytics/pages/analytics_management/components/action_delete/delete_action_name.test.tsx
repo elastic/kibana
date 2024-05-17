@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import { i18nServiceMock, coreMock as mockCoreServices } from '@kbn/core/public/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
-import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock as mockCoreServices, i18nServiceMock } from '@kbn/core/public/mocks';
 
-import { DeleteActionName } from './delete_action_name';
 import { DeleteActionModal } from './delete_action_modal';
+import { DeleteActionName } from './delete_action_name';
 import { useDeleteAction } from './use_delete_action';
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, VFC } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,18 +20,19 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
-import { TakeAction } from './take_action';
-import { DateFormatter } from '../../../../components/date_formatter';
+import React, { useMemo, useState, VFC } from 'react';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutJson } from './json_tab';
-import { IndicatorsFlyoutTable } from './table_tab';
+import { DateFormatter } from '../../../../components/date_formatter';
+import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { unwrapValue } from '../../utils/unwrap_value';
+import { IndicatorsFlyoutJson } from './json_tab';
 import { IndicatorsFlyoutOverview } from './overview_tab';
+import { IndicatorsFlyoutTable } from './table_tab';
+import { TakeAction } from './take_action';
 import {
+  INDICATORS_FLYOUT_SUBTITLE_TEST_ID,
   INDICATORS_FLYOUT_TABS_TEST_ID,
   INDICATORS_FLYOUT_TITLE_TEST_ID,
-  INDICATORS_FLYOUT_SUBTITLE_TEST_ID,
 } from './test_ids';
 enum TAB_IDS {
   overview,

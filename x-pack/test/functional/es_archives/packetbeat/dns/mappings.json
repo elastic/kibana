@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "packetbeat-7.0.0-iot-2019.11",
     "mappings": {
       "_meta": {

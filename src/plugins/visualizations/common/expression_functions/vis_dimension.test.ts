@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Arguments, visDimension } from './vis_dimension';
-import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import moment from 'moment';
+import { Arguments, visDimension } from './vis_dimension';
 
 describe('interpreter/functions#vis_dimension', () => {
   const fn = functionWrapper(visDimension());

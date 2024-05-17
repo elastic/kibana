@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 import type {
   EndpointActionResponse,
-  LogsEndpointActionResponse,
   EndpointActionResponseDataOutput,
+  LogsEndpointActionResponse,
 } from '../../../../../common/endpoint/types';
-import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 
 interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
@@ -104,7 +104,7 @@ export const fetchActionResponses = async ({
  */
 export const fetchEndpointActionResponses = async <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 >({
   esClient,
   actionIds,

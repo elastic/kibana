@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { mockedDateString } from '../tests/lib';
-import { incrementRevision } from './increment_revision';
 import { SavedObject } from '@kbn/core/server';
-import { RuleTypeParams } from '../../types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { UpdateRuleData } from '../../application/rule/methods/update';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RuleTypeParams } from '../../types';
+import { mockedDateString } from '../tests/lib';
+import { incrementRevision } from './increment_revision';
 
 describe('incrementRevision', () => {
   const currentRule: SavedObject<RuleAttributes> = {

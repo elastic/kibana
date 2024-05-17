@@ -9,19 +9,19 @@
 import { FetchIndexResponse } from '../actions/fetch_indices';
 import { BaseState } from '../state';
 import {
+  MigrationType,
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
-  getAliases,
-  getMigrationType,
-  buildRemoveAliasActions,
-  versionMigrationCompleted,
-  MigrationType,
-  getTempIndexName,
-  createBulkIndexOperationTuple,
-  hasLaterVersionAlias,
   aliasVersion,
+  buildRemoveAliasActions,
+  createBulkIndexOperationTuple,
+  getAliases,
   getIndexTypes,
+  getMigrationType,
+  getTempIndexName,
+  hasLaterVersionAlias,
+  versionMigrationCompleted,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { PaletteRegistry } from '@kbn/coloring';
-import { render, screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import {
   DatasourcePublicAPI,
   FramePublicAPI,
   VisualizationDimensionEditorProps,
 } from '../../../types';
 import { DatatableVisualizationState } from '../visualization';
-import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
 
 describe('data table dimension editor additional section', () => {

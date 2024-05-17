@@ -6,8 +6,8 @@
  */
 
 import {
-  FLEET_ELASTIC_AGENT_PACKAGE,
   AGENTS_INDEX,
+  FLEET_ELASTIC_AGENT_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type, Node } from 'ts-morph';
+import { Node, Type } from 'ts-morph';
 import { TypeKind } from '../types';
 
 export function getTypeKind(node: Node): TypeKind {

@@ -14,14 +14,14 @@ jest.mock('./track', () => ({ track: jest.fn() }));
 jest.mock('../../contexts/request_context', () => ({ useRequestActionContext: jest.fn() }));
 jest.mock('../../../lib/utils', () => ({ replaceVariables: jest.fn() }));
 
+import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
 
-import { ContextValue, ServicesContextProvider } from '../../contexts';
-import { serviceContextMock } from '../../contexts/services_context.mock';
-import { useRequestActionContext } from '../../contexts/request_context';
-import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
 import * as utils from '../../../lib/utils';
+import { ContextValue, ServicesContextProvider } from '../../contexts';
+import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
+import { useRequestActionContext } from '../../contexts/request_context';
+import { serviceContextMock } from '../../contexts/services_context.mock';
 
 import { sendRequest } from './send_request';
 import { useSendCurrentRequest } from './use_send_current_request';

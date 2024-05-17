@@ -6,9 +6,9 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import objectHash from 'object-hash';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import objectHash from 'object-hash';
 import type {
   BaseFieldsLatest,
   NewTermsFieldsLatest,
@@ -16,12 +16,12 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, NewTermsRuleParams } from '../../rule_schema';
-import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
-import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
-import type { SignalSource } from '../types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { CompleteRule, NewTermsRuleParams } from '../../rule_schema';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import type { SignalSource } from '../types';
+import { getSuppressionAlertFields, getSuppressionTerms } from '../utils';
+import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;

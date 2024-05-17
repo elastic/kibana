@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TimelineTabs } from '../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { TimelineTabs } from '../../../../../common/types';
+import { TestProviders, defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
 import type { UnifiedTimelineBodyProps } from './unified_timeline_body';
 import { UnifiedTimelineBody } from './unified_timeline_body';
-import { render, screen } from '@testing-library/react';
-import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 
 jest.mock('../unified_components', () => {
   return {

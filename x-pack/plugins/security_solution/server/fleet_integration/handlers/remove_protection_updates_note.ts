@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import pMap from 'p-map';
 import { protectionUpdatesNoteSavedObjectType } from '../../endpoint/lib/protection_updates_note/saved_object_mappings';
 

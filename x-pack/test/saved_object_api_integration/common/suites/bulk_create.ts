@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import expect from '@kbn/expect';
+import { SPACE_1, SPACE_2, getTestDataLoader } from '../../../common/lib/test_data_loader';
+import { FtrProviderContext } from '../ftr_provider_context';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
 import {
   expectResponses,
-  getUrlPrefix,
-  getTestTitle,
   getRedactedNamespaces,
+  getTestTitle,
+  getUrlPrefix,
 } from '../lib/saved_object_test_utils';
+import { ALL_SPACES_ID, SPACES } from '../lib/spaces';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

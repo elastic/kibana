@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { HttpStart, HttpHandler } from '@kbn/core/public';
+import type { HttpHandler, HttpStart } from '@kbn/core/public';
 import type { Parameters } from '@storybook/react';
 import { INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH } from '../../../../../common/http_api/infra_ml';
 import {
+  type AlertsSummaryHttpMocks,
+  type AnomaliesHttpMocks,
+  type MetadataResponseMocks,
+  type ProcessesHttpMocks,
+  type SnapshotAPIHttpMocks,
   alertsSummaryHttpResponse,
   anomaliesHttpResponse,
   metadataHttpResponse,
   processesChartHttpResponse,
   processesHttpResponse,
   snapshotAPItHttpResponse,
-  type AlertsSummaryHttpMocks,
-  type AnomaliesHttpMocks,
-  type MetadataResponseMocks,
-  type ProcessesHttpMocks,
-  type SnapshotAPIHttpMocks,
 } from './fixtures';
 
 export const getHttp = (params: Parameters): HttpStart => {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
+import type { IRouter } from '@kbn/core-http-server';
 
 /**
  * Allows to configure HTTP response parameters

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchHit, UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { FileStatus } from '@kbn/files-plugin/common/types';
 
 import {

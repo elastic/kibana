@@ -1,3 +1,6 @@
+import { coreMock } from '@kbn/core/public/mocks';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +8,9 @@
  * 2.0.
  */
 import React from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
-import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { LensPluginStartDependencies } from '../../plugin';
-import { createMockStartDependencies } from '../../editor_frame_service/mocks';
 import { DOC_TYPE } from '../../../common/constants';
+import { createMockStartDependencies } from '../../editor_frame_service/mocks';
+import type { LensPluginStartDependencies } from '../../plugin';
 import { ConfigureInLensPanelAction } from './edit_action';
 
 describe('open config panel action', () => {

@@ -6,57 +6,58 @@
  */
 
 import {
+  AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  AppMountParameters,
 } from '@kbn/core/public';
-import { BehaviorSubject, from } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { BehaviorSubject, from } from 'rxjs';
 
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
-  enableLegacyUptimeApp,
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import {
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
+  enableLegacyUptimeApp,
 } from '@kbn/observability-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
-import {
-  ObservabilityAIAssistantPublicStart,
-  ObservabilityAIAssistantPublicSetup,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { PLUGIN } from '../common/constants/plugin';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { UptimeConfig } from '../common/config';
+import { PLUGIN } from '../common/constants/plugin';
+import { setStartServices } from './kibana_services';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -66,7 +67,6 @@ import {
   legacyAlertTypeInitializers,
   uptimeAlertTypeInitializers,
 } from './legacy_uptime/lib/alert_types';
-import { setStartServices } from './kibana_services';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;

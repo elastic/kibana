@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { deleteRuleRoute } from './delete_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { deleteRuleRoute } from './delete_rule_route';
 
 const rulesClient = rulesClientMock.create();
 

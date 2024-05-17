@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getEventLog, ObjectRemover } from '../../../../../common/lib';
+import { ObjectRemover, getEventLog } from '../../../../../common/lib';
 import { EmailDomainsAllowed } from '../../config';
 
 // eslint-disable-next-line import/no-default-export

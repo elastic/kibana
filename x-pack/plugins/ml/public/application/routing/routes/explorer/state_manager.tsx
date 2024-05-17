@@ -12,25 +12,25 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useUrlState } from '@kbn/ml-url-state';
-import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import { useUrlState } from '@kbn/ml-url-state';
 import { useMlKibana } from '../../../contexts/kibana';
 
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
-import { useRefresh } from '../../use_refresh';
-import { Explorer } from '../../../explorer';
-import { ml } from '../../../services/ml_api_service';
-import { useExplorerData } from '../../../explorer/actions';
-import { useJobSelection } from '../../../components/job_selector/use_job_selection';
+import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_view_selector';
 import { useTableInterval } from '../../../components/controls/select_interval';
 import { useTableSeverity } from '../../../components/controls/select_severity';
+import { useJobSelection } from '../../../components/job_selector/use_job_selection';
 import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';
-import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_view_selector';
-import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import { Explorer } from '../../../explorer';
+import { useExplorerData } from '../../../explorer/actions';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
+import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
+import { ml } from '../../../services/ml_api_service';
+import { useRefresh } from '../../use_refresh';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];

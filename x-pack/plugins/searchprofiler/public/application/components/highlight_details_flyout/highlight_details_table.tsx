@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { EuiBasicTable, EuiToolTip, EuiBadge } from '@elastic/eui';
 
-import { BreakdownItem } from '../../types';
 import { nsToPretty } from '../../lib';
+import { BreakdownItem } from '../../types';
 import { PercentageBadge } from '../percentage_badge';
 
 interface Props {

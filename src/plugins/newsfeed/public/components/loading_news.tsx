@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiLoadingElastic } from '@elastic/eui';

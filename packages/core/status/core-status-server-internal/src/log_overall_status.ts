@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, pairwise, takeUntil, map, startWith } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { Logger } from '@kbn/logging';
+import type { Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, map, pairwise, startWith, takeUntil } from 'rxjs';
 
 interface LogOverallStatusChangesParams {
   logger: Logger;

@@ -13,13 +13,13 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import React, { useCallback, useMemo, useState } from 'react';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 

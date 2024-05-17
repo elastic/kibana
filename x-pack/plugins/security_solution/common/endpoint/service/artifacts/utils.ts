@@ -6,8 +6,8 @@
  */
 
 import type {
-  ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { v4 as uuidv4 } from 'uuid';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';

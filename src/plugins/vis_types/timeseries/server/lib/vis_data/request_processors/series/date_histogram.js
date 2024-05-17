@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { UI_SETTINGS, search } from '@kbn/data-plugin/server';
 import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
-import { offsetTime } from '../../offset_time';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
-import { search, UI_SETTINGS } from '@kbn/data-plugin/server';
+import { offsetTime } from '../../offset_time';
 
 const { dateHistogramInterval } = search.aggs;
 

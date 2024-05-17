@@ -7,11 +7,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../../../shared_imports';
 
+import { PipelineError, toKnownError } from './error_utils';
 import { i18nTexts } from './i18n_texts';
-import { toKnownError, PipelineError } from './error_utils';
 
 interface Props {
   error: unknown;

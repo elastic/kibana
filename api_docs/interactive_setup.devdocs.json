@@ -141,9 +141,7 @@
             "description": [
               "\nAn array of addresses in the form of `<hostname>:<port>` or `<ip_address>:<port>` where the Elasticsearch node is listening for HTTP connections."
             ],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "src/plugins/interactive_setup/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -194,9 +192,7 @@
             "type": "boolean",
             "tags": [],
             "label": "authRequired",
-            "description": [
-              "\nIndicates whether the cluster requires authentication."
-            ],
+            "description": ["\nIndicates whether the cluster requires authentication."],
             "path": "src/plugins/interactive_setup/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -284,9 +280,7 @@
         "type": "Enum",
         "tags": [],
         "label": "ElasticsearchConnectionStatus",
-        "description": [
-          "\nDescribes current status of the Elasticsearch connection."
-        ],
+        "description": ["\nDescribes current status of the Elasticsearch connection."],
         "path": "src/plugins/interactive_setup/common/elasticsearch_connection_status.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -301,9 +295,7 @@
         "tags": [],
         "label": "ERROR_COMPATIBILITY_FAILURE",
         "description": [],
-        "signature": [
-          "\"compatibility_failure\""
-        ],
+        "signature": ["\"compatibility_failure\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -316,9 +308,7 @@
         "tags": [],
         "label": "ERROR_CONFIGURE_FAILURE",
         "description": [],
-        "signature": [
-          "\"configure_failure\""
-        ],
+        "signature": ["\"configure_failure\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -331,9 +321,7 @@
         "tags": [],
         "label": "ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED",
         "description": [],
-        "signature": [
-          "\"elasticsearch_connection_configured\""
-        ],
+        "signature": ["\"elasticsearch_connection_configured\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -346,9 +334,7 @@
         "tags": [],
         "label": "ERROR_ENROLL_FAILURE",
         "description": [],
-        "signature": [
-          "\"enroll_failure\""
-        ],
+        "signature": ["\"enroll_failure\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -361,9 +347,7 @@
         "tags": [],
         "label": "ERROR_KIBANA_CONFIG_FAILURE",
         "description": [],
-        "signature": [
-          "\"kibana_config_failure\""
-        ],
+        "signature": ["\"kibana_config_failure\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -376,9 +360,7 @@
         "tags": [],
         "label": "ERROR_KIBANA_CONFIG_NOT_WRITABLE",
         "description": [],
-        "signature": [
-          "\"kibana_config_not_writable\""
-        ],
+        "signature": ["\"kibana_config_not_writable\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -391,9 +373,7 @@
         "tags": [],
         "label": "ERROR_OUTSIDE_PREBOOT_STAGE",
         "description": [],
-        "signature": [
-          "\"outside_preboot_stage\""
-        ],
+        "signature": ["\"outside_preboot_stage\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -406,9 +386,7 @@
         "tags": [],
         "label": "ERROR_PING_FAILURE",
         "description": [],
-        "signature": [
-          "\"ping_failure\""
-        ],
+        "signature": ["\"ping_failure\""],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -421,9 +399,7 @@
         "tags": [],
         "label": "VERIFICATION_CODE_LENGTH",
         "description": [],
-        "signature": [
-          "6"
-        ],
+        "signature": ["6"],
         "path": "src/plugins/interactive_setup/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

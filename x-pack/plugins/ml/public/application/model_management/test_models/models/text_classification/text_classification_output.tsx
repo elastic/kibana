@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { type FC, Fragment } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiProgress,
-  EuiTitle,
   EuiHorizontalRule,
+  EuiProgress,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { type FC, Fragment } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
 import type {
+  FillMaskInference,
+  FormattedTextClassificationResponse,
+  LangIdentInference,
   TextClassificationInference,
   ZeroShotClassificationInference,
-  FillMaskInference,
-  LangIdentInference,
-  FormattedTextClassificationResponse,
 } from '.';
 
 export const getTextClassificationOutputComponent = (

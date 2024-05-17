@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BrowserField } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { BrowserField } from '../../containers/source';
 
 export type EventFieldsData = BrowserField & TimelineEventsDetailsItem;
 

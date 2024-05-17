@@ -6,8 +6,8 @@
  */
 
 import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
-import { merge } from 'lodash/fp';
 import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
+import { merge } from 'lodash/fp';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse, getListClient } from '../utils';

@@ -9,8 +9,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { RegistryEventDetailsLine } from './registry_event_details_line';
 import { MODIFIED_REGISTRY_KEY } from '../system/translations';
+import { RegistryEventDetailsLine } from './registry_event_details_line';
 
 jest.mock('../../../../../../common/lib/kibana');
 

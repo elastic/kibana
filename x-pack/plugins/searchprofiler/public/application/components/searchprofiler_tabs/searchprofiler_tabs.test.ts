@@ -7,7 +7,7 @@
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
-import { SearchProfilerTabs, Props } from './searchprofiler_tabs';
+import { Props, SearchProfilerTabs } from './searchprofiler_tabs';
 
 describe('Search Profiler Tabs', () => {
   it('renders', async () => {

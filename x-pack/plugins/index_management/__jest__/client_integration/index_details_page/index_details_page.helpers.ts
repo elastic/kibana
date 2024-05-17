@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   AsyncTestBedConfig,
+  TestBed,
   reactRouterMock,
   registerTestBed,
-  TestBed,
 } from '@kbn/test-jest-helpers';
-import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 
 import { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
-import { testIndexName } from './mocks';
 import { MappingField } from '../index_template_wizard/template_form.helpers';
+import { testIndexName } from './mocks';
 
 let routerMock: typeof reactRouterMock;
 const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({

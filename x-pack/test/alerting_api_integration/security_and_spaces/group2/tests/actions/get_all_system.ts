@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
 export default function getAllActionTests({ getService }: FtrProviderContext) {

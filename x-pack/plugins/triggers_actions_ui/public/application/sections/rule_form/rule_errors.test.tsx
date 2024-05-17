@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import React, { Fragment } from 'react';
-import {
-  validateBaseProperties,
-  getRuleErrors,
-  getRuleActionErrors,
-  hasObjectErrors,
-  isValidRule,
-} from './rule_errors';
+import { v4 as uuidv4 } from 'uuid';
+import { ActionTypeModel } from '../../..';
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionTypeModel } from '../../..';
+import {
+  getRuleActionErrors,
+  getRuleErrors,
+  hasObjectErrors,
+  isValidRule,
+  validateBaseProperties,
+} from './rule_errors';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };

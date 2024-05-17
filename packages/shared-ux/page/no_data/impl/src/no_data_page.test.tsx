@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { NoDataCard } from '@kbn/shared-ux-card-no-data';
 import { getNoDataPageServicesMock } from '@kbn/shared-ux-page-no-data-mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
 
 import { NoDataPage } from './no_data_page';
 import { NoDataPageProvider } from './services';

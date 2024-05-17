@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { get, max, sum, last, isNumber } from 'lodash';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { get, isNumber, last, max, sum } from 'lodash';
 import {
-  MetricsAPIResponse,
-  SnapshotNodeResponse,
   MetricsAPIRequest,
+  MetricsAPIResponse,
   MetricsAPIRow,
-  SnapshotRequest,
-  SnapshotNode,
   MetricsAPISeries,
+  SnapshotNode,
   SnapshotNodeMetric,
+  SnapshotNodeResponse,
+  SnapshotRequest,
 } from '../../../../common/http_api';
-import { META_KEY } from './constants';
 import { applyMetadataToLastPath } from './apply_metadata_to_last_path';
+import { META_KEY } from './constants';
 
 const getMetricValue = (row: MetricsAPIRow) => {
   if (!isNumber(row.metric_0)) return null;

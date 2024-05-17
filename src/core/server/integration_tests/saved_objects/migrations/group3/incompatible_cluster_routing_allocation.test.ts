@@ -7,18 +7,18 @@
  */
 
 import Path from 'path';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Root } from '@kbn/core-root-server-internal';
+import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
+import {
+  type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
+import { LogRecord } from '@kbn/logging';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LogRecord } from '@kbn/logging';
 import { getDocVersion } from '../test_utils';
-import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
 const docVersion = getDocVersion();

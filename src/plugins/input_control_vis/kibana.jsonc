@@ -15,8 +15,6 @@
       "unifiedSearch",
       "uiActions"
     ],
-    "requiredBundles": [
-      "kibanaReact", "embeddable"
-    ]
+    "requiredBundles": ["kibanaReact", "embeddable"]
   }
 }

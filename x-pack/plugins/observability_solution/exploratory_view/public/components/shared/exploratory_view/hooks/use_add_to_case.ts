@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { HttpSetup, MountPoint } from '@kbn/core/public';
-import { CaseUI, AttachmentType } from '@kbn/cases-plugin/common';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
-import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AttachmentType, CaseUI } from '@kbn/cases-plugin/common';
 import { LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';
+import { HttpSetup, MountPoint } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
+import { useCallback, useState } from 'react';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { AddToCaseProps } from '../header/add_to_case_action';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
-import type { PolicyFormComponentCommonProps } from '../../types';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { UIPolicyConfig } from '../../../../../../../../common/endpoint/types';
+import type { PolicyFormComponentCommonProps } from '../../types';
 import type { EventFormOption, SupplementalEventFormOption } from '../event_collection_card';
 import { EventCollectionCard } from '../event_collection_card';
 

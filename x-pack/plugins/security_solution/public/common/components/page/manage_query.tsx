@@ -9,8 +9,8 @@ import type { Position } from '@elastic/charts';
 import { omit } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
-import type { inputsModel } from '../../store';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { inputsModel } from '../../store';
 import type { InputsModelId } from '../../store/inputs/constants';
 
 export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {

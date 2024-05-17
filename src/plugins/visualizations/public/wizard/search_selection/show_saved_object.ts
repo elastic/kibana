@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectCommon, FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 export interface SavedSearchesAttributes extends FinderAttributes {
   isTextBasedQuery: boolean;

@@ -7,7 +7,7 @@
  */
 
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, VislibConfig } from '../config';
+import { VislibConfig, configSchema } from '../config';
 
 export const config: PluginConfigDescriptor<VislibConfig> = {
   exposeToBrowser: {

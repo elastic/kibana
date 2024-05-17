@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
+import { RulesParams, rulesLocatorID } from '@kbn/observability-plugin/public';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import React from 'react';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
-import { InputFieldProps } from './input_fields';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { InputFieldProps } from './input_fields';
 
 interface IndicesConfigurationPanelProps {
   isLoading: boolean;

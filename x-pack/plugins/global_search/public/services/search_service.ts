@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { merge, Observable, timer, throwError, EMPTY } from 'rxjs';
-import { map, takeUntil, catchError } from 'rxjs';
+import { HttpStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { duration } from 'moment';
-import { i18n } from '@kbn/i18n';
-import { HttpStart } from '@kbn/core/public';
+import { EMPTY, Observable, merge, throwError, timer } from 'rxjs';
+import { catchError, map, takeUntil } from 'rxjs';
+import { defaultMaxProviderResults } from '../../common/constants';
+import { GlobalSearchFindError } from '../../common/errors';
+import { ILicenseChecker } from '../../common/license_checker';
+import { takeInArray } from '../../common/operators';
+import { processProviderResult } from '../../common/process_result';
 import {
+  GlobalSearchBatchedResults,
   GlobalSearchFindParams,
   GlobalSearchProviderResult,
-  GlobalSearchBatchedResults,
 } from '../../common/types';
-import { GlobalSearchFindError } from '../../common/errors';
-import { takeInArray } from '../../common/operators';
-import { defaultMaxProviderResults } from '../../common/constants';
-import { processProviderResult } from '../../common/process_result';
-import { ILicenseChecker } from '../../common/license_checker';
-import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchClientConfigType } from '../config';
-import { GlobalSearchFindOptions } from './types';
-import { getDefaultPreference } from './utils';
+import { GlobalSearchResultProvider } from '../types';
 import { fetchServerResults } from './fetch_server_results';
 import { fetchServerSearchableTypes } from './fetch_server_searchable_types';
+import { GlobalSearchFindOptions } from './types';
+import { getDefaultPreference } from './utils';
 
 /** @public */
 export interface SearchServiceSetup {

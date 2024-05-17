@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 
 jest.mock('../../../kibana_services', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { type FC, useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -32,17 +32,17 @@ import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
-import { getTransformProgress } from '../../../../common';
-import { useCreateTransform, useGetTransformStats, useStartTransforms } from '../../../../hooks';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { RedirectToTransformManagement } from '../../../../common/navigation';
-import { ToastNotificationText } from '../../../../components';
 import type {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
 import { isContinuousTransform } from '../../../../../../common/types/transform';
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { getTransformProgress } from '../../../../common';
+import { RedirectToTransformManagement } from '../../../../common/navigation';
+import { ToastNotificationText } from '../../../../components';
+import { useCreateTransform, useGetTransformStats, useStartTransforms } from '../../../../hooks';
 
 export interface StepDetailsExposedState {
   created: boolean;

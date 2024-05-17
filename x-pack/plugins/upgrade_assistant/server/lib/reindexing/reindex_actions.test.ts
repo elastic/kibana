@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import moment from 'moment';
 
 import {
@@ -16,9 +16,9 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { getMockVersionInfo } from '../__fixtures__/version';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
-import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 

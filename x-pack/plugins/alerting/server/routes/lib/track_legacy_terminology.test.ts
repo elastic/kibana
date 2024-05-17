@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { trackLegacyTerminology, LEGACY_TERMS } from './track_legacy_terminology';
+import { LEGACY_TERMS, trackLegacyTerminology } from './track_legacy_terminology';
 
 describe('trackLegacyTerminology', () => {
   it('should call `usageCounter.incrementCounter`', () => {

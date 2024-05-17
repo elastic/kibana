@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 
-import { remoteClusters } from './reducers';
 import { detailPanel } from './middleware';
+import { remoteClusters } from './reducers';
 
 export function createRemoteClustersStore(initialState = {}) {
   const enhancers = [applyMiddleware(thunk, detailPanel)];

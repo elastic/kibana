@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { css } from '@emotion/react';
 import {
-  EuiTitle,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiText,
   EuiFlyoutHeader,
-  IconType,
-  EuiBetaBadge,
+  EuiIcon,
   EuiTab,
   EuiTabs,
+  EuiText,
+  EuiTitle,
+  IconType,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
-import { EditConnectorTabs } from '../../../../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { memo, useCallback } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { EditConnectorTabs } from '../../../../types';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 
 const FlyoutHeaderComponent: React.FC<{
   isExperimental?: boolean;

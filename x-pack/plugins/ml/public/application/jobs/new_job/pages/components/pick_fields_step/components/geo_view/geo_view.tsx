@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
 
 import { GeoDetector } from './metric_selection';
 import { GeoDetectorsSummary } from './metric_selection_summary';

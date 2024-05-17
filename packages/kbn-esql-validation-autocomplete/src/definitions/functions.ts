@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { ESQLFunction } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import { isLiteralItem } from '../shared/helpers';
 import type { FunctionDefinition } from './types';
 

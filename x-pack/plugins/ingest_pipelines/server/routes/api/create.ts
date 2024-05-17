@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
-import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
+import { Pipeline } from '../../../common/types';
 import { RouteDependencies } from '../../types';
 import { pipelineSchema } from './shared';
 

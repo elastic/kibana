@@ -7,8 +7,8 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
 import { DashboardAttributes, SavedDashboardPanel } from './content_management';
 import { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';

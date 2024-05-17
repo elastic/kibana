@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
+import type { EuiDataGridRefProps } from '@elastic/eui';
+import { type EuiDataGridColumnCellAction, EuiLoadingSpinner } from '@elastic/eui';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { MutableRefObject } from 'react';
 import React, { useCallback, useMemo, useRef } from 'react';
-import type { EuiDataGridRefProps } from '@elastic/eui';
-import { EuiLoadingSpinner, type EuiDataGridColumnCellAction } from '@elastic/eui';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type {
   CellAction,
   CellActionCompatibilityContext,
   CellActionExecutionContext,
-  CellActionsProps,
   CellActionFieldValue,
+  CellActionsProps,
 } from '../types';
 import { useBulkLoadActions } from './use_load_actions';
 
@@ -43,7 +43,7 @@ export interface UseDataGridColumnsCellActionsProps
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
-  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
+  P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps,
 > = (props: P) => EuiDataGridColumnCellAction[][];
 
 // static actions array references to prevent React updates

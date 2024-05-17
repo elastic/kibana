@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ViewDetailsPopover } from './view_details_popover';
 import type { SearchResponseWarning } from '../../types';
+import { ViewDetailsPopover } from './view_details_popover';
 
 describe('ViewDetailsPopover', () => {
   describe('single warning', () => {

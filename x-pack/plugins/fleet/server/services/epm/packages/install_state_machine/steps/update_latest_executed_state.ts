@@ -11,8 +11,8 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../constants';
 
 import { auditLoggingService } from '../../../../audit_logging';
 
-import type { InstallContext } from '../_state_machine_package_install';
 import { withPackageSpan } from '../../utils';
+import type { InstallContext } from '../_state_machine_package_install';
 
 // Function invoked after each transition
 export const updateLatestExecutedState = async (context: InstallContext) => {

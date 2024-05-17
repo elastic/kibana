@@ -49,9 +49,7 @@
             "type": "Object",
             "tags": [],
             "label": "props",
-            "description": [
-              "The {@link FieldRowProps } for the {@link FieldRow } component."
-            ],
+            "description": ["The {@link FieldRowProps } for the {@link FieldRow } component."],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-components-field-row",
@@ -178,9 +176,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldRowProps",
-        "description": [
-          "\nProps for a {@link FieldRow} component."
-        ],
+        "description": ["\nProps for a {@link FieldRow} component."],
         "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -191,9 +187,7 @@
             "type": "Object",
             "tags": [],
             "label": "field",
-            "description": [
-              "The {@link FieldDefinition} corresponding the setting."
-            ],
+            "description": ["The {@link FieldDefinition} corresponding the setting."],
             "signature": [
               "{ id: string; type: ",
               {
@@ -215,9 +209,7 @@
             "type": "boolean",
             "tags": [],
             "label": "isSavingEnabled",
-            "description": [
-              "True if saving settings is enabled, false otherwise."
-            ],
+            "description": ["True if saving settings is enabled, false otherwise."],
             "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -228,9 +220,7 @@
             "type": "Function",
             "tags": [],
             "label": "onFieldChange",
-            "description": [
-              "The {@link OnInputChangeFn} handler."
-            ],
+            "description": ["The {@link OnInputChangeFn} handler."],
             "signature": [
               "(id: string, change?: ",
               {
@@ -298,9 +288,7 @@
             "description": [
               "\nThe onClear handler, if a value is cleared to an empty or default state."
             ],
-            "signature": [
-              "((id: string) => void) | undefined"
-            ],
+            "signature": ["((id: string) => void) | undefined"],
             "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -311,12 +299,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "id",
-                "description": [
-                  "The id relating to the field to clear."
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["The id relating to the field to clear."],
+                "signature": ["string"],
                 "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -365,9 +349,7 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldRowProviderProps",
-        "description": [
-          "\nProps for {@link FieldRowProvider}."
-        ],
+        "description": ["\nProps for {@link FieldRowProvider}."],
         "signature": [
           {
             "pluginId": "@kbn/management-settings-components-field-row",
@@ -426,9 +408,7 @@
             "tags": [],
             "label": "docLinks",
             "description": [],
-            "signature": [
-              "{ links: { management: Record<string, string>; }; }"
-            ],
+            "signature": ["{ links: { management: Record<string, string>; }; }"],
             "path": "packages/kbn-management/settings/components/field_row/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -442,9 +422,7 @@
         "type": "Interface",
         "tags": [],
         "label": "Services",
-        "description": [
-          "\nContextual services used by a {@link FieldRow} component."
-        ],
+        "description": ["\nContextual services used by a {@link FieldRow} component."],
         "path": "packages/kbn-management/settings/components/field_row/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -456,9 +434,7 @@
             "tags": [],
             "label": "links",
             "description": [],
-            "signature": [
-              "{ [key: string]: string; }"
-            ],
+            "signature": ["{ [key: string]: string; }"],
             "path": "packages/kbn-management/settings/components/field_row/types.ts",
             "deprecated": false,
             "trackAdoption": false

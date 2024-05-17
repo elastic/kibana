@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldIconProps, GenericFieldIcon } from './field_icon';
+import React, { Fragment } from 'react';
 import { type FieldBase } from '../../types';
+import type { FieldIconProps, GenericFieldIcon } from './field_icon';
 
 const Fallback = () => <Fragment />;
 

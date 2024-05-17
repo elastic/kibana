@@ -6,23 +6,23 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
+import {
+  UpdateMaintenanceWindowRequestBodyV1,
+  UpdateMaintenanceWindowRequestParamsV1,
+  UpdateMaintenanceWindowResponseV1,
+  updateBodySchemaV1,
+  updateParamsSchemaV1,
+} from '../../../../../common/routes/maintenance_window/apis/update';
+import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
 import { ILicenseState } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
-import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
-import {
-  updateBodySchemaV1,
-  updateParamsSchemaV1,
-  UpdateMaintenanceWindowRequestBodyV1,
-  UpdateMaintenanceWindowRequestParamsV1,
-  UpdateMaintenanceWindowResponseV1,
-} from '../../../../../common/routes/maintenance_window/apis/update';
-import { transformUpdateBodyV1 } from './transforms';
+import { verifyAccessAndContext } from '../../../lib';
 import { transformMaintenanceWindowToResponseV1 } from '../../transforms';
+import { transformUpdateBodyV1 } from './transforms';
 
 export const updateMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

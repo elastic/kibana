@@ -7,14 +7,14 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { useRightPanelContext } from '../context';
-import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../../helpers';
+import { useRightPanelContext } from '../context';
 
 interface CellActionsProps {
   /**

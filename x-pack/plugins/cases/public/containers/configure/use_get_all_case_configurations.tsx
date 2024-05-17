@@ -6,8 +6,8 @@
  */
 
 import type { CasesConfigurationUI } from '../types';
-import { initialConfiguration } from './utils';
 import { useGetCaseConfigurationsQuery } from './use_get_case_configurations_query';
+import { initialConfiguration } from './utils';
 
 const transformConfiguration = (data: CasesConfigurationUI[] | null): CasesConfigurationUI[] => {
   if (data) {

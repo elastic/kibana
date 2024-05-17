@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { monaco } from '../../monaco_imports';
 import {
   consoleSharedLanguageConfiguration,
   consoleSharedLexerRules,
-  matchTokensWithEOL,
   matchToken,
+  matchTokensWithEOL,
 } from './shared';
-import { monaco } from '../../monaco_imports';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   ...consoleSharedLanguageConfiguration,

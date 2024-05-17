@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Story } from '@storybook/react';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import React from 'react';
+import { Indicator, generateMockIndicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
 
 export default {

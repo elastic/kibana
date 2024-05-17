@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { FieldDescription } from './description';
 import { FieldDefinition } from '@kbn/management-settings-types';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { wrap } from '../mocks';
+import { FieldDescription } from './description';
 
 const description = 'hello world description';
 

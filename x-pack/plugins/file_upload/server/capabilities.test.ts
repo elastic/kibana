@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { setupCapabilities } from './capabilities';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { Capabilities, CoreStart } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { setupCapabilities } from './capabilities';
 
 describe('setupCapabilities', () => {
   it('registers a capabilities provider for the file upload feature', () => {

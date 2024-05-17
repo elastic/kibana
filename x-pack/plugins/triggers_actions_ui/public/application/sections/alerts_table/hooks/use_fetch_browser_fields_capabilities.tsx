@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isValidFeatureId, ValidFeatureId } from '@kbn/rule-data-utils';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import { ValidFeatureId, isValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
-import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { Alerts } from '../../../../types';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
 export interface FetchAlertsArgs {
@@ -84,9 +84,8 @@ export const useFetchBrowserFieldCapabilities = ({
     setIsLoading(true);
 
     const callApi = async (validFeatureId: ValidFeatureId[]) => {
-      const { browserFields: browserFieldsInfo, fields: newFields } = await getBrowserFieldInfo(
-        validFeatureId
-      );
+      const { browserFields: browserFieldsInfo, fields: newFields } =
+        await getBrowserFieldInfo(validFeatureId);
       setFields(newFields);
       setBrowserFields(browserFieldsInfo);
       setIsLoading(false);

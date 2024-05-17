@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiButton,
   EuiIcon,
@@ -15,10 +14,11 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
+import React from 'react';
 import {
-  DatasetSelection,
   DataSourceSelection,
   DataViewSelection,
+  DatasetSelection,
   isDataViewSelection,
 } from '../../../../common/data_source_selection';
 import { DATA_SOURCE_SELECTOR_WIDTH, POPOVER_ID } from '../constants';

@@ -7,7 +7,7 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { GuideId, GuideState, GuideStatus, GuideConfig } from '@kbn/guided-onboarding';
+import { GuideConfig, GuideId, GuideState, GuideStatus } from '@kbn/guided-onboarding';
 import type { GuidesConfig } from '../../common';
 import { API_BASE_PATH } from '../../common';
 import { findGuideConfigByGuideId, getInProgressStepConfig } from './helpers';

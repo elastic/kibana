@@ -7,14 +7,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isEmpty } from 'lodash';
-import { postCaseConfigure, patchCaseConfigure } from './api';
-import * as i18n from './translations';
-import type { ServerError } from '../../types';
-import { useCasesToast } from '../../common/use_cases_toast';
-import { casesMutationsKeys, casesQueriesKeys } from '../constants';
-import { useCasesContext } from '../../components/cases_context/use_cases_context';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ConfigurationRequest } from '../../../common/types/api';
+import { useCasesToast } from '../../common/use_cases_toast';
+import { useCasesContext } from '../../components/cases_context/use_cases_context';
+import type { ServerError } from '../../types';
+import { casesMutationsKeys, casesQueriesKeys } from '../constants';
+import { patchCaseConfigure, postCaseConfigure } from './api';
+import * as i18n from './translations';
 
 type Request = Omit<SnakeToCamelCase<ConfigurationRequest>, 'owner'> & {
   id: string;

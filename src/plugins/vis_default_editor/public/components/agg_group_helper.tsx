@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { findIndex, isEmpty } from 'lodash';
 import type { IAggConfig } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
+import { findIndex, isEmpty } from 'lodash';
 
 import { getSchemaByName } from '../schemas';
 import type { AggsState } from './agg_group_state';

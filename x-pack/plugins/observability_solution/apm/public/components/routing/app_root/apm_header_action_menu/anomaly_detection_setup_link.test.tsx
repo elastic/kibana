@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
 import { getAnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
-import { render } from '../rtl_helpers';
-import * as hooks from '../hooks/use_series_storage';
-import { ViewActions } from './view_actions';
-import { AllSeries, reportTypeKey } from '../hooks/use_series_storage';
 import { ReportTypes } from '../../../..';
+import * as hooks from '../hooks/use_series_storage';
+import { AllSeries, reportTypeKey } from '../hooks/use_series_storage';
+import { render } from '../rtl_helpers';
+import { ViewActions } from './view_actions';
 
 describe('ViewActions', () => {
   const applyChanges = jest.fn();

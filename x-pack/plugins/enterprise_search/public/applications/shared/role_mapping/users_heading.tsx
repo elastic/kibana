@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { USERS_HEADING_TITLE, USERS_HEADING_DESCRIPTION, USERS_HEADING_LABEL } from './constants';
+import { USERS_HEADING_DESCRIPTION, USERS_HEADING_LABEL, USERS_HEADING_TITLE } from './constants';
 
 interface Props {
   onClick(): void;

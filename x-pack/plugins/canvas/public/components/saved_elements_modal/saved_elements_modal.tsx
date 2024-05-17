@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { camelCase } from 'lodash';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { CustomElement, PositionedElement } from '../../../types';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { useNotifyService, useCustomElementService } from '../../services';
-// @ts-expect-error untyped local
-import { selectToplevelNodes } from '../../state/actions/transient';
+import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
+import { useCustomElementService, useNotifyService } from '../../services';
 // @ts-expect-error untyped local
 import { insertNodes } from '../../state/actions/elements';
+// @ts-expect-error untyped local
+import { selectToplevelNodes } from '../../state/actions/transient';
 import { getSelectedPage } from '../../state/selectors/workpad';
-import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import {
   SavedElementsModal as Component,
   Props as ComponentProps,
 } from './saved_elements_modal.component';
-import { PositionedElement, CustomElement } from '../../../types';
 
 const customElementAdded = 'elements-custom-added';
 

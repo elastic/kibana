@@ -11,8 +11,8 @@ import {
   CaseAttributesRt,
   CaseSettingsRt,
   CaseSeverity,
-  CasesRt,
   CaseStatuses,
+  CasesRt,
   RelatedCaseRt,
 } from './v1';
 

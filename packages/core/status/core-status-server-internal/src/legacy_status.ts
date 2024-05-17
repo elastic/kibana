@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { pick } from 'lodash';
+import type { PluginName } from '@kbn/core-base-common';
+import { type CoreStatus, type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { i18n } from '@kbn/i18n';
 import { deepFreeze } from '@kbn/std';
-import type { PluginName } from '@kbn/core-base-common';
-import { ServiceStatusLevels, type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
+import { pick } from 'lodash';
 
 interface Deps {
   overall: ServiceStatus;

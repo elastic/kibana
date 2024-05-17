@@ -18,10 +18,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { validateTopNBucket } from '../validators';
 import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
 import { type MlAnomalyDetectionAlertAdvancedSettings } from '../../../common/types/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
+import { validateTopNBucket } from '../validators';
 
 interface AdvancedSettingsProps {
   value: MlAnomalyDetectionAlertAdvancedSettings;

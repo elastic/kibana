@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
-import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Meta, Story } from '@storybook/react';
+import React, { useState } from 'react';
 import { ErrorCountRuleParams, ErrorCountRuleType } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';

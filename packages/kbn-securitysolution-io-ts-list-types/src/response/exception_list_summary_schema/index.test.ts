@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { getListSummaryResponseMock } from './index.mock';
 import { ExceptionListSummarySchema, exceptionListSummarySchema } from '.';
+import { getListSummaryResponseMock } from './index.mock';
 
 describe('list_summary_schema', () => {
   test('it should validate a typical list summary response', () => {

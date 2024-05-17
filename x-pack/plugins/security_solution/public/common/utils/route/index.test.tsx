@@ -8,12 +8,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { SecurityPageName } from '../../../app/types';
 import { HostsTableType } from '../../../explore/hosts/store/model';
 import { ManageRoutesSpy } from './manage_spy_routes';
+import { generateHistoryMock, generateRoutesMock } from './mocks';
 import { SpyRouteComponent } from './spy_routes';
 import { useRouteSpy } from './use_route_spy';
-import { generateHistoryMock, generateRoutesMock } from './mocks';
-import { SecurityPageName } from '../../../app/types';
 
 const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;
 jest.mock('./use_route_spy', () => ({

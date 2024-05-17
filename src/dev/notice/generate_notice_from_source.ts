@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { readFile } from 'fs/promises';
 import { relative } from 'path';
+import { readFile } from 'fs/promises';
 import globby from 'globby';
 
 import { ToolingLog } from '@kbn/tooling-log';

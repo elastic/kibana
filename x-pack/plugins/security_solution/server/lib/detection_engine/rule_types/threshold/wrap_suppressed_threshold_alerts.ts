@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import objectHash from 'object-hash';
 import sortBy from 'lodash/sortBy';
+import objectHash from 'object-hash';
 
-import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
-  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_INSTANCE_ID,
-  ALERT_SUPPRESSION_TERMS,
-  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_TERMS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
 
-import type { ThresholdBucket } from './types';
+import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { transformBucketIntoHit } from './bulk_create_threshold_signals';
-import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { ThresholdBucket } from './types';
 
 /**
  * wraps suppressed threshold alerts

@@ -9,18 +9,18 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import type { Agent } from '../../types';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
-import { getAgentById, getAgents, updateAgent, getAgentPolicyForAgent } from './crud';
+import { getAgentById, getAgentPolicyForAgent, getAgents, updateAgent } from './crud';
 import {
-  invalidateAPIKeysForAgents,
   UnenrollActionRunner,
+  invalidateAPIKeysForAgents,
   unenrollBatch,
   updateActionsForForceUnenroll,
 } from './unenroll_action_runner';

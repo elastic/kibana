@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { OpenIndicatorFlyoutButton } from './open_flyout_button';
+import React from 'react';
 import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
+import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { BUTTON_TEST_ID } from './test_ids';
 
 const mockIndicator = generateMockIndicator();

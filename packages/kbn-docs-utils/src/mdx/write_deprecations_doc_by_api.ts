@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import Fsp from 'fs/promises';
-import Path from 'path';
+import moment from 'moment';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import {
   ApiReference,
   ReferencedDeprecationsByAPI,
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
 } from '../types';
-import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
 export async function writeDeprecationDocByApi(

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import userEvent from '@testing-library/user-event';
+import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { DISCOVER_APP_LOCATOR } from '../../../common';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { LogsExplorerTabs, LogsExplorerTabsProps } from './logs_explorer_tabs';
-import { DISCOVER_APP_LOCATOR } from '../../../common';
-import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
 const createMockLocator = (id: string) => ({
   navigate: jest.fn(),

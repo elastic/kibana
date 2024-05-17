@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  LicenseType,
   ILicense,
-  LicenseStatus,
-  LicenseCheck,
   LICENSE_TYPE,
-  PublicLicenseJSON,
-  PublicLicense,
+  LicenseCheck,
+  LicenseStatus,
+  LicenseType,
   PublicFeatures,
+  PublicLicense,
+  PublicLicenseJSON,
 } from './types';
 
 /**

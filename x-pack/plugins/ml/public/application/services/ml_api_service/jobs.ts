@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
-import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { CategorizationAnalyzer, FieldValidationResults } from '@kbn/ml-category-validator';
-import type { HttpService } from '../http_service';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { useMemo } from 'react';
+import type { Observable } from 'rxjs';
 import { useMlKibana } from '../../contexts/kibana';
+import type { HttpService } from '../http_service';
 
-import type { Dictionary } from '../../../../common/types/common';
+import type { JobAction } from '../../../../common/constants/job_actions';
 import type {
-  MlJobWithTimeRange,
-  MlSummaryJobs,
   CombinedJobWithStats,
-  Job,
   Datafeed,
   IndicesOptions,
+  Job,
+  MlJobWithTimeRange,
+  MlSummaryJobs,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
-import type { JobAction } from '../../../../common/constants/job_actions';
+import type { Dictionary } from '../../../../common/types/common';
 import type { Group } from '../../../../common/types/groups';
 import type { ExistingJobsAndGroups } from '../job_service';
 
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { Category } from '../../../../common/types/categories';
 import type {
-  JobsExistResponse,
   BulkCreateResults,
+  JobsExistResponse,
   ResetJobsResponse,
 } from '../../../../common/types/job_service';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {

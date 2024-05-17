@@ -6,15 +6,15 @@
  */
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ToolingLog } from '@kbn/tooling-log';
-import type SuperTest from 'supertest';
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL as DETECTION_ENGINE_QUERY_ALERTS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from '../count_down_test';
-import { getQueryAlertsId } from './get_query_alerts_ids';
 import { routeWithNamespace } from '../route_with_namespace';
+import { getQueryAlertsId } from './get_query_alerts_ids';
 
 /**
  * Given an array of rule ids this will return only alerts based on that rule id both

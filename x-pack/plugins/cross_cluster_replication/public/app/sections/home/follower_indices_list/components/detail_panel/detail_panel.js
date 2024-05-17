@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -30,12 +27,15 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { Component, Fragment } from 'react';
 import 'react-ace';
 import 'brace/theme/textmate';
 
 import { getIndexListUri } from '@kbn/index-management-plugin/public';
-import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
+import { routing } from '../../../../../services/routing';
 import { ContextMenu } from '../context_menu';
 
 export class DetailPanel extends Component {

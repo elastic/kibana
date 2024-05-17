@@ -8,15 +8,15 @@
 import * as t from 'io-ts';
 
 import {
-  concurrent_searches,
-  items_per_search,
-  machine_learning_job_id,
   RiskScore,
   RiskScoreMapping,
   RuleActionArray,
   RuleActionThrottle,
   Severity,
   SeverityMapping,
+  concurrent_searches,
+  items_per_search,
+  machine_learning_job_id,
   threat_index,
   threat_indicator_path,
   threat_mapping,
@@ -53,19 +53,19 @@ import {
 
 import {
   BuildingBlockObject,
+  InlineKqlQuery,
+  RuleDataSource,
   RuleEqlQuery,
   RuleEsqlQuery,
-  InlineKqlQuery,
   RuleKqlQuery,
-  RuleDataSource,
   RuleNameOverrideObject,
   RuleSchedule,
   TimelineTemplateReference,
   TimestampOverrideObject,
 } from './diffable_field_types';
 
-import { buildSchema } from './build_schema';
 import { anomaly_threshold } from '../../../../model/schemas';
+import { buildSchema } from './build_schema';
 
 export type DiffableCommonFields = t.TypeOf<typeof DiffableCommonFields>;
 export const DiffableCommonFields = buildSchema({

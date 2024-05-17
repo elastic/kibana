@@ -8,7 +8,6 @@
 import {
   DEFAULT_ICON,
   EXTERNAL,
-  getDirectionIcon,
   INBOUND,
   INCOMING,
   INTERNAL,
@@ -16,6 +15,7 @@ import {
   OUTBOUND,
   OUTGOING,
   UNKNOWN,
+  getDirectionIcon,
 } from '.';
 
 describe('direction', () => {

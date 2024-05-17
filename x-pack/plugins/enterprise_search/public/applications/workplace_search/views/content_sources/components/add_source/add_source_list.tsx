@@ -10,39 +10,39 @@ import React, { useEffect, useState, ChangeEvent } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiEmptyPrompt,
   EuiFieldSearch,
-  EuiFormRow,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPanel,
-  EuiEmptyPrompt,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { AppLogic } from '../../../../app_logic';
 import noOrgSourcesIcon from '../../../../assets/share_circle.svg';
 import {
-  WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
+  WorkplaceSearchPageTemplate,
 } from '../../../../components/layout';
 import { ContentSection } from '../../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { NAV, CUSTOM_SERVICE_TYPE } from '../../../../constants';
+import { CUSTOM_SERVICE_TYPE, NAV } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 
 import { AvailableSourcesList } from './available_sources_list';
 import { ConfiguredSourcesList } from './configured_sources_list';
 import {
+  ADD_SOURCE_EMPTY_BODY,
+  ADD_SOURCE_EMPTY_TITLE,
   ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
-  ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
-  ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION,
   ADD_SOURCE_NO_SOURCES_TITLE,
   ADD_SOURCE_ORG_SOURCES_TITLE,
-  ADD_SOURCE_PRIVATE_SOURCES_TITLE,
+  ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
   ADD_SOURCE_PLACEHOLDER,
-  ADD_SOURCE_EMPTY_TITLE,
-  ADD_SOURCE_EMPTY_BODY,
+  ADD_SOURCE_PRIVATE_SOURCES_TITLE,
+  ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION,
 } from './constants';
 
 export const AddSourceList: React.FC = () => {

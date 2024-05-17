@@ -8,10 +8,10 @@
 import type { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
 import type { SearchItems } from '../../../../../hooks/use_search_items';
 
-import { defaultSearch, QUERY_LANGUAGE_KUERY } from './constants';
-import type { StepDefineExposedState } from './types';
 import { TRANSFORM_FUNCTION } from '../../../../../../../common/constants';
 import type { LatestFunctionConfigUI } from '../../../../../../../common/types/transform';
+import { QUERY_LANGUAGE_KUERY, defaultSearch } from './constants';
+import type { StepDefineExposedState } from './types';
 
 export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineExposedState {
   return {

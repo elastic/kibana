@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../../types';
+import { getListClient } from '..';
 import {
   readListItemArrayResponse,
   readListItemRequestQuery,
   readListItemResponse,
 } from '../../../common/api';
+import type { ListsPluginRouter } from '../../types';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
-import { getListClient } from '..';
 
 export const readListItemRoute = (router: ListsPluginRouter): void => {
   router.versioned

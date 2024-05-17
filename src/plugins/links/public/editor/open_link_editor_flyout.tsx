@@ -9,12 +9,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import { coreServices } from '../services/kibana_services';
 import { Link } from '../../common/content_management';
 import { LinkEditor } from '../components/editor/link_editor';
+import { coreServices } from '../services/kibana_services';
 import { focusMainFlyout } from './links_editor_tools';
 
 export interface LinksEditorProps {

@@ -7,25 +7,25 @@
  */
 
 import {
+  CUSTOM_PALETTE,
+  CustomPaletteParams,
+  DEFAULT_COLOR_STEPS,
+  DEFAULT_CONTINUITY,
+  DEFAULT_RANGE_TYPE,
   DataBounds,
   PaletteOutput,
   PaletteRegistry,
-  checkIsMinContinuity,
-  reversePalette,
-  checkIsMaxContinuity,
   calculateStop,
-  roundValue,
-  getPaletteStops,
+  checkIsMaxContinuity,
+  checkIsMinContinuity,
   getDataMinMax,
-  CustomPaletteParams,
-  CUSTOM_PALETTE,
-  DEFAULT_RANGE_TYPE,
-  DEFAULT_COLOR_STEPS,
-  DEFAULT_CONTINUITY,
+  getPaletteStops,
+  reversePalette,
+  roundValue,
 } from '../../palettes';
 
 import type { ColorRange } from './color_ranges';
-import { toColorStops, sortColorRanges } from './color_ranges/utils';
+import { sortColorRanges, toColorStops } from './color_ranges/utils';
 import type { PaletteConfigurationState } from './types';
 
 /**
@@ -87,16 +87,22 @@ export function updateRangeType(
   params.rangeMin = checkIsMinContinuity(continuity)
     ? Number.NEGATIVE_INFINITY
     : activePalette.name === CUSTOM_PALETTE
-    ? newColorStops[0].stop
-    : params.stops[0].stop;
+      ? newColorStops[0].stop
+      : params.stops[0].stop;
 
   params.rangeMax = checkIsMaxContinuity(continuity)
     ? Number.POSITIVE_INFINITY
     : activePalette.params?.rangeMax
-    ? calculateStop(activePalette.params.rangeMax, newMin, oldMin, oldMax - oldMin, newMax - newMin)
-    : lastStop > newMax
-    ? lastStop + 1
-    : newMax;
+      ? calculateStop(
+          activePalette.params.rangeMax,
+          newMin,
+          oldMin,
+          oldMax - oldMin,
+          newMax - newMin
+        )
+      : lastStop > newMax
+        ? lastStop + 1
+        : newMax;
 
   return params;
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { left } from 'fp-ts/lib/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
 
 import { GetRuleManagementFiltersResponse } from './get_rule_management_filters_route';
 

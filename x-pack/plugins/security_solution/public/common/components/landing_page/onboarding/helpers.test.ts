@@ -6,11 +6,11 @@
  */
 
 import {
-  getCardTimeInMinutes,
   getCardStepsLeft,
+  getCardTimeInMinutes,
+  isStepActive,
   setupActiveSections,
   updateActiveSections,
-  isStepActive,
 } from './helpers';
 import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
 
@@ -19,16 +19,16 @@ import {
   AddIntegrationsSteps,
   CreateProjectSteps,
   EnablePrebuiltRulesSteps,
+  GetStartedWithAlertsCardsId,
   OverviewSteps,
   QuickStartSectionCardsId,
   SectionId,
-  GetStartedWithAlertsCardsId,
   ViewAlertsSteps,
   ViewDashboardSteps,
 } from './types';
 
-import * as sectionsConfigs from './sections';
 import { ProductLine } from './configs';
+import * as sectionsConfigs from './sections';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
 
 const onboardingSteps = [

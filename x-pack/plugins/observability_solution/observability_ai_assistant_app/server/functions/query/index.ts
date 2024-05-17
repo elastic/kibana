@@ -6,24 +6,24 @@
  */
 
 import Fs from 'fs';
-import { keyBy, mapValues, once, pick } from 'lodash';
-import pLimit from 'p-limit';
 import Path from 'path';
-import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
+import { ESQLSearchReponse } from '@kbn/es-types';
 import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
-  VisualizeESQLUserIntention,
   VISUALIZE_ESQL_USER_INTENTIONS,
+  VisualizeESQLUserIntention,
 } from '@kbn/observability-ai-assistant-plugin/common/functions/visualize_esql';
 import {
-  concatenateChatCompletionChunks,
   ConcatenatedMessage,
+  concatenateChatCompletionChunks,
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
-import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
-import { ESQLSearchReponse } from '@kbn/es-types';
+import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
+import { keyBy, mapValues, once, pick } from 'lodash';
+import pLimit from 'p-limit';
+import { lastValueFrom, startWith } from 'rxjs';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import { validateEsqlQuery } from './validate_esql_query';

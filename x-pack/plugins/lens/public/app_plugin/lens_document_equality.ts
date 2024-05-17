@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { intersection, isEqual, union } from 'lodash';
 import { Document } from '../persistence/saved_object_store';
 import { AnnotationGroups, DatasourceMap, VisualizationMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';

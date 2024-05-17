@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { ZOOM_LEVELS, MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../common/lib/constants';
+import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL, ZOOM_LEVELS } from '../../common/lib/constants';
 
 export interface Props {
   /**

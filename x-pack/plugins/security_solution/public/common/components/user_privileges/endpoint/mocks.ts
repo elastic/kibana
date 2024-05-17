@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 export const getEndpointPrivilegesInitialStateMock = ({
   loading = false,

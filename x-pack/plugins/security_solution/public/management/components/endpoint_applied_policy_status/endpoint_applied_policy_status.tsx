@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import { EuiHealth, EuiToolTip, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { HostMetadata } from '../../../../common/endpoint/types';
 import {
   POLICY_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_TEXT,
 } from '../../pages/endpoint_hosts/view/host_constants';
-import type { HostMetadata } from '../../../../common/endpoint/types';
 
 /**
  * Displays the status of an applied policy on the Endpoint (using the information provided

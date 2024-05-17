@@ -1,3 +1,6 @@
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +9,10 @@
  */
 import expect from '@kbn/expect';
 import { sum } from 'lodash';
-import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
-import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';
-import { SupertestReturnType } from '../../common/apm_api_supertest';
 
 const {
   ES_BULK_DURATION,

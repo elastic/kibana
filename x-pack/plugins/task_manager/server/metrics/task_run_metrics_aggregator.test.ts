@@ -6,13 +6,13 @@
  */
 
 import * as uuid from 'uuid';
-import { asOk, asErr } from '../lib/result_type';
+import { asErr, asOk } from '../lib/result_type';
 import { TaskStatus } from '../task';
 import {
-  asTaskManagerStatEvent,
-  asTaskRunEvent,
   TaskManagerStats,
   TaskPersistence,
+  asTaskManagerStatEvent,
+  asTaskRunEvent,
 } from '../task_events';
 import { TaskRunResult } from '../task_running';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';

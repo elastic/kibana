@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
-import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix } from '../../../../../../common/lib';
+import { Spaces } from '../../../../../scenarios';
 
 const API_URI = 'internal/triggers_actions_ui/data/_fields';
 

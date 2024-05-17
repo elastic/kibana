@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/core/server';
 
 const MAX_ATTEMPTS = 3;
 

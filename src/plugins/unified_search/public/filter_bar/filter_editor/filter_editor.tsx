@@ -16,57 +16,57 @@ import {
   EuiFormRow,
   EuiFormRowProps,
   EuiIcon,
+  EuiLink,
+  EuiLoadingSpinner,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiToolTip,
   withEuiTheme,
-  EuiTextColor,
-  EuiLink,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
+import { cx } from '@emotion/css';
+import { CodeEditor } from '@kbn/code-editor';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { DataViewsContract, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
-  type Filter,
   BooleanRelation,
+  FILTERS,
+  type Filter,
   buildCombinedFilter,
   buildCustomFilter,
   buildEmptyFilter,
-  FILTERS,
   filterToQueryDsl,
   getFilterParams,
   isCombinedFilter,
 } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { XJsonLang } from '@kbn/monaco';
 import { merge } from 'lodash';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import { XJsonLang } from '@kbn/monaco';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewsContract, getIndexPatternFromFilter } from '@kbn/data-plugin/public';
-import { CodeEditor } from '@kbn/code-editor';
-import { cx } from '@emotion/css';
-import { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
+import { FiltersBuilder } from '../../filters_builder';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import {
+  filterBadgeStyle,
+  filterPreviewLabelStyle,
+  filtersBuilderMaxHeightCss,
+} from './filter_editor.styles';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
   getOperatorFromFilter,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { FiltersBuilder } from '../../filters_builder';
-import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
 import {
   MIDDLE_TRUNCATION_PROPS,
   SINGLE_SELECTION_AS_TEXT_PROPS,
   flattenFilters,
 } from './lib/helpers';
-import {
-  filterBadgeStyle,
-  filterPreviewLabelStyle,
-  filtersBuilderMaxHeightCss,
-} from './filter_editor.styles';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export const strings = {
   getPanelTitleAdd: () =>

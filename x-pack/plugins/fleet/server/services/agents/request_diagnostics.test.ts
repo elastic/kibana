@@ -6,8 +6,8 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../app_context';
 
 import { createClientMock } from './action.mock';
 import { bulkRequestDiagnostics, requestDiagnostics } from './request_diagnostics';

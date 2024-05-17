@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
-import { InsightsSummaryRow } from './insights_summary_row';
-import { useRightPanelContext } from '../context';
-import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { useRightPanelContext } from '../context';
+import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
+import { InsightsSummaryRow } from './insights_summary_row';
+import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
 
 /**
  * Threat intelligence section under Insights section, overview tab.

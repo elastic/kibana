@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { cloneDeep, isEqual } from 'lodash';
+import { useEffect, useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { combineLatest, of, Subject, Subscription } from 'rxjs';
-import { isEqual, cloneDeep } from 'lodash';
+import { Subject, Subscription, combineLatest, of } from 'rxjs';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
-  pluck,
-  startWith,
-  switchMap,
+  filter,
   map,
   pairwise,
-  filter,
+  pluck,
   skipWhile,
+  startWith,
+  switchMap,
 } from 'rxjs';
-import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { type MLHttpFetchError, extractErrorMessage } from '@kbn/ml-error-utils';
 
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import type { JobValidator } from '../../job_validator/job_validator';
 import { VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import { useMlKibana } from '../../../../../contexts/kibana';
 import type { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];

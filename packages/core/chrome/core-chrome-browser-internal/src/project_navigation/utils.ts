@@ -7,20 +7,20 @@
  */
 
 import type {
+  AppDeepLinkId,
   ChromeNavLink,
   ChromeProjectNavigationNode,
-  NavigationTreeDefinition,
-  NodeDefinition,
-  RecentlyAccessedDefinition,
-  RootNavigationItemDefinition,
-  NavigationTreeDefinitionUI,
-  PresetDefinition,
-  GroupDefinition,
-  AppDeepLinkId,
-  SideNavNodeStatus,
   CloudLinkId,
   CloudLinks,
+  GroupDefinition,
   ItemDefinition,
+  NavigationTreeDefinition,
+  NavigationTreeDefinitionUI,
+  NodeDefinition,
+  PresetDefinition,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
+  SideNavNodeStatus,
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
 import { getPresets } from './navigation_presets';
@@ -258,7 +258,7 @@ function getTitleForNode(
 function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >({ id, link, href, cloudLink, renderAs }: NodeDefinition<LinkId, Id, ChildrenId>) {
   if (link && cloudLink) {
     throw new Error(
@@ -285,7 +285,7 @@ function validateNodeProps<
 const initNavNode = <
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 >(
   node: NodeDefinition<LinkId, Id, ChildrenId>,
   {

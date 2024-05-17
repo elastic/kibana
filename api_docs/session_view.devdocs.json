@@ -22,11 +22,7 @@
             "tags": [],
             "label": "getSessionView",
             "description": [],
-            "signature": [
-              "(props: ",
-              "SessionViewDeps",
-              ") => JSX.Element"
-            ],
+            "signature": ["(props: ", "SessionViewDeps", ") => JSX.Element"],
             "path": "x-pack/plugins/session_view/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -38,9 +34,7 @@
                 "tags": [],
                 "label": "props",
                 "description": [],
-                "signature": [
-                  "SessionViewDeps"
-                ],
+                "signature": ["SessionViewDeps"],
                 "path": "x-pack/plugins/session_view/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -62,9 +56,7 @@
         "tags": [],
         "label": "ENTRY_SESSION_ENTITY_ID_PROPERTY",
         "description": [],
-        "signature": [
-          "\"process.entry_leader.entity_id\""
-        ],
+        "signature": ["\"process.entry_leader.entity_id\""],
         "path": "x-pack/plugins/session_view/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -103,9 +95,7 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": [
-              "string | number"
-            ],
+            "signature": ["string | number"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -142,9 +132,7 @@
             "tags": [],
             "label": "[alertUuid: string]: { status: string; processEntityId: string; }",
             "description": [],
-            "signature": [
-              "[alertUuid: string]:  { status: string; processEntityId: string; }"
-            ],
+            "signature": ["[alertUuid: string]:  { status: string; processEntityId: string; }"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -170,10 +158,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "signature": [
-              "\"all\" | ",
-              "EventCategory"
-            ],
+            "signature": ["\"all\" | ", "EventCategory"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -382,9 +367,7 @@
             "tags": [],
             "label": "searchMatched",
             "description": [],
-            "signature": [
-              "number[] | null"
-            ],
+            "signature": ["number[] | null"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -534,9 +517,7 @@
             "tags": [],
             "label": "clearSearch",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -550,9 +531,7 @@
             "tags": [],
             "label": "hasOutput",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -566,9 +545,7 @@
             "tags": [],
             "label": "hasAlerts",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -652,9 +629,7 @@
             "tags": [],
             "label": "hasExec",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -668,9 +643,7 @@
             "tags": [],
             "label": "getOutput",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -707,9 +680,7 @@
             "tags": [],
             "label": "isUserEntered",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -745,9 +716,7 @@
                 "tags": [],
                 "label": "verboseMode",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
+                "signature": ["boolean"],
                 "path": "x-pack/plugins/session_view/common/types/v1.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -763,9 +732,7 @@
             "tags": [],
             "label": "isVerbose",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -779,9 +746,7 @@
             "tags": [],
             "label": "getEndTime",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -855,9 +820,7 @@
             "tags": [],
             "label": "'@timestamp'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -925,10 +888,7 @@
             "tags": [],
             "label": "network",
             "description": [],
-            "signature": [
-              "ProcessEventNetwork",
-              " | undefined"
-            ],
+            "signature": ["ProcessEventNetwork", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -982,10 +942,7 @@
             "tags": [],
             "label": "user",
             "description": [],
-            "signature": [
-              "User",
-              " | undefined"
-            ],
+            "signature": ["User", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -997,10 +954,7 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "signature": [
-              "Group",
-              " | undefined"
-            ],
+            "signature": ["Group", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1033,10 +987,7 @@
             "tags": [],
             "label": "process",
             "description": [],
-            "signature": [
-              "ProcessSelf",
-              " | undefined"
-            ],
+            "signature": ["ProcessSelf", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1147,9 +1098,7 @@
             "tags": [],
             "label": "uuid",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1161,9 +1110,7 @@
             "tags": [],
             "label": "reason",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1175,9 +1122,7 @@
             "tags": [],
             "label": "workflow_status",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1189,9 +1134,7 @@
             "tags": [],
             "label": "status",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1203,9 +1146,7 @@
             "tags": [],
             "label": "original_time",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1247,10 +1188,7 @@
             "tags": [],
             "label": "rule",
             "description": [],
-            "signature": [
-              "ProcessEventAlertRule",
-              " | undefined"
-            ],
+            "signature": ["ProcessEventAlertRule", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1276,9 +1214,7 @@
             "tags": [],
             "label": "instance",
             "description": [],
-            "signature": [
-              "{ name?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ name?: string | undefined; } | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1290,9 +1226,7 @@
             "tags": [],
             "label": "account",
             "description": [],
-            "signature": [
-              "{ id?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ id?: string | undefined; } | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1304,9 +1238,7 @@
             "tags": [],
             "label": "project",
             "description": [],
-            "signature": [
-              "{ id?: string | undefined; name?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ id?: string | undefined; name?: string | undefined; } | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1318,9 +1250,7 @@
             "tags": [],
             "label": "provider",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1332,9 +1262,7 @@
             "tags": [],
             "label": "region",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1360,9 +1288,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1374,9 +1300,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1416,9 +1340,7 @@
             "tags": [],
             "label": "architecture",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1430,9 +1352,7 @@
             "tags": [],
             "label": "hostname",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1444,9 +1364,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1458,9 +1376,7 @@
             "tags": [],
             "label": "ip",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1472,9 +1388,7 @@
             "tags": [],
             "label": "mac",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1486,9 +1400,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1514,9 +1426,7 @@
             "tags": [],
             "label": "boot",
             "description": [],
-            "signature": [
-              "{ id?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ id?: string | undefined; } | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1542,9 +1452,7 @@
             "tags": [],
             "label": "address",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1556,9 +1464,7 @@
             "tags": [],
             "label": "ip",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1570,9 +1476,7 @@
             "tags": [],
             "label": "port",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1612,9 +1516,7 @@
             "tags": [],
             "label": "namespace",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1626,9 +1528,7 @@
             "tags": [],
             "label": "cluster",
             "description": [],
-            "signature": [
-              "{ name?: string | undefined; id?: string | undefined; } | undefined"
-            ],
+            "signature": ["{ name?: string | undefined; id?: string | undefined; } | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1654,9 +1554,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1668,9 +1566,7 @@
             "tags": [],
             "label": "events",
             "description": [],
-            "signature": [
-              "any[] | undefined"
-            ],
+            "signature": ["any[] | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1717,9 +1613,7 @@
             "tags": [],
             "label": "cursor",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1731,9 +1625,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1759,9 +1651,7 @@
             "tags": [],
             "label": "entity_id",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1773,9 +1663,7 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
+            "signature": ["string[] | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1787,9 +1675,7 @@
             "tags": [],
             "label": "args_count",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1801,9 +1687,7 @@
             "tags": [],
             "label": "command_line",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1815,9 +1699,7 @@
             "tags": [],
             "label": "executable",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1829,9 +1711,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1843,9 +1723,7 @@
             "tags": [],
             "label": "interactive",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1857,9 +1735,7 @@
             "tags": [],
             "label": "working_directory",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1871,9 +1747,7 @@
             "tags": [],
             "label": "pid",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1885,9 +1759,7 @@
             "tags": [],
             "label": "start",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1899,9 +1771,7 @@
             "tags": [],
             "label": "end",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1913,10 +1783,7 @@
             "tags": [],
             "label": "user",
             "description": [],
-            "signature": [
-              "User",
-              " | undefined"
-            ],
+            "signature": ["User", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1928,10 +1795,7 @@
             "tags": [],
             "label": "group",
             "description": [],
-            "signature": [
-              "Group",
-              " | undefined"
-            ],
+            "signature": ["Group", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1943,10 +1807,7 @@
             "tags": [],
             "label": "supplemental_groups",
             "description": [],
-            "signature": [
-              "Group",
-              "[] | undefined"
-            ],
+            "signature": ["Group", "[] | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1958,9 +1819,7 @@
             "tags": [],
             "label": "exit_code",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1972,10 +1831,7 @@
             "tags": [],
             "label": "entry_meta",
             "description": [],
-            "signature": [
-              "EntryMeta",
-              " | undefined"
-            ],
+            "signature": ["EntryMeta", " | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2053,9 +1909,7 @@
             "tags": [],
             "label": "maxBytesExceeded",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2095,9 +1949,7 @@
             "tags": [],
             "label": "rows",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2109,9 +1961,7 @@
             "tags": [],
             "label": "columns",
             "description": [],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "x-pack/plugins/session_view/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2129,9 +1979,7 @@
         "tags": [],
         "label": "ENTRY_SESSION_ENTITY_ID_PROPERTY",
         "description": [],
-        "signature": [
-          "\"process.entry_leader.entity_id\""
-        ],
+        "signature": ["\"process.entry_leader.entity_id\""],
         "path": "x-pack/plugins/session_view/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2144,9 +1992,7 @@
         "tags": [],
         "label": "EventAction",
         "description": [],
-        "signature": [
-          "\"end\" | \"fork\" | \"exec\" | \"text_output\" | \"executed\""
-        ],
+        "signature": ["\"end\" | \"fork\" | \"exec\" | \"text_output\" | \"executed\""],
         "path": "x-pack/plugins/session_view/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2159,9 +2005,7 @@
         "tags": [],
         "label": "EventKind",
         "description": [],
-        "signature": [
-          "\"event\" | \"signal\""
-        ],
+        "signature": ["\"event\" | \"signal\""],
         "path": "x-pack/plugins/session_view/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2174,10 +2018,7 @@
         "tags": [],
         "label": "ProcessEventAlertCategory",
         "description": [],
-        "signature": [
-          "\"all\" | ",
-          "EventCategory"
-        ],
+        "signature": ["\"all\" | ", "EventCategory"],
         "path": "x-pack/plugins/session_view/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,

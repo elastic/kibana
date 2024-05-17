@@ -18,18 +18,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  IngestPipelinesListParams,
   INGEST_PIPELINES_APP_LOCATOR,
   INGEST_PIPELINES_PAGES,
+  IngestPipelinesListParams,
 } from '@kbn/ingest-pipelines-plugin/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
-import { useKibana } from '../../../../../utils/kibana_react';
 import { useFetchSloInspect } from '../../../../../hooks/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../../hooks/use_plugin_context';
+import { useKibana } from '../../../../../utils/kibana_react';
 import { transformCreateSLOFormToCreateSLOInput } from '../../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../../types';
 import { CodeBlockAccordion } from './code_block_accordion';

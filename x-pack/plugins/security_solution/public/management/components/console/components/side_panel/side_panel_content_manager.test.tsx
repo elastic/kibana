@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ConsoleProps } from '../..';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { getConsoleTestSetup } from '../../mocks';
-import { act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 describe('When displaying the side panel', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;

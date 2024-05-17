@@ -13,27 +13,27 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { LandingLinksImageCards } from '@kbn/security-solution-navigation/landing_links';
-import { useContractComponents } from '../../../common/hooks/use_contract_component';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import React, { useCallback, useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
-import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
-import { LinkButton } from '../../../common/components/links/helpers';
-import * as i18n from './translations';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
-import { DASHBOARDS_PAGE_TITLE } from '../translations';
-import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
 import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
-import { useGlobalQueryString } from '../../../common/utils/global_query_string';
+import { LinkButton } from '../../../common/components/links/helpers';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { useContractComponents } from '../../../common/hooks/use_contract_component';
+import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
 import { trackLandingLinkClick } from '../../../common/lib/telemetry/trackers';
+import { useRootNavLink } from '../../../common/links/nav_links';
+import { useGlobalQueryString } from '../../../common/utils/global_query_string';
+import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import type { TagReference } from '../../context/dashboard_context';
 import { useSecurityTags } from '../../context/dashboard_context';
+import { useCreateSecurityDashboardLink } from '../../hooks/use_create_security_dashboard_link';
+import { DASHBOARDS_PAGE_TITLE } from '../translations';
+import * as i18n from './translations';
 
 const getInitialFilterString = (securityTags: TagReference[] | null | undefined) => {
   if (!securityTags) {

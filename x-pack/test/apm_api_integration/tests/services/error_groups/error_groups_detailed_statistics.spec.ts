@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { first, last, sumBy } from 'lodash';
-import moment from 'moment';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import expect from '@kbn/expect';
+import { first, last, sumBy } from 'lodash';
+import moment from 'moment';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 import { getErrorGroupIds } from './get_error_group_ids';

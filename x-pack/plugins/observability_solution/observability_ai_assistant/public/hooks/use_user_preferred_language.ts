@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
+import { aiAssistantResponseLanguage } from '../../common';
 import {
+  BROWSER_LANGUAGE_SETTING,
   DEFAULT_LANGUAGE_OPTION,
   KIBANA_LOCALE_SETTING,
-  BROWSER_LANGUAGE_SETTING,
   languages,
 } from '../../common/ui_settings/language_options';
-import { aiAssistantResponseLanguage } from '../../common';
 
 import { useKibana } from './use_kibana';
 

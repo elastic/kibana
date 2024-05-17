@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { i18n } from '@kbn/i18n';
 import path from 'path';
+import { i18n } from '@kbn/i18n';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { createFailError } from '@kbn/dev-cli-errors';
 import {
@@ -19,8 +19,8 @@ import {
   makeDirAsync,
   normalizePath,
   readFileAsync,
-  writeFileAsync,
   verifyICUMessage,
+  writeFileAsync,
 } from './utils';
 
 import { I18nConfig } from './config';

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { createHashHistory, History, UnregisterCallback } from 'history';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { AppUpdater, ToastsSetup } from '@kbn/core/public';
-import { setStateToKbnUrl } from './kbn_url_storage';
+import { History, UnregisterCallback, createHashHistory } from 'history';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { unhashUrl } from './hash_unhash_url';
+import { setStateToKbnUrl } from './kbn_url_storage';
 
 export interface KbnUrlTracker {
   /**

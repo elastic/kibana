@@ -1,3 +1,7 @@
+import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,10 +11,6 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import { ExpressionsServiceFork } from '@kbn/expressions-plugin/common/service/expressions_fork';
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
-import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { App, ExpressionsContext } from './app';
 import { countEvent, getEvents, pluck } from './functions';
 

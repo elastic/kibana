@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
-import { TELEMETRY_SAVED_OBJECT_TYPE, TELEMETRY_SAVED_OBJECT_ID } from './constants';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { TELEMETRY_SAVED_OBJECT_ID, TELEMETRY_SAVED_OBJECT_TYPE } from './constants';
 import type { TelemetrySavedObjectAttributes } from './types';
 
 export async function updateTelemetrySavedObject(

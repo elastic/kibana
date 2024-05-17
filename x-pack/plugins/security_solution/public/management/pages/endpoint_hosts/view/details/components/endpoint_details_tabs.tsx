@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiFlyoutBody, EuiTab, EuiTabs } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import type { EndpointIndexUIQueryParams } from '../../../types';
 
-import { EndpointDetailsFlyoutHeader } from './flyout_header';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { EndpointDetailsFlyoutHeader } from './flyout_header';
 
 export enum EndpointDetailsTabsTypes {
   overview = 'details',

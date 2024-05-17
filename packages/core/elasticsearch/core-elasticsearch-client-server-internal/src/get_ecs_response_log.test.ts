@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type DiagnosticResult, type ConnectionRequestParams } from '@elastic/elasticsearch';
+import { type ConnectionRequestParams, type DiagnosticResult } from '@elastic/elasticsearch';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 interface ResponseFixtureOptions {

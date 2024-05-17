@@ -6,8 +6,8 @@
  */
 
 import { simpleQueryMock } from './__mocks__/simple_query';
-import { defaultSimpleQuery, isSimpleQuery, isSimpleDefaultQuery } from './simple_query';
 import { matchAllQuery } from './match_all_query';
+import { defaultSimpleQuery, isSimpleDefaultQuery, isSimpleQuery } from './simple_query';
 
 describe('isSimpleQuery', () => {
   it("should return if it's a simple query", () => {

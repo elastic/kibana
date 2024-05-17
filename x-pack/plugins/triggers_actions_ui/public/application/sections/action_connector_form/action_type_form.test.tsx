@@ -1,3 +1,13 @@
+import { EuiFieldText } from '@elastic/eui';
+import {
+  RuleNotifyWhen,
+  RuleNotifyWhenType,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
+import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { render, screen, waitFor } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,29 +15,19 @@
  * 2.0.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ActionTypeForm } from './action_type_form';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { act } from 'react-dom/test-utils';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import {
   ActionConnector,
-  ActionType,
-  GenericValidationResult,
   ActionConnectorMode,
+  ActionType,
   ActionVariables,
+  GenericValidationResult,
   NotifyWhenSelectOptions,
 } from '../../../types';
-import { act } from 'react-dom/test-utils';
-import { EuiFieldText } from '@elastic/eui';
-import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, waitFor, screen } from '@testing-library/react';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { transformActionVariables } from '../../lib/action_variables';
-import {
-  RuleNotifyWhen,
-  RuleNotifyWhenType,
-  SanitizedRuleAction,
-} from '@kbn/alerting-plugin/common';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ActionTypeForm } from './action_type_form';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {

@@ -6,60 +6,58 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { fireEvent, render, screen } from '@testing-library/react';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { fireEvent, render, screen } from '@testing-library/react';
+import * as React from 'react';
 
-import { AddPanelFlyout } from './add_panel_flyout';
-import { core, embeddableStart, usageCollection } from '../kibana_services';
-import { ContactCardEmbeddableFactory } from '../lib/test_samples';
-import { Container, registerReactEmbeddableSavedObject } from '../lib';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { core, embeddableStart, usageCollection } from '../kibana_services';
+import { Container, registerReactEmbeddableSavedObject } from '../lib';
+import { ContactCardEmbeddableFactory } from '../lib/test_samples';
+import { AddPanelFlyout } from './add_panel_flyout';
 
 // Mock saved objects finder component so we can call the onChoose method.
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
   return {
-    SavedObjectFinder: jest
-      .fn()
-      .mockImplementation(
-        ({
-          onChoose,
-        }: {
-          onChoose: (id: string, type: string, name: string, so: unknown) => Promise<void>;
-        }) => (
-          <>
-            <button
-              id="soFinderAddButton"
-              data-test-subj="soFinderAddButton"
-              onClick={() =>
-                onChoose?.(
-                  'awesomeId',
-                  'AWESOME_EMBEDDABLE',
-                  'Awesome sauce',
-                  {} as unknown as SavedObjectCommon
-                )
-              }
-            >
-              Add embeddable!
-            </button>
-            <button
-              id="soFinderAddLegacyButton"
-              data-test-subj="soFinderAddLegacyButton"
-              onClick={() =>
-                onChoose?.(
-                  'testId',
-                  'CONTACT_CARD_EMBEDDABLE',
-                  'test name',
-                  {} as unknown as SavedObjectCommon
-                )
-              }
-            >
-              Add legacy embeddable!
-            </button>
-          </>
-        )
-      ),
+    SavedObjectFinder: jest.fn().mockImplementation(
+      ({
+        onChoose,
+      }: {
+        onChoose: (id: string, type: string, name: string, so: unknown) => Promise<void>;
+      }) => (
+        <>
+          <button
+            id="soFinderAddButton"
+            data-test-subj="soFinderAddButton"
+            onClick={() =>
+              onChoose?.(
+                'awesomeId',
+                'AWESOME_EMBEDDABLE',
+                'Awesome sauce',
+                {} as unknown as SavedObjectCommon
+              )
+            }
+          >
+            Add embeddable!
+          </button>
+          <button
+            id="soFinderAddLegacyButton"
+            data-test-subj="soFinderAddLegacyButton"
+            onClick={() =>
+              onChoose?.(
+                'testId',
+                'CONTACT_CARD_EMBEDDABLE',
+                'test name',
+                {} as unknown as SavedObjectCommon
+              )
+            }
+          >
+            Add legacy embeddable!
+          </button>
+        </>
+      )
+    ),
   };
 });
 

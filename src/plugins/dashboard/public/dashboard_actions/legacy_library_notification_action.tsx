@@ -14,12 +14,12 @@ import {
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { LibraryNotificationPopover } from './library_notification_popover';
-import {
-  legacyUnlinkActionIsCompatible,
-  LegacyUnlinkFromLibraryAction,
-} from './legacy_unlink_from_library_action';
 import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
+import {
+  LegacyUnlinkFromLibraryAction,
+  legacyUnlinkActionIsCompatible,
+} from './legacy_unlink_from_library_action';
+import { LibraryNotificationPopover } from './library_notification_popover';
 
 export const LEGACY_ACTION_LIBRARY_NOTIFICATION = 'LEGACY_ACTION_LIBRARY_NOTIFICATION';
 

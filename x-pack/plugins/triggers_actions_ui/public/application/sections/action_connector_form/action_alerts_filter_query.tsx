@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { AlertsFilter } from '@kbn/alerting-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { AlertsFilter } from '@kbn/alerting-plugin/common';
+import { ValidFeatureId } from '@kbn/rule-data-utils';
 import deepEqual from 'fast-deep-equal';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { AlertsSearchBar } from '../alerts_search_bar';
 
 interface ActionAlertsFilterQueryProps {

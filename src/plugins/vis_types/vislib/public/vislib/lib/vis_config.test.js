@@ -8,8 +8,8 @@
 
 import d3 from 'd3';
 
-import { VisConfig } from './vis_config';
 import { getMockUiState } from '../../fixtures/mocks';
+import { VisConfig } from './vis_config';
 
 describe('Vislib VisConfig Class Test Suite', function () {
   let el;

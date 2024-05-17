@@ -8,12 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  resolveWithMissingImage,
   getElasticOutline,
   isValidUrl,
+  resolveWithMissingImage,
 } from '@kbn/presentation-util-plugin/common';
-import { ExpressionRevealImageFunction, Origin, Position } from '../types';
 import { BASE64, URL } from '../constants';
+import { ExpressionRevealImageFunction, Origin, Position } from '../types';
 
 const strings = {
   help: i18n.translate('expressionRevealImage.functions.revealImageHelpText', {

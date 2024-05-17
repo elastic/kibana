@@ -17,17 +17,17 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
 import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';

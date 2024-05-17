@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public/types';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { EventAnnotationService } from './event_annotation_service';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import {
+  eventAnnotationGroup,
   manualPointEventAnnotation,
   manualRangeEventAnnotation,
   queryPointEventAnnotation,
-  eventAnnotationGroup,
 } from '../common';
-import { getFetchEventAnnotations } from './fetch_event_annotations';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { EventAnnotationService } from './event_annotation_service';
+import { getFetchEventAnnotations } from './fetch_event_annotations';
 
 export interface EventAnnotationStartDependencies {
   data: DataPublicPluginStart;

@@ -36,10 +36,7 @@
           "tags": [],
           "label": "locator",
           "description": [],
-          "signature": [
-            "LicenseManagementLocator",
-            " | undefined"
-          ],
+          "signature": ["LicenseManagementLocator", " | undefined"],
           "path": "x-pack/plugins/license_management/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -55,9 +52,7 @@
       "tags": [],
       "label": "LicenseManagementUIPluginStart",
       "description": [],
-      "signature": [
-        "void"
-      ],
+      "signature": ["void"],
       "path": "x-pack/plugins/license_management/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,

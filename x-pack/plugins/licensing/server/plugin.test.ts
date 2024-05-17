@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  CoreStatus,
+  IClusterClient,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+} from '@kbn/core/server';
 import {
   ClusterClientMock,
   coreMock,
@@ -15,15 +19,11 @@ import {
   loggingSystemMock,
   statusServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  CoreStatus,
-  IClusterClient,
-  ServiceStatusLevel,
-  ServiceStatusLevels,
-} from '@kbn/core/server';
+import moment from 'moment';
+import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import { LicenseType } from '../common/types';
-import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
+import { ElasticsearchError } from './types';
 
 function buildRawLicense(
   options: Partial<estypes.XpackInfoMinimalLicenseInformation> = {}

@@ -15,9 +15,9 @@ import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
-import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { MergedServiceStat, mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { processRunResults } from './process_run_result';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ruleResultServiceMock } from '../../monitoring/rule_result_service.mock';
-import { asErr, asOk } from '../../lib/result_type';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { asErr, asOk } from '../../lib/result_type';
+import { ruleResultServiceMock } from '../../monitoring/rule_result_service.mock';
+import { processRunResults } from './process_run_result';
 
 const logger = loggingSystemMock.create().get();
 const ruleResultService = ruleResultServiceMock.create();

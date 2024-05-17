@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { get } from 'lodash';
+import * as apmMetrics from '@kbn/monitoring-plugin/server/lib/metrics/apm/metrics';
+import * as beatsMetrics from '@kbn/monitoring-plugin/server/lib/metrics/beats/metrics';
 import * as esMetrics from '@kbn/monitoring-plugin/server/lib/metrics/elasticsearch/metrics';
 import * as kibanaMetrics from '@kbn/monitoring-plugin/server/lib/metrics/kibana/metrics';
 import * as logstashMetrics from '@kbn/monitoring-plugin/server/lib/metrics/logstash/metrics';
-import * as beatsMetrics from '@kbn/monitoring-plugin/server/lib/metrics/beats/metrics';
-import * as apmMetrics from '@kbn/monitoring-plugin/server/lib/metrics/apm/metrics';
+import { get } from 'lodash';
 
 export default function ({ getService }) {
   const es = getService('es');

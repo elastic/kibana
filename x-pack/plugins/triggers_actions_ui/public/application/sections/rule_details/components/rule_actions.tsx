@@ -1,3 +1,14 @@
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  IconType,
+} from '@elastic/eui';
+import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,21 +16,10 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import {
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  IconType,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
+import { RuleUiAction } from '../../../../types';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
-import { RuleUiAction } from '../../../../types';
 
 export interface RuleActionsProps {
   ruleActions: RuleUiAction[];

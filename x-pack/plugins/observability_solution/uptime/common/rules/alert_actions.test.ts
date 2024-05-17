@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { populateAlertActions } from './alert_actions';
-import { ActionConnector } from './types';
 import { MONITOR_STATUS } from '../constants/uptime_alerts';
+import { populateAlertActions } from './alert_actions';
 import { MonitorStatusTranslations } from './legacy_uptime/translations';
+import { ActionConnector } from './types';
 
 describe('Legacy Alert Actions factory', () => {
   it('generate expected action for pager duty', async () => {

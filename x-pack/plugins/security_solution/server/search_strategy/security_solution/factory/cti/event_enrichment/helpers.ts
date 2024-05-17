@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { get, isEmpty } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { get, isEmpty } from 'lodash';
 
 import {
   ENRICHMENT_TYPES,

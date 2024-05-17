@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
 import type { AgentSelection } from '@kbn/osquery-io-ts-types';
+import { useMutation } from '@tanstack/react-query';
 import type { CreateLiveQueryRequestBodySchema } from '../../common/api';
 import { API_VERSIONS } from '../../common/constants';
-import { useKibana } from '../common/lib/kibana';
-import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { LiveQueryDetailsItem } from '../actions/use_live_query_details';
+import { useErrorToast } from '../common/hooks/use_error_toast';
+import { useKibana } from '../common/lib/kibana';
 
 interface UseLiveQueryProps {
   onSuccess?: () => void;

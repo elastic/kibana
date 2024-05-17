@@ -16,17 +16,17 @@
  * Not to be confused with vislib/vis.js.
  */
 
-import { isFunction, defaults, cloneDeep } from 'lodash';
-import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+import { Assign } from '@kbn/utility-types';
+import { cloneDeep, defaults, isFunction } from 'lodash';
 
-import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
+import { AggConfigSerialized, IAggConfigs, ISearchSource } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
-import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
+import { PersistedState } from './persisted_state';
+import { getAggs, getFieldsFormats, getSavedSearch, getSearch, getTypes } from './services';
+import { BaseVisType } from './vis_types';
 
 export type { SerializedVis, SerializedVisData };
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { BorderForm } from './border_form';
-import { AppearanceForm } from './appearance_form';
-import { CanvasWorkpad } from '../../../../types';
-import { Arguments as AppearanceArguments } from './appearance_form';
-import { Arguments as BorderArguments } from './border_form';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 import { ArgTypesStrings } from '../../../../i18n';
+import { CanvasWorkpad } from '../../../../types';
+import { AppearanceForm } from './appearance_form';
+import { Arguments as AppearanceArguments } from './appearance_form';
+import { BorderForm } from './border_form';
+import { Arguments as BorderArguments } from './border_form';
 
 export { BorderStyle } from './border_form';
 

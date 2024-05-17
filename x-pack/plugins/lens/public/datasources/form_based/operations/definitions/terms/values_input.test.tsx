@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { shallow } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { shallow } from 'enzyme';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { ValuesInput } from './values_input';
 
 jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());

@@ -26,9 +26,9 @@ import {
   createLegacyRuleAction,
   createRuleThroughAlertingEndpoint,
   getLegacyActionSO,
+  getRuleSOById,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  getRuleSOById,
   getSimpleRule,
   getWebHookAction,
 } from '../../../utils';

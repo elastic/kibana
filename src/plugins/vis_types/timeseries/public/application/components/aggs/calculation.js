@@ -11,22 +11,22 @@ import React, { useEffect } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import { CalculationVars, newVariable } from './vars';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  htmlIdGenerator,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiTextArea,
   EuiFormRow,
-  EuiCode,
   EuiSpacer,
+  EuiTextArea,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;

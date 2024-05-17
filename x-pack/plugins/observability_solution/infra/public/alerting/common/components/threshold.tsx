@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Chart, Metric, Settings } from '@elastic/charts';
-import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
+import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { Comparator } from '../../../../common/alerting/metrics';
 
 export interface ChartProps {

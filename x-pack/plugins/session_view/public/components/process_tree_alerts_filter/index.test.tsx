@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { ProcessTreeAlertsFilter, ProcessTreeAlertsFilterDeps } from '.';
+import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 import { mockAlertTypeCounts } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessTreeAlertsFilter, ProcessTreeAlertsFilterDeps } from '.';
-import userEvent from '@testing-library/user-event';
-import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 
 describe('ProcessTreeAlertsFiltersFilter component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

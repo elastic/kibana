@@ -12,10 +12,10 @@
 
 import { get } from 'lodash';
 
-import { ES_AGGREGATION, ML_JOB_AGGREGATION, DOC_COUNT, _DOC_COUNT } from '@kbn/ml-anomaly-utils';
+import { DOC_COUNT, ES_AGGREGATION, ML_JOB_AGGREGATION, _DOC_COUNT } from '@kbn/ml-anomaly-utils';
 
-import type { SeriesConfig } from '../../../common/types/results';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { SeriesConfig } from '../../../common/types/results';
 
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 

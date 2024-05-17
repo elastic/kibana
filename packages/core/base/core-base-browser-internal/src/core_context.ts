@@ -7,8 +7,8 @@
  */
 
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import type { LoggerFactory } from '@kbn/logging';
 import type { CoreId } from '@kbn/core-base-common-internal';
+import type { LoggerFactory } from '@kbn/logging';
 
 /** @internal */
 export interface CoreContext {

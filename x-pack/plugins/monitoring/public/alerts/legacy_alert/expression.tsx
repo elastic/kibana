@@ -1,3 +1,6 @@
+import { EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +8,10 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { debounce } from 'lodash';
-import { EuiSpacer, EuiForm, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useDerivedIndexPattern } from '../components/param_details_form/use_derived_index_pattern';
-import { convertKueryToElasticSearchQuery } from '../../lib/kuery';
 import { KueryBar } from '../../components/kuery_bar';
+import { convertKueryToElasticSearchQuery } from '../../lib/kuery';
 import { Props } from '../components/param_details_form/expression';
+import { useDerivedIndexPattern } from '../components/param_details_form/use_derived_index_pattern';
 import { AlertParamDuration } from '../flyout_expressions/alert_param_duration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;

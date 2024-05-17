@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { useDispatch } from 'react-redux';
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import { ColorMapping } from '../../config';
+import { CategoricalColor, ColorCode } from '../../config/types';
 import { getPalette } from '../../palettes';
-import { ColorSwatch } from '../color_picker/color_swatch';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
-import { ColorCode, CategoricalColor } from '../../config/types';
+import { ColorSwatch } from '../color_picker/color_swatch';
 
 export function SpecialAssignment({
   assignmentColor,

@@ -9,13 +9,13 @@
 import Fs from 'fs';
 import { join } from 'path';
 
-import sinon from 'sinon';
-import globby from 'globby';
 import del from 'del';
+import globby from 'globby';
+import sinon from 'sinon';
 
 import { Logger } from '../../cli/logger';
-import { extract, getPackData } from './pack';
 import { _downloadSingle } from './download';
+import { extract, getPackData } from './pack';
 
 describe('kibana cli', function () {
   describe('pack', function () {
@@ -71,8 +71,9 @@ describe('kibana cli', function () {
         await getPackData(settings, logger);
         await extract(settings, logger);
 
-        expect(globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false }).sort())
-          .toMatchInlineSnapshot(`
+        expect(
+          globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false }).sort()
+        ).toMatchInlineSnapshot(`
           Array [
             "archive.part",
             "bin",

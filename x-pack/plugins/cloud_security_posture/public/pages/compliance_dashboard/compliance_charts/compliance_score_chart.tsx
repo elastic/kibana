@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   AreaSeries,
   Axis,
   Chart,
-  niceTimeFormatByDay,
   Settings,
-  timeFormatter,
   Tooltip,
+  niceTimeFormatByDay,
+  timeFormatter,
 } from '@elastic/charts';
 import {
-  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiText,
-  EuiTitle,
   type EuiLinkButtonProps,
+  EuiText,
   type EuiTextProps,
+  EuiTitle,
   EuiToolTip,
   EuiToolTipProps,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
-import { statusColors } from '../../../common/constants';
+import React from 'react';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
-import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import type { Evaluation, PostureTrend, Stats } from '../../../../common/types_old';
+import { statusColors } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
+import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
+import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 
 interface ComplianceScoreChartProps {
   compact?: boolean;

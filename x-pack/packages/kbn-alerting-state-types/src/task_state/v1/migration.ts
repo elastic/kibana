@@ -6,13 +6,13 @@
  */
 
 import { type TypeOf } from '@kbn/config-schema';
-import { isJSONObject, isString, isBoolean, isNumber, isStringArray, isBooleanArray } from '../lib';
+import { isBoolean, isBooleanArray, isJSONObject, isNumber, isString, isStringArray } from '../lib';
 import {
-  versionSchema,
-  throttledActionSchema,
-  rawAlertInstanceSchema,
-  metaSchema,
   lastScheduledActionsSchema,
+  metaSchema,
+  rawAlertInstanceSchema,
+  throttledActionSchema,
+  versionSchema,
 } from './schema';
 
 type VersionSchema = TypeOf<typeof versionSchema>;
@@ -26,15 +26,18 @@ export function migrateThrottledActions(
   if (!isJSONObject(throttledActions)) {
     return;
   }
-  return Object.keys(throttledActions).reduce((acc, key) => {
-    const val = throttledActions[key];
-    if (isJSONObject(val) && isString(val.date)) {
-      acc[key] = {
-        date: val.date,
-      };
-    }
-    return acc;
-  }, {} as TypeOf<typeof throttledActionSchema>);
+  return Object.keys(throttledActions).reduce(
+    (acc, key) => {
+      const val = throttledActions[key];
+      if (isJSONObject(val) && isString(val.date)) {
+        acc[key] = {
+          date: val.date,
+        };
+      }
+      return acc;
+    },
+    {} as TypeOf<typeof throttledActionSchema>
+  );
 }
 
 export function migrateLastScheduledActions(
@@ -79,16 +82,19 @@ export function migrateAlertInstances(
   if (!isJSONObject(alertInstances)) {
     return;
   }
-  return Object.keys(alertInstances).reduce((acc, key) => {
-    const val = alertInstances[key];
-    if (isJSONObject(val)) {
-      acc[key] = {
-        meta: migrateMeta(val.meta),
-        state: isJSONObject(val.state) ? val.state : undefined,
-      };
-    }
-    return acc;
-  }, {} as Record<string, RawAlertInstanceSchema>);
+  return Object.keys(alertInstances).reduce(
+    (acc, key) => {
+      const val = alertInstances[key];
+      if (isJSONObject(val)) {
+        acc[key] = {
+          meta: migrateMeta(val.meta),
+          state: isJSONObject(val.state) ? val.state : undefined,
+        };
+      }
+      return acc;
+    },
+    {} as Record<string, RawAlertInstanceSchema>
+  );
 }
 
 export const upMigration = (state: Record<string, unknown>): VersionSchema => {

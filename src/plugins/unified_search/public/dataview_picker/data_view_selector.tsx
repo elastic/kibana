@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useEffect, useRef, useState } from 'react';
 import type { EuiSelectableProps } from '@elastic/eui';
 import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewsList } from './dataview_list';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { IUnifiedSearchPluginServices } from '../types';
+import { DataViewsList } from './dataview_list';
 import { ExploreMatchingButton } from './explore_matching_button';
 
 export interface DataViewSelectorProps {

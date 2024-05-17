@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PolicySelectionItem } from '../policies_selector';
-import { PoliciesSelector } from '../policies_selector';
+import React, { memo, useCallback, useState } from 'react';
 import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import type { PolicySelectionItem } from '../policies_selector';
+import { PoliciesSelector } from '../policies_selector';
 
 export interface SearchExceptionsProps {
   defaultValue?: string;

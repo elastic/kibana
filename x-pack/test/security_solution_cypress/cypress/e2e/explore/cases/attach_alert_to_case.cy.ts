@@ -14,10 +14,10 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
-import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { ALERTS_URL } from '../../../urls/navigation';
 
 const loadDetectionsPage = (role: SecurityRoleName) => {
   login(role);

@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import {
+  ES_AGGREGATION,
+  type InfluencersFilterQuery,
+  type MlEntityField,
+  type MlRecordForInfluencer,
+  aggregationTypeTransform,
+} from '@kbn/ml-anomaly-utils';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { each, get } from 'lodash';
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
 // entityFields parameter must be an array, with each object in the array having 'fieldName'
@@ -14,24 +25,13 @@
 // Returned response contains a results property containing the requested aggregation.
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
-import { each, get } from 'lodash';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ErrorType } from '@kbn/ml-error-utils';
-import {
-  aggregationTypeTransform,
-  type InfluencersFilterQuery,
-  type MlEntityField,
-  type MlRecordForInfluencer,
-  ES_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
-import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import type { Dictionary } from '../../../../common/types/common';
-import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import type { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
-import { findAggField } from '../../../../common/util/validation_utils';
-import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
-import type { MlApiServices } from '../ml_api_service';
 import type { CriteriaField } from '.';
+import type { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
+import type { Dictionary } from '../../../../common/types/common';
+import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
+import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
+import { findAggField } from '../../../../common/util/validation_utils';
+import type { MlApiServices } from '../ml_api_service';
 
 export interface ResultResponse {
   success: boolean;

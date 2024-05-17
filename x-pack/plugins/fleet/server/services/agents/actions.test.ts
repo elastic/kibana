@@ -7,9 +7,9 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import type { NewAgentAction, AgentActionType } from '../../../common/types';
+import type { AgentActionType, NewAgentAction } from '../../../common/types';
 
-import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../mocks';
+import { type MockedFleetAppContext, createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
 

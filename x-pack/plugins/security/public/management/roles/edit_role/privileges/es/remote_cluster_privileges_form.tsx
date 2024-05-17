@@ -21,9 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 
-import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 import type { RoleRemoteClusterPrivilege } from '../../../../../../common';
 import type { RoleValidator } from '../../validate_role';
+import { RemoteClusterComboBox } from './remote_clusters_combo_box';
 
 const fromOption = (option: EuiComboBoxOptionOption) => option.label;
 const toOption = (value: string): EuiComboBoxOptionOption => ({ label: value });

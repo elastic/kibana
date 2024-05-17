@@ -7,45 +7,45 @@
  */
 
 import {
-  pointInTimeFinderMock,
   mockGetBulkOperationError,
   mockGetCurrentTime,
   mockGetSearchDsl,
+  pointInTimeFinderMock,
 } from '../repository.test.mock';
 
-import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Payload } from '@hapi/boom';
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsBulkGetObject } from '@kbn/core-saved-objects-api-server';
-import { type SavedObjectsRawDocSource, type SavedObject } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsRepository } from '../repository';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   SavedObjectsSerializer,
   encodeHitVersion,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { type SavedObject, type SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { kibanaMigratorMock } from '../../mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsRepository } from '../repository';
 
 import {
-  NAMESPACE_AGNOSTIC_TYPE,
-  MULTI_NAMESPACE_ISOLATED_TYPE,
   HIDDEN_TYPE,
-  mockTimestamp,
-  mappings,
-  bulkGetSuccess,
-  createRegistry,
-  createDocumentMigrator,
-  getMockMgetResponse,
+  MULTI_NAMESPACE_ISOLATED_TYPE,
+  NAMESPACE_AGNOSTIC_TYPE,
   type TypeIdTuple,
-  createSpySerializer,
   bulkGet,
-  expectErrorResult,
+  bulkGetSuccess,
+  createBadRequestErrorPayload,
+  createDocumentMigrator,
+  createRegistry,
+  createSpySerializer,
+  expectError,
   expectErrorInvalidType,
   expectErrorNotFound,
-  expectError,
-  createBadRequestErrorPayload,
+  expectErrorResult,
+  getMockMgetResponse,
+  mappings,
+  mockTimestamp,
 } from '../../test_helpers/repository.test.common';
 
 interface ExpectedErrorResult {

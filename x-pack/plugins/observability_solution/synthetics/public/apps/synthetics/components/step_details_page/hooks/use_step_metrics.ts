@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { useParams } from 'react-router-dom';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { formatBytes } from './use_object_metrics';
-import { formatMillisecond } from '../step_metrics/step_metrics';
 import {
   CLS_HELP_LABEL,
   DCL_TOOLTIP,
@@ -17,8 +17,8 @@ import {
   LCP_HELP_LABEL,
   TRANSFER_SIZE_HELP,
 } from '../step_metrics/labels';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import { formatMillisecond } from '../step_metrics/step_metrics';
+import { formatBytes } from './use_object_metrics';
 
 export const MONITOR_DURATION_US = 'monitor.duration.us';
 export const SYNTHETICS_CLS = 'browser.experience.cls';

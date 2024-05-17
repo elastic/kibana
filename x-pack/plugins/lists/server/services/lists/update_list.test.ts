@@ -10,8 +10,8 @@ import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 
-import { updateList } from './update_list';
 import { getList } from './get_list';
+import { updateList } from './update_list';
 import { getUpdateListOptionsMock } from './update_list.mock';
 
 jest.mock('../utils', () => ({

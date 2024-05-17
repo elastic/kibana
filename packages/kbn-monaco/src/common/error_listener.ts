@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Recognizer, RecognitionException } from 'antlr4';
+import type { RecognitionException, Recognizer } from 'antlr4';
 import { ErrorListener } from 'antlr4';
 import type { MonacoEditorError } from '../types';
 

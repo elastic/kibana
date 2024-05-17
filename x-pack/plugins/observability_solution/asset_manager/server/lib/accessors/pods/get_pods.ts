@@ -12,8 +12,8 @@ import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
-import { parseEan } from '../../parse_ean';
 import { collectPods } from '../../collectors/pods';
+import { parseEan } from '../../parse_ean';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 
 export type GetPodsOptions = GetPodsOptionsPublic & AssetClientDependencies;

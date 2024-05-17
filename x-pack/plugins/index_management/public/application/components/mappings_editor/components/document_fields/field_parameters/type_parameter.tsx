@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, EuiText, EuiLink } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 
 import { documentationService } from '../../../../../services/documentation';
+import { FIELD_TYPES_OPTIONS } from '../../../constants';
 import {
-  getFieldConfig,
   filterTypesForMultiField,
   filterTypesForNonRootFields,
+  getFieldConfig,
 } from '../../../lib';
 import { UseField } from '../../../shared_imports';
 import { ComboBoxOption, DataType } from '../../../types';
-import { FIELD_TYPES_OPTIONS } from '../../../constants';
 
 interface Props {
   isRootLevelField: boolean;
@@ -36,8 +36,8 @@ export const TypeParameter = ({
     let options = isMultiField
       ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
       : isRootLevelField
-      ? FIELD_TYPES_OPTIONS
-      : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS);
+        ? FIELD_TYPES_OPTIONS
+        : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS);
 
     if (!isSemanticTextEnabled) {
       options = options.filter((option) => option.value !== 'semantic_text');

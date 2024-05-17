@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { convertSliApmParamsToApmAppDeeplinkUrl } from './convert_sli_apm_params_to_apm_app_deeplink_url';
-import { buildSlo } from '../../data/slo/slo';
-import { buildApmLatencyIndicator } from '../../data/slo/indicator';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { buildApmLatencyIndicator } from '../../data/slo/indicator';
+import { buildSlo } from '../../data/slo/slo';
+import { convertSliApmParamsToApmAppDeeplinkUrl } from './convert_sli_apm_params_to_apm_app_deeplink_url';
 
 const DEFAULT_PARAMS = {
   environment: 'fooEnvironment',

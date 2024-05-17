@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import {
-  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
+  RuleExecutorOptions,
   RuleType,
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
-import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
-import { IRuleDataClient } from '../rule_data_client';
-import { BulkResponseErrorAggregation } from './utils';
+import { Logger } from '@kbn/logging';
 import { AlertWithCommonFieldsLatest } from '../../common/schemas';
 import { SuppressionFieldsLatest } from '../../common/schemas';
+import { IRuleDataClient } from '../rule_data_client';
+import { BulkResponseErrorAggregation } from './utils';
 
 export type PersistenceAlertService = <T>(
   alerts: Array<{
@@ -76,7 +76,7 @@ export type PersistenceAlertType<
   TParams extends RuleTypeParams,
   TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
+  TActionGroupIds extends string = never,
 > = Omit<
   RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'

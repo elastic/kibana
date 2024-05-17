@@ -6,8 +6,8 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { handleEsError } from './shared_imports';
 
 export interface Dependencies {

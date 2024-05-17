@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import https from 'https';
 import type { Response } from 'node-fetch';
 import fetch from 'node-fetch';
-import https from 'https';
 
 import { USAGE_SERVICE_USAGE_URL } from '../../constants';
 import type { UsageRecord } from '../../types';

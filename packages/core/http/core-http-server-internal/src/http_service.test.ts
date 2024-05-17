@@ -8,21 +8,21 @@
 
 import { mockHttpServer } from './http_service.test.mocks';
 
-import { noop } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { hapiMocks } from '@kbn/hapi-mocks';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { hapiMocks } from '@kbn/hapi-mocks';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { noop } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
 jest.mock('@kbn/core-http-router-server-internal');
-import { HttpService } from './http_service';
-import { HttpConfigType, config } from './http_config';
 import { cspConfig } from './csp';
-import { externalUrlConfig, ExternalUrlConfig } from './external_url';
+import { ExternalUrlConfig, externalUrlConfig } from './external_url';
+import { HttpConfigType, config } from './http_config';
+import { HttpService } from './http_service';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());

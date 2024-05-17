@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { Browser } from '@kbn/ftr-common-functional-ui-services';
-import { AppSearchService, IEngine } from '../../../../services/app_search_service';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { AppSearchService, IEngine } from '../../../../services/app_search_service';
 
 export default function enterpriseSearchSetupEnginesTests({
   getService,

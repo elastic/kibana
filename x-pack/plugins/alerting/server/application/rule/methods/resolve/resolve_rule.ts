@@ -7,18 +7,18 @@
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
+import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import { resolveRuleSavedObject } from '../../../../rules_client/lib';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RuleTypeParams } from '../../../../types';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { RulesClientContext } from '../../../../rules_client/types';
 import { formatLegacyActions } from '../../../../rules_client/lib';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { RuleTypeParams } from '../../../../types';
+import type { ResolvedSanitizedRule } from '../../../../types';
+import { ruleSchema } from '../../schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { Rule } from '../../types';
-import { ruleSchema } from '../../schemas';
 import { resolveRuleParamsSchema } from './schemas';
-import type { ResolvedSanitizedRule } from '../../../../types';
 
 export interface ResolveParams {
   id: string;

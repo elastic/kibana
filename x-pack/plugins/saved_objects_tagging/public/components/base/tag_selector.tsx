@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useCallback, useState } from 'react';
 import {
   EuiComboBox,
-  EuiHealth,
-  EuiHighlight,
   EuiComboBoxOptionOption,
-  EuiIcon,
+  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBoxProps,
+  EuiHealth,
+  EuiHighlight,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FC, useMemo, useCallback, useState } from 'react';
 import { Tag } from '../../../common';
 import { testSubjFriendly } from '../../utils';
 import { CreateModalOpener } from '../edition_modal';

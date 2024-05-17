@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { duration } from 'moment';
-import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { duration } from 'moment';
 import { CloudExperimentsPluginStart } from '../common';
 import { FEATURE_FLAG_NAMES } from '../common/constants';
-import { CloudExperimentsPlugin } from './plugin';
-import { LaunchDarklyClient } from './launch_darkly_client';
 import { MetadataService } from '../common/metadata_service';
+import { LaunchDarklyClient } from './launch_darkly_client';
+import { CloudExperimentsPlugin } from './plugin';
 jest.mock('./launch_darkly_client');
 
 function getLaunchDarklyClientInstanceMock() {

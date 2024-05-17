@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import PropTypes from 'prop-types';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
+import PropTypes from 'prop-types';
+import React, { FC } from 'react';
+import { DatatableColumn, DatatableColumnType, Datatable as DatatableType } from '../../../types';
 import { Paginate } from '../paginate';
-import { Datatable as DatatableType, DatatableColumn, DatatableColumnType } from '../../../types';
 
 const getIcon = (type: DatatableColumnType | null) => {
   if (type === null) {

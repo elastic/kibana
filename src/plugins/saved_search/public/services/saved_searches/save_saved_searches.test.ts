@@ -8,11 +8,11 @@
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
-import { saveSavedSearch } from './save_saved_searches';
-import type { SavedSearch } from './types';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { saveSavedSearch } from './save_saved_searches';
+import type { SavedSearch } from './types';
 
 describe('saveSavedSearch', () => {
   let cmApi: ContentManagementPublicStart['client'];

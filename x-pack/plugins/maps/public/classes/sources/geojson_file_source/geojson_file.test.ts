@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GeoJsonFileSource } from './geojson_file_source';
-import { BoundsRequestMeta } from '../vector_source';
 import { FIELD_ORIGIN } from '../../../../common/constants';
+import { BoundsRequestMeta } from '../vector_source';
+import { GeoJsonFileSource } from './geojson_file_source';
 
 describe('GeoJsonFileSource', () => {
   describe('getName', () => {

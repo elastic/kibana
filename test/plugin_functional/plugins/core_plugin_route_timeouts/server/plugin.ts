@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 
 export class CorePluginRouteTimeoutsPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {

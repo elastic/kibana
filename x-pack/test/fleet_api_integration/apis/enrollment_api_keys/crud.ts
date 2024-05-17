@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents, getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { getEsClientForAPIKey, setupFleetAndAgents } from '../agents/services';
 
 import { testUsers } from '../test_users';
 

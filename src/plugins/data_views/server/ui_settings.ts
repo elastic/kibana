@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from './constants';
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
-import { EuiFormRow, EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import React, { useCallback, useMemo, useState, useEffect, memo } from 'react';
 
 import { uniq } from 'lodash';
 
@@ -18,14 +18,14 @@ import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-
 // import { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 type AutocompleteStart = any;
 
-import * as i18n from '../translations';
-import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import {
-  getGenericComboBoxProps,
   GetGenericComboBoxPropsReturn,
+  getGenericComboBoxProps,
 } from '../get_generic_combo_box_props';
-import { paramIsValid } from '../param_is_valid';
+import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { paramContainsSpace } from '../param_contains_space';
+import { paramIsValid } from '../param_is_valid';
+import * as i18n from '../translations';
 
 const SINGLE_SELECTION = { asPlainText: true };
 

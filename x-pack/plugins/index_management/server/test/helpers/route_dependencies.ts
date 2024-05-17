@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { handleEsError } from '../../shared_imports';
 import { IndexDataEnricher } from '../../services';
+import { handleEsError } from '../../shared_imports';
 import type { RouteDependencies } from '../../types';
 
 export const routeDependencies: Omit<RouteDependencies, 'router'> = {

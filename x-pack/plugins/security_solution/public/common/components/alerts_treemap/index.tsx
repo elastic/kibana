@@ -13,13 +13,12 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
+import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { useThemes } from '../charts/common';
 import { DraggableLegend } from '../charts/draggable_legend';
 import type { LegendItem } from '../charts/draggable_legend_item';
-import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
-import { getRiskScorePalette, RISK_SCORE_STEPS } from './lib/chart_palette';
+import { RISK_SCORE_STEPS, getRiskScorePalette } from './lib/chart_palette';
 import { getFlattenedBuckets } from './lib/flatten/get_flattened_buckets';
-import { getFlattenedLegendItems } from './lib/legend/get_flattened_legend_items';
 import {
   getGroupByFieldsOnClick,
   getMaxRiskSubAggregations,
@@ -28,6 +27,7 @@ import {
 } from './lib/helpers';
 import { getLayersMultiDimensional, getLayersOneDimension } from './lib/layers';
 import { getFirstGroupLegendItems } from './lib/legend';
+import { getFlattenedLegendItems } from './lib/legend/get_flattened_legend_items';
 import { NoData } from './no_data';
 import { NO_DATA_REASON_LABEL } from './translations';
 import type { AlertsTreeMapAggregation, FlattenedBucket, RawBucket } from './types';

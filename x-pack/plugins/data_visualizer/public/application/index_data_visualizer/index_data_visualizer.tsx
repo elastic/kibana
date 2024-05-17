@@ -5,48 +5,48 @@
  * 2.0.
  */
 import '../_index.scss';
-import { pick } from 'lodash';
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
-import { isEqual } from 'lodash';
-import { encode } from '@kbn/rison';
-import { i18n } from '@kbn/i18n';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { StorageContextProvider } from '@kbn/ml-local-storage';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { getNestedProperty } from '@kbn/ml-nested-property';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { EuiCallOut } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
+import { getNestedProperty } from '@kbn/ml-nested-property';
 import {
-  Provider as UrlStateContextProvider,
-  parseUrlState,
-  isRisonSerializationRequired,
   type Accessor,
   type Dictionary,
   type SetUrlState,
+  Provider as UrlStateContextProvider,
   UrlStateProvider,
+  isRisonSerializationRequired,
+  parseUrlState,
 } from '@kbn/ml-url-state';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { encode } from '@kbn/rison';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { pick } from 'lodash';
+import { isEqual } from 'lodash';
+import { parse, stringify } from 'query-string';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
-  type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
+  type IndexDataVisualizerViewProps,
 } from './components/index_data_visualizer_view';
 import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view/index_data_visualizer_esql';
 
-import { useDataVisualizerKibana } from '../kibana_context';
 import type { GetAdditionalLinks } from '../common/components/results_links';
-import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
-import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { useDataVisualizerKibana } from '../kibana_context';
+import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
+import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DV_STORAGE_KEYS } from './types/storage';
 
 const XXL_BREAKPOINT = 1400;

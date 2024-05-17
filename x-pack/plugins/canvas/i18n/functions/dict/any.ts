@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type { any } from '../../../canvas_plugin_src/functions/common/any';
-import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { BOOLEAN_TRUE } from '../../constants';
+import { FunctionHelp } from '../function_help';
 
 export const help: FunctionHelp<FunctionFactory<typeof any>> = {
   help: i18n.translate('xpack.canvas.functions.anyHelpText', {

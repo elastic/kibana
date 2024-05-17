@@ -12,14 +12,14 @@ import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/publi
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from '../common';
+import { heatmapFunction, heatmapGridConfig, heatmapLegendConfig } from '../common';
+import { heatmapRenderer } from './expression_renderers';
 import {
   setDatatableUtilities,
   setFormatService,
   setPaletteService,
   setUISettings,
 } from './services';
-import { heatmapRenderer } from './expression_renderers';
 
 /** @internal */
 export interface ExpressionHeatmapPluginSetup {

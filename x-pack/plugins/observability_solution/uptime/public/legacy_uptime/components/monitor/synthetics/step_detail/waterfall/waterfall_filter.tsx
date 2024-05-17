@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -17,16 +16,17 @@ import {
   EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
+  FILTER_COLLAPSE_REQUESTS_LABEL,
+  FILTER_POPOVER_OPEN_LABEL,
+  FILTER_REMOVE_SCREENREADER_LABEL,
   FILTER_REQUESTS_LABEL,
   FILTER_SCREENREADER_LABEL,
-  FILTER_REMOVE_SCREENREADER_LABEL,
-  FILTER_POPOVER_OPEN_LABEL,
-  FILTER_COLLAPSE_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
-import { MimeType, FriendlyMimetypeLabels } from './types';
+import { FriendlyMimetypeLabels, MimeType } from './types';
 
 interface Props {
   query: string;

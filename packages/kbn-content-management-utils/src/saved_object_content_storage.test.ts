@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { SOContentStorage } from './saved_object_content_storage';
 import { CMCrudTypes } from './types';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 import { schema } from '@kbn/config-schema';
 import type {
@@ -16,10 +16,10 @@ import type {
   Version,
 } from '@kbn/object-versioning';
 import { getContentManagmentServicesTransforms } from '@kbn/object-versioning';
-import { savedObjectSchema, objectTypeToGetResultSchema, createResultSchema } from './schema';
+import { createResultSchema, objectTypeToGetResultSchema, savedObjectSchema } from './schema';
 
-import { coreMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
 
 const testAttributesSchema = schema.object(
   {

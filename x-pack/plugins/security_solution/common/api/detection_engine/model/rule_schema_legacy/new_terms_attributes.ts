@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { LimitedSizeArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../constants';
 
 // Attributes specific to New Terms rules

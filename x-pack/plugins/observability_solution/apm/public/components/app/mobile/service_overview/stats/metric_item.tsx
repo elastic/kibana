@@ -1,3 +1,6 @@
+import { Chart, Metric, MetricDatum } from '@elastic/charts';
+import { EuiPanel, EuiSkeletonText } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import React from 'react';
-import { Chart, Metric, MetricDatum } from '@elastic/charts';
-import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 
 export function MetricItem({
   data,

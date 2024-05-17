@@ -8,24 +8,24 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
-import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
-  xyVisFunction,
-  legendConfigFunction,
-  dataDecorationConfigFunction,
-  xAxisConfigFunction,
-  yAxisConfigFunction,
-  referenceLineDecorationConfigFunction,
-  axisExtentConfigFunction,
   annotationLayerFunction,
-  referenceLineFunction,
-  extendedDataLayerFunction,
-  referenceLineLayerFunction,
-  layeredXyVisFunction,
+  axisExtentConfigFunction,
+  dataDecorationConfigFunction,
   extendedAnnotationLayerFunction,
+  extendedDataLayerFunction,
+  layeredXyVisFunction,
+  legendConfigFunction,
+  referenceLineDecorationConfigFunction,
+  referenceLineFunction,
+  referenceLineLayerFunction,
+  xAxisConfigFunction,
+  xyVisFunction,
+  yAxisConfigFunction,
 } from '../common/expression_functions';
-import { SetupDeps } from './types';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
+import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
+import { SetupDeps } from './types';
 
 export class ExpressionXyPlugin
   implements Plugin<ExpressionXyPluginSetup, ExpressionXyPluginStart>

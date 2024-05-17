@@ -7,7 +7,7 @@
 
 import React, { type FC, type PropsWithChildren } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiPageTemplate, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 

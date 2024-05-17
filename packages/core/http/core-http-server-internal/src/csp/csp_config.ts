@@ -7,7 +7,7 @@
  */
 
 import type { ICspConfig } from '@kbn/core-http-server';
-import { CspAdditionalConfig, cspConfig, CspConfigType } from './config';
+import { CspAdditionalConfig, CspConfigType, cspConfig } from './config';
 import { CspDirectives } from './csp_directives';
 
 const DEFAULT_CONFIG = Object.freeze(cspConfig.schema.validate({}));

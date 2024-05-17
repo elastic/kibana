@@ -6,11 +6,11 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
-import { ESSearchSource } from './es_search_source';
-import { GeoJsonVectorLayer } from '../../layers/vector_layer';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { getIsGoldPlus } from '../../../licensed_features';
+import { GeoJsonVectorLayer } from '../../layers/vector_layer';
+import { ESSearchSource } from './es_search_source';
 
 export interface CreateLayerDescriptorParams {
   indexPatternId: string;

@@ -6,23 +6,23 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
-import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
+import { FeatureFeedbackButton, useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { BetaBadge } from '../../../components/beta_badge';
+import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
+import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { MetricsPageTemplate } from '../page_template';
-import { hostsTitle } from '../../../translations';
-import { MetricsDataViewProvider } from './hooks/use_metrics_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { hostsTitle } from '../../../translations';
+import { MetricsPageTemplate } from '../page_template';
 import { HostContainer } from './components/hosts_container';
-import { BetaBadge } from '../../../components/beta_badge';
-import { NoRemoteCluster } from '../../../components/empty_states';
+import { MetricsDataViewProvider } from './hooks/use_metrics_data_view';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';

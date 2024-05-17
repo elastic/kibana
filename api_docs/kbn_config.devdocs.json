@@ -35,9 +35,7 @@
             "type": "Object",
             "tags": [],
             "label": "packageInfo",
-            "description": [
-              "\nInformation about Kibana package (version, build number etc.)."
-            ],
+            "description": ["\nInformation about Kibana package (version, build number etc.)."],
             "signature": [
               "{ readonly version: string; readonly branch: string; readonly buildNum: number; readonly buildSha: string; readonly buildShaShort: string; readonly buildDate: Date; readonly buildFlavor: ",
               {
@@ -59,9 +57,7 @@
             "type": "Object",
             "tags": [],
             "label": "mode",
-            "description": [
-              "\nMode Kibana currently run in (development or production)."
-            ],
+            "description": ["\nMode Kibana currently run in (development or production)."],
             "signature": [
               "{ readonly name: \"production\" | \"development\"; readonly dev: boolean; readonly prod: boolean; }"
             ],
@@ -81,9 +77,7 @@
         "tags": [],
         "label": "getConfigFromFiles",
         "description": [],
-        "signature": [
-          "(configFiles: readonly string[]) => Record<string, any>"
-        ],
+        "signature": ["(configFiles: readonly string[]) => Record<string, any>"],
         "path": "packages/kbn-config/src/raw/read_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -95,9 +89,7 @@
             "tags": [],
             "label": "configFiles",
             "description": [],
-            "signature": [
-              "readonly string[]"
-            ],
+            "signature": ["readonly string[]"],
             "path": "packages/kbn-config/src/raw/read_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -114,9 +106,7 @@
         "tags": [],
         "label": "hasConfigPathIntersection",
         "description": [],
-        "signature": [
-          "(leafPath: string, rootPath: string) => boolean"
-        ],
+        "signature": ["(leafPath: string, rootPath: string) => boolean"],
         "path": "packages/kbn-config/src/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -128,9 +118,7 @@
             "tags": [],
             "label": "leafPath",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-config/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -143,9 +131,7 @@
             "tags": [],
             "label": "rootPath",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-config/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -161,12 +147,8 @@
         "type": "Function",
         "tags": [],
         "label": "isConfigPath",
-        "description": [
-          "\nChecks whether specified value can be considered as config path."
-        ],
-        "signature": [
-          "(value: unknown) => boolean"
-        ],
+        "description": ["\nChecks whether specified value can be considered as config path."],
+        "signature": ["(value: unknown) => boolean"],
         "path": "packages/kbn-config/src/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -177,12 +159,8 @@
             "type": "Unknown",
             "tags": [],
             "label": "value",
-            "description": [
-              "Value to check."
-            ],
-            "signature": [
-              "unknown"
-            ],
+            "description": ["Value to check."],
+            "signature": ["unknown"],
             "path": "packages/kbn-config/src/config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -200,9 +178,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ChangedDeprecatedPaths",
-        "description": [
-          "\nList of config paths changed during deprecation.\n"
-        ],
+        "description": ["\nList of config paths changed during deprecation.\n"],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -214,9 +190,7 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -228,9 +202,7 @@
             "tags": [],
             "label": "unset",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
+            "signature": ["string[]"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -258,9 +230,7 @@
             "tags": [],
             "label": "set",
             "description": [],
-            "signature": [
-              "{ path: string; value: any; }[] | undefined"
-            ],
+            "signature": ["{ path: string; value: any; }[] | undefined"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -272,9 +242,7 @@
             "tags": [],
             "label": "unset",
             "description": [],
-            "signature": [
-              "{ path: string; }[] | undefined"
-            ],
+            "signature": ["{ path: string; }[] | undefined"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -301,9 +269,7 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "The current Kibana version, e.g `7.16.1`, `8.0.0`"
-            ],
+            "description": ["The current Kibana version, e.g `7.16.1`, `8.0.0`"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -314,9 +280,7 @@
             "type": "string",
             "tags": [],
             "label": "branch",
-            "description": [
-              "The current Kibana branch, e.g `7.x`, `7.16`, `master`"
-            ],
+            "description": ["The current Kibana branch, e.g `7.x`, `7.16`, `master`"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -327,9 +291,7 @@
             "type": "Object",
             "tags": [],
             "label": "docLinks",
-            "description": [
-              "Allow direct access to the doc links from the deprecation handler"
-            ],
+            "description": ["Allow direct access to the doc links from the deprecation handler"],
             "signature": [
               {
                 "pluginId": "@kbn/doc-links",
@@ -391,9 +353,7 @@
                 "tags": [],
                 "label": "deprecatedKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -406,9 +366,7 @@
                 "tags": [],
                 "label": "removeBy",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -421,9 +379,7 @@
                 "tags": [],
                 "label": "details",
                 "description": [],
-                "signature": [
-                  "FactoryConfigDeprecationDetails"
-                ],
+                "signature": ["FactoryConfigDeprecationDetails"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -464,9 +420,7 @@
                 "tags": [],
                 "label": "deprecatedKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -479,9 +433,7 @@
                 "tags": [],
                 "label": "removeBy",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -494,9 +446,7 @@
                 "tags": [],
                 "label": "details",
                 "description": [],
-                "signature": [
-                  "FactoryConfigDeprecationDetails"
-                ],
+                "signature": ["FactoryConfigDeprecationDetails"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -537,9 +487,7 @@
                 "tags": [],
                 "label": "oldKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -552,9 +500,7 @@
                 "tags": [],
                 "label": "newKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -567,9 +513,7 @@
                 "tags": [],
                 "label": "details",
                 "description": [],
-                "signature": [
-                  "FactoryConfigDeprecationDetails"
-                ],
+                "signature": ["FactoryConfigDeprecationDetails"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -610,9 +554,7 @@
                 "tags": [],
                 "label": "oldKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -625,9 +567,7 @@
                 "tags": [],
                 "label": "newKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -640,9 +580,7 @@
                 "tags": [],
                 "label": "details",
                 "description": [],
-                "signature": [
-                  "FactoryConfigDeprecationDetails"
-                ],
+                "signature": ["FactoryConfigDeprecationDetails"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -683,9 +621,7 @@
                 "tags": [],
                 "label": "unusedKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -698,9 +634,7 @@
                 "tags": [],
                 "label": "details",
                 "description": [],
-                "signature": [
-                  "FactoryConfigDeprecationDetails"
-                ],
+                "signature": ["FactoryConfigDeprecationDetails"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -741,9 +675,7 @@
                 "tags": [],
                 "label": "unusedKey",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -756,9 +688,7 @@
                 "tags": [],
                 "label": "details",
                 "description": [],
-                "signature": [
-                  "FactoryConfigDeprecationDetails"
-                ],
+                "signature": ["FactoryConfigDeprecationDetails"],
                 "path": "packages/kbn-config/src/deprecation/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -776,9 +706,7 @@
         "type": "Interface",
         "tags": [],
         "label": "DeprecatedConfigDetails",
-        "description": [
-          "\nDeprecated Config Details\n"
-        ],
+        "description": ["\nDeprecated Config Details\n"],
         "path": "packages/kbn-config/src/deprecation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -789,9 +717,7 @@
             "type": "string",
             "tags": [],
             "label": "configPath",
-            "description": [
-              "The path of the deprecated config setting"
-            ],
+            "description": ["The path of the deprecated config setting"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -802,12 +728,8 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": [
-              "The title to be displayed for the deprecation."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["The title to be displayed for the deprecation."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -818,9 +740,7 @@
             "type": "string",
             "tags": [],
             "label": "message",
-            "description": [
-              "The message to be displayed for the deprecation."
-            ],
+            "description": ["The message to be displayed for the deprecation."],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -834,9 +754,7 @@
             "description": [
               "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade."
             ],
-            "signature": [
-              "\"warning\" | \"critical\""
-            ],
+            "signature": ["\"warning\" | \"critical\""],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -850,9 +768,7 @@
             "description": [
               "(optional) set to `true` to prevent the config service from logging the deprecation message."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -866,9 +782,7 @@
             "description": [
               "(optional) link to the documentation for more details on the deprecation."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -879,12 +793,8 @@
             "type": "Object",
             "tags": [],
             "label": "correctiveActions",
-            "description": [
-              "corrective action needed to fix this deprecation."
-            ],
-            "signature": [
-              "{ manualSteps: string[]; }"
-            ],
+            "description": ["corrective action needed to fix this deprecation."],
+            "signature": ["{ manualSteps: string[]; }"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -910,9 +820,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "\"production\" | \"development\""
-            ],
+            "signature": ["\"production\" | \"development\""],
             "path": "packages/kbn-config/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1015,9 +923,7 @@
             "tags": [],
             "label": "buildDate",
             "description": [],
-            "signature": [
-              "Date"
-            ],
+            "signature": ["Date"],
             "path": "packages/kbn-config/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1029,9 +935,7 @@
             "tags": [],
             "label": "buildFlavor",
             "description": [],
-            "signature": [
-              "\"serverless\" | \"traditional\""
-            ],
+            "signature": ["\"serverless\" | \"traditional\""],
             "path": "packages/kbn-config/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1108,9 +1012,7 @@
         "tags": [],
         "label": "BuildFlavor",
         "description": [],
-        "signature": [
-          "\"serverless\" | \"traditional\""
-        ],
+        "signature": ["\"serverless\" | \"traditional\""],
         "path": "packages/kbn-config/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1165,9 +1067,7 @@
             "description": [
               "must not be mutated, return {@link ConfigDeprecationCommand } to change config shape."
             ],
-            "signature": [
-              "{ readonly [x: string]: any; }"
-            ],
+            "signature": ["{ readonly [x: string]: any; }"],
             "path": "packages/kbn-config/src/deprecation/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1314,9 +1214,7 @@
         "tags": [],
         "label": "ConfigPath",
         "description": [],
-        "signature": [
-          "string | string[]"
-        ],
+        "signature": ["string | string[]"],
         "path": "packages/kbn-config/src/config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1329,9 +1227,7 @@
         "tags": [],
         "label": "RawConfigAdapter",
         "description": [],
-        "signature": [
-          "(rawConfig: Record<string, any>) => Record<string, any>"
-        ],
+        "signature": ["(rawConfig: Record<string, any>) => Record<string, any>"],
         "path": "packages/kbn-config/src/raw/raw_config_service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1344,9 +1240,7 @@
             "tags": [],
             "label": "rawConfig",
             "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
+            "signature": ["{ [x: string]: any; }"],
             "path": "packages/kbn-config/src/raw/raw_config_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1361,11 +1255,7 @@
         "tags": [],
         "label": "RawConfigurationProvider",
         "description": [],
-        "signature": [
-          "{ getConfig$: () => ",
-          "Observable",
-          "<Record<string, any>>; }"
-        ],
+        "signature": ["{ getConfig$: () => ", "Observable", "<Record<string, any>>; }"],
         "path": "packages/kbn-config/src/raw/raw_config_service.ts",
         "deprecated": false,
         "trackAdoption": false,

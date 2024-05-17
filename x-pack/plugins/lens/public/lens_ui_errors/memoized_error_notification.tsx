@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 
 const [getMemoizedErrorNotification, setMemoizedErrorNotification] = createGetterSetter<

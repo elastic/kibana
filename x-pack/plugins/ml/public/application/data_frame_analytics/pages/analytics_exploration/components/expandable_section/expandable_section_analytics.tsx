@@ -13,16 +13,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 
 import {
-  getAnalysisType,
   type DataFrameAnalysisConfigType,
+  getAnalysisType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { ml } from '../../../../../services/ml_api_service';
 
-import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 import type { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
 import { DATA_FRAME_MODE } from '../../../analytics_management/components/analytics_list/common';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
+import { isGetDataFrameAnalyticsStatsResponseOk } from '../../../analytics_management/services/analytics_service/get_analytics';
 
 import type { ExpandableSectionProps } from './expandable_section';
 import { ExpandableSection, HEADER_ITEMS_LOADING } from './expandable_section';

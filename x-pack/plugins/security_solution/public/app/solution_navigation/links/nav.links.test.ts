@@ -5,16 +5,16 @@
  * 2.0.
  */
 import type { ChromeNavLink } from '@kbn/core/public';
-import { APP_UI_ID } from '../../../../common';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { NavigationLink } from '@kbn/security-solution-navigation';
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import { coreMock } from '@kbn/core/public/mocks';
-import { createSolutionNavLinks$ } from './nav_links';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, firstValueFrom, take } from 'rxjs';
-import { mlNavCategories, mlNavLinks } from './sections/ml_links';
+import { APP_UI_ID } from '../../../../common';
+import { createSolutionNavLinks$ } from './nav_links';
 import { assetsNavLinks } from './sections/assets_links';
 import { investigationsNavLinks } from './sections/investigations_links';
+import { mlNavCategories, mlNavLinks } from './sections/ml_links';
 
 const mockChromeNavLinks = jest.fn((): ChromeNavLink[] => []);
 const mockChromeGetNavLinks = jest.fn(() => new BehaviorSubject(mockChromeNavLinks()));

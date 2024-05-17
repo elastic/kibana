@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import type {
+  NewTrustedApp,
+  PutTrustedAppsRequestParams,
+  TrustedAppConditionEntry,
+} from '../types';
 import {
   GetTrustedAppsRequestSchema,
   GetTrustedAppsSummaryRequestSchema,
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
-import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import type {
-  TrustedAppConditionEntry,
-  NewTrustedApp,
-  PutTrustedAppsRequestParams,
-} from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {

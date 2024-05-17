@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import File from 'vinyl';
 import * as Babel from '@babel/core';
+import File from 'vinyl';
 
 const transformedFiles = new WeakSet<File>();
 

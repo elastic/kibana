@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { ConfigKey } from '../../../common/runtime_types';
+import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getMonitors } from '../common';
+import { SyntheticsRestApiRouteFactory } from '../types';
 
 const querySchema = schema.object({
   search_after: schema.maybe(schema.string()),

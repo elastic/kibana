@@ -7,10 +7,10 @@
 
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 
-import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
 import { LOGS_LOCATOR_ID } from './logs_locator';
 import { NODE_LOGS_LOCATOR_ID } from './node_logs_locator';
 import { TRACE_LOGS_LOCATOR_ID } from './trace_logs_locator';
+import { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './types';
 
 export const getLogsLocatorsFromUrlService = (urlService: UrlService) => {
   const logsLocator = urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;

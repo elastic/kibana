@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDurationV1 } from '../../../validation';
 import { rRuleRequestSchemaV1 } from '../../../../r_rule';
-import { notifyWhenSchemaV1, scheduleIdsSchemaV1 } from '../../../response';
 import { ruleSnoozeScheduleSchemaV1 } from '../../../request';
+import { notifyWhenSchemaV1, scheduleIdsSchemaV1 } from '../../../response';
+import { validateDurationV1 } from '../../../validation';
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
 

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import { LogRecord } from '@kbn/logging';
 import type { Conversion } from '@kbn/core-logging-common-internal';
+import { LogRecord } from '@kbn/logging';
+import chalk from 'chalk';
 
 export const LoggerConversion: Conversion = {
   pattern: /%logger/g,

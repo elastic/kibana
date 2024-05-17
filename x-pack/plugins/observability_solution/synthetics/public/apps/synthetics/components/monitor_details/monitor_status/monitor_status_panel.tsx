@@ -7,20 +7,20 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
-import { Chart, Settings, Heatmap, ScaleType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { Chart, Heatmap, LEGACY_LIGHT_THEME, ScaleType, Settings, Tooltip } from '@elastic/charts';
+import { EuiPanel, EuiResizeObserver, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
-import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
-import { MonitorStatusLegend } from './monitor_status_legend';
 import { getMonitorStatusChartTheme } from './monitor_status_chart_theme';
 import {
-  getXAxisLabelFormatter,
-  getColorBands,
-  getBrushData,
   MonitorStatusPanelProps,
+  getBrushData,
+  getColorBands,
+  getXAxisLabelFormatter,
 } from './monitor_status_data';
+import { MonitorStatusHeader } from './monitor_status_header';
+import { MonitorStatusLegend } from './monitor_status_legend';
 import { useMonitorStatusData } from './use_monitor_status_data';
 
 export const MonitorStatusPanel = ({

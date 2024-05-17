@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiRange, EuiRangeTick } from '@elastic/eui';
 import { _SingleRangeChangeEvent } from '@elastic/eui/src/components/form/range/types';
+import React from 'react';
 import { TimeSlice } from '../../../common/types';
 
 interface Props {

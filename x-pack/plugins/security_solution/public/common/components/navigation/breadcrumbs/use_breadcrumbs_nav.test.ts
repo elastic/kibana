@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { GetSecuritySolutionUrl } from '../../link_to';
+import { renderHook } from '@testing-library/react-hooks';
 import { SecurityPageName } from '../../../../../common/constants';
-import type { LinkInfo, LinkItem } from '../../../links';
-import { useBreadcrumbsNav } from './use_breadcrumbs_nav';
 import type { BreadcrumbsNav } from '../../../breadcrumbs';
 import * as kibanaLib from '../../../lib/kibana';
+import type { LinkInfo, LinkItem } from '../../../links';
+import type { GetSecuritySolutionUrl } from '../../link_to';
+import { useBreadcrumbsNav } from './use_breadcrumbs_nav';
 
 jest.mock('../../../lib/kibana');
 

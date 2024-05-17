@@ -6,8 +6,8 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { GetGuards } from '../shared_services';
 import { resultsServiceProvider } from '../../models/results_service';
+import type { GetGuards } from '../shared_services';
 
 type OrigResultsServiceProvider = ReturnType<typeof resultsServiceProvider>;
 

@@ -37,9 +37,7 @@
             "type": "Function",
             "tags": [],
             "label": "add",
-            "description": [
-              "\nAdd a new banner\n"
-            ],
+            "description": ["\nAdd a new banner\n"],
             "signature": [
               "(mount: ",
               {
@@ -61,9 +59,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
-                "description": [
-                  "{@link MountPoint }"
-                ],
+                "description": ["{@link MountPoint }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
@@ -88,9 +84,7 @@
                 "description": [
                   "optional priority order to display this banner. Higher priority values are shown first."
                 ],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -107,12 +101,8 @@
             "type": "Function",
             "tags": [],
             "label": "remove",
-            "description": [
-              "\nRemove a banner\n"
-            ],
-            "signature": [
-              "(id: string) => boolean"
-            ],
+            "description": ["\nRemove a banner\n"],
+            "signature": ["(id: string) => boolean"],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -126,18 +116,14 @@
                 "description": [
                   "the unique identifier for the banner returned by {@link OverlayBannersStart.add }"
                 ],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": [
-              "if the banner was found or not"
-            ]
+            "returnComment": ["if the banner was found or not"]
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser",
@@ -145,9 +131,7 @@
             "type": "Function",
             "tags": [],
             "label": "replace",
-            "description": [
-              "\nReplace a banner in place\n"
-            ],
+            "description": ["\nReplace a banner in place\n"],
             "signature": [
               "(id: string | undefined, mount: ",
               {
@@ -172,9 +156,7 @@
                 "description": [
                   "the unique identifier for the banner returned by {@link OverlayBannersStart.add }"
                 ],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -186,9 +168,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
-                "description": [
-                  "{@link MountPoint }"
-                ],
+                "description": ["{@link MountPoint }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
@@ -213,9 +193,7 @@
                 "description": [
                   "optional priority order to display this banner. Higher priority values are shown first."
                 ],
-                "signature": [
-                  "number | undefined"
-                ],
+                "signature": ["number | undefined"],
                 "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -233,9 +211,7 @@
             "tags": [],
             "label": "getComponent",
             "description": [],
-            "signature": [
-              "() => JSX.Element"
-            ],
+            "signature": ["() => JSX.Element"],
             "path": "packages/core/overlays/core-overlays-browser/src/banners.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -251,9 +227,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OverlayFlyoutStart",
-        "description": [
-          "\nAPIs to open and manage fly-out dialogs.\n"
-        ],
+        "description": ["\nAPIs to open and manage fly-out dialogs.\n"],
         "path": "packages/core/overlays/core-overlays-browser/src/flyout.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -262,9 +236,7 @@
             "parentPluginId": "@kbn/core-overlays-browser",
             "id": "def-common.OverlayFlyoutStart.open",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": ["return"],
             "label": "open",
             "description": [
               "\nOpens a flyout panel with the given mount point inside. You can use\n`close()` on the returned FlyoutRef to close the flyout.\n"
@@ -305,9 +277,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
-                "description": [
-                  "{@link MountPoint } - Mounts the children inside a flyout panel"
-                ],
+                "description": ["{@link MountPoint } - Mounts the children inside a flyout panel"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
@@ -329,9 +299,7 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link OverlayFlyoutOpenOptions } - options for the flyout"
-                ],
+                "description": ["{@link OverlayFlyoutOpenOptions } - options for the flyout"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
@@ -371,9 +339,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -385,9 +351,7 @@
             "tags": [],
             "label": "cancelButtonText",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -399,9 +363,7 @@
             "tags": [],
             "label": "confirmButtonText",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -413,9 +375,7 @@
             "tags": [],
             "label": "className",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -427,9 +387,7 @@
             "tags": [],
             "label": "closeButtonAriaLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -441,9 +399,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -455,9 +411,7 @@
             "tags": [],
             "label": "defaultFocusedButton",
             "description": [],
-            "signature": [
-              "\"cancel\" | \"confirm\" | undefined"
-            ],
+            "signature": ["\"cancel\" | \"confirm\" | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -485,9 +439,7 @@
             "description": [
               "\nSets the max-width of the modal.\nSet to `true` to use the default (`euiBreakpoints 'm'`),\nset to `false` to not restrict the width,\nset to a number for a custom width in px,\nset to a string for a custom width in custom measurement."
             ],
-            "signature": [
-              "string | number | boolean | undefined"
-            ],
+            "signature": ["string | number | boolean | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -513,9 +465,7 @@
             "tags": [],
             "label": "className",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -527,9 +477,7 @@
             "tags": [],
             "label": "closeButtonAriaLabel",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -541,9 +489,7 @@
             "tags": [],
             "label": "'data-test-subj'",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -555,9 +501,7 @@
             "tags": [],
             "label": "maxWidth",
             "description": [],
-            "signature": [
-              "string | number | boolean | undefined"
-            ],
+            "signature": ["string | number | boolean | undefined"],
             "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -571,9 +515,7 @@
         "type": "Interface",
         "tags": [],
         "label": "OverlayModalStart",
-        "description": [
-          "\nAPIs to open and manage modal dialogs.\n"
-        ],
+        "description": ["\nAPIs to open and manage modal dialogs.\n"],
         "path": "packages/core/overlays/core-overlays-browser/src/modal.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -582,9 +524,7 @@
             "parentPluginId": "@kbn/core-overlays-browser",
             "id": "def-common.OverlayModalStart.open",
             "type": "Function",
-            "tags": [
-              "return"
-            ],
+            "tags": ["return"],
             "label": "open",
             "description": [
               "\nOpens a modal panel with the given mount point inside. You can use\n`close()` on the returned OverlayRef to close the modal.\n"
@@ -625,9 +565,7 @@
                 "type": "Function",
                 "tags": [],
                 "label": "mount",
-                "description": [
-                  "{@link MountPoint } - Mounts the children inside the modal"
-                ],
+                "description": ["{@link MountPoint } - Mounts the children inside the modal"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-mount-utils-browser",
@@ -649,9 +587,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link OverlayModalOpenOptions } - options for the modal"
-                ],
+                "description": ["{@link OverlayModalOpenOptions } - options for the modal"],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-overlays-browser",
@@ -774,9 +710,7 @@
             "type": "Object",
             "tags": [],
             "label": "banners",
-            "description": [
-              "{@link OverlayBannersStart}"
-            ],
+            "description": ["{@link OverlayBannersStart}"],
             "signature": [
               {
                 "pluginId": "@kbn/core-overlays-browser",
@@ -796,9 +730,7 @@
             "type": "Function",
             "tags": [],
             "label": "openFlyout",
-            "description": [
-              "{@link OverlayFlyoutStart#open}"
-            ],
+            "description": ["{@link OverlayFlyoutStart#open}"],
             "signature": [
               "(mount: ",
               {
@@ -859,9 +791,7 @@
                     "tags": [],
                     "label": "element",
                     "description": [],
-                    "signature": [
-                      "T"
-                    ],
+                    "signature": ["T"],
                     "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -897,9 +827,7 @@
             "type": "Function",
             "tags": [],
             "label": "openModal",
-            "description": [
-              "{@link OverlayModalStart#open}"
-            ],
+            "description": ["{@link OverlayModalStart#open}"],
             "signature": [
               "(mount: ",
               {
@@ -960,9 +888,7 @@
                     "tags": [],
                     "label": "element",
                     "description": [],
-                    "signature": [
-                      "T"
-                    ],
+                    "signature": ["T"],
                     "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -998,9 +924,7 @@
             "type": "Function",
             "tags": [],
             "label": "openConfirm",
-            "description": [
-              "{@link OverlayModalStart#openConfirm}"
-            ],
+            "description": ["{@link OverlayModalStart#openConfirm}"],
             "signature": [
               "(message: string | ",
               {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Cases } from '.';
 import { Router } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
+import React from 'react';
+import { Cases } from '.';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../common/components/guided_onboarding_tour/tour_config';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/components/guided_onboarding_tour');
 jest.mock('../../common/lib/kibana');

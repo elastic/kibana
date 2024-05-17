@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { inventoryViewSavedObjectRT } from './types';
 
 export const inventoryViewSavedObjectName = 'inventory-view';

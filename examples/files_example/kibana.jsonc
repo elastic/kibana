@@ -7,9 +7,6 @@
     "id": "filesExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "files",
-      "developerExamples"
-    ]
+    "requiredPlugins": ["files", "developerExamples"]
   }
 }

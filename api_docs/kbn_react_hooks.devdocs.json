@@ -47,9 +47,7 @@
             "tags": [],
             "label": "initialValue",
             "description": [],
-            "signature": [
-              "boolean"
-            ],
+            "signature": ["boolean"],
             "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -79,9 +77,7 @@
             "tags": [],
             "label": "on",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -95,9 +91,7 @@
             "tags": [],
             "label": "off",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -111,9 +105,7 @@
             "tags": [],
             "label": "toggle",
             "description": [],
-            "signature": [
-              "(nextValue?: any) => void"
-            ],
+            "signature": ["(nextValue?: any) => void"],
             "path": "packages/kbn-react-hooks/src/use_boolean/use_boolean.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -126,9 +118,7 @@
                 "tags": [],
                 "label": "nextValue",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
+                "signature": ["any"],
                 "path": "node_modules/react-use/lib/useToggle.d.ts",
                 "deprecated": false,
                 "trackAdoption": false

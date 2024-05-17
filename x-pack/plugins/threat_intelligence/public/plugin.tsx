@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import React, { Suspense } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { generateAttachmentType } from './modules/cases/utils/attachments';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import React, { Suspense } from 'react';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import { EnterpriseGuard } from './containers/enterprise_guard';
+import { SecuritySolutionContext } from './containers/security_solution_context';
 import { KibanaContextProvider } from './hooks/use_kibana';
+import { generateAttachmentType } from './modules/cases/utils/attachments';
 import {
   SecuritySolutionPluginContext,
   Services,
@@ -21,8 +23,6 @@ import {
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
 } from './types';
-import { SecuritySolutionContext } from './containers/security_solution_context';
-import { EnterpriseGuard } from './containers/enterprise_guard';
 
 interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;
@@ -37,22 +37,21 @@ const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicato
 export const createApp =
   (services: Services) =>
   () =>
-  ({ securitySolutionContext }: AppProps) =>
-    (
-      <IntlProvider>
-        <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
-          <SecuritySolutionContext.Provider value={securitySolutionContext}>
-            <KibanaContextProvider services={services}>
-              <EnterpriseGuard>
-                <Suspense fallback={<div />}>
-                  <LazyIndicatorsPageWrapper />
-                </Suspense>
-              </EnterpriseGuard>
-            </KibanaContextProvider>
-          </SecuritySolutionContext.Provider>
-        </ReduxStoreProvider>
-      </IntlProvider>
-    );
+  ({ securitySolutionContext }: AppProps) => (
+    <IntlProvider>
+      <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
+        <SecuritySolutionContext.Provider value={securitySolutionContext}>
+          <KibanaContextProvider services={services}>
+            <EnterpriseGuard>
+              <Suspense fallback={<div />}>
+                <LazyIndicatorsPageWrapper />
+              </Suspense>
+            </EnterpriseGuard>
+          </KibanaContextProvider>
+        </SecuritySolutionContext.Provider>
+      </ReduxStoreProvider>
+    </IntlProvider>
+  );
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
   public async setup(

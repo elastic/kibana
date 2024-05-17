@@ -8,8 +8,8 @@
 
 import Path from 'path';
 
-import { UnknownVals } from './ts_helpers';
 import { ThemeTags, parseThemeTags } from './theme_tags';
+import { UnknownVals } from './ts_helpers';
 
 export interface WorkerConfig {
   readonly repoRoot: string;

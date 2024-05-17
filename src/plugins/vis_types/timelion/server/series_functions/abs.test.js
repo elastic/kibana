@@ -8,8 +8,8 @@
 
 import fn from './abs';
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
+import _ from 'lodash';
 const seriesList = require('./fixtures/series_list')();
 import invoke from './test_helpers/invoke_series_fn';
 

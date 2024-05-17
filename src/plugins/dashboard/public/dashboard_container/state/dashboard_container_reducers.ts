@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PayloadAction } from '@reduxjs/toolkit';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { PayloadAction } from '@reduxjs/toolkit';
 
+import { DashboardContainerInput } from '../../../common';
 import {
-  DashboardReduxState,
   DashboardPublicState,
+  DashboardReduxState,
   DashboardStateFromSaveModal,
   DashboardStateFromSettingsFlyout,
 } from '../types';
-import { DashboardContainerInput } from '../../../common';
 
 export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------

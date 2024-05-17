@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useContext, useState } from 'react';
+import { EuiButtonEmpty, EuiCodeBlock, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { JobCreatorContext } from '../../../job_creator_context';
+import type { FC } from 'react';
+import React, { useContext, useState } from 'react';
 import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
+import { JobCreatorContext } from '../../../job_creator_context';
 
 export const ResetQueryButton: FC = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);

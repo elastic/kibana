@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream, EnhancedDataStreamFromEs, Health, DataRetention } from '../types';
+import { DataRetention, DataStream, EnhancedDataStreamFromEs, Health } from '../types';
 
 export function deserializeDataStream(dataStreamFromEs: EnhancedDataStreamFromEs): DataStream {
   const {

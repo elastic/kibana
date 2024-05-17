@@ -13,11 +13,11 @@ import { EuiForm } from '@elastic/eui';
 
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import {
-  UserFlyout,
-  UserSelector,
-  UserAddedInfo,
-  UserInvitationCallout,
   DeactivatedUserCallout,
+  UserAddedInfo,
+  UserFlyout,
+  UserInvitationCallout,
+  UserSelector,
 } from '../../../shared/role_mapping';
 import { Role } from '../../types';
 

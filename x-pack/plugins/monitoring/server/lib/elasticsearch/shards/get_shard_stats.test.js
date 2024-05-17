@@ -6,8 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { clusterFixture, shardStatsFixture } from './__fixtures__';
 import { handleResponse } from './get_shard_stats';
-import { shardStatsFixture, clusterFixture } from './__fixtures__';
 
 let resp;
 let cluster;

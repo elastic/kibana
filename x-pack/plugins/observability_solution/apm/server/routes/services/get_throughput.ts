@@ -11,8 +11,8 @@ import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../commo
 import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { Maybe } from '../../../typings/common';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface Options {
   environment: string;

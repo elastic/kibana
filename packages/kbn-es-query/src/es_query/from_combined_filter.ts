@@ -7,9 +7,9 @@
  */
 
 import { Filter, isCombinedFilter } from '../filters';
-import { DataViewBase } from './types';
-import { buildQueryFromFilters, EsQueryFiltersConfig } from './from_filters';
 import { BooleanRelation, CombinedFilter } from '../filters/build_filters';
+import { EsQueryFiltersConfig, buildQueryFromFilters } from './from_filters';
+import { DataViewBase } from './types';
 
 const fromAndFilter = (
   filter: CombinedFilter,

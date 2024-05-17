@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { schema } from '@kbn/config-schema';
-import { TaskStatus } from '../task';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import { v4 as uuidV4 } from 'uuid';
+import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import type { TaskPollingLifecycleOpts } from '../polling_lifecycle';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
-import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
-import { injectTask, setupTestServers, retry } from './lib';
+import { TaskStatus } from '../task';
+import { injectTask, retry, setupTestServers } from './lib';
 
 const { TaskPollingLifecycle: TaskPollingLifecycleMock } = jest.requireMock('../polling_lifecycle');
 jest.mock('../polling_lifecycle', () => {

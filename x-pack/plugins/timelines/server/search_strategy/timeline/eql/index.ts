@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { map, mergeMap } from 'rxjs';
+import { EQL_SEARCH_STRATEGY, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
-import { EqlSearchStrategyResponse, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { map, mergeMap } from 'rxjs';
 import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import { EqlSearchResponse } from '../../../../common/search_strategy';
 import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';

@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  getUnauthorizedErrorMessage,
-} from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import {
+  ObjectRemover,
+  getTestRuleData,
+  getUnauthorizedErrorMessage,
+  getUrlPrefix,
+} from '../../../../common/lib';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 
 const getTestUtils = (
   describeType: 'internal' | 'public',

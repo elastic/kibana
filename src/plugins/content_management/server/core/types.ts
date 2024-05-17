@@ -7,21 +7,21 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type {
-  Version,
-  ContentManagementServiceTransforms,
-  ContentManagementServiceDefinitionVersioned,
-} from '@kbn/object-versioning';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import type {
+  ContentManagementServiceDefinitionVersioned,
+  ContentManagementServiceTransforms,
+  Version,
+} from '@kbn/object-versioning';
 
 import type {
-  GetResult,
   BulkGetResult,
   CreateResult,
-  UpdateResult,
   DeleteResult,
+  GetResult,
   SearchQuery,
   SearchResult,
+  UpdateResult,
 } from '../../common';
 
 export type StorageContextGetTransformFn = (
@@ -58,7 +58,7 @@ export interface StorageContext {
 export interface ContentStorage<
   T = unknown,
   U = T,
-  TMSearchConfig extends MSearchConfig<T, any> = MSearchConfig<T, unknown>
+  TMSearchConfig extends MSearchConfig<T, any> = MSearchConfig<T, unknown>,
 > {
   /** Get a single item */
   get(ctx: StorageContext, id: string, options?: object): Promise<GetResult<T, any>>;

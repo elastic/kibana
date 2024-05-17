@@ -6,9 +6,9 @@
  */
 
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { kqlQuery } from '@kbn/observability-plugin/server';
 import type { InfraProfilingFlamegraphRequestParams } from '../../../../common/http_api/profiling_api';
 
 export async function fetchProfilingFlamegraph(

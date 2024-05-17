@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import moment from 'moment';
 import { Actions, EventLogger, ScreenshottingAction, Transactions } from '.';
-import { ElementPosition } from '../get_element_position_data';
 import { ConfigType } from '../../config';
+import { ElementPosition } from '../get_element_position_data';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',

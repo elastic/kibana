@@ -1,3 +1,4 @@
+import { isEmpty } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,16 +6,15 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { isEmpty } from 'lodash';
 
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { usePluginContext } from './use_plugin_context';
 
-import { useDataFetcher } from './use_data_fetcher';
 import { parseAlert } from '../pages/alerts/helpers/parse_alert';
 import type { TopAlert } from '../typings/alerts';
+import { useDataFetcher } from './use_data_fetcher';
 
 interface AlertDetailParams {
   id: string;

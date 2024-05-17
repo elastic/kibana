@@ -10,18 +10,18 @@ import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../../../tasks/timeline';
 
-import { hostsUrl, ALERTS_URL } from '../../../../urls/navigation';
+import { ALERTS_URL, hostsUrl } from '../../../../urls/navigation';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
 import { getNewRule } from '../../../../objects/rule';
-import { refreshPage } from '../../../../tasks/security_header';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { createField } from '../../../../tasks/create_runtime_field';
-import { openAlertsFieldBrowser } from '../../../../tasks/alerts';
 import { GET_DATA_GRID_HEADER } from '../../../../screens/common/data_grid';
 import { GET_TIMELINE_HEADER } from '../../../../screens/timeline';
+import { openAlertsFieldBrowser } from '../../../../tasks/alerts';
 import { deleteRuntimeField } from '../../../../tasks/api_calls/sourcerer';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { createField } from '../../../../tasks/create_runtime_field';
+import { refreshPage } from '../../../../tasks/security_header';
 
 const alertRunTimeField = 'field.name.alert.page';
 const timelineRuntimeField = 'field.name.timeline';

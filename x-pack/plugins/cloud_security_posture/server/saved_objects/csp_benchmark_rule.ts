@@ -7,10 +7,10 @@
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
-import { rulesV1, rulesV2, rulesV3 } from '../../common/types';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { cspBenchmarkRuleMigrations } from './migrations';
+import { rulesV1, rulesV2, rulesV3 } from '../../common/types';
 import { cspBenchmarkRuleSavedObjectMapping } from './mappings';
+import { cspBenchmarkRuleMigrations } from './migrations';
 
 export const cspBenchmarkRule: SavedObjectsType = {
   name: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,

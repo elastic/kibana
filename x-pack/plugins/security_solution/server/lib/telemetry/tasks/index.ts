@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { telemetryConfiguration } from '../configuration';
 import type { SecurityTelemetryTaskConfig } from '../task';
+import { createTelemetryConfigurationTaskConfig } from './configuration';
+import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
 import { createTelemetryDiagnosticsTaskConfig } from './diagnostic';
 import { createTelemetryEndpointTaskConfig } from './endpoint';
-import { createTelemetrySecurityListTaskConfig } from './security_lists';
-import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
+import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
 import { createTelemetryPrebuiltRuleAlertsTaskConfig } from './prebuilt_rule_alerts';
+import { createTelemetrySecurityListTaskConfig } from './security_lists';
 import { createTelemetryTimelineTaskConfig } from './timelines';
 import { createTelemetryDiagnosticTimelineTaskConfig } from './timelines_diagnostic';
-import { createTelemetryConfigurationTaskConfig } from './configuration';
-import { telemetryConfiguration } from '../configuration';
-import { createTelemetryFilterListArtifactTaskConfig } from './filterlists';
 
 export function createTelemetryTaskConfigs(): SecurityTelemetryTaskConfig[] {
   return [

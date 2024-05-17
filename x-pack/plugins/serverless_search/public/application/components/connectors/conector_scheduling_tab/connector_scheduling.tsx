@@ -1,3 +1,5 @@
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
-import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
 import { useConnectorScheduling } from '../../../hooks/api/use_update_connector_scheduling';
 
 interface ConnectorSchedulingPanels {

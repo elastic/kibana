@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import { EuiLink } from '@elastic/eui';
+import type { DocLinks } from '@kbn/doc-links';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DocLinks } from '@kbn/doc-links';
-import { EuiLink } from '@elastic/eui';
+import React, { memo } from 'react';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
+import { SEARCHABLE_FIELDS } from '../constants';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
-import { SEARCHABLE_FIELDS } from '../constants';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
   defaultMessage:

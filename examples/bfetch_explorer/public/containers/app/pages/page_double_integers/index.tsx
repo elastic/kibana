@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
+import * as React from 'react';
 import { DoubleIntegers } from '../../../../components/double_integers';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';

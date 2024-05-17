@@ -9,8 +9,8 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 
-import { ParentProcessDraggable } from './parent_process_draggable';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { ParentProcessDraggable } from './parent_process_draggable';
 
 jest.mock('../../../../../common/lib/kibana');
 

@@ -7,13 +7,8 @@
     "id": "expressionShape",
     "server": true,
     "browser": true,
-    "requiredPlugins": [
-      "expressions",
-      "presentationUtil"
-    ],
+    "requiredPlugins": ["expressions", "presentationUtil"],
     "requiredBundles": [],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

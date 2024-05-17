@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cloudSecurityMetringCallback } from './cloud_security_metering';
 import type { MetringTaskProperties } from '../types';
+import { cloudSecurityMetringCallback } from './cloud_security_metering';
 
 const TASK_INTERVAL = 1800; // 30 minutes
 

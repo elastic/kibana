@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { resolve } from 'path';
+import expect from '@kbn/expect';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');

@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { PaletteOutput } from '@kbn/coloring';
 import { LayoutDirection, MetricWTrend } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
-import {
-  Datatable,
-  ExpressionFunctionDefinition,
-  ExpressionValueRender,
-} from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
 import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,
   CustomPaletteState,
 } from '@kbn/charts-plugin/common';
-import { VisParams, visType } from './expression_renderers';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
+  Datatable,
+  ExpressionFunctionDefinition,
+  ExpressionValueRender,
+} from '@kbn/expressions-plugin/common';
+import { $Values } from '@kbn/utility-types';
+import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
+import {
+  AvailableMetricIcons,
   EXPRESSION_METRIC_NAME,
   EXPRESSION_METRIC_TRENDLINE_NAME,
-  AvailableMetricIcons,
 } from '../constants';
+import { VisParams, visType } from './expression_renderers';
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
 

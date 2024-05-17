@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useLocation, useRouteMatch } from 'react-router-dom';
-import { keyBy } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { keyBy } from 'lodash';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';

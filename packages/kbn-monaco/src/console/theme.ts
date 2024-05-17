@@ -9,7 +9,7 @@
 import { makeHighContrastColor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { darkMode } from '@kbn/ui-theme';
-import { buildLightTheme, buildDarkTheme } from '../code_editor';
+import { buildDarkTheme, buildLightTheme } from '../code_editor';
 import { themeRuleGroupBuilderFactory } from '../common/theme';
 import { monaco } from '../monaco_imports';
 

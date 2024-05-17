@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ComponentStory } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '@kbn/observability-plugin/public';
+import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { BurnRateRuleParams } from '../../typings';
 import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
 

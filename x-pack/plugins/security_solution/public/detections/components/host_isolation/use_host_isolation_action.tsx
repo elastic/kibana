@@ -1,3 +1,4 @@
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,27 +6,26 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
+import type { AgentStatusInfo } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import {
-  getSentinelOneAgentId,
-  isAlertFromSentinelOneEvent,
-} from '../../../common/utils/sentinelone_alert_check';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import {
   getCrowdstrikeAgentId,
   isAlertFromCrowdstrikeEvent,
 } from '../../../common/utils/crowdstrike_alert_check';
-import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
-import type { AgentStatusInfo } from '../../../../common/endpoint/types';
-import { HostStatus } from '../../../../common/endpoint/types';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
-import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
-import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
-import { getFieldValue } from './helpers';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import {
+  getSentinelOneAgentId,
+  isAlertFromSentinelOneEvent,
+} from '../../../common/utils/sentinelone_alert_check';
 import { useAgentStatusHook } from '../../../management/hooks/agents/use_get_agent_status';
+import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
+import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import { getFieldValue } from './helpers';
+import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;

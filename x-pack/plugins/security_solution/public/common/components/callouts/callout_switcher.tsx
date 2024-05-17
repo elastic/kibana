@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 
-import type { CallOutMessage } from './callout_types';
 import { CallOut } from './callout';
+import type { CallOutMessage } from './callout_types';
 import { useCallOutStorage } from './use_callout_storage';
 
 export interface CallOutSwitcherProps {

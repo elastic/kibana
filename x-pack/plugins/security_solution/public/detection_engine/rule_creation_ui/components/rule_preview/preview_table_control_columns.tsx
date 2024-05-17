@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import type { ActionProps, ControlColumnProps } from '../../../../../common/types';
 import {
   DEFAULT_ACTION_BUTTON_WIDTH,
   getActionsColumnWidth,
 } from '../../../../common/components/header_actions';
-import type { ActionProps, ControlColumnProps } from '../../../../../common/types';
 import * as i18n from './translations';
 
 const EventsTdContent = styled.div.attrs(({ className }) => ({
@@ -23,10 +23,7 @@ const EventsTdContent = styled.div.attrs(({ className }) => ({
   min-width: 0;
   padding: ${({ theme }) => theme.eui.euiSizeXS};
   text-align: ${({ textAlign }) => textAlign};
-  width: ${({ width }) =>
-    width != null
-      ? `${width}px`
-      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+  width: ${({ width }) => (width != null ? `${width}px` : '100%')}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 
   button.euiButtonIcon {
     margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};

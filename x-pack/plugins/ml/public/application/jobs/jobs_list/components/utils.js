@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { each } from 'lodash';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { JOB_ACTION } from '../../../../../common/constants/job_actions';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
+import { DATAFEED_STATE, JOB_STATE } from '../../../../../common/constants/states';
+import { parseInterval } from '../../../../../common/util/parse_interval';
+import { mlCalendarService } from '../../../services/calendar_service';
 import { mlJobService } from '../../../services/job_service';
+import { ml } from '../../../services/ml_api_service';
 import {
   getToastNotificationService,
   toastNotificationServiceProvider,
 } from '../../../services/toast_notification_service';
 import { getApplication, getToastNotifications } from '../../../util/dependency_cache';
-import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
-import { JOB_ACTION } from '../../../../../common/constants/job_actions';
-import { parseInterval } from '../../../../../common/util/parse_interval';
-import { mlCalendarService } from '../../../services/calendar_service';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { PLUGIN_ID } from '../../../../../common/constants/app';
-import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {

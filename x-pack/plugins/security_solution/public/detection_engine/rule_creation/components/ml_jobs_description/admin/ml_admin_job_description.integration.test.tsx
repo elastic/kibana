@@ -1,3 +1,6 @@
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import noop from 'lodash/noop';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,12 +8,9 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import noop from 'lodash/noop';
-import { TestProviders } from '../../../../../common/mock';
 import { useEnableDataFeed } from '../../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../../common/components/ml_popover/types';
+import { TestProviders } from '../../../../../common/mock';
 
 import { MlAdminJobDescription } from './ml_admin_job_description';
 

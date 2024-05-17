@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Command } from 'commander';
-import { kibanaPackageJson } from '@kbn/repo-info';
 import { bootstrap } from '@kbn/health-gateway-server';
+import { kibanaPackageJson } from '@kbn/repo-info';
+import { Command } from 'commander';
 
 const program = new Command('bin/kibana-health-gateway');
 

@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
+import { RouteDependencies } from '../../../types';
 
 function findMatchingNodes(stats: any, nodeAttrs: string): any {
   return Object.entries(stats.nodes).reduce((accum: any[], [nodeId, nodeStats]: [any, any]) => {

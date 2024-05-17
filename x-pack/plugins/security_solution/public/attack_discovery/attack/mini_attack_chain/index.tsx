@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 
 import { getTacticMetadata } from '../../helpers';
-import { ATTACK_CHAIN_TOOLTIP } from './translations';
 import type { AttackDiscovery } from '../../types';
+import { ATTACK_CHAIN_TOOLTIP } from './translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery;

@@ -16,8 +16,8 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 const txtDrilldownAction = i18n.translate(
   'uiActionsEnhanced.components.DrilldownForm.drilldownAction',

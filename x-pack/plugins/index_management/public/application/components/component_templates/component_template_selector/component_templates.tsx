@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
-import React, { useState, useMemo } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useState, useMemo } from 'react';
 
 import { ComponentTemplateListItem } from '../../../../../common';
-import { FilterListButton } from './components';
 import { ComponentTemplatesList } from './component_templates_list';
 import { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
+import { FilterListButton } from './components';
 
 import './component_templates.scss';
 

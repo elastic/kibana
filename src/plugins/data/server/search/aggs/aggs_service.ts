@@ -9,19 +9,19 @@
 import { pick } from 'lodash';
 
 import type {
-  IUiSettingsClient,
-  UiSettingsServiceStart,
-  SavedObjectsClientContract,
   ElasticsearchClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  UiSettingsServiceStart,
 } from '@kbn/core/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  calculateBounds,
   AggsCommonService,
-  aggsRequiredUiSettings,
   TimeRange,
+  aggsRequiredUiSettings,
+  calculateBounds,
 } from '../../../common';
 import { AggsSetup, AggsStart } from './types';
 

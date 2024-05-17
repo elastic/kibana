@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { DiscoverAppState } from '../discover_app_state_container';
-import { DiscoverServices } from '../../../../build_services';
-import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
-import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { cloneDeep, isEqual } from 'lodash';
 import {
+  DiscoverDataSource,
   createDataViewDataSource,
   createEsqlDataSource,
-  DiscoverDataSource,
 } from '../../../../../common/data_sources';
+import { DiscoverServices } from '../../../../build_services';
+import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
+import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { DiscoverAppState } from '../discover_app_state_container';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -58,8 +58,8 @@ export function getStateDefaults({
   const dataSource: DiscoverDataSource | undefined = isTextBasedQueryMode
     ? createEsqlDataSource()
     : dataView?.id
-    ? createDataViewDataSource({ dataViewId: dataView.id })
-    : undefined;
+      ? createDataViewDataSource({ dataViewId: dataView.id })
+      : undefined;
 
   const defaultState: DiscoverAppState = {
     query,

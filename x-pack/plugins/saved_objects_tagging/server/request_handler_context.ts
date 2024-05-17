@@ -8,8 +8,8 @@
 import type { CoreRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ITagsClient } from '../common/types';
+import { AssignmentService, IAssignmentService, TagsClient } from './services';
 import { ITagsRequestHandlerContext } from './types';
-import { TagsClient, IAssignmentService, AssignmentService } from './services';
 
 export class TagsRequestHandlerContext implements ITagsRequestHandlerContext {
   #client?: ITagsClient;

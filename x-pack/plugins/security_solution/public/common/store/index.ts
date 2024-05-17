@@ -9,11 +9,11 @@ export * from './model';
 export * from './reducer';
 export * from './selectors';
 
-import type { Middleware, Dispatch } from 'redux';
-import { createStoreFactory, createStore, getStore } from './store';
-import type { ImmutableMiddleware, State } from './types';
-import type { AppAction } from './actions';
+import type { Dispatch, Middleware } from 'redux';
 import type { Immutable } from '../../../common/endpoint/types';
+import type { AppAction } from './actions';
+import { createStore, createStoreFactory, getStore } from './store';
+import type { ImmutableMiddleware, State } from './types';
 
 export { createStoreFactory, createStore, getStore };
 

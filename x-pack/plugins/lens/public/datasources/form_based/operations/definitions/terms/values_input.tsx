@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { useDebounceWithOptions } from '../../../../../shared_components';
 
 export const ValuesInput = ({
@@ -64,16 +64,16 @@ export const ValuesInput = ({
               }),
             ]
           : isLowerThanMin
-          ? [
-              i18n.translate('xpack.lens.indexPattern.terms.sizeLimitMin', {
-                defaultMessage:
-                  'Value is lower than the minimum {min}, the minimum value is used instead.',
-                values: {
-                  min: minValue,
-                },
-              }),
-            ]
-          : null
+            ? [
+                i18n.translate('xpack.lens.indexPattern.terms.sizeLimitMin', {
+                  defaultMessage:
+                    'Value is lower than the minimum {min}, the minimum value is used instead.',
+                  values: {
+                    min: minValue,
+                  },
+                }),
+              ]
+            : null
       }
     >
       <EuiFieldNumber

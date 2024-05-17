@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { INDICATOR_TYPE_CELL } from '../screens/indicators';
+import { KQL_FILTER } from '../screens/query_bar';
 import {
   closeFlyout,
   navigateToFlyoutTableTab,
   openFlyout,
   waitForViewToBeUpdated,
 } from '../tasks/common';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { login, visit } from '../tasks/login';
 import {
   clearKQLBar,
   filterInFromBarChartLegend,
@@ -24,10 +28,6 @@ import {
   filterOutFromFlyoutTableTab,
   filterOutFromTableCell,
 } from '../tasks/query_bar';
-import { INDICATOR_TYPE_CELL } from '../screens/indicators';
-import { KQL_FILTER } from '../screens/query_bar';
-import { login, visit } from '../tasks/login';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 

@@ -5,129 +5,125 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
-  PluginInitializerContext,
-  Plugin,
   CoreSetup,
   CoreStart,
+  ElasticsearchServiceStart,
+  IContextProvider,
+  ISavedObjectsRepository,
   KibanaRequest,
   Logger,
-  IContextProvider,
-  ElasticsearchServiceStart,
-  SavedObjectsClientContract,
+  Plugin,
+  PluginInitializerContext,
   SavedObjectsBulkGetObject,
-  ISavedObjectsRepository,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
+  IEventLogClientService,
+  IEventLogService,
+  IEventLogger,
+} from '@kbn/event-log-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
-  IEventLogClientService,
-  IEventLogger,
-  IEventLogService,
-} from '@kbn/event-log-plugin/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
-import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
-import { resolveCustomHosts } from './lib/custom_host_settings';
-import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
+import { ActionsClient } from './actions_client/actions_client';
+import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import {
-  createEphemeralExecutionEnqueuerFunction,
   createBulkExecutionEnqueuerFunction,
+  createEphemeralExecutionEnqueuerFunction,
 } from './create_execute_function';
-import { registerActionsUsageCollector } from './usage';
 import {
   ActionExecutor,
-  TaskRunnerFactory,
-  LicenseState,
   ILicenseState,
+  LicenseState,
+  TaskRunnerFactory,
   spaceIdToNamespace,
 } from './lib';
+import { resolveCustomHosts } from './lib/custom_host_settings';
 import {
-  Services,
   ActionType,
-  InMemoryConnector,
   ActionTypeConfig,
-  ActionTypeSecrets,
   ActionTypeParams,
+  ActionTypeSecrets,
   ActionsRequestHandlerContext,
+  InMemoryConnector,
+  Services,
   UnsecuredServices,
 } from './types';
+import { registerActionsUsageCollector } from './usage';
 
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
-import { defineRoutes } from './routes';
-import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
+import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  ConnectorWithOptionalDeprecation,
+  isConnectorDeprecated,
+} from './application/connector/lib';
+import { ActionsAuthorization } from './authorization/actions_authorization';
+import {
+  AuthorizationMode,
+  getAuthorizationModeBySource,
+} from './authorization/get_authorization_mode_by_source';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
-import { setupSavedObjects } from './saved_objects';
+import { createSystemConnectors } from './create_system_actions';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { ACTIONS_FEATURE } from './feature';
-import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionExecutionSource } from './lib/action_execution_source';
-import {
-  getAuthorizationModeBySource,
-  AuthorizationMode,
-} from './authorization/get_authorization_mode_by_source';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
+import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClient } from './lib/connector_token_client';
-import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import {
-  isConnectorDeprecated,
-  ConnectorWithOptionalDeprecation,
-} from './application/connector/lib';
+import { defineRoutes } from './routes';
+import { setupSavedObjects } from './saved_objects';
 import { createSubActionConnectorFramework } from './sub_action_framework';
+import { CaseConnector } from './sub_action_framework/case';
+import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import {
   ICaseServiceAbstract,
   IServiceAbstract,
   SubActionConnectorType,
 } from './sub_action_framework/types';
-import { SubActionConnector } from './sub_action_framework/sub_action_connector';
-import { CaseConnector } from './sub_action_framework/case';
 import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
-import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
-import { createSystemConnectors } from './create_system_actions';
+import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 
 export interface PluginSetupContract {
   registerType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
     Params extends ActionTypeParams = ActionTypeParams,
-    ExecutorResultData = void
-  >(
-    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
-  ): void;
+    ExecutorResultData = void,
+  >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>): void;
 
   registerSubActionConnectorType<
     Config extends ActionTypeConfig = ActionTypeConfig,
-    Secrets extends ActionTypeSecrets = ActionTypeSecrets
-  >(
-    connector: SubActionConnectorType<Config, Secrets>
-  ): void;
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  >(connector: SubActionConnectorType<Config, Secrets>): void;
 
   isPreconfiguredConnector(connectorId: string): boolean;
 
@@ -360,7 +356,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
         Params extends ActionTypeParams = ActionTypeParams,
-        ExecutorResultData = void
+        ExecutorResultData = void,
       >(
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
@@ -369,7 +365,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       registerSubActionConnectorType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
-        Secrets extends ActionTypeSecrets = ActionTypeSecrets
+        Secrets extends ActionTypeSecrets = ActionTypeSecrets,
       >(
         connector: SubActionConnectorType<Config, Secrets>
       ) => {

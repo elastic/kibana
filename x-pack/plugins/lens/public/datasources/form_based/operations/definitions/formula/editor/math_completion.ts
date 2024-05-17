@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { uniq, startsWith } from 'lodash';
+import { parseTimeShift } from '@kbn/data-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { monaco } from '@kbn/monaco';
 import {
-  parse,
-  TinymathLocation,
   TinymathAST,
   TinymathFunction,
-  TinymathVariable,
+  TinymathLocation,
   TinymathNamedArgument,
+  TinymathVariable,
+  parse,
 } from '@kbn/tinymath';
 import type {
-  UnifiedSearchPublicPluginStart,
   QuerySuggestion,
+  UnifiedSearchPublicPluginStart,
 } from '@kbn/unified-search-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { parseTimeShift } from '@kbn/data-plugin/common';
-import { tinymathFunctions } from '@kbn/lens-formula-docs';
+import { startsWith, uniq } from 'lodash';
 import moment from 'moment';
-import { nonNullable } from '../../../../../../utils';
+import type { GenericOperationDefinition } from '../..';
 import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
-import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { groupArgsByType, unquotedStringRegex } from '../util';
-import type { GenericOperationDefinition } from '../..';
-import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
-import { hasFunctionFieldArgument } from '../validation';
-import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
+import { nonNullable } from '../../../../../../utils';
 import {
   reducedTimeRangeOptionOrder,
   reducedTimeRangeOptions,
 } from '../../../../reduced_time_range_utils';
+import { timeShiftOptionOrder, timeShiftOptions } from '../../../../time_shift_utils';
+import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
+import { groupArgsByType, unquotedStringRegex } from '../util';
+import { hasFunctionFieldArgument } from '../validation';
+import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -470,8 +470,8 @@ export function getSuggestion(
     typeof suggestion === 'string'
       ? suggestion
       : 'label' in suggestion
-      ? suggestion.label
-      : suggestion.text;
+        ? suggestion.label
+        : suggestion.text;
   let insertText: string | undefined;
   let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';

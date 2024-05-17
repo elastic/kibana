@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchMetric } from '../../metrics';
-import { createQuery } from '../../create_query';
-import { calculateRate } from '../../calculate_rate';
-import { getUnassignedShards } from '../shards';
+import { get } from 'lodash';
 import { ElasticsearchResponse } from '../../../../common/types/es';
-import { LegacyRequest } from '../../../types';
-import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
+import { LegacyRequest } from '../../../types';
+import { calculateRate } from '../../calculate_rate';
+import { getElasticsearchDataset, getIndexPatterns } from '../../cluster/get_index_patterns';
+import { createQuery } from '../../create_query';
+import { ElasticsearchMetric } from '../../metrics';
+import { getUnassignedShards } from '../shards';
 
 export function handleResponse(
   resp: ElasticsearchResponse,

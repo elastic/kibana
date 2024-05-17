@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPanel,
-  EuiText,
-  EuiLink,
-  EuiSpacer,
+  EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiIcon,
   EuiKeyPadMenuItemProps,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 export type MonitorTypeRadioGroupProps = EuiKeyPadMenuItemProps & {
   options: MonitorTypeRadioOption[];

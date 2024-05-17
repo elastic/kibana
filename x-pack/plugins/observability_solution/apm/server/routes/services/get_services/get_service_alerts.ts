@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -14,10 +14,10 @@ import {
 } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
+import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
+import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
 
 export type ServiceAlertsResponse = Array<{
   serviceName: string;

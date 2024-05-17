@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
-import { isEqual } from 'lodash';
-import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
+import { appendToESQLQuery, removeDropCommandsFromESQLQuery } from '@kbn/esql-utils';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -19,28 +22,25 @@ import type {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { isEqual } from 'lodash';
+import { BehaviorSubject, Observable, distinctUntilChanged, map } from 'rxjs';
+import { shouldDisplayHistogram } from '../layout/helpers';
 import {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramSuggestionType,
   UnifiedHistogramVisContext,
 } from '../types';
-import {
-  isSuggestionShapeAndVisContextCompatible,
-  deriveLensSuggestionFromLensAttributes,
-  type QueryParams,
-} from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
+import {
+  type QueryParams,
+  deriveLensSuggestionFromLensAttributes,
+  isSuggestionShapeAndVisContextCompatible,
+} from '../utils/external_vis_context';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
-import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
@@ -51,8 +51,8 @@ const stateSelectorFactory =
     state$.pipe(map(selector), distinctUntilChanged(equalityFn));
 
 export enum LensVisServiceStatus {
-  'initial' = 'initial',
-  'completed' = 'completed',
+  initial = 'initial',
+  completed = 'completed',
 }
 
 interface LensVisServiceState {

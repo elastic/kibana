@@ -1,3 +1,4 @@
+import { ALL_VALUE } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,7 +6,6 @@
  * 2.0.
  */
 import { getGroupByCardinalityFilters } from './get_group_by_cardinality_filters';
-import { ALL_VALUE } from '@kbn/slo-schema';
 
 describe('get group by cardinality filters', () => {
   it('formats filters correctly', () => {

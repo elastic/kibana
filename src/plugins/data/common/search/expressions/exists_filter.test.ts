@@ -7,8 +7,8 @@
  */
 
 import { createMockContext } from '@kbn/expressions-plugin/common';
-import { functionWrapper } from './utils';
 import { existsFilterFunction } from './exists_filter';
+import { functionWrapper } from './utils';
 
 describe('interpreter/functions#existsFilter', () => {
   const fn = functionWrapper(existsFilterFunction);

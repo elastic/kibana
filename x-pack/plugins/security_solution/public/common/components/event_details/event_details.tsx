@@ -9,57 +9,57 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiHorizontalRule,
-  EuiSkeletonText,
   EuiLoadingSpinner,
   EuiNotificationBadge,
+  EuiSkeletonText,
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
-import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import type { RawEventData } from '../../../../common/types/response_actions';
-import { useResponseActionsView } from './response_actions_view';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import type { SearchHit } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import type { RawEventData } from '../../../../common/types/response_actions';
+import type { TimelineTabs } from '../../../../common/types/timeline';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { useRiskScoreData } from '../../../entity_analytics/api/hooks/use_risk_score_data';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
+import type { BrowserFields } from '../../containers/source';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import {
   AlertsCasesTourSteps,
-  getTourAnchor,
   SecurityStepId,
+  getTourAnchor,
 } from '../guided_onboarding_tour/tour_config';
-import { EventFieldsBrowser } from './event_fields_browser';
-import { JsonView } from './json_view';
-import { ThreatSummaryView } from './cti_details/threat_summary_view';
-import { ThreatDetailsView } from './cti_details/threat_details_view';
-import * as i18n from './translations';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { AlertSummaryView } from './alert_summary_view';
-import type { BrowserFields } from '../../containers/source';
-import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import type { TimelineTabs } from '../../../../common/types/timeline';
+import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import {
   filterDuplicateEnrichments,
   getEnrichmentFields,
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
-import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
-import { InvestigationGuideView } from './investigation_guide_view';
-import { Overview } from './overview';
+import { ThreatDetailsView } from './cti_details/threat_details_view';
+import { ThreatSummaryView } from './cti_details/threat_summary_view';
+import { EventFieldsBrowser } from './event_fields_browser';
 import { Insights } from './insights/insights';
-import { useRiskScoreData } from '../../../entity_analytics/api/hooks/use_risk_score_data';
-import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
-import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
-import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { InvestigationGuideView } from './investigation_guide_view';
+import { JsonView } from './json_view';
 import { useOsqueryTab } from './osquery_tab';
+import { Overview } from './overview';
+import { useResponseActionsView } from './response_actions_view';
+import * as i18n from './translations';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 

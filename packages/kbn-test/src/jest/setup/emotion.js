@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createSerializer } from '@emotion/jest';
 import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
+import { createSerializer } from '@emotion/jest';
 
 module.exports = createSerializer({
   classNameReplacer: replaceEmotionPrefix,

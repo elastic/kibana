@@ -26,14 +26,14 @@ import { i18n } from '@kbn/i18n';
 import { FetchSyncJobsStatsApiLogic } from '../../api/stats/fetch_sync_jobs_stats_api_logic';
 
 import {
+  getConnectedBadgeAriaLabel,
   getConnectedConnectorsBadgeLabel,
   getConnectedConnectorsTooltipContent,
-  getConnectedBadgeAriaLabel,
-  getIncompleteConnectorsBadgeLabel,
-  getIncompleteConnectorBadgeAriaLabel,
-  getIncompleteConnectorsTooltip,
   getIdleJobsLabel,
   getIdleJobsTooltip,
+  getIncompleteConnectorBadgeAriaLabel,
+  getIncompleteConnectorsBadgeLabel,
+  getIncompleteConnectorsTooltip,
   getOrphanedJobsLabel,
   getOrphanedJobsTooltip,
   getRunningJobsBadgeAriaLabel,
@@ -112,14 +112,17 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                           }
                         )
                     : hasMultipleConnectors
-                    ? i18n.translate('xpack.enterpriseSearch.connectorStats.multipleCrawlersText', {
-                        defaultMessage: '{count} web crawlers',
-                        values: { count: connectorCount },
-                      })
-                    : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
-                        defaultMessage: '{count} web crawler',
-                        values: { count: connectorCount },
-                      })}
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorStats.multipleCrawlersText',
+                          {
+                            defaultMessage: '{count} web crawlers',
+                            values: { count: connectorCount },
+                          }
+                        )
+                      : i18n.translate('xpack.enterpriseSearch.connectorStats.singleCrawlerText', {
+                          defaultMessage: '{count} web crawler',
+                          values: { count: connectorCount },
+                        })}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

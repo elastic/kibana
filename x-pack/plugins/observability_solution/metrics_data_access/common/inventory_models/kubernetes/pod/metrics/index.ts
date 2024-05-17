@@ -10,12 +10,12 @@ import { memory } from './snapshot/memory';
 import { rx } from './snapshot/rx';
 import { tx } from './snapshot/tx';
 
-import { podOverview } from './tsvb/pod_overview';
+import { InventoryMetrics } from '../../../types';
 import { podCpuUsage } from './tsvb/pod_cpu_usage';
 import { podLogUsage } from './tsvb/pod_log_usage';
 import { podMemoryUsage } from './tsvb/pod_memory_usage';
 import { podNetworkTraffic } from './tsvb/pod_network_traffic';
-import { InventoryMetrics } from '../../../types';
+import { podOverview } from './tsvb/pod_overview';
 
 const podSnapshotMetrics = { cpu, memory, rx, tx };
 

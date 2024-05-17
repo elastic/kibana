@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { Observable } from 'rxjs';
 
 /**
  * Options for the server-side {@link GlobalSearchPluginStart.find | find API}

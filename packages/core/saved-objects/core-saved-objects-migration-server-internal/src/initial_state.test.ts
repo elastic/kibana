@@ -7,20 +7,20 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
-  type SavedObjectsMigrationConfigType,
-  SavedObjectTypeRegistry,
   type IndexMapping,
+  SavedObjectTypeRegistry,
+  type SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { createInitialState, type CreateInitialStateParams } from './initial_state';
+import * as Option from 'fp-ts/Option';
 import * as getOutdatedDocumentsQueryModule from './get_outdated_documents_query';
 import { getOutdatedDocumentsQuery } from './get_outdated_documents_query';
+import { type CreateInitialStateParams, createInitialState } from './initial_state';
 
 const mockLogger = loggingSystemMock.create();
 

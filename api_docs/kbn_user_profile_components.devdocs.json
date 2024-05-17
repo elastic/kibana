@@ -25,9 +25,7 @@
         "type": "Function",
         "tags": [],
         "label": "getUserDisplayName",
-        "description": [
-          "\nDetermines the display name for the provided user information."
-        ],
+        "description": ["\nDetermines the display name for the provided user information."],
         "signature": [
           "(params: ",
           {
@@ -49,9 +47,7 @@
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": [
-              "Set of available user's name-related fields."
-            ],
+            "description": ["Set of available user's name-related fields."],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -76,9 +72,7 @@
         "type": "Function",
         "tags": [],
         "label": "UserAvatar",
-        "description": [
-          "\nRenders an avatar given a user profile"
-        ],
+        "description": ["\nRenders an avatar given a user profile"],
         "signature": [
           "({ user, avatar, ...rest }: React.PropsWithChildren<",
           {
@@ -127,9 +121,7 @@
         "type": "Function",
         "tags": [],
         "label": "UserAvatarTip",
-        "description": [
-          "\nRenders a user avatar with tooltip"
-        ],
+        "description": ["\nRenders a user avatar with tooltip"],
         "signature": [
           "({ user, avatar, ...rest }: React.PropsWithChildren<",
           {
@@ -178,9 +170,7 @@
         "type": "Function",
         "tags": [],
         "label": "UserProfilesKibanaProvider",
-        "description": [
-          "\nKibana-specific Provider that maps to known dependency types."
-        ],
+        "description": ["\nKibana-specific Provider that maps to known dependency types."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           {
@@ -287,9 +277,7 @@
         "type": "Function",
         "tags": [],
         "label": "UserProfilesProvider",
-        "description": [
-          "\nAbstract external service Provider."
-        ],
+        "description": ["\nAbstract external service Provider."],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "Services",
@@ -306,11 +294,7 @@
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
-              "Services",
-              ">>"
-            ],
+            "signature": ["React.PropsWithChildren<React.PropsWithChildren<", "Services", ">>"],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -326,9 +310,7 @@
         "type": "Function",
         "tags": [],
         "label": "UserProfilesSelectable",
-        "description": [
-          "\nRenders a selectable component given a list of user profiles"
-        ],
+        "description": ["\nRenders a selectable component given a list of user profiles"],
         "signature": [
           "<Option extends ",
           {
@@ -384,9 +366,7 @@
         "type": "Function",
         "tags": [],
         "label": "UserToolTip",
-        "description": [
-          "\nRenders a tooltip with user information"
-        ],
+        "description": ["\nRenders a tooltip with user information"],
         "signature": [
           "({ user, avatar, ...rest }: React.PropsWithChildren<",
           {
@@ -466,9 +446,7 @@
             "tags": [],
             "label": "{\n  notificationSuccess = {},\n  pageReloadChecker,\n}",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -486,9 +464,7 @@
         "type": "Interface",
         "tags": [],
         "label": "GetUserDisplayNameParams",
-        "description": [
-          "\nSet of available name-related fields to pick as display name."
-        ],
+        "description": ["\nSet of available name-related fields to pick as display name."],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -499,9 +475,7 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [
-              "\nUsername of the user."
-            ],
+            "description": ["\nUsername of the user."],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -512,12 +486,8 @@
             "type": "string",
             "tags": [],
             "label": "email",
-            "description": [
-              "\nOptional email of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional email of the user."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -528,12 +498,8 @@
             "type": "string",
             "tags": [],
             "label": "full_name",
-            "description": [
-              "\nOptional full name of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional full name of the user."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -547,9 +513,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserAvatarProps",
-        "description": [
-          "\nProps of {@link UserAvatar} component"
-        ],
+        "description": ["\nProps of {@link UserAvatar} component"],
         "signature": [
           {
             "pluginId": "@kbn/user-profile-components",
@@ -572,9 +536,7 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nUser to be rendered"
-            ],
+            "description": ["\nUser to be rendered"],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -595,9 +557,7 @@
             "type": "Object",
             "tags": [],
             "label": "avatar",
-            "description": [
-              "\nAvatar data of user to be rendered"
-            ],
+            "description": ["\nAvatar data of user to be rendered"],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -644,9 +604,7 @@
             "type": "string",
             "tags": [],
             "label": "uid",
-            "description": [
-              "\nUnique ID for of the user profile."
-            ],
+            "description": ["\nUnique ID for of the user profile."],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -657,9 +615,7 @@
             "type": "boolean",
             "tags": [],
             "label": "enabled",
-            "description": [
-              "\nIndicates whether user profile is enabled or not."
-            ],
+            "description": ["\nIndicates whether user profile is enabled or not."],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -670,9 +626,7 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nInformation about the user that owns profile."
-            ],
+            "description": ["\nInformation about the user that owns profile."],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -692,12 +646,8 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": [
-              "\nUser specific data associated with the profile."
-            ],
-            "signature": [
-              "{ [P in keyof D]?: D[P] | undefined; }"
-            ],
+            "description": ["\nUser specific data associated with the profile."],
+            "signature": ["{ [P in keyof D]?: D[P] | undefined; }"],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -711,9 +661,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileAvatarData",
-        "description": [
-          "\nAvatar stored in user profile."
-        ],
+        "description": ["\nAvatar stored in user profile."],
         "path": "packages/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -727,9 +675,7 @@
             "description": [
               "\nOptional initials (two letters) of the user to use as avatar if avatar picture isn't specified."
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -740,12 +686,8 @@
             "type": "string",
             "tags": [],
             "label": "color",
-            "description": [
-              "\nBackground color of the avatar when initials are used."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nBackground color of the avatar when initials are used."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -756,12 +698,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "imageUrl",
-            "description": [
-              "\nBase64 data URL for the user avatar image."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
+            "description": ["\nBase64 data URL for the user avatar image."],
+            "signature": ["string | null | undefined"],
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -829,9 +767,7 @@
             "tags": [],
             "label": "[key: string]: unknown",
             "description": [],
-            "signature": [
-              "[key: string]:  unknown"
-            ],
+            "signature": ["[key: string]:  unknown"],
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -845,9 +781,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfilesKibanaDependencies",
-        "description": [
-          "\nKibana-specific service types."
-        ],
+        "description": ["\nKibana-specific service types."],
         "path": "packages/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -858,9 +792,7 @@
             "type": "Object",
             "tags": [],
             "label": "core",
-            "description": [
-              "CoreStart contract"
-            ],
+            "description": ["CoreStart contract"],
             "signature": [
               "{ notifications: ",
               {
@@ -899,11 +831,7 @@
             "tags": [],
             "label": "security",
             "description": [],
-            "signature": [
-              "{ userProfiles: ",
-              "UserProfileAPIClient",
-              "; }"
-            ],
+            "signature": ["{ userProfiles: ", "UserProfileAPIClient", "; }"],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1004,9 +932,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfilesPopoverProps",
-        "description": [
-          "\nProps of {@link UserProfilesPopover} component"
-        ],
+        "description": ["\nProps of {@link UserProfilesPopover} component"],
         "signature": [
           {
             "pluginId": "@kbn/user-profile-components",
@@ -1026,16 +952,10 @@
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesPopoverProps.title",
             "type": "Any",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "title",
-            "description": [
-              "\nTitle of the popover"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nTitle of the popover"],
+            "signature": ["any"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1044,13 +964,9 @@
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesPopoverProps.selectableProps",
             "type": "Object",
-            "tags": [
-              "see"
-            ],
+            "tags": ["see"],
             "label": "selectableProps",
-            "description": [
-              "\nProps forwarded to selectable component"
-            ],
+            "description": ["\nProps forwarded to selectable component"],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -1074,9 +990,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfilesSelectableProps",
-        "description": [
-          "\nProps of {@link UserProfilesSelectable} component"
-        ],
+        "description": ["\nProps of {@link UserProfilesSelectable} component"],
         "signature": [
           {
             "pluginId": "@kbn/user-profile-components",
@@ -1099,12 +1013,8 @@
             "type": "Array",
             "tags": [],
             "label": "defaultOptions",
-            "description": [
-              "\nList of users to be rendered as suggestions."
-            ],
-            "signature": [
-              "Option[] | undefined"
-            ],
+            "description": ["\nList of users to be rendered as suggestions."],
+            "signature": ["Option[] | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1115,12 +1025,8 @@
             "type": "Array",
             "tags": [],
             "label": "selectedOptions",
-            "description": [
-              "\nList of selected users or `null` (no users)."
-            ],
-            "signature": [
-              "Option[] | undefined"
-            ],
+            "description": ["\nList of selected users or `null` (no users)."],
+            "signature": ["Option[] | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1134,9 +1040,7 @@
             "description": [
               "\nList of users from search results. Should be updated based on the search term provided by `onSearchChange` callback."
             ],
-            "signature": [
-              "Option[] | undefined"
-            ],
+            "signature": ["Option[] | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1150,9 +1054,7 @@
             "description": [
               "\nMaximum number of users allowed to be selected.\n\nThis limit is not enforced and only used to show a warning message."
             ],
-            "signature": [
-              "number | undefined"
-            ],
+            "signature": ["number | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1163,12 +1065,8 @@
             "type": "Function",
             "tags": [],
             "label": "onChange",
-            "description": [
-              "\nPasses back the current selection."
-            ],
-            "signature": [
-              "((options: Option[]) => void) | undefined"
-            ],
+            "description": ["\nPasses back the current selection."],
+            "signature": ["((options: Option[]) => void) | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1179,12 +1077,8 @@
                 "type": "Array",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "Either the list of selected users or `null` (no users)."
-                ],
-                "signature": [
-                  "Option[]"
-                ],
+                "description": ["Either the list of selected users or `null` (no users)."],
+                "signature": ["Option[]"],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1199,12 +1093,8 @@
             "type": "Function",
             "tags": [],
             "label": "onSearchChange",
-            "description": [
-              "\nPasses back the search term."
-            ],
-            "signature": [
-              "((searchTerm: string) => void) | undefined"
-            ],
+            "description": ["\nPasses back the search term."],
+            "signature": ["((searchTerm: string) => void) | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1215,12 +1105,8 @@
                 "type": "string",
                 "tags": [],
                 "label": "searchTerm",
-                "description": [
-                  "Search term"
-                ],
-                "signature": [
-                  "string"
-                ],
+                "description": ["Search term"],
+                "signature": ["string"],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1235,12 +1121,8 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isLoading",
-            "description": [
-              "\nLoading indicator for asynchronous search operations."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "description": ["\nLoading indicator for asynchronous search operations."],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1251,12 +1133,8 @@
             "type": "string",
             "tags": [],
             "label": "searchPlaceholder",
-            "description": [
-              "\nPlaceholder text of search field."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nPlaceholder text of search field."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1267,12 +1145,8 @@
             "type": "string",
             "tags": [],
             "label": "searchInputId",
-            "description": [
-              "\nIdentifier of search field."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nIdentifier of search field."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1283,12 +1157,8 @@
             "type": "Function",
             "tags": [],
             "label": "selectedStatusMessage",
-            "description": [
-              "\nReturns message for number of selected users."
-            ],
-            "signature": [
-              "((selectedCount: number) => React.ReactNode) | undefined"
-            ],
+            "description": ["\nReturns message for number of selected users."],
+            "signature": ["((selectedCount: number) => React.ReactNode) | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1299,12 +1169,8 @@
                 "type": "number",
                 "tags": [],
                 "label": "selectedCount",
-                "description": [
-                  "Number of selected users"
-                ],
-                "signature": [
-                  "number"
-                ],
+                "description": ["Number of selected users"],
+                "signature": ["number"],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1319,12 +1185,8 @@
             "type": "Function",
             "tags": [],
             "label": "limitReachedMessage",
-            "description": [
-              "\nReturns message when maximum number of selected users are reached."
-            ],
-            "signature": [
-              "((limit: number) => React.ReactNode) | undefined"
-            ],
+            "description": ["\nReturns message when maximum number of selected users are reached."],
+            "signature": ["((limit: number) => React.ReactNode) | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1335,12 +1197,8 @@
                 "type": "number",
                 "tags": [],
                 "label": "limit",
-                "description": [
-                  "Maximum number of users allowed to be selected"
-                ],
-                "signature": [
-                  "number"
-                ],
+                "description": ["Maximum number of users allowed to be selected"],
+                "signature": ["number"],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1355,9 +1213,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "clearButtonLabel",
-            "description": [
-              "\nLabel for clear button."
-            ],
+            "description": ["\nLabel for clear button."],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
@@ -1371,12 +1227,8 @@
             "type": "string",
             "tags": [],
             "label": "nullOptionLabel",
-            "description": [
-              "\nLabel of \"no users\" option."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nLabel of \"no users\" option."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1387,9 +1239,7 @@
             "type": "Object",
             "tags": [],
             "label": "nullOptionProps",
-            "description": [
-              "\nAdditional props for \"no users\" option."
-            ],
+            "description": ["\nAdditional props for \"no users\" option."],
             "signature": [
               "Partial<Pick<(",
               "DisambiguateSet",
@@ -1423,12 +1273,8 @@
             "type": "string",
             "tags": [],
             "label": "defaultOptionsLabel",
-            "description": [
-              "\nLabel for default options group separator."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nLabel for default options group separator."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1442,9 +1288,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileUserInfo",
-        "description": [
-          "\nBasic user information returned in user profile."
-        ],
+        "description": ["\nBasic user information returned in user profile."],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1455,9 +1299,7 @@
             "type": "string",
             "tags": [],
             "label": "username",
-            "description": [
-              "\nUsername of the user."
-            ],
+            "description": ["\nUsername of the user."],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1468,12 +1310,8 @@
             "type": "string",
             "tags": [],
             "label": "email",
-            "description": [
-              "\nOptional email of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional email of the user."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1484,12 +1322,8 @@
             "type": "string",
             "tags": [],
             "label": "full_name",
-            "description": [
-              "\nOptional full name of the user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
+            "description": ["\nOptional full name of the user."],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1503,9 +1337,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserSettingsData",
-        "description": [
-          "\nUser settings stored in the data object of the User Profile"
-        ],
+        "description": ["\nUser settings stored in the data object of the User Profile"],
         "path": "packages/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1538,9 +1370,7 @@
             "tags": [],
             "label": "solutionNavOptOut",
             "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/kbn-user-profile-components/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1554,9 +1384,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UserToolTipProps",
-        "description": [
-          "\nProps of {@link UserToolTip} component"
-        ],
+        "description": ["\nProps of {@link UserToolTip} component"],
         "signature": [
           {
             "pluginId": "@kbn/user-profile-components",
@@ -1579,9 +1407,7 @@
             "type": "Object",
             "tags": [],
             "label": "user",
-            "description": [
-              "\nUser to be rendered"
-            ],
+            "description": ["\nUser to be rendered"],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -1601,9 +1427,7 @@
             "type": "Object",
             "tags": [],
             "label": "avatar",
-            "description": [
-              "\nAvatar data of user to be rendered"
-            ],
+            "description": ["\nAvatar data of user to be rendered"],
             "signature": [
               {
                 "pluginId": "@kbn/user-profile-components",
@@ -1631,9 +1455,7 @@
         "tags": [],
         "label": "DarkModeValue",
         "description": [],
-        "signature": [
-          "\"\" | \"light\" | \"dark\""
-        ],
+        "signature": ["\"\" | \"light\" | \"dark\""],
         "path": "packages/kbn-user-profile-components/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1677,9 +1499,7 @@
             "tags": [],
             "label": "__0",
             "description": [],
-            "signature": [
-              "Props"
-            ],
+            "signature": ["Props"],
             "path": "packages/kbn-user-profile-components/src/hooks/use_update_user_profile.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1693,9 +1513,7 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileWithAvatar",
-        "description": [
-          "\nConvenience type for a {@link UserProfile} with avatar data"
-        ],
+        "description": ["\nConvenience type for a {@link UserProfile} with avatar data"],
         "signature": [
           {
             "pluginId": "@kbn/user-profile-components",

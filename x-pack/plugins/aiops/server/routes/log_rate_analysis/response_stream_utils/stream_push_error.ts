@@ -8,8 +8,8 @@
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
-  addErrorAction,
   type AiopsLogRateAnalysisApiAction,
+  addErrorAction,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 
 import type { LogDebugMessage } from './log_debug_message';

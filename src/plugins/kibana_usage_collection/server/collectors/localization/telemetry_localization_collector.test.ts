@@ -20,8 +20,8 @@ const createI18nLoaderMock = (translations: TranslationsMock) => {
   } as unknown as typeof i18nLoader;
 };
 
-import { getTranslationCount } from './telemetry_localization_collector';
 import { i18nLoader } from '@kbn/i18n';
+import { getTranslationCount } from './telemetry_localization_collector';
 
 describe('getTranslationCount', () => {
   it('returns 0 if no translations registered', async () => {

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  EuiSpacer,
-  EuiFormRow,
+  EuiButtonGroup,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFieldText,
-  EuiButtonGroup,
+  EuiFormRow,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
-import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { useKibana, useSubAction } from '@kbn/triggers-actions-ui-plugin/public';
 import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type {
   PostBlockkitParams,
   PostMessageParams,
@@ -49,8 +49,8 @@ const SlackParamsFields: React.FunctionComponent<
     channels.length > 0
       ? channels[0]
       : channelIds.length > 0 && channelIds[0].length > 0
-      ? channelIds[0]
-      : ''
+        ? channelIds[0]
+        : ''
   );
   const [messageType, setMessageType] = useState('text');
   const [textValue, setTextValue] = useState<string | undefined>(text);

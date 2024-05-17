@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Listr } from 'listr2';
-import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
+import chalk from 'chalk';
+import { Listr } from 'listr2';
 
 import {
-  createTaskContext,
   ErrorReporter,
-  parseConfigsTask,
-  extractCollectorsTask,
-  checkMatchingSchemasTask,
-  generateSchemasTask,
-  checkCompatibleTypesTask,
-  writeToFileTask,
   TaskContext,
+  checkCompatibleTypesTask,
+  checkMatchingSchemasTask,
+  createTaskContext,
+  extractCollectorsTask,
+  generateSchemasTask,
+  parseConfigsTask,
+  writeToFileTask,
 } from '../tools/tasks';
 
 export function runTelemetryCheck() {

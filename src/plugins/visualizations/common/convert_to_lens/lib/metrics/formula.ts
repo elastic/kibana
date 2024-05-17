@@ -7,10 +7,11 @@
  */
 
 import { DataView, DataViewField, METRIC_TYPES } from '@kbn/data-plugin/common';
-import { isFieldValid, SchemaConfig } from '../../..';
+import { SchemaConfig, isFieldValid } from '../../..';
 import { Operations } from '../../constants';
-import { isMetricWithField, getStdDeviationFormula, ExtendedColumnConverterArgs } from '../convert';
-import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
+import { ExtendedColumnConverterArgs, getStdDeviationFormula, isMetricWithField } from '../convert';
+import { SIBLING_PIPELINE_AGGS } from '../convert/constants';
+import { SUPPORTED_METRICS, getFormulaFromMetric } from '../convert/supported_metrics';
 import {
   getAggIdAndValue,
   getFieldNameFromField,
@@ -20,7 +21,6 @@ import {
   isPipeline,
   isStdDevAgg,
 } from '../utils';
-import { SIBLING_PIPELINE_AGGS } from '../convert/constants';
 
 type PipelineAggs = SchemaConfig<
   | METRIC_TYPES.CUMULATIVE_SUM

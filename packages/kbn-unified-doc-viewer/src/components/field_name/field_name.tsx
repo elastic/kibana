@@ -8,13 +8,13 @@
 
 import React, { Fragment } from 'react';
 import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { FieldDescriptionIconButton, getFieldTypeName } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 
 interface Props {
   fieldName: string;

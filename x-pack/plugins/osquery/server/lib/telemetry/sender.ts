@@ -10,14 +10,14 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import {
+  TELEMETRY_EBT_CONFIG_EVENT,
+  TELEMETRY_EBT_LIVE_QUERY_EVENT,
+  TELEMETRY_EBT_PACK_EVENT,
+  TELEMETRY_EBT_SAVED_QUERY_EVENT,
+} from './constants';
 import type { TelemetryReceiver } from './receiver';
 import { createTelemetryTaskConfigs } from './tasks';
-import {
-  TELEMETRY_EBT_LIVE_QUERY_EVENT,
-  TELEMETRY_EBT_SAVED_QUERY_EVENT,
-  TELEMETRY_EBT_CONFIG_EVENT,
-  TELEMETRY_EBT_PACK_EVENT,
-} from './constants';
 
 import type { OsqueryTelemetryTaskConfig } from './task';
 import { OsqueryTelemetryTask } from './task';

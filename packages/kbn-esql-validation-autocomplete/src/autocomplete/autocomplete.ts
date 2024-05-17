@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import uniqBy from 'lodash/uniqBy';
 import type {
   AstProviderFn,
   ESQLAstItem,
@@ -16,9 +15,13 @@ import type {
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { partition } from 'lodash';
-import type { EditorContext, SuggestionRawDefinition } from './types';
+import uniqBy from 'lodash/uniqBy';
+import { FunctionArgSignature } from '../definitions/types';
+import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
+import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   columnExists,
+  getAllFunctions,
   getColumnHit,
   getCommandDefinition,
   getCommandOption,
@@ -35,14 +38,20 @@ import {
   isMathFunction,
   isOptionItem,
   isRestartingExpression,
-  isSourceCommand,
   isSettingItem,
+  isSingleItem,
+  isSourceCommand,
   isSourceItem,
   isTimeIntervalItem,
-  getAllFunctions,
-  isSingleItem,
   nonNullable,
 } from '../shared/helpers';
+import {
+  buildQueryUntilPreviousCommand,
+  getFieldsByTypeHelper,
+  getPolicyHelper,
+  getSourcesHelper,
+} from '../shared/resources_helpers';
+import { ESQLCallbacks } from '../shared/types';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
@@ -57,31 +66,22 @@ import {
   semiColonCompleteItem,
 } from './complete_items';
 import {
+  buildConstantsDefinitions,
   buildFieldsDefinitions,
-  buildPoliciesDefinitions,
-  buildSourcesDefinitions,
+  buildMatchingFieldsDefinition,
   buildNewVarDefinition,
   buildNoPoliciesAvailableDefinition,
-  getCompatibleFunctionDefinition,
-  buildMatchingFieldsDefinition,
-  getCompatibleLiterals,
-  buildConstantsDefinitions,
-  buildVariablesDefinitions,
   buildOptionDefinition,
+  buildPoliciesDefinitions,
   buildSettingDefinitions,
+  buildSourcesDefinitions,
   buildValueDefinitions,
+  buildVariablesDefinitions,
+  getCompatibleFunctionDefinition,
+  getCompatibleLiterals,
 } from './factories';
-import { EDITOR_MARKER, SINGLE_BACKTICK } from '../shared/constants';
-import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
-import {
-  buildQueryUntilPreviousCommand,
-  getFieldsByTypeHelper,
-  getPolicyHelper,
-  getSourcesHelper,
-} from '../shared/resources_helpers';
-import { ESQLCallbacks } from '../shared/types';
 import { getFunctionsToIgnoreForStats, isAggFunctionUsedAlready } from './helper';
-import { FunctionArgSignature } from '../definitions/types';
+import type { EditorContext, SuggestionRawDefinition } from './types';
 
 type GetSourceFn = () => Promise<SuggestionRawDefinition[]>;
 type GetFieldsByTypeFn = (
@@ -1113,8 +1113,8 @@ async function getFunctionArgsSuggestions(
         const _suggestions: string[] = p.literalSuggestions
           ? p.literalSuggestions
           : p.literalOptions
-          ? p.literalOptions
-          : [];
+            ? p.literalOptions
+            : [];
 
         return acc.concat(_suggestions);
       }, [] as string[])
@@ -1148,8 +1148,8 @@ async function getFunctionArgsSuggestions(
       command.name !== 'stats'
         ? -1
         : commandArgIndex < 0
-        ? Math.max(command.args.length - 1, 0)
-        : commandArgIndex;
+          ? Math.max(command.args.length - 1, 0)
+          : commandArgIndex;
 
     const finalCommandArg = command.args[finalCommandArgIndex];
 
@@ -1196,8 +1196,8 @@ async function getFunctionArgsSuggestions(
         signature.params.length > argIndex
           ? signature.params[argIndex]
           : signature.minParams
-          ? signature.params[signature.params.length - 1]
-          : null
+            ? signature.params[signature.params.length - 1]
+            : null
       )
       .filter(nonNullable);
 

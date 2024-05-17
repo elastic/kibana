@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ChangePointEmbeddableApi } from '../embeddables/change_point_chart/types';
 import type { AiopsPluginStartDeps } from '../types';
 import type { ChangePointChartActionContext } from './change_point_action_context';

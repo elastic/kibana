@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ReactText } from 'react';
-import { Query } from '@kbn/es-query';
-import { HttpStart } from '@kbn/core/public';
 import { estypes } from '@elastic/elasticsearch';
+import { HttpStart } from '@kbn/core/public';
+import { Query } from '@kbn/es-query';
+import { ReactText } from 'react';
 
 export type SampleInput = ReactText | ReactText[] | Record<string, ReactText | ReactText[]>;
 export interface Sample {

@@ -1,3 +1,11 @@
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiComboBoxProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +14,6 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { INVALID_FIELD_ID } from './field_select_utils';

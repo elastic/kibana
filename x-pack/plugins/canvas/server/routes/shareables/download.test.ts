@@ -8,10 +8,10 @@
 import fs from 'fs';
 import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
 
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { RequestHandler, RequestHandlerContext, kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { initializeDownloadShareableWorkpadRoute } from './download';
 import { getMockedRouterDeps } from '../test_helpers';
+import { initializeDownloadShareableWorkpadRoute } from './download';
 
 const mockRouteContext = {} as RequestHandlerContext;
 const path = `api/canvas/workpad/find`;

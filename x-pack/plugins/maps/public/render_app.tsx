@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { i18n } from '@kbn/i18n';
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
-import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { FormattedRelative } from '@kbn/i18n-react';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import {
-  getCoreChrome,
-  getAnalytics,
-  getCoreI18n,
-  getTheme,
-  getMapsCapabilities,
-  getEmbeddableService,
-  getDocLinks,
-  getCore,
-} from './kibana_services';
-import { ListPage, MapPage } from './routes';
-import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
+import { MapByReferenceInput, MapByValueInput } from './embeddable/types';
+import {
+  getAnalytics,
+  getCore,
+  getCoreChrome,
+  getCoreI18n,
+  getDocLinks,
+  getEmbeddableService,
+  getMapsCapabilities,
+  getTheme,
+} from './kibana_services';
+import { ListPage, MapPage } from './routes';
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {

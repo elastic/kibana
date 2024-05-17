@@ -1,8 +1,6 @@
 {
   "order": 1,
-  "index_patterns": [
-    "kbn-data-forge-fake_hosts.fake_hosts-*"
-  ],
+  "index_patterns": ["kbn-data-forge-fake_hosts.fake_hosts-*"],
   "settings": {
     "index": {
       "mapping": {
@@ -13,11 +11,7 @@
       "number_of_shards": "1",
       "number_of_replicas": "0",
       "query": {
-        "default_field": [
-          "message",
-          "labels.*",
-          "event.*"
-        ]
+        "default_field": ["message", "labels.*", "event.*"]
       }
     }
   },

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
+import moment from 'moment';
 
 import type { ThreatArray } from '@kbn/security-solution-plugin/common/api/detection_engine';
 

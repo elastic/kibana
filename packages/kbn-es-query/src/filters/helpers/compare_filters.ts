@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { defaults, isEqual, omit, map } from 'lodash';
-import type { FilterMeta, Filter } from '../build_filters';
+import { defaults, isEqual, map, omit } from 'lodash';
+import type { Filter, FilterMeta } from '../build_filters';
 import { isCombinedFilter } from '../build_filters';
 
 /** @public */

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
+import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
+import React from 'react';
+import { QueryLanguageSwitcher, QueryLanguageSwitcherProps } from './language_switcher';
 const startMock = coreMock.createStart();
 
 describe('LanguageSwitcher', () => {

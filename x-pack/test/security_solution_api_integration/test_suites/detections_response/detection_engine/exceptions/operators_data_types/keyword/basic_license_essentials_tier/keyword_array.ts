@@ -14,18 +14,18 @@ import {
   importFile,
 } from '../../../../../../lists_and_exception_lists/utils';
 
-import { createRuleWithExceptionEntries } from '../../../../../utils';
 import {
-  createRule,
   createAlertsIndex,
-  deleteAllRules,
+  createRule,
   deleteAllAlerts,
-  getRuleForAlertTesting,
+  deleteAllRules,
   getAlertsById,
-  waitForRuleSuccess,
+  getRuleForAlertTesting,
   waitForAlertsToBePresent,
+  waitForRuleSuccess,
 } from '../../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { createRuleWithExceptionEntries } from '../../../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

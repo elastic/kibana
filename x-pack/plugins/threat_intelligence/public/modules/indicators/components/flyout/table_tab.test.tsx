@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProvidersComponent } from '../../../../mocks/test_providers';
+import React from 'react';
 import {
-  generateMockIndicator,
   Indicator,
   RawIndicatorFieldId,
+  generateMockIndicator,
 } from '../../../../../common/types/indicator';
-import { IndicatorsFlyoutTable } from './table_tab';
+import { TestProvidersComponent } from '../../../../mocks/test_providers';
+import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { unwrapValue } from '../../utils/unwrap_value';
 import { EMPTY_PROMPT_TEST_ID } from './empty_prompt';
-import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
+import { IndicatorsFlyoutTable } from './table_tab';
 import { FLYOUT_TABLE_TEST_ID } from './test_ids';
 
 const mockIndicator: Indicator = generateMockIndicator();

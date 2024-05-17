@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import moment from 'moment';
+import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transformCreateCommentsToComments, transformUpdateCommentsToComments } from '.';

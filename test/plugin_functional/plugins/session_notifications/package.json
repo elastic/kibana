@@ -12,4 +12,3 @@
     "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
   }
 }
-

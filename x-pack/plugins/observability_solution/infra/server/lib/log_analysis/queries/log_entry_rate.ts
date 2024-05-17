@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 import {
+  createDatasetsFilters,
   createJobIdFilters,
   createResultTypeFilters,
   createTimeRangeFilters,
   defaultRequestParameters,
-  createDatasetsFilters,
 } from './common';
 
 export const createLogEntryRateQuery = (

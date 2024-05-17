@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { FormEvent } from 'react';
-import React from 'react';
+import { waitFor } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import type { FormEvent } from 'react';
+import React from 'react';
 
+import { useImportList } from '@kbn/securitysolution-list-hooks';
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
-import { useImportList } from '@kbn/securitysolution-list-hooks';
 
 jest.mock('@kbn/securitysolution-list-hooks');
 const mockUseImportList = useImportList as jest.Mock;

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiDataGridColumnCellActionProps, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 import {
   DatatableColumn,

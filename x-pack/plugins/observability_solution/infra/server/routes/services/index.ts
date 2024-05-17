@@ -6,15 +6,15 @@
  */
 
 import {
-  GetServicesRequestQueryRT,
   GetServicesRequestQuery,
+  GetServicesRequestQueryRT,
   ServicesAPIResponseRT,
 } from '../../../common/http_api/host_details';
-import { InfraBackendLibs } from '../../lib/infra_types';
-import { getServices } from '../../lib/host_details/get_services';
-import { validateStringAssetFilters } from './lib/utils';
 import { createSearchClient } from '../../lib/create_search_client';
+import { getServices } from '../../lib/host_details/get_services';
+import { InfraBackendLibs } from '../../lib/infra_types';
 import { buildRouteValidationWithExcess } from '../../utils/route_validation';
+import { validateStringAssetFilters } from './lib/utils';
 
 export const initServicesRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;

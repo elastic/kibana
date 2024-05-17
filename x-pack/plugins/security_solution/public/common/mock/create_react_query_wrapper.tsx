@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
 export function createReactQueryWrapper(): React.FC {
   const queryClient = new QueryClient({

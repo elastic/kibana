@@ -8,11 +8,11 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { PinEventAction } from './pin_event_action';
+import { TimelineType } from '../../../../common/api/timeline';
+import { TestProviders } from '../../mock';
 import { useUserPrivileges } from '../user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';
-import { TestProviders } from '../../mock';
-import { TimelineType } from '../../../../common/api/timeline';
+import { PinEventAction } from './pin_event_action';
 
 jest.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

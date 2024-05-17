@@ -7,10 +7,6 @@
     "id": "unifiedDocViewerExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": [
-      "data",
-      "developerExamples",
-      "unifiedDocViewer"
-    ]
+    "requiredPlugins": ["data", "developerExamples", "unifiedDocViewer"]
   }
 }

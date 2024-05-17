@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import { MarkerItems } from '../waterfall/context/waterfall_chart';
 

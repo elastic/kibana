@@ -8,16 +8,16 @@
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
   getSetSignalStatusByIdsRequest,
   getSetSignalStatusByQueryRequest,
+  getSuccessfulSignalUpdateResponse,
+  setStatusSignalMissingIdsAndQueryPayload,
   typicalSetStatusSignalByIdsPayload,
   typicalSetStatusSignalByQueryPayload,
-  setStatusSignalMissingIdsAndQueryPayload,
-  getSuccessfulSignalUpdateResponse,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
-import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 
 describe('set signal status', () => {

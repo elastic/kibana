@@ -12,16 +12,16 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import React, { useMemo, useState } from 'react';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 
 interface Props {
   spanLinksCount: SpanLinksCount;

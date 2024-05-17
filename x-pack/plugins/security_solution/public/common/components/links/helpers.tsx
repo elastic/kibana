@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import type { SyntheticEvent, PropsWithChildren } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
 import type {
   EuiButtonIcon,
   EuiButtonProps,
@@ -21,8 +13,16 @@ import {
   EuiLink,
   EuiPopover,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { PropsWithChildren, SyntheticEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { defaultToEmptyTag } from '../empty_value';
 export interface ReputationLinkSetting {
   name: string;

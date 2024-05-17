@@ -10,9 +10,9 @@ import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
 import {
-  SCHEMA_QUERY_V8_8_0,
   SCHEMA_QUERY_MODEL_VERSION_1,
   SCHEMA_QUERY_MODEL_VERSION_2,
+  SCHEMA_QUERY_V8_8_0,
 } from './schemas/query';
 
 export const querySavedObjectType: SavedObjectsType = {

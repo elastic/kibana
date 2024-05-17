@@ -6,15 +6,15 @@
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
-import {
-  mockVisualizationMap,
-  mockDatasourceMap,
-  mockDataViewWithTimefield,
-  mockAllSuggestions,
-} from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
+import {
+  mockAllSuggestions,
+  mockDataViewWithTimefield,
+  mockDatasourceMap,
+  mockVisualizationMap,
+} from '../../../mocks';
+import type { LensPluginStartDependencies } from '../../../plugin';
 import { getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;

@@ -24,9 +24,7 @@
         "type": "Class",
         "tags": [],
         "label": "ElasticV3ServerShipper",
-        "description": [
-          "\nElastic V3 shipper to use on the server side."
-        ],
+        "description": ["\nElastic V3 shipper to use on the server side."],
         "signature": [
           {
             "pluginId": "@kbn/analytics-shippers-elastic-v3-server",
@@ -54,9 +52,7 @@
             "type": "string",
             "tags": [],
             "label": "shipperName",
-            "description": [
-              "Shipper's unique name"
-            ],
+            "description": ["Shipper's unique name"],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -67,9 +63,7 @@
             "type": "Object",
             "tags": [],
             "label": "telemetryCounter$",
-            "description": [
-              "Observable to emit the stats of the processed events."
-            ],
+            "description": ["Observable to emit the stats of the processed events."],
             "signature": [
               "Subject",
               "<",
@@ -92,12 +86,8 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": [
-              "\nCreates a new instance of the {@link ElasticV3ServerShipper}."
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["\nCreates a new instance of the {@link ElasticV3ServerShipper}."],
+            "signature": ["any"],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,9 +98,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "{@link ElasticV3ShipperOptions }"
-                ],
+                "description": ["{@link ElasticV3ShipperOptions }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -131,9 +119,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
-                "description": [
-                  "{@link AnalyticsClientInitContext }"
-                ],
+                "description": ["{@link AnalyticsClientInitContext }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -181,9 +167,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
-                "description": [
-                  "The full new context to set {@link EventContext }"
-                ],
+                "description": ["The full new context to set {@link EventContext }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -210,9 +194,7 @@
             "description": [
               "\nWhen `false`, it flushes the internal queue and stops sending events."
             ],
-            "signature": [
-              "(isOptedIn: boolean) => void"
-            ],
+            "signature": ["(isOptedIn: boolean) => void"],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -223,12 +205,8 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
-                "description": [
-                  "`true` for resume sending events. `false` to stop."
-                ],
-                "signature": [
-                  "boolean"
-                ],
+                "description": ["`true` for resume sending events. `false` to stop."],
+                "signature": ["boolean"],
                 "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -243,9 +221,7 @@
             "type": "Function",
             "tags": [],
             "label": "reportEvents",
-            "description": [
-              "\nEnqueues the events to be sent via the leaky bucket algorithm."
-            ],
+            "description": ["\nEnqueues the events to be sent via the leaky bucket algorithm."],
             "signature": [
               "(events: ",
               {
@@ -267,9 +243,7 @@
                 "type": "Array",
                 "tags": [],
                 "label": "events",
-                "description": [
-                  "batched events {@link Event }"
-                ],
+                "description": ["batched events {@link Event }"],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -297,9 +271,7 @@
             "description": [
               "\nTriggers a flush of the internal queue to attempt to send any events held in the queue\nand resolves the returned promise once the queue is emptied."
             ],
-            "signature": [
-              "() => Promise<void>"
-            ],
+            "signature": ["() => Promise<void>"],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -315,9 +287,7 @@
             "description": [
               "\nShuts down the shipper.\nTriggers a flush of the internal queue to attempt to send any events held in the queue."
             ],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/analytics/shippers/elastic_v3/server/src/server_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -336,9 +306,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ElasticV3ShipperOptions",
-        "description": [
-          "\nOptions for the Elastic V3 shipper"
-        ],
+        "description": ["\nOptions for the Elastic V3 shipper"],
         "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -349,9 +317,7 @@
             "type": "string",
             "tags": [],
             "label": "channelName",
-            "description": [
-              "\nThe name of the channel to stream all the events to."
-            ],
+            "description": ["\nThe name of the channel to stream all the events to."],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -362,9 +328,7 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": [
-              "\nThe product's version."
-            ],
+            "description": ["\nThe product's version."],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -378,9 +342,7 @@
             "description": [
               "\nProvide it to override the Analytics client's default configuration."
             ],
-            "signature": [
-              "\"production\" | \"staging\" | undefined"
-            ],
+            "signature": ["\"production\" | \"staging\" | undefined"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -394,9 +356,7 @@
             "description": [
               "\nShould show debug information about the requests it makes to the V3 API."
             ],
-            "signature": [
-              "boolean | undefined"
-            ],
+            "signature": ["boolean | undefined"],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false

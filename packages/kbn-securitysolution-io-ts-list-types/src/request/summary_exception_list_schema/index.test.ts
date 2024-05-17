@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { left } from 'fp-ts/lib/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { left } from 'fp-ts/lib/Either';
 
-import { getSummaryExceptionListSchemaMock } from './index.mock';
 import { SummaryExceptionListSchema, summaryExceptionListSchema } from '.';
+import { getSummaryExceptionListSchemaMock } from './index.mock';
 
 describe('summary_exception_list_schema', () => {
   test('it should validate a typical exception list request', () => {

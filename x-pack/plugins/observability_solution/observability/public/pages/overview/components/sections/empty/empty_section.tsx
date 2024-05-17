@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import React from 'react';
 import { ObservabilityFetchDataPlugins } from '../../../../../typings';
 
 export interface Section {

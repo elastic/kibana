@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import { set } from '@kbn/safer-lodash-set/fp';
+import { mount } from 'enzyme';
 import { omit } from 'lodash/fp';
 import React from 'react';
 
+import type { ColumnHeaderOptions } from '../../../common/types';
+import { mockBrowserFields } from '../../../mock/mock_source';
+import { defaultHeaders } from '../../../store/data_table/defaults';
+import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import type { BUILT_IN_SCHEMA } from './helpers';
 import {
-  getColumnWidthFromType,
-  getColumnHeaders,
-  getSchema,
-  getColumnHeader,
   allowSorting,
+  getColumnHeader,
+  getColumnHeaders,
+  getColumnWidthFromType,
+  getSchema,
 } from './helpers';
-import { DEFAULT_TABLE_COLUMN_MIN_WIDTH, DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH } from '../constants';
-import type { ColumnHeaderOptions } from '../../../common/types';
-import { defaultHeaders } from '../../../store/data_table/defaults';
-import { mockBrowserFields } from '../../../mock/mock_source';
 
 describe('helpers', () => {
   describe('getColumnWidthFromType', () => {

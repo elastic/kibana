@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
+import { Assignees } from './assignees';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
   ASSIGNEES_HEADER_TEST_ID,
+  ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
-import { Assignees } from './assignees';
 
-import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
-import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/assignees/test_ids';
 import type { SetAlertAssigneesFunc } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import { TestProviders } from '../../../../common/mock';
-import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/assignees/test_ids';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import {
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
   USER_AVATAR_ITEM_TEST_ID,
 } from '../../../../common/components/user_profiles/test_ids';
+import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
+import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { TestProviders } from '../../../../common/mock';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');

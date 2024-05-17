@@ -1,3 +1,5 @@
+import { EuiStepsHorizontal } from '@elastic/eui';
+import type { EuiStepsHorizontalProps } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,8 +7,6 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiStepsHorizontal } from '@elastic/eui';
-import type { EuiStepsHorizontalProps } from '@elastic/eui';
 import styled from 'styled-components';
 
 // polyfill until https://github.com/elastic/eui/discussions/5836 implemented

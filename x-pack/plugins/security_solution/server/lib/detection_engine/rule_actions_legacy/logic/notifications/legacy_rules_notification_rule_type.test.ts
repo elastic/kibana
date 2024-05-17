@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
+import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
-// eslint-disable-next-line no-restricted-imports
-import { legacyRulesNotificationRuleType } from './legacy_rules_notification_rule_type';
-import { buildSignalsSearchQuery } from './build_signals_query';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyNotificationExecutorOptions } from './legacy_types';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import {
   sampleDocSearchResultsNoSortIdNoVersion,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
 } from '../../../rule_types/__mocks__/es_results';
-import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
+import { buildSignalsSearchQuery } from './build_signals_query';
+// eslint-disable-next-line no-restricted-imports
+import { legacyRulesNotificationRuleType } from './legacy_rules_notification_rule_type';
+// eslint-disable-next-line no-restricted-imports
+import type { LegacyNotificationExecutorOptions } from './legacy_types';
 
 jest.mock('./build_signals_query');
 

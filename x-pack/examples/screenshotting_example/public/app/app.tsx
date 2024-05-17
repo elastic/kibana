@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -15,15 +14,16 @@ import {
   EuiImage,
   EuiPage,
   EuiPageBody,
-  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiPageSection,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import React, { useCallback, useContext, useState } from 'react';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../../common';
 import { HttpContext } from './http_context';
 

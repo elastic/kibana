@@ -9,8 +9,8 @@ import type { FactoryQueryTypes } from '../../../../../common/search_strategy/se
 import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/security_solution/related_entities';
 
 import type { SecuritySolutionFactory } from '../types';
-import { hostsRelatedUsers } from './related_users';
 import { usersRelatedHosts } from './related_hosts';
+import { hostsRelatedUsers } from './related_users';
 
 export const relatedEntitiesFactory: Record<
   RelatedEntitiesQueries,

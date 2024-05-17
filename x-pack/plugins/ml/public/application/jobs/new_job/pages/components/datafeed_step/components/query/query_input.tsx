@@ -7,11 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useState, useContext, useEffect } from 'react';
-import { JobCreatorContext } from '../../../job_creator_context';
-import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
-import { Description } from './description';
 import { isValidJson } from '../../../../../../../../../common/util/validation_utils';
+import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { Description } from './description';
 
 const EDITOR_HEIGHT = '400px';
 

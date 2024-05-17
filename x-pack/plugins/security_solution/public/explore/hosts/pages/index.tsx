@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { HOSTS_PATH } from '../../../../common/constants';
-import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
+import { HostDetails } from './details';
 
 import { MlHostConditionalContainer } from '../../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';

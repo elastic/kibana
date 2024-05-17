@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
+import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
-import { useKibana } from '../../../../common/lib/kibana';
-import {
-  INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
-  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
-  INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
-  INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
-  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
-  INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
-  INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
-} from './test_ids';
-import { useLeftPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import React, { memo, useCallback, useMemo } from 'react';
 import { LeftPanelInsightsTab } from '..';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EventKind } from '../../shared/constants/event_kinds';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { getField } from '../../shared/utils';
+import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
+import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import {
   THREAT_INTELLIGENCE_TAB_ID,
   ThreatIntelligenceDetails,
 } from '../components/threat_intelligence_details';
-import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
-import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
-import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { useLeftPanelContext } from '../context';
+import {
+  INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
+  INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
+  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
+  INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
+  INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
+} from './test_ids';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   INTERNAL_FIND_LISTS_BY_SIZE,
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
@@ -14,9 +14,9 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import { chunk } from 'lodash';
 
-import type { ListsPluginRouter } from '../../types';
-import { decodeCursor } from '../../services/utils';
 import { findListsBySizeRequestQuery, findListsBySizeResponse } from '../../../common/api';
+import { decodeCursor } from '../../services/utils';
+import type { ListsPluginRouter } from '../../types';
 import { buildRouteValidation, buildSiemResponse, getListClient } from '../utils';
 
 export const findListsBySizeRoute = (router: ListsPluginRouter): void => {

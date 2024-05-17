@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
+import { Logger } from '@kbn/core/server';
+import { RuleExecutionStatuses } from '../../common';
+import { translations } from '../constants/translations';
 import { RuleResultService } from '../monitoring/rule_result_service';
+import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import {
+  RawRule,
+  RawRuleExecutionStatus,
+  Rule,
   RuleExecutionStatus,
+  RuleExecutionStatusErrorReasons,
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
-  RawRuleExecutionStatus,
-  RawRule,
-  Rule,
-  RuleExecutionStatusErrorReasons,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { RuleExecutionStatuses } from '../../common';
-import { translations } from '../constants/translations';
-import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { RuleRunMetrics } from './rule_run_metrics_store';
 
 export interface IExecutionStatusAndMetrics {

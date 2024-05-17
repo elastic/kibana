@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
 import { EventEmitter } from 'events';
 import {
   EuiButton,
@@ -21,13 +20,14 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState } from 'react';
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 interface LinkedSearchProps {
   savedSearch: SavedSearch;

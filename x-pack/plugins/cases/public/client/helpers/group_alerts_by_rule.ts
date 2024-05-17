@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import type { Ecs } from '../../../common';
+import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common/types/domain';
-import { getRuleIdFromEvent } from './get_rule_id_from_event';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
+import { getRuleIdFromEvent } from './get_rule_id_from_event';
 
 type Maybe<T> = T | null;
 interface Event {

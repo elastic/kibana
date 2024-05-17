@@ -6,14 +6,14 @@
  */
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { has } from 'lodash';
-import type { AlertsBySeverityAgg } from './types';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
-import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
+import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
+import type { SummaryChartsAgg, SummaryChartsData } from '../alerts_summary_charts_panel/types';
 import * as i18n from './translations';
+import type { AlertsBySeverityAgg } from './types';
 
 export const getSeverityColor = (severity: string) => {
   return SEVERITY_COLOR[severity.toLocaleLowerCase() as Severity] ?? emptyDonutColor;

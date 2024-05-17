@@ -8,16 +8,16 @@
 
 import _ from 'lodash';
 
+import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
 import {
+  Filter,
+  PhraseFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
-  Filter,
   getPhraseFilterField,
   getPhraseFilterValue,
   isPhraseFilter,
-  PhraseFilter,
 } from '@kbn/es-query';
-import { DataViewsContract, FilterManager as QueryFilterManager } from '@kbn/data-plugin/public';
 import { FilterManager } from './filter_manager';
 
 export class PhraseFilterManager extends FilterManager {

@@ -28,9 +28,8 @@ export const fetchExplainData = async (formState: State['form']) => {
     delete jobConfig.dest;
     delete jobConfig.model_memory_limit;
     delete jobConfig.analyzed_fields;
-    const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
-      jobConfig
-    );
+    const resp: DfAnalyticsExplainResponse =
+      await ml.dataFrameAnalytics.explainDataFrameAnalytics(jobConfig);
     expectedMemory = resp.memory_estimation?.expected_memory_without_disk;
     fieldSelection = resp.field_selection || [];
   } catch (error) {

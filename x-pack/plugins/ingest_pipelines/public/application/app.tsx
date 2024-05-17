@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React, { FunctionComponent } from 'react';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../shared_imports';
 
@@ -16,17 +16,17 @@ import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
 import {
   SectionError,
-  useAuthorizationContext,
-  WithPrivileges,
   SectionLoading,
+  WithPrivileges,
+  useAuthorizationContext,
 } from '../shared_imports';
 
 import {
-  PipelinesList,
-  PipelinesCreate,
-  PipelinesEdit,
   PipelinesClone,
+  PipelinesCreate,
   PipelinesCreateFromCsv,
+  PipelinesEdit,
+  PipelinesList,
 } from './sections';
 import { ROUTES } from './services/navigation';
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiAccordion, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
-import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 

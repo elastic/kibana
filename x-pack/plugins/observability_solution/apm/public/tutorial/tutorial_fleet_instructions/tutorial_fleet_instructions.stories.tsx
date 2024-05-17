@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HttpStart } from '@kbn/core/public';
 import { Story } from '@storybook/react';
 import React from 'react';
-import { HttpStart } from '@kbn/core/public';
 import TutorialFleetInstructions from '.';
 
 interface Args {

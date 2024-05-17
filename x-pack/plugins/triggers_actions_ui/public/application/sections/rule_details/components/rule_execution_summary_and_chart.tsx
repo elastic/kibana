@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiPanel,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiIconTip,
+  EuiPanel,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { RuleSummary, RuleType } from '../../../../types';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RuleSummary, RuleType } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
+import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,

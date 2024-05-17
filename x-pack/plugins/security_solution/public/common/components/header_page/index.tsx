@@ -6,25 +6,25 @@
  */
 
 import {
-  EuiProgress,
   EuiPageHeader,
   EuiPageHeaderSection,
+  EuiProgress,
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
 import { css } from '@emotion/react';
+import React from 'react';
 import styled, { css as styleCss } from 'styled-components';
 
+import type { SecurityPageName } from '../../../app/types';
+import { useKibana } from '../../lib/kibana';
 import type { LinkIconProps } from '../link_icon';
 import { LinkIcon } from '../link_icon';
+import { useFormatUrl } from '../link_to';
 import type { SubtitleProps } from '../subtitle';
 import { Subtitle } from '../subtitle';
 import { Title } from './title';
 import type { BadgeOptions, TitleProp } from './types';
-import { useFormatUrl } from '../link_to';
-import type { SecurityPageName } from '../../../app/types';
-import { useKibana } from '../../lib/kibana';
 interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;

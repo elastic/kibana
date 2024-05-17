@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
+import moment from 'moment';
 import {
   Aggregators,
   CustomMetricExpressionParams,
   SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { AdditionalContext } from '../utils';
+import { MissingGroupsRecord, checkMissingGroups } from './check_missing_group';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
-import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
 
 export interface EvaluatedRuleParams {
   criteria: CustomMetricExpressionParams[];

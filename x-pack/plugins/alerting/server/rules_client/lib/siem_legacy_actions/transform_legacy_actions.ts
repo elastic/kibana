@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
-import { isEmpty } from 'lodash/fp';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { isEmpty } from 'lodash/fp';
+import { v4 } from 'uuid';
 import { RawRuleAction } from '../../../types';
+import { transformToAlertThrottle } from './transform_to_alert_throttle';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import { LegacyIRuleActionsAttributes } from './types';
-import { transformToAlertThrottle } from './transform_to_alert_throttle';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function

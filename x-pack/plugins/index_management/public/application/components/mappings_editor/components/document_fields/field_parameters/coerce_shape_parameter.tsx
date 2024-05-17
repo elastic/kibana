@@ -9,8 +9,8 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 export const CoerceShapeParameter = () => (
   <EditFieldFormRow

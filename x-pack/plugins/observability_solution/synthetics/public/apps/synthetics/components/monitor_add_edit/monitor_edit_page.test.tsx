@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { ConfigKey } from '../../../../../common/runtime_types';
+import { useMonitorName } from '../../hooks/use_monitor_name';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
-import { useMonitorName } from '../../hooks/use_monitor_name';
-import { ConfigKey } from '../../../../../common/runtime_types';
 
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import {
-  PROFILE_VALUES_ENUM,
   PROFILES_MAP,
+  PROFILE_VALUES_ENUM,
 } from '../../../../../common/constants/monitor_defaults';
 
 jest.mock('@kbn/observability-shared-plugin/public');

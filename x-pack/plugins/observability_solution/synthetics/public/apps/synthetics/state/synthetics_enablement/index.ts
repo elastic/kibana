@@ -6,13 +6,13 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import {
-  getSyntheticsEnablement,
-  getSyntheticsEnablementSuccess,
-  getSyntheticsEnablementFailure,
-} from './actions';
 import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '../utils/http_error';
+import {
+  getSyntheticsEnablement,
+  getSyntheticsEnablementFailure,
+  getSyntheticsEnablementSuccess,
+} from './actions';
 
 export interface SyntheticsEnablementState {
   loading: boolean;

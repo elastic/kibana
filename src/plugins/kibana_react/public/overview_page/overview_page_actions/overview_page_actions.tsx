@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import React from 'react';
 
 interface Props {
   addDataHref: string;

@@ -14,10 +14,10 @@ import './language';
 import type { LangModuleType } from '../types';
 import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
 import {
-  lexerRules,
-  languageConfiguration,
-  consoleOutputLexerRules,
   consoleOutputLanguageConfiguration,
+  consoleOutputLexerRules,
+  languageConfiguration,
+  lexerRules,
 } from './lexer_rules';
 
 export { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID, CONSOLE_THEME_ID } from './constants';

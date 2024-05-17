@@ -24,9 +24,7 @@
             "tags": [],
             "label": "{\n  title,\n  description,\n  headingId,\n  children,\n  tabs,\n  activeTabId,\n  changeActiveTab,\n}",
             "description": [],
-            "signature": [
-              "TabbedTableListViewProps"
-            ],
+            "signature": ["TabbedTableListViewProps"],
             "path": "packages/content-management/tabbed_table_list_view/src/tabbed_table_list_view.tsx",
             "deprecated": false,
             "trackAdoption": false,

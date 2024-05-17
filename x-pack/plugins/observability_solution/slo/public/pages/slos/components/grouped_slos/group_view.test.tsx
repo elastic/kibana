@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '../../../../utils/test_helper';
+import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../../../common/constants';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
-import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../../../common/constants';
+import { render } from '../../../../utils/test_helper';
 
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { GroupView } from './group_view';

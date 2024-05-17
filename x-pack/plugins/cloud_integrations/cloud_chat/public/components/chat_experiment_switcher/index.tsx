@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 
 import type { ChatVariant } from '../../../common/types';
-import { ChatHeaderMenuItem } from '../chat_header_menu_item';
 import { Chat as ChatFloatingBubble } from '../chat_floating_bubble';
+import { ChatHeaderMenuItem } from '../chat_header_menu_item';
 
 const BUBBLE_ALLOWED_LOCATIONS = [
   'app/home#/getting_started',

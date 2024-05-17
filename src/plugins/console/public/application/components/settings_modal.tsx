@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import React, { Fragment, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import _ from 'lodash';
+import React, { Fragment, useState, useCallback } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckboxGroup,
   EuiFieldNumber,
   EuiFormRow,
-  EuiCheckboxGroup,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSwitch,
   EuiSuperSelect,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
@@ -55,8 +55,8 @@ const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
     value === 0
       ? onceTimeInterval()
       : value === 60
-      ? everyHourTimeInterval()
-      : everyNMinutesTimeInterval(value),
+        ? everyHourTimeInterval()
+        : everyNMinutesTimeInterval(value),
 }));
 
 export interface DevToolsSettingsModalProps {

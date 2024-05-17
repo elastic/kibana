@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
+import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
-import { MetricsAPIRequest, SnapshotRequest } from '../../../../common/http_api';
+import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
 
 jest.mock('./create_timerange_with_interval', () => {
   return {

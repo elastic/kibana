@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
-import { range } from 'lodash';
 import {
+  AlertsClientError,
   DEFAULT_AAD_CONFIG,
   RuleType,
   RuleTypeState,
-  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
-import { schema } from '@kbn/config-schema';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { schema } from '@kbn/config-schema';
+import { range } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
-  DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
-  AlwaysFiringParams,
   AlwaysFiringActionGroupIds,
+  AlwaysFiringParams,
+  DEFAULT_INSTANCES_TO_GENERATE,
 } from '../../common/constants';
 
 type ActionGroups = 'small' | 'medium' | 'large';

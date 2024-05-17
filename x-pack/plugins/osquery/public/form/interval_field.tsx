@@ -1,3 +1,7 @@
+import type { EuiFieldNumberProps } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import deepEqual from 'fast-deep-equal';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +9,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import deepEqual from 'fast-deep-equal';
 import { useController } from 'react-hook-form';
-import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 const intervalFieldValidations = {
   required: {

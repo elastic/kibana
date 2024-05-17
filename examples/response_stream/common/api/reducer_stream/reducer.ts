@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ReducerStreamApiAction, API_ACTION_NAME } from '.';
+import { API_ACTION_NAME, ReducerStreamApiAction } from '.';
 
 export const UI_ACTION_NAME = {
   RESET: 'reset',
 } as const;
-export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
+export type UiActionName = (typeof UI_ACTION_NAME)[keyof typeof UI_ACTION_NAME];
 
 export interface StreamState {
   errors: string[];

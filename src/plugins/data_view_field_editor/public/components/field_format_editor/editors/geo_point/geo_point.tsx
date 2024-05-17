@@ -10,8 +10,8 @@ import React, { Fragment } from 'react';
 
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { GeoPointFormat } from '@kbn/field-formats-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DefaultFormatEditor, defaultState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';

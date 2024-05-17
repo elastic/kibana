@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { generateFilters } from './generate_filters';
 import { FilterManager } from '../filter_manager';
+import { generateFilters } from './generate_filters';
 
 import {
-  Filter,
-  DataViewFieldBase,
   DataViewBase,
-  isExistsFilter,
+  DataViewFieldBase,
+  Filter,
+  PhraseFilter,
+  RangeFilter,
   buildExistsFilter,
+  isExistsFilter,
   isPhraseFilter,
   isRangeFilter,
-  RangeFilter,
-  PhraseFilter,
 } from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';

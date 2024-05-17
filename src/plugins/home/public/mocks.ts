@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
-import { environmentServiceMock } from './services/environment/environment.mock';
-import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
-import { addDataServiceMock } from './services/add_data/add_data_service.mock';
 import { HomePublicPluginSetup } from './plugin';
+import { addDataServiceMock } from './services/add_data/add_data_service.mock';
+import { environmentServiceMock } from './services/environment/environment.mock';
+import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
+import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
 import { welcomeServiceMock } from './services/welcome/welcome_service.mocks';
 
 const createSetupContract = (): jest.Mocked<HomePublicPluginSetup> => ({

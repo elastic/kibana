@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { OptimizerConfig } from '../optimizer';
-import { parseStats, inAnyEntryChunk } from './parse_stats';
+import { inAnyEntryChunk, parseStats } from './parse_stats';
 
 export async function runFindBabelHelpersInEntryBundlesCli() {
   run(async ({ log }) => {

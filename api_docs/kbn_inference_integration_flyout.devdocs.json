@@ -75,11 +75,7 @@
             "tags": [],
             "label": "{\n  onSaveInferenceEndpoint,\n  onFlyoutClose,\n  isInferenceFlyoutVisible,\n  e5documentationUrl = '',\n  elserv2documentationUrl = '',\n  supportedNlpModels = '',\n  nlpImportModel = '',\n  errorCallout,\n  trainedModels = [],\n  isCreateInferenceApiLoading,\n  onInferenceEndpointChange,\n  inferenceEndpointError = undefined,\n  setInferenceEndpointError,\n}",
             "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              "InferenceFlyoutProps",
-              ">"
-            ],
+            "signature": ["React.PropsWithChildren<", "InferenceFlyoutProps", ">"],
             "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -120,9 +116,7 @@
             "tags": [],
             "label": "service_settings",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
             "deprecated": false,
             "trackAdoption": false

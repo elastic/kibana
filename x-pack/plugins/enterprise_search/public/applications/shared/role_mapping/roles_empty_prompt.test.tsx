@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
 import { RolesEmptyPrompt } from './roles_empty_prompt';
 

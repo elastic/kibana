@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
-import { CasesSubFeatureId } from '../product_features_keys';
+import { i18n } from '@kbn/i18n';
 import { APP_ID } from '../constants';
+import { CasesSubFeatureId } from '../product_features_keys';
 import type { CasesFeatureParams } from './types';
 
 /**

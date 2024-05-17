@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import React from 'react';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 interface TextInputOptionProps<ParamName extends string> {
   disabled?: boolean;

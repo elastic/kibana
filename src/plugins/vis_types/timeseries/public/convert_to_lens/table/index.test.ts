@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { TableVisConfiguration } from '@kbn/visualizations-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { TableVisConfiguration } from '@kbn/visualizations-plugin/common';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { convertToLens } from '.';
-import { createPanel, createSeries } from '../lib/__mocks__';
-import { Panel } from '../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../common/enums';
+import { Panel } from '../../../common/types';
+import { createPanel, createSeries } from '../lib/__mocks__';
 
 const mockConvertToDateHistogramColumn = jest.fn();
 const mockGetMetricsColumns = jest.fn();

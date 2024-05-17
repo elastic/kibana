@@ -8,33 +8,33 @@
 import React, { memo, useMemo } from 'react';
 
 import {
-  EuiLink,
+  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
+  EuiLink,
   EuiPanel,
   EuiText,
-  EuiAccordion,
-  useEuiTheme,
+  EuiTextColor,
   useEuiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
-import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Rule } from '../../../detection_engine/rule_management/logic/types';
-import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
+import styled from 'styled-components';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
-import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
-import { TitleBadge } from '../title_badge';
-import * as i18n from '../../translations';
-import { ListExceptionItems } from '../list_exception_items';
+import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
+import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { useListDetailsView } from '../../hooks';
+import type { ExceptionListInfo } from '../../hooks/use_all_exception_lists';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
-import { ManageRules } from '../manage_rules';
+import * as i18n from '../../translations';
 import { IncludeExpiredExceptionsModal } from '../expired_exceptions_list_items_modal';
+import { ListExceptionItems } from '../list_exception_items';
+import { ManageRules } from '../manage_rules';
+import { TitleBadge } from '../title_badge';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;

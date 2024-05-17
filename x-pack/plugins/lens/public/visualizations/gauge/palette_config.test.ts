@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { transparentizePalettes } from './palette_config';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { transparentizePalettes } from './palette_config';
 
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 

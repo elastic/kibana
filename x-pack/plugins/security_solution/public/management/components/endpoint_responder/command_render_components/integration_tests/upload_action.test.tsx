@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { getEndpointConsoleCommands } from '../..';
+import { UPLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import {
   ENDPOINT_CAPABILITIES,
   type EndpointCapabilities,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
-import {
-  type AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../common/mock/endpoint';
-import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
-import {
-  ConsoleManagerTestComponent,
-  getConsoleManagerMockRenderResultQueriesAndActions,
-} from '../../../console/components/console_manager/mocks';
 import type {
   ActionDetailsApiResponse,
   EndpointPrivileges,
   ResponseActionUploadOutputContent,
 } from '../../../../../../common/endpoint/types';
-import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
-import { getEndpointConsoleCommands } from '../..';
-import React from 'react';
-import { getConsoleSelectorsAndActionMock } from '../../../console/mocks';
-import { waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { executionTranslations } from '../../../console/components/console_state/state_update_handlers/translations';
-import { UPLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
+import {
+  type AppContextTestRender,
+  createAppRootMockRenderer,
+} from '../../../../../common/mock/endpoint';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
+import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
+import {
+  ConsoleManagerTestComponent,
+  getConsoleManagerMockRenderResultQueriesAndActions,
+} from '../../../console/components/console_manager/mocks';
+import { executionTranslations } from '../../../console/components/console_state/state_update_handlers/translations';
+import { getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
 describe('When using `upload` response action', () => {

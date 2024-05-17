@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 import { Root } from '@kbn/core-root-server-internal';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import {
-  createTestServers,
-  createRootWithCorePlugins,
   type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
 } from '@kbn/core-test-helpers-kbn-server';
+import { getMigrationHash } from '@kbn/core-test-helpers-so-type-serializer';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -48,10 +48,13 @@ describe('checking migration metadata changes on all registered SO types', () =>
   it('detecting migration related changes in registered types', () => {
     const allTypes = typeRegistry.getAllTypes();
 
-    const hashMap = allTypes.reduce((map, type) => {
-      map[type.name] = getMigrationHash(type);
-      return map;
-    }, {} as Record<string, string>);
+    const hashMap = allTypes.reduce(
+      (map, type) => {
+        map[type.name] = getMigrationHash(type);
+        return map;
+      },
+      {} as Record<string, string>
+    );
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {

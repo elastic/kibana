@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
-import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useMutation } from '@tanstack/react-query';
-import { deleteListItem } from '@kbn/securitysolution-list-api';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { DeleteListItemParams } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { deleteListItem } from '@kbn/securitysolution-list-api';
+import type { DeleteListItemParams } from '@kbn/securitysolution-list-api';
+import type { UseMutationOptions } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useInvalidateListItemQuery } from '../use_find_list_items';
 
 const deleteListItemWithOptionalSignal = withOptionalSignal(deleteListItem);

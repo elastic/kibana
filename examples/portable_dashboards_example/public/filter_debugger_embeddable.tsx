@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   PublishesUnifiedSearch,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
+import React from 'react';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export type Api = DefaultEmbeddableApi<{}>;

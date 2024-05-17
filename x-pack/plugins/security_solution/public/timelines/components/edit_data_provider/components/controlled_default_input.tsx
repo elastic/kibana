@@ -9,8 +9,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 
-import { isPrimitiveArray } from '../../timeline/helpers';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
+import { isPrimitiveArray } from '../../timeline/helpers';
 import { sanatizeValue } from '../helpers';
 import * as i18n from '../translations';
 

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThreatRuleParams } from '../../rule_schema';
-import { indicatorMatchExecutor } from './indicator_match';
 import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
-import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
+import { indicatorMatchExecutor } from './indicator_match';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions

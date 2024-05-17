@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
+import moment from 'moment';
 import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
-import { SearchStatus } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 import { getSearchStatus } from './get_search_status';
+import { SearchStatus } from './types';
 
 export async function getSessionStatus(
   deps: { internalClient: ElasticsearchClient },

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { capitalize } from 'lodash';
-import numeral from '@elastic/numeral';
-import React from 'react';
 import {
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
-  Pagination,
   EuiTableSortingType,
+  Pagination,
 } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { capitalize } from 'lodash';
+import React from 'react';
 
 import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import type { MLJobs } from '../../../types';
 import { EuiMonitoringTable } from '../../table';
-import { MachineLearningJobStatusIcon } from '../ml_job_listing/status_icon';
 import { ClusterStatus } from '../cluster_status';
+import { MachineLearningJobStatusIcon } from '../ml_job_listing/status_icon';
 
 interface Props {
   clusterStatus: boolean;

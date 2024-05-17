@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { ValuesType } from 'utility-types';
-import type { AsDuration, AsPercent, TimeUnitChar } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
-import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import type { AsDuration, AsPercent, TimeUnitChar } from '@kbn/observability-plugin/common';
+import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ValuesType } from 'utility-types';
+import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
+import { getEnvironmentLabel } from '../environment_filter_values';
 import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
@@ -21,8 +23,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../es_fields/apm';
-import { getEnvironmentLabel } from '../environment_filter_values';
-import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 

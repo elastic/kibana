@@ -19,7 +19,7 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     rule_id: 'rule-1',
     version: 1,
     ...rewrites,
-  } as PrebuiltRuleAsset);
+  }) as PrebuiltRuleAsset;
 
 export const getPrebuiltRuleWithExceptionsMock = (): PrebuiltRuleAsset => ({
   description: 'A rule with an exception list',

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { EuiButtonGroup, EuiFlexGroup, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiText, EuiButtonGroup, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ExceptionsPagination } from '../../utils/types';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import {
   UtilityBar,
-  UtilityBarSection,
   UtilityBarGroup,
+  UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import type { ExceptionsPagination } from '../../utils/types';
 import * as i18n from './translations';
 
 const StyledText = styled.span`

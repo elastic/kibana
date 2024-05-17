@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
 
 import { EuiButton, EuiConfirmModal, EuiPageSection, EuiPageTemplate } from '@elastic/eui';
 
-import { setBreadcrumbs, listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { SectionLoading } from '../../../shared_imports';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
   RemoteClustersProvider,
 } from '../../components';
 import { API_STATUS } from '../../constants';
-import { SectionLoading } from '../../../shared_imports';
+import { editBreadcrumb, listBreadcrumb, setBreadcrumbs } from '../../services/breadcrumbs';
 
 export class FollowerIndexEdit extends PureComponent {
   static propTypes = {

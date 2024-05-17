@@ -6,9 +6,7 @@
     "dataSize": 9036305,
     "nodesCount": 1,
     "upTime": 1403187,
-    "version": [
-      "7.0.0-alpha1"
-    ],
+    "version": ["7.0.0-alpha1"],
     "memUsed": 280753264,
     "memMax": 709623808,
     "unassignedShards": 23,

@@ -7,7 +7,7 @@
  */
 
 import { DataViewBase, DataViewFieldBase } from '../../es_query';
-import { buildQueryFilter, buildRangeFilter, Filter, FilterStateStore } from '../build_filters';
+import { Filter, FilterStateStore, buildQueryFilter, buildRangeFilter } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
 
 describe('filter manager utilities', () => {

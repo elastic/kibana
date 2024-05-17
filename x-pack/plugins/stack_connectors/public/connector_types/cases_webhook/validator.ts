@@ -12,8 +12,8 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { containsChars, isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { templateActionVariable } from '@kbn/triggers-actions-ui-plugin/public';
-import * as i18n from './translations';
 import { casesVars, commentVars, urlVars, urlVarsExt } from './action_variables';
+import * as i18n from './translations';
 
 const errorCode: ERROR_CODE = 'ERR_FIELD_MISSING';
 

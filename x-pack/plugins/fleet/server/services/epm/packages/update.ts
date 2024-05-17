@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { ExperimentalIndexingFeature } from '../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import type { Installation, UpdatePackageRequestSchema } from '../../../types';
 import { PackageNotFoundError } from '../../../errors';
+import type { Installation, UpdatePackageRequestSchema } from '../../../types';
 
 import { auditLoggingService } from '../../audit_logging';
 

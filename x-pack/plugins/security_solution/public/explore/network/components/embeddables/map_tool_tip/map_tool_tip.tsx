@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import type { Geometry } from 'geojson';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
-import type { MapToolTipProps } from '../types';
-import { ToolTipFooter } from './tooltip_footer';
-import { LineToolTipContent } from './line_tool_tip_content';
-import { PointToolTipContent } from './point_tool_tip_content';
+import type { Geometry } from 'geojson';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Loader } from '../../../../../common/components/loader';
 import * as i18n from '../translations';
+import type { MapToolTipProps } from '../types';
+import { LineToolTipContent } from './line_tool_tip_content';
+import { PointToolTipContent } from './point_tool_tip_content';
+import { ToolTipFooter } from './tooltip_footer';
 
 export const MapToolTipComponent = ({
   closeTooltip,

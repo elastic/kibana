@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
-import { i18nTexts } from '../i18n_texts';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { useFilePickerContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 
 export const SearchField: FunctionComponent = () => {
   const { state } = useFilePickerContext();

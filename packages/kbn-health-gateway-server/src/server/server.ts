@@ -7,9 +7,9 @@
  */
 
 import type { Server as HapiServer, ServerRoute as HapiServerRoute } from '@hapi/hapi';
-import { createServer, getServerOptions, getListenerOptions } from '@kbn/server-http-tools';
 import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
 import { ServerConfig } from './server_config';
 import type { ServerConfigType } from './server_config';
 

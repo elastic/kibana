@@ -6,20 +6,20 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, Redirect } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 
-import { useValues, useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { Status } from '../../../../../common/types/api';
 import {
-  SEARCH_APPLICATION_PATH,
-  SEARCH_APPLICATION_CONTENT_PATH,
   SEARCH_APPLICATION_CONNECT_PATH,
-  SearchApplicationViewTabs,
+  SEARCH_APPLICATION_CONTENT_PATH,
+  SEARCH_APPLICATION_PATH,
   SearchApplicationConnectTabs,
   SearchApplicationContentTabs,
+  SearchApplicationViewTabs,
 } from '../../routes';
 
 import { EnterpriseSearchApplicationsPageTemplate } from '../layout/page_template';

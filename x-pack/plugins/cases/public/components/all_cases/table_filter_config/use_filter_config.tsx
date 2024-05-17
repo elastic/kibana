@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { isEmpty, isEqual, merge } from 'lodash';
 import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { merge, isEqual, isEmpty } from 'lodash';
-import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
-import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
+import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
+import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
+import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
-import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';
 
 const mergeSystemAndCustomFieldConfigs = ({
   systemFilterConfig,
@@ -73,7 +73,7 @@ const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOpt
 
   return [newActiveByFilterKey, setActiveByFilterKey] as [
     FilterConfigState[],
-    (value: SetStateAction<FilterConfigState[]>) => void
+    (value: SetStateAction<FilterConfigState[]>) => void,
   ];
 };
 

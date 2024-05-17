@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 import { getFailures } from './get_failures';
 import { parseTestReport } from './test_report';
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
 
 it('discovers failures in ftr report', async () => {
   const failures = getFailures(await parseTestReport(FTR_REPORT));

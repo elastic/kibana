@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { filter, find, isEmpty, pick, isString } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { filter, find, isEmpty, isString, pick } from 'lodash';
 import type { PackSavedObject, SavedQuerySavedObject } from '../../common/types';
 
 /**

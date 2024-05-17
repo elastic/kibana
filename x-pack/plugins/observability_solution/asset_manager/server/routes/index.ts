@@ -6,14 +6,14 @@
  */
 
 import { RequestHandlerContext } from '@kbn/core/server';
-import { SetupRouteOptions } from './types';
+import { assetsRoutes } from './assets';
+import { containersRoutes } from './assets/containers';
+import { hostsRoutes } from './assets/hosts';
+import { podsRoutes } from './assets/pods';
+import { servicesRoutes } from './assets/services';
 import { pingRoute } from './ping';
 import { sampleAssetsRoutes } from './sample_assets';
-import { assetsRoutes } from './assets';
-import { hostsRoutes } from './assets/hosts';
-import { servicesRoutes } from './assets/services';
-import { containersRoutes } from './assets/containers';
-import { podsRoutes } from './assets/pods';
+import { SetupRouteOptions } from './types';
 
 export function setupRoutes<T extends RequestHandlerContext>({
   router,

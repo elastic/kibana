@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
-import { type } from '../type';
 import { listOperator as operator } from '../list_operator';
+import { type } from '../type';
 
 export const entriesList = t.exact(
   t.type({

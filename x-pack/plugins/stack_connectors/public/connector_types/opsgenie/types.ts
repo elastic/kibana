@@ -12,8 +12,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   OpsgenieActionConfig,
-  OpsgenieActionSecrets,
   OpsgenieActionParams,
+  OpsgenieActionSecrets,
 } from '../../../server/connector_types';
 
 export type OpsgenieActionConnector = UserConfiguredActionConnector<

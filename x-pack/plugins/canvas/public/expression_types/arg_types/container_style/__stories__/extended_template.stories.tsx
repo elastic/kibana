@@ -11,9 +11,9 @@ import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
 
-import { Arguments, ArgumentTypes, BorderStyle, ExtendedTemplate } from '../extended_template';
-import { BorderForm } from '../border_form';
 import { AppearanceForm } from '../appearance_form';
+import { BorderForm } from '../border_form';
+import { ArgumentTypes, Arguments, BorderStyle, ExtendedTemplate } from '../extended_template';
 
 const defaultValues: Arguments = {
   padding: 0,

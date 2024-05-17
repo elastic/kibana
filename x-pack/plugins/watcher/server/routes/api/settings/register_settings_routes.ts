@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { registerLoadRoute } from './register_load_route';
 import { RouteDependencies } from '../../../types';
+import { registerLoadRoute } from './register_load_route';
 
 export function registerSettingsRoutes(deps: RouteDependencies) {
   registerLoadRoute(deps);

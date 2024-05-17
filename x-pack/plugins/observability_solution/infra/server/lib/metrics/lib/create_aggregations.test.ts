@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createAggregations, createCompositeAggregations } from './create_aggregations';
 import moment from 'moment';
 import { MetricsAPIRequest } from '../../../../common/http_api';
+import { createAggregations, createCompositeAggregations } from './create_aggregations';
 
 const options: MetricsAPIRequest = {
   timerange: {

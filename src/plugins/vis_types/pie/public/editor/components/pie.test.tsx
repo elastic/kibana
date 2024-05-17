@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import PieOptions, { PieOptionsProps } from './pie';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
+import PieOptions, { PieOptionsProps } from './pie';
 
 describe('PalettePicker', function () {
   let props: PieOptionsProps;

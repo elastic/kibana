@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import * as Either from 'fp-ts/lib/Either';
+import type { TransformErrorObjects } from '../core';
 import {
   createBulkDeleteOperationBody,
   createBulkIndexOperationTuple,
   getTempIndexName,
 } from './helpers';
-import type { TransformErrorObjects } from '../core';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
 export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;

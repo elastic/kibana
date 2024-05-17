@@ -6,6 +6,11 @@
  */
 
 import {
+  checkRecognizerSuccess,
+  mockGetModuleResponse,
+  mockJobsSummaryResponse,
+} from '../api.mock';
+import {
   composeModuleAndInstalledJobs,
   createSecurityJobs,
   getAugmentedFields,
@@ -13,11 +18,6 @@ import {
   getModuleJobs,
   moduleToSecurityJob,
 } from './use_security_jobs_helpers';
-import {
-  checkRecognizerSuccess,
-  mockGetModuleResponse,
-  mockJobsSummaryResponse,
-} from '../api.mock';
 
 // TODO: Expand test coverage
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { FleetAuthz } from './authz';
+import { ENDPOINT_PRIVILEGES, dataTypes } from './constants';
 import type {
   AgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
   PostDeletePackagePoliciesResponse,
 } from './types';
-import type { FleetAuthz } from './authz';
-import { dataTypes, ENDPOINT_PRIVILEGES } from './constants';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import React, { Fragment, useEffect } from 'react';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { useBrowserRunOnceMonitors } from '../hooks/use_browser_run_once_monitors';
 

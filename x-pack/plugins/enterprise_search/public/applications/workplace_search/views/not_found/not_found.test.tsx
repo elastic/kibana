@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
-import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
+import { PersonalDashboardLayout, WorkplaceSearchPageTemplate } from '../../components/layout';
 
 import { NotFound } from '.';
 

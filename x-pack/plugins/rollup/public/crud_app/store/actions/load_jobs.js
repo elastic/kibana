@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loadJobs as sendLoadJobsRequest, deserializeJobs } from '../../services';
-import { LOAD_JOBS_START, LOAD_JOBS_SUCCESS, LOAD_JOBS_FAILURE } from '../action_types';
+import { deserializeJobs, loadJobs as sendLoadJobsRequest } from '../../services';
+import { LOAD_JOBS_FAILURE, LOAD_JOBS_START, LOAD_JOBS_SUCCESS } from '../action_types';
 
 export const loadJobs = () => async (dispatch) => {
   dispatch({

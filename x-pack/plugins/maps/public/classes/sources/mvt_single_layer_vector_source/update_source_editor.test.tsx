@@ -7,13 +7,13 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { UpdateSourceEditor } from './update_source_editor';
-import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
-import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
 import { SOURCE_TYPES } from '../../../../common/constants';
+import { TiledSingleLayerVectorSourceDescriptor } from '../../../../common/descriptor_types';
+import { MVTSingleLayerVectorSource } from './mvt_single_layer_vector_source';
+import { UpdateSourceEditor } from './update_source_editor';
 
 const descriptor: TiledSingleLayerVectorSourceDescriptor = {
   type: SOURCE_TYPES.MVT_SINGLE_LAYER,

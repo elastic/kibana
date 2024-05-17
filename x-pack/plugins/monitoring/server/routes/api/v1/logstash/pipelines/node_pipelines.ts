@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
-import { handleError } from '../../../../../lib/errors';
-import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
-import { MonitoringCore, PipelineMetricKey } from '../../../../../types';
-import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashNodePipelinesRequestParamsRT,
   postLogstashNodePipelinesRequestPayloadRT,
 } from '../../../../../../common/http_api/logstash';
+import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../../lib/errors';
+import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
+import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
+import { MonitoringCore, PipelineMetricKey } from '../../../../../types';
 
 const throughputMetric = 'logstash_node_pipeline_throughput';
 const nodesCountMetric = 'logstash_node_pipeline_nodes_count';

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
 import {
-  EuiText,
   EuiButton,
-  EuiSpacer,
+  EuiCodeBlock,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCopy,
-  EuiCodeBlock,
   EuiLink,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useState } from 'react';
 
 import { useStartServices } from '../../hooks';
 
-import { agentPolicyRouteService, API_VERSIONS } from '../../../common';
+import { API_VERSIONS, agentPolicyRouteService } from '../../../common';
 
 import { sendGetK8sManifest } from '../../hooks/use_request/k8s';
 

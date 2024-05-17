@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { concatMap, firstValueFrom, from, Observable, of, throwError } from 'rxjs';
-import { pick } from 'lodash';
-import moment from 'moment';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import {
   CoreSetup,
   CoreStart,
@@ -19,21 +17,23 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap, tap } from 'rxjs';
-import type {
-  IKibanaSearchResponse,
-  IKibanaSearchRequest,
-  ISearchOptions,
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '@kbn/search-types';
-import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/search-types';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { pick } from 'lodash';
+import moment from 'moment';
+import { Observable, concatMap, firstValueFrom, from, of, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -45,18 +45,17 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { registerSearchRoute, registerSessionRoutes } from './routes';
-import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
-import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { usageProvider } from './collectors/search/usage';
-import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
-import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
-import { searchTelemetry } from '../saved_objects';
 import {
-  cidrFunction,
-  dateRangeFunction,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  ESQL_SEARCH_STRATEGY,
+  SQL_SEARCH_STRATEGY,
+  SearchSourceDependencies,
+  SearchSourceService,
+  cidrFunction,
+  dateRangeFunction,
+  eqlRawResponse,
   esRawResponse,
   existsFilterFunction,
   extendedBoundsFunction,
@@ -74,34 +73,35 @@ import {
   phraseFilterFunction,
   queryFilterFunction,
   rangeFilterFunction,
-  selectFilterFunction,
   rangeFunction,
   removeFilterFunction,
-  SearchSourceDependencies,
   searchSourceRequiredUiSettings,
-  SearchSourceService,
-  eqlRawResponse,
-  SQL_SEARCH_STRATEGY,
-  ESQL_SEARCH_STRATEGY,
-  ESQL_ASYNC_SEARCH_STRATEGY,
+  selectFilterFunction,
 } from '../../common/search';
-import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
-  getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
+  getShardDelayBucketAgg,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
-import { SearchSessionService } from './session';
-import { registerBsearchRoute } from './routes/bsearch';
-import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
-import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
+import { searchTelemetry } from '../saved_objects';
+import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
+import { usageProvider } from './collectors/search/usage';
+import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
-import { CachedUiSettingsClient } from './services';
-import { sqlSearchStrategyProvider } from './strategies/sql_search';
+import { getEql, getEsaggs, getEsdsl, getEsql, getEssql } from './expressions';
+import { registerSearchRoute, registerSessionRoutes } from './routes';
+import { registerBsearchRoute } from './routes/bsearch';
 import { searchSessionSavedObjectType } from './saved_objects';
-import { esqlSearchStrategyProvider } from './strategies/esql_search';
+import { CachedUiSettingsClient } from './services';
+import { SearchSessionService } from './session';
+import { eqlSearchStrategyProvider } from './strategies/eql_search';
+import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
+import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { esqlAsyncSearchStrategyProvider } from './strategies/esql_async_search';
+import { esqlSearchStrategyProvider } from './strategies/esql_search';
+import { sqlSearchStrategyProvider } from './strategies/sql_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -331,7 +331,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse<any> = IEsSearchResponse,
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -342,7 +342,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
   >(
     name: string = ENHANCED_ES_SEARCH_STRATEGY
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
@@ -356,7 +356,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private search = <
     SearchStrategyRequest extends IKibanaSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse,
   >(
     deps: SearchStrategyDependencies,
     request: SearchStrategyRequest,
@@ -546,7 +546,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return {
         search: <
           SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+          SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
         >(
           searchRequest: SearchStrategyRequest,
           options: ISearchOptions = {}

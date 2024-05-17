@@ -8,18 +8,18 @@
 
 import React from 'react';
 
-import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 
 import { ExceptionItems } from '.';
 
-import { ViewerStatus } from '../types';
-import { fireEvent, render } from '@testing-library/react';
-import { ruleReferences } from '../mocks/rule_references.mock';
 import { Pagination } from '@elastic/eui';
+import { fireEvent, render } from '@testing-library/react';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
+import { ruleReferences } from '../mocks/rule_references.mock';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
 import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
+import { ViewerStatus } from '../types';
 
 const onCreateExceptionListItem = jest.fn();
 const onDeleteException = jest.fn();

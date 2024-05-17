@@ -97,12 +97,12 @@ export const FieldRulesTable: React.FC<FieldRulesTableProps> = ({
               {content.value_type === ContentFrom.FIXED
                 ? content.value
                 : multipleObjectsHandling === MultipleObjectsHandling.ARRAY
-                ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.arrayLabel', {
-                    defaultMessage: 'array',
-                  })
-                : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.stringLabel', {
-                    defaultMessage: 'string',
-                  })}
+                  ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.arrayLabel', {
+                      defaultMessage: 'array',
+                    })
+                  : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.stringLabel', {
+                      defaultMessage: 'string',
+                    })}
             </EuiCode>
           </EuiFlexItem>
         </EuiFlexGroup>

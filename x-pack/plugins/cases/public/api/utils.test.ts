@@ -8,24 +8,24 @@
 import {
   allCases,
   allCasesSnake,
+  caseUserActionsWithRegisteredAttachments,
+  caseUserActionsWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
   caseWithRegisteredAttachmentsSnake,
   externalReferenceAttachment,
   externalReferenceAttachmentSnake,
-  persistableStateAttachmentSnake,
   persistableStateAttachment,
-  caseUserActionsWithRegisteredAttachments,
-  caseUserActionsWithRegisteredAttachmentsSnake,
+  persistableStateAttachmentSnake,
 } from '../containers/mock';
 import {
   convertAllCasesToCamel,
   convertArrayToCamelCase,
-  convertCaseResolveToCamelCase,
-  convertCasesToCamelCase,
-  convertCaseToCamelCase,
-  convertToCamelCase,
-  convertAttachmentsToCamelCase,
   convertAttachmentToCamelCase,
+  convertAttachmentsToCamelCase,
+  convertCaseResolveToCamelCase,
+  convertCaseToCamelCase,
+  convertCasesToCamelCase,
+  convertToCamelCase,
   convertUserActionsToCamelCase,
 } from './utils';
 

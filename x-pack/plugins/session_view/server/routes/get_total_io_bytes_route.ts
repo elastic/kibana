@@ -3,14 +3,14 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  GET_TOTAL_IO_BYTES_ROUTE,
-  TOTAL_BYTES_CAPTURED_PROPERTY,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
+  GET_TOTAL_IO_BYTES_ROUTE,
   TIMESTAMP_PROPERTY,
+  TOTAL_BYTES_CAPTURED_PROPERTY,
 } from '../../common/constants';
 
 export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) => {

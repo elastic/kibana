@@ -8,9 +8,9 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { appContextService } from '../../..';
-import { ElasticsearchAssetType } from '../../../../types';
-import { FleetError } from '../../../../errors';
 import type { EsAssetReference } from '../../../../../common/types';
+import { FleetError } from '../../../../errors';
+import { ElasticsearchAssetType } from '../../../../types';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 
 export const deletePreviousPipelines = async (

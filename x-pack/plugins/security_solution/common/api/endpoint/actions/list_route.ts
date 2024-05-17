@@ -8,12 +8,12 @@
 // TODO: fix the odd TS error
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
 } from '../../../endpoint/service/response_actions/constants';
-import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
 import { agentTypesSchema } from './common/base';
 
 const commandsSchema = schema.oneOf(

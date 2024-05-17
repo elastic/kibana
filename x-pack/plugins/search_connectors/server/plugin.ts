@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ConnectorServerSideDefinition } from '../common/connectors';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {

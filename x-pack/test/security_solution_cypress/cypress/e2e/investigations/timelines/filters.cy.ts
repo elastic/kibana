@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { login } from '../../../tasks/login';
-import { visitWithTimeRange } from '../../../tasks/navigation';
-import {
-  createNewTimeline,
-  addNameAndDescriptionToTimeline,
-  populateTimeline,
-} from '../../../tasks/timeline';
-import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { ALERTS_URL } from '../../../urls/navigation';
 import { getTimeline } from '../../../objects/timeline';
 import {
   GET_TIMELINE_GRID_CELL,
+  HOVER_ACTIONS,
   TIMELINE_EVENT,
   TIMELINE_FILTER_BADGE_ENABLED,
-  HOVER_ACTIONS,
 } from '../../../screens/timeline';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import {
+  addNameAndDescriptionToTimeline,
+  createNewTimeline,
+  populateTimeline,
+} from '../../../tasks/timeline';
+import { ALERTS_URL } from '../../../urls/navigation';
 
 const mockTimeline = getTimeline();
 describe(

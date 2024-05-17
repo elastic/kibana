@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { sortBy } from 'lodash';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

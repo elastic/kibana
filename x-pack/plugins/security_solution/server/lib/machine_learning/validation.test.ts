@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toAuthzError, throwAuthzError } from './validation';
+import { throwAuthzError, toAuthzError } from './validation';
 
 describe('toAuthzError', () => {
   it('returns nothing if validation is valid', () => {

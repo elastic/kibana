@@ -6,6 +6,7 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -13,7 +14,6 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { UIProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { ApmUrlParams } from '../../context/url_params_context/types';

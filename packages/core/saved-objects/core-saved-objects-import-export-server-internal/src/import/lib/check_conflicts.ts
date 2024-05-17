@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
-  SavedObjectsImportFailure,
   SavedObjectError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { v4 as uuidv4 } from 'uuid';
 import type { ImportStateMap } from './types';
 
 interface CheckConflictsParams {

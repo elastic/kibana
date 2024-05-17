@@ -7,8 +7,8 @@
  */
 
 import chalk from 'chalk';
-import getopts from 'getopts';
 import dedent from 'dedent';
+import getopts from 'getopts';
 import { commands } from './cli_commands';
 import { isCliError } from './errors';
 import { log } from './utils';

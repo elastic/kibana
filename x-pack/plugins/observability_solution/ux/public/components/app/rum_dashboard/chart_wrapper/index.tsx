@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { HTMLAttributes, ReactNode } from 'react';
 import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import React, { HTMLAttributes, ReactNode } from 'react';
 
 interface Props {
   children?: ReactNode;

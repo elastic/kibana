@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
+import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
 import { customFieldsConfigurationMock } from '../../containers/mock';
+import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
 import { CustomFields } from './custom_fields';
 import * as i18n from './translations';
-import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
-import { useGetAllCaseConfigurationsResponse } from '../configure_cases/__mock__';
 
 jest.mock('../../containers/configure/use_get_all_case_configurations');
 

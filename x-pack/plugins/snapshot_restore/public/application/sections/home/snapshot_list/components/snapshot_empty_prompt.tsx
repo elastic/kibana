@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiButton, EuiIcon, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
+import { useHistory } from 'react-router-dom';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../../common';
-import { reactRouterNavigate, WithPrivileges } from '../../../../../shared_imports';
-import { linkToAddPolicy, linkToPolicies } from '../../../../services/navigation';
+import { WithPrivileges, reactRouterNavigate } from '../../../../../shared_imports';
 import { useCore } from '../../../../app_context';
+import { linkToAddPolicy, linkToPolicies } from '../../../../services/navigation';
 
 export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: number }> = ({
   policiesCount,

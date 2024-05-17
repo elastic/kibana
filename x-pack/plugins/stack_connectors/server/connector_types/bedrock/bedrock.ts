@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import aws from 'aws4';
-import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+import aws from 'aws4';
+import { AxiosError, Method } from 'axios';
 import {
-  RunActionParamsSchema,
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_TOKEN_LIMIT,
+  SUB_ACTION,
+} from '../../../common/bedrock/constants';
+import {
   InvokeAIActionParamsSchema,
-  StreamingResponseSchema,
+  RunActionParamsSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
+  StreamingResponseSchema,
 } from '../../../common/bedrock/schema';
+import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 import {
   Config,
-  Secrets,
-  RunActionParams,
-  RunActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
+  RunActionParams,
+  RunActionResponse,
   RunApiLatestResponse,
+  Secrets,
 } from '../../../common/bedrock/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_TIMEOUT_MS,
-} from '../../../common/bedrock/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
   StreamingResponse,
 } from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 
 interface SignedRequest {
   host: string;

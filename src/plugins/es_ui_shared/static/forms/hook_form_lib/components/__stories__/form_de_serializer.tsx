@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import React from 'react';
 
+import { NumericField, TextField } from '../../../components';
 import { fieldFormatters } from '../../../helpers';
-import { TextField, NumericField } from '../../../components';
 import { useForm } from '../../hooks/use_form';
 import { Form } from '../form';
 import { UseField } from '../use_field';
-import { FormArgs } from './types';
 import { submitForm } from './form_utils';
+import { FormArgs } from './types';
 
 interface MyForm {
   endPoint: string;

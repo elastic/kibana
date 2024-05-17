@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { storiesOf } from '@storybook/react';
+import React from 'react';
 import { Debug } from '../debug';
 import { largePayload, smallPayload } from './helpers';
 

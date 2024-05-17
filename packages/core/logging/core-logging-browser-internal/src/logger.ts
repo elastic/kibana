@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
 import { AbstractLogger } from '@kbn/core-logging-common-internal';
+import { LogLevel, LogMeta, LogRecord } from '@kbn/logging';
 
 function isError(x: any): x is Error {
   return x instanceof Error;

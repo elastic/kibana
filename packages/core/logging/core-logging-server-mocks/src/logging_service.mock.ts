@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { LoggingServiceSetup } from '@kbn/core-logging-server';
 import type {
-  LoggingService,
-  InternalLoggingServiceSetup,
   InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+  LoggingService,
 } from '@kbn/core-logging-server-internal';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createInternalPrebootMock = (): jest.Mocked<InternalLoggingServicePreboot> => ({
   configure: jest.fn(),

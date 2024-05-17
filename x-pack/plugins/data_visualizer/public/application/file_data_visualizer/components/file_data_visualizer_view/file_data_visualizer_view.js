@@ -12,22 +12,22 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { isEqual } from 'lodash';
 
+import {
+  DEFAULT_LINES_TO_SAMPLE,
+  createUrlOverrides,
+  processResults,
+  readFile,
+} from '../../../common/components/utils';
 import { AboutPanel, LoadingPanel } from '../about_panel';
+import { EditFlyout } from '../edit_flyout';
+import { ExplanationFlyout } from '../explanation_flyout';
+import { ImportView } from '../import_view';
 import { ResultsView } from '../results_view';
 import {
   FileCouldNotBeRead,
   FileTooLarge,
   FindFileStructurePermissionDenied,
 } from './file_error_callouts';
-import { EditFlyout } from '../edit_flyout';
-import { ExplanationFlyout } from '../explanation_flyout';
-import { ImportView } from '../import_view';
-import {
-  DEFAULT_LINES_TO_SAMPLE,
-  readFile,
-  createUrlOverrides,
-  processResults,
-} from '../../../common/components/utils';
 
 import { MODE } from './constants';
 

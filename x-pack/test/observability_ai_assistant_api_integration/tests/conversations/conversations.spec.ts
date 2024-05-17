@@ -6,12 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { merge, omit } from 'lodash';
 import {
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { merge, omit } from 'lodash';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import type { SupertestReturnType } from '../../common/observability_ai_assistant_api_client';
 

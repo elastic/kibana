@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
 } from '@kbn/security-plugin/server';
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 import type { Logger } from '@kbn/logging';
 
@@ -19,8 +19,8 @@ import { appContextService } from '..';
 import type { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type {
-  TransformAPIKey,
   SecondaryAuthorizationHeader,
+  TransformAPIKey,
 } from '../../../common/types/models/transform_api_key';
 
 export function isTransformApiKey(arg: any): arg is TransformAPIKey {

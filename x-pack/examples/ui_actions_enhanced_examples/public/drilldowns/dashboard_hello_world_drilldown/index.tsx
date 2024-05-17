@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import {
   ChartActionContext,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
+import React from 'react';
 
 export type ActionContext = ChartActionContext;
 

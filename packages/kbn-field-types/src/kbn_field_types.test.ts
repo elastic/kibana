@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { castEsToKbnFieldTypeName, getKbnFieldType, getKbnTypeNames, KbnFieldType } from '..';
+import { KbnFieldType, castEsToKbnFieldTypeName, getKbnFieldType, getKbnTypeNames } from '..';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 

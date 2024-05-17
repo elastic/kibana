@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Subject, of, firstValueFrom } from 'rxjs';
-import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { sleep } from '../test_utils';
-import { asOk } from '../lib/result_type';
-import { delayOnClaimConflicts } from './delay_on_claim_conflicts';
-import { asTaskPollingCycleEvent } from '../task_events';
+import { Subject, firstValueFrom, of } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { FillPoolResult } from '../lib/fill_pool';
+import { asOk } from '../lib/result_type';
+import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { asTaskPollingCycleEvent } from '../task_events';
+import { sleep } from '../test_utils';
+import { delayOnClaimConflicts } from './delay_on_claim_conflicts';
 
 describe('delayOnClaimConflicts', () => {
   beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));

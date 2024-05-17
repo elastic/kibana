@@ -7,9 +7,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noResultsIllustrationLight } from '@kbn/shared-svg';
+import React from 'react';
 
 const panelStyle = {
   maxWidth: 500,

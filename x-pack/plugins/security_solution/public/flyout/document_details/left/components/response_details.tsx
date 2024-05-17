@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
-import { useLeftPanelContext } from '../context';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import React from 'react';
+import styled from 'styled-components';
 import { useOsqueryTab } from '../../../../common/components/event_details/osquery_tab';
 import { useResponseActionsView } from '../../../../common/components/event_details/response_actions_view';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useLeftPanelContext } from '../context';
+import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 
 const ExtendedFlyoutWrapper = styled.div`
  figure {

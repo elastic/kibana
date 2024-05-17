@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export const MonitorsPageHeader = () => (
   <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>

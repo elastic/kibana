@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
+import React, { useCallback, useMemo, useState } from 'react';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import { SearchExceptions } from '../../../../../components/search_exceptions';
-import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
-import { useUrlParams } from '../../../../../hooks/use_url_params';
-import { useUrlPagination } from '../../../../../hooks/use_url_pagination';
-import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
-import { useOldUrlSearchPaginationReplace } from '../../../../../hooks/use_old_url_search_pagination_replace';
+import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
 import type { ArtifactCardGridProps } from '../../../../../components/artifact_card_grid';
 import { ArtifactCardGrid } from '../../../../../components/artifact_card_grid';
-import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
-import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
-import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
-import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
-import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
-import { useListArtifact } from '../../../../../hooks/artifacts';
-import type { POLICY_ARTIFACT_LIST_LABELS } from './translations';
+import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
+import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
+import { SearchExceptions } from '../../../../../components/search_exceptions';
+import { useListArtifact } from '../../../../../hooks/artifacts';
+import { useOldUrlSearchPaginationReplace } from '../../../../../hooks/use_old_url_search_pagination_replace';
+import { useUrlPagination } from '../../../../../hooks/use_url_pagination';
+import { useUrlParams } from '../../../../../hooks/use_url_params';
+import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
+import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
+import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
+import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
+import type { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;

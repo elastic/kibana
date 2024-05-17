@@ -13,14 +13,14 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { GenericBulkCreateResponse } from '../factories';
-import type { Anomaly } from '../../../machine_learning';
-import type { BulkCreate, WrapHits } from '../types';
-import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
-import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { Anomaly } from '../../../machine_learning';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
+import type { GenericBulkCreateResponse } from '../factories';
+import type { BulkCreate, WrapHits } from '../types';
 import { createEnrichEventsFunction } from '../utils/enrichments';
+import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 
 interface BulkCreateMlSignalsParams {
   anomalyHits: Array<estypes.SearchHit<Anomaly>>;

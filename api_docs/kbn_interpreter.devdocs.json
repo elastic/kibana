@@ -46,9 +46,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -60,9 +58,7 @@
                 "tags": [],
                 "label": "prop",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -78,9 +74,7 @@
             "tags": [],
             "label": "wrapper",
             "description": [],
-            "signature": [
-              "(obj: ItemSpec) => Item"
-            ],
+            "signature": ["(obj: ItemSpec) => Item"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,9 +86,7 @@
                 "tags": [],
                 "label": "obj",
                 "description": [],
-                "signature": [
-                  "ItemSpec"
-                ],
+                "signature": ["ItemSpec"],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -110,9 +102,7 @@
             "tags": [],
             "label": "register",
             "description": [],
-            "signature": [
-              "(fn: () => ItemSpec) => void"
-            ],
+            "signature": ["(fn: () => ItemSpec) => void"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -124,9 +114,7 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": [
-                  "() => ItemSpec"
-                ],
+                "signature": ["() => ItemSpec"],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -142,9 +130,7 @@
             "tags": [],
             "label": "toJS",
             "description": [],
-            "signature": [
-              "() => { [key: string]: any; }"
-            ],
+            "signature": ["() => { [key: string]: any; }"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -158,9 +144,7 @@
             "tags": [],
             "label": "toArray",
             "description": [],
-            "signature": [
-              "() => Item[]"
-            ],
+            "signature": ["() => Item[]"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -174,9 +158,7 @@
             "tags": [],
             "label": "get",
             "description": [],
-            "signature": [
-              "(name: string) => Item"
-            ],
+            "signature": ["(name: string) => Item"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -188,9 +170,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -206,9 +186,7 @@
             "tags": [],
             "label": "getProp",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -222,9 +200,7 @@
             "tags": [],
             "label": "reset",
             "description": [],
-            "signature": [
-              "() => void"
-            ],
+            "signature": ["() => void"],
             "path": "packages/kbn-interpreter/src/common/lib/registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -242,12 +218,8 @@
         "type": "Function",
         "tags": [],
         "label": "addRegistries",
-        "description": [
-          "\nAdd a new set of registries to an existing set of registries.\n"
-        ],
-        "signature": [
-          "(registries: any, newRegistries: any) => any"
-        ],
+        "description": ["\nAdd a new set of registries to an existing set of registries.\n"],
+        "signature": ["(registries: any, newRegistries: any) => any"],
         "path": "packages/kbn-interpreter/src/common/registries.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -258,12 +230,8 @@
             "type": "Any",
             "tags": [],
             "label": "registries",
-            "description": [
-              "- The existing set of registries"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["- The existing set of registries"],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -275,12 +243,8 @@
             "type": "Any",
             "tags": [],
             "label": "newRegistries",
-            "description": [
-              "- The new set of registries"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["- The new set of registries"],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -297,9 +261,7 @@
         "tags": [],
         "label": "castProvider",
         "description": [],
-        "signature": [
-          "(types: any) => (node: any, toTypeNames: any) => any"
-        ],
+        "signature": ["(types: any) => (node: any, toTypeNames: any) => any"],
         "path": "packages/kbn-interpreter/src/common/lib/cast.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -311,9 +273,7 @@
             "tags": [],
             "label": "types",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/cast.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -330,9 +290,7 @@
         "tags": [],
         "label": "Fn",
         "description": [],
-        "signature": [
-          "(config: any) => void"
-        ],
+        "signature": ["(config: any) => void"],
         "path": "packages/kbn-interpreter/src/common/lib/fn.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -344,9 +302,7 @@
             "tags": [],
             "label": "config",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/fn.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -384,9 +340,7 @@
             "tags": [],
             "label": "expression",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -399,9 +353,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-interpreter/src/common/lib/ast/from_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -420,9 +372,7 @@
         "description": [
           "\nThis is used for looking up function/argument definitions. It looks through\nthe given object/array for a case-insensitive match, which could be either the\n`name` itself, or something under the `aliases` property."
         ],
-        "signature": [
-          "(specs: any, name: any) => any"
-        ],
+        "signature": ["(specs: any, name: any) => any"],
         "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -434,9 +384,7 @@
             "tags": [],
             "label": "specs",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -449,9 +397,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/get_by_alias.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -468,9 +414,7 @@
         "tags": [],
         "label": "getType",
         "description": [],
-        "signature": [
-          "(node: any) => string"
-        ],
+        "signature": ["(node: any) => string"],
         "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -482,9 +426,7 @@
             "tags": [],
             "label": "node",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/get_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -501,9 +443,7 @@
         "tags": [],
         "label": "isAst",
         "description": [],
-        "signature": [
-          "(value: any) => boolean"
-        ],
+        "signature": ["(value: any) => boolean"],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -515,9 +455,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -534,9 +472,7 @@
         "tags": [],
         "label": "isAstWithMeta",
         "description": [],
-        "signature": [
-          "(value: any) => boolean"
-        ],
+        "signature": ["(value: any) => boolean"],
         "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -548,9 +484,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/lib/ast/ast.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -569,9 +503,7 @@
         "description": [
           "\nRegister a set of interpreter specs (functions, types, renderers, etc)\n"
         ],
-        "signature": [
-          "(registries: any, specs: any) => any"
-        ],
+        "signature": ["(registries: any, specs: any) => any"],
         "path": "packages/kbn-interpreter/src/common/registries.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -582,12 +514,8 @@
             "type": "Any",
             "tags": [],
             "label": "registries",
-            "description": [
-              "- The set of registries"
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["- The set of registries"],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -602,9 +530,7 @@
             "description": [
               "- The specs to be regsitered (e.g. { types: [], browserFunctions: [] })"
             ],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -623,9 +549,7 @@
         "description": [
           "\nA convenience function for exposing registries and register in a plugin-friendly way\nas a global in the browser, and as server.plugins.interpreter.register | registries\non the server.\n"
         ],
-        "signature": [
-          "(registries: any) => { registries(): any; register(specs: any): any; }"
-        ],
+        "signature": ["(registries: any) => { registries(): any; register(specs: any): any; }"],
         "path": "packages/kbn-interpreter/src/common/registries.js",
         "deprecated": false,
         "trackAdoption": false,
@@ -636,12 +560,8 @@
             "type": "Any",
             "tags": [],
             "label": "registries",
-            "description": [
-              "- The registries to wrap."
-            ],
-            "signature": [
-              "any"
-            ],
+            "description": ["- The registries to wrap."],
+            "signature": ["any"],
             "path": "packages/kbn-interpreter/src/common/registries.js",
             "deprecated": false,
             "trackAdoption": false,
@@ -679,9 +599,7 @@
             "tags": [],
             "label": "expression",
             "description": [],
-            "signature": [
-              "string"
-            ],
+            "signature": ["string"],
             "path": "packages/kbn-interpreter/src/common/lib/ast/safe_element_from_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -741,9 +659,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "string | Options"
-            ],
+            "signature": ["string | Options"],
             "path": "packages/kbn-interpreter/src/common/lib/ast/to_expression.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -760,11 +676,7 @@
         "tags": [],
         "label": "typedParse",
         "description": [],
-        "signature": [
-          "(input: string, options?: ",
-          "ParserOptions",
-          " | undefined) => any"
-        ],
+        "signature": ["(input: string, options?: ", "ParserOptions", " | undefined) => any"],
         "path": "packages/kbn-interpreter/src/common/lib/parse.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -788,10 +700,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": [
-              "ParserOptions",
-              " | undefined"
-            ],
+            "signature": ["ParserOptions", " | undefined"],
             "path": "packages/kbn-ambient-common-types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false

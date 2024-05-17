@@ -1,3 +1,4 @@
+import type { EuiToolTipProps } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +7,6 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 
 export const getManagedContentBadge: (tooltipText: string) => TopNavMenuBadgeProps = (

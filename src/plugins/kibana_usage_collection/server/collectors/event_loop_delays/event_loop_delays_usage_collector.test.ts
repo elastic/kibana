@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   Collector,
-  createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
+  createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
+import { Subject } from 'rxjs';
 import { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
-import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 

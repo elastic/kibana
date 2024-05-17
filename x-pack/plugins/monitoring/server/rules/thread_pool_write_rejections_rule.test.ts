@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ThreadPoolWriteRejectionsRule } from './thread_pool_write_rejections_rule';
-import { RULE_THREAD_POOL_WRITE_REJECTIONS } from '../../common/constants';
-import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_THREAD_POOL_WRITE_REJECTIONS } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
+import { ThreadPoolWriteRejectionsRule } from './thread_pool_write_rejections_rule';
 
 const RealDate = Date;
 

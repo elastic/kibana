@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createFleetTestRendererMock } from '../../../../../mock';
 import { sendGetEnrollmentSettings } from '../../../../../hooks/use_request/settings';
+import { createFleetTestRendererMock } from '../../../../../mock';
 
 import { useFleetServerUnhealthy } from './use_fleet_server_unhealthy';
 

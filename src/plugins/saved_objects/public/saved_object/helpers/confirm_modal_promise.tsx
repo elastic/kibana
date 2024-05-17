@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { EuiConfirmModal } from '@elastic/eui';
 import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 
 type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 

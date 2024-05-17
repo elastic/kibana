@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { FC, PropsWithChildren } from 'react';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
-import { renderHook } from '@testing-library/react-hooks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { renderHook } from '@testing-library/react-hooks';
 
-import {
-  options,
-  source,
-  derivedIndexPattern,
-  timestamps,
-  resp,
-  createSeries,
-} from '../../../../utils/fixtures/metrics_explorer';
-import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import {
+  createSeries,
+  derivedIndexPattern,
+  options,
+  resp,
+  source,
+  timestamps,
+} from '../../../../utils/fixtures/metrics_explorer';
+import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
 
 const mockedFetch = jest.fn();
 

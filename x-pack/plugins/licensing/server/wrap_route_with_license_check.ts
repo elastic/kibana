@@ -6,10 +6,10 @@
  */
 
 import {
-  RequestHandler,
   KibanaRequest,
-  RouteMethod,
   KibanaResponseFactory,
+  RequestHandler,
+  RouteMethod,
 } from '@kbn/core/server';
 
 import { ILicense } from '../common/types';

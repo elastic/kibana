@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -26,24 +24,26 @@ import {
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase } from '@kbn/es-query';
-import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from './types';
+import { useKibana } from '../../utils/kibana_react';
 import { ExpressionRow } from './components/expression_row';
-import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import { GroupBy, MetricsExplorerFields } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
+import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 

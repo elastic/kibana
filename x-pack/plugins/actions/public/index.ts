@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { Plugin, ActionsPublicPluginSetup } from './plugin';
+import { ActionsPublicPluginSetup, Plugin } from './plugin';
 
 export type { ActionsPublicPluginSetup };
 export { Plugin };

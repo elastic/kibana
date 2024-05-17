@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { LicenseState } from './lib/license_state';
-import { registerSearchRoute } from './routes/search';
-import { registerExploreRoute } from './routes/explore';
-import { registerSampleData } from './sample_data';
-import { graphWorkspace } from './saved_objects';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { GraphStorage } from './content_management/graph_storage';
+import { LicenseState } from './lib/license_state';
+import { registerExploreRoute } from './routes/explore';
+import { registerSearchRoute } from './routes/search';
+import { registerSampleData } from './sample_data';
+import { graphWorkspace } from './saved_objects';
 
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
 import { PageTemplate } from '../page_template';
 
 type InlineLogViewSplashPageProps = {

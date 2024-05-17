@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { cloneDeep, getOr, omit } from 'lodash/fp';
-import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
+import { cloneDeep, getOr, omit } from 'lodash/fp';
 
-import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
-import { timelineDefaults } from '../../store/defaults';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { mockGetOneTimelineResult, mockTimelineResults } from '../../../common/mock';
+import { resolveTimeline } from '../../containers/api';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../store/actions';
+import { timelineDefaults } from '../../store/defaults';
+import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import {
+  mockTemplate as mockSelectedTemplate,
+  mockTimeline as mockSelectedTimeline,
+} from './__mocks__';
 import type { QueryTimelineById } from './helpers';
 import {
   defaultTimelineToTimelineModel,
+  formatTimelineResultToModel,
   getNotesCount,
   getPinnedEventCount,
   isUntitled,
   omitTypenameInTimeline,
   useQueryTimelineById,
-  formatTimelineResultToModel,
 } from './helpers';
 import type { OpenTimelineResult } from './types';
-import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
-import {
-  mockTimeline as mockSelectedTimeline,
-  mockTemplate as mockSelectedTemplate,
-} from './__mocks__';
-import { resolveTimeline } from '../../containers/api';
-import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');

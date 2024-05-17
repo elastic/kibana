@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import expect from '@kbn/expect';
 
-import {
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  DETECTION_ENGINE_ALERT_TAGS_URL,
-} from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  DETECTION_ENGINE_ALERT_TAGS_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 
-import { setAlertTags } from '../../../utils';
 import {
   createAlertsIndex,
-  deleteAllAlerts,
-  getQueryAlertIds,
-  deleteAllRules,
   createRule,
-  waitForAlertsToBePresent,
+  deleteAllAlerts,
+  deleteAllRules,
   getAlertsByIds,
-  waitForRuleSuccess,
+  getQueryAlertIds,
   getRuleForAlertTesting,
+  waitForAlertsToBePresent,
+  waitForRuleSuccess,
 } from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { setAlertTags } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

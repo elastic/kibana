@@ -1,3 +1,4 @@
+import { capitalize } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,11 +6,10 @@
  * 2.0.
  */
 import React from 'react';
-import { useParams, Redirect } from 'react-router-dom';
-import { capitalize } from 'lodash';
+import { Redirect, useParams } from 'react-router-dom';
 
 import { getCustomIntegrationsStart } from '../../../../../../services/custom_integrations';
-import { useLink, useBreadcrumbs } from '../../../../hooks';
+import { useBreadcrumbs, useLink } from '../../../../hooks';
 export interface CustomLanguageClientsParams {
   pkgkey: string;
 }

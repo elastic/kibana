@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import { SetupModeToggleButton } from './toggle_button';
 
 describe('ToggleButton', () => {

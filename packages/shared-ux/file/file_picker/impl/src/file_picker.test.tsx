@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import { FileUpload } from '@kbn/shared-ux-file-upload';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
-import { FilesContext } from '@kbn/shared-ux-file-context';
+import { FileUpload } from '@kbn/shared-ux-file-upload';
+import { registerTestBed } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { FilePicker, Props } from './file_picker';
 
 describe('FilePicker', () => {

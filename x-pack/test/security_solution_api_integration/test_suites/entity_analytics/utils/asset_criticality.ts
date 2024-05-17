@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import querystring from 'querystring';
+import type { Client } from '@elastic/elasticsearch';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_PRIVILEGES_URL,
   ASSET_CRITICALITY_STATUS_URL,
   ASSET_CRITICALITY_URL,
-  ASSET_CRITICALITY_PRIVILEGES_URL,
-  ASSET_CRITICALITY_CSV_UPLOAD_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
-import type { Client } from '@elastic/elasticsearch';
-import type { ToolingLog } from '@kbn/tooling-log';
-import querystring from 'querystring';
 import { KbnClient } from '@kbn/test';
+import type { ToolingLog } from '@kbn/tooling-log';
+import SuperTest from 'supertest';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>

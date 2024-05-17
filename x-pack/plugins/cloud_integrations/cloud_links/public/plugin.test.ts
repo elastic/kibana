@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { maybeAddCloudLinksMock } from './plugin.test.mocks';
-import { CloudLinksPlugin } from './plugin';
-import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { CloudLinksPlugin } from './plugin';
+import { maybeAddCloudLinksMock } from './plugin.test.mocks';
 
 describe('Cloud Links Plugin - public', () => {
   let plugin: CloudLinksPlugin;

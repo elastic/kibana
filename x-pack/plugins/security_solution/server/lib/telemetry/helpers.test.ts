@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
+import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import { createMockPackagePolicy, stubClusterInfo, stubLicenseInfo } from './__mocks__';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
-  LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
+  LIST_ENDPOINT_EXCEPTION,
   LIST_TRUSTED_APPLICATION,
 } from './constants';
 import {
-  extractEndpointPolicyConfig,
-  getPreviousDiagTaskTimestamp,
-  getPreviousDailyTaskTimestamp,
-  batchTelemetryRecords,
-  isPackagePolicyList,
-  templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
+  batchTelemetryRecords,
+  extractEndpointPolicyConfig,
   formatValueListMetaData,
-  tlog,
-  setIsElasticCloudDeployment,
+  getPreviousDailyTaskTimestamp,
+  getPreviousDiagTaskTimestamp,
+  isPackagePolicyList,
   processK8sUsernames,
+  setIsElasticCloudDeployment,
+  templateExceptionList,
+  tlog,
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
-import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
-import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep } from 'lodash';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {

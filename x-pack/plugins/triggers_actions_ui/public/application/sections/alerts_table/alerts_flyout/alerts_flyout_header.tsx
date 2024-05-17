@@ -1,3 +1,6 @@
+import { EuiTitle } from '@elastic/eui';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import { get } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,9 +8,6 @@
  * 2.0.
  */
 import React from 'react';
-import { get } from 'lodash';
-import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { EuiTitle } from '@elastic/eui';
 import { AlertsTableFlyoutBaseProps } from '../../../../types';
 
 type Props = AlertsTableFlyoutBaseProps;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison from '@kbn/rison';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -21,45 +21,45 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import type { SerializableRecord } from '@kbn/utility-types';
-import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+import { isQuery } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import {
-  isCategorizationAnomaly,
-  isRuleSupported,
+  MLCATEGORY,
+  type MlAnomaliesTableRecord,
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
-  type MlAnomaliesTableRecord,
-  MLCATEGORY,
+  isCategorizationAnomaly,
+  isRuleSupported,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
-import { escapeQuotes } from '@kbn/es-query';
-import { isQuery } from '@kbn/data-plugin/public';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { PLUGIN_ID } from '../../../../common/constants/app';
-import { findMessageField } from '../../util/index_utils';
-import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
-import { parseInterval } from '../../../../common/util/parse_interval';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
+import { parseInterval } from '../../../../common/util/parse_interval';
+import { getInitialAnomaliesLayers, getInitialSourceIndexFieldLayers } from '../../../maps/util';
+import { findMessageField } from '../../util/index_utils';
 
-import { mlJobService } from '../../services/job_service';
-import { ml } from '../../services/ml_api_service';
-import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
-import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
-import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlKibana } from '../../contexts/kibana';
+import type { SourceIndicesWithGeoFields } from '../../explorer/explorer_utils';
+import { escapeDoubleQuotes, getDateFormatTz } from '../../explorer/explorer_utils';
+import { mlJobService } from '../../services/job_service';
+import { ml } from '../../services/ml_api_service';
+import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { useMlIndexUtils } from '../../util/index_service';
+import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
 

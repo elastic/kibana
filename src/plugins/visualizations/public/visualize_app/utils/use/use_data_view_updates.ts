@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { useEffect } from 'react';
-import type { Subscription } from 'rxjs';
 import type { EventEmitter } from 'events';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { useEffect } from 'react';
+import type { Subscription } from 'rxjs';
 import type {
-  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../../types';
 import { VisualizeAppState } from '../../types';
 

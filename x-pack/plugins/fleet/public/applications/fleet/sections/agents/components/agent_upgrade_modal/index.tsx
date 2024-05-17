@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import {
-  EuiConfirmModal,
-  EuiComboBox,
-  EuiFormRow,
-  EuiSpacer,
-  EuiToolTip,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiCallOut,
+  EuiComboBox,
+  EuiConfirmModal,
   EuiDatePicker,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
   EuiLink,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,8 +32,8 @@ import semverValid from 'semver/functions/valid';
 
 import {
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
-  getMinVersion,
   getFleetServerVersionMessage,
+  getMinVersion,
   isAgentVersionLessThanFleetServer,
 } from '../../../../../../../common/services';
 
@@ -42,24 +42,24 @@ import {
   isStuckInUpdating,
 } from '../../../../../../../common/services/agent_status';
 
-import type { Agent } from '../../../../types';
 import {
+  sendGetAgentStatus,
+  sendGetAllFleetServerAgents,
   sendPostAgentUpgrade,
   sendPostBulkAgentUpgrade,
-  useStartServices,
-  useKibanaVersion,
-  useConfig,
-  sendGetAgentStatus,
   useAgentVersion,
-  sendGetAllFleetServerAgents,
+  useConfig,
+  useKibanaVersion,
+  useStartServices,
 } from '../../../../hooks';
+import type { Agent } from '../../../../types';
 
-import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
   differsOnlyInPatch,
   getNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
 } from '../../../../../../../common/services/is_agent_upgradeable';
+import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 
 import {
   FALLBACK_VERSIONS,

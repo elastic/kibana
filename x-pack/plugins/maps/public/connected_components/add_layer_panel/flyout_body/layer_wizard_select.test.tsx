@@ -7,10 +7,10 @@
 
 jest.mock('../../../classes/layers', () => ({}));
 
-import React from 'react';
 import { shallow } from 'enzyme';
-import { LayerWizardSelect } from './layer_wizard_select';
+import React from 'react';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { LayerWizardSelect } from './layer_wizard_select';
 
 const defaultProps = {
   onSelect: () => {},

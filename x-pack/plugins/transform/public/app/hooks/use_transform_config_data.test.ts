@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getCombinedProperties } from './use_transform_config_data';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { getCombinedProperties } from './use_transform_config_data';
 
 describe('getCombinedProperties', () => {
   test('extracts missing mappings from docs', () => {

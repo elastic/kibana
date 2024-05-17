@@ -7,10 +7,10 @@
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import type { JobType } from '../../../../common/types/saved_objects';
-import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
+import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
 import { newJobCapsService } from './new_job_capabilities_service';
+import { newJobCapsServiceAnalytics } from './new_job_capabilities_service_analytics';
 
 export const ANOMALY_DETECTOR = 'anomaly-detector';
 export const DATA_FRAME_ANALYTICS = 'data-frame-analytics';

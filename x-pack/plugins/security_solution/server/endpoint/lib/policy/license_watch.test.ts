@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { LicenseService } from '../../../../common/license';
-import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
-import { PolicyWatcher } from './license_watch';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { Subject } from 'rxjs';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
+import { LicenseService } from '../../../../common/license';
+import { PolicyWatcher } from './license_watch';
 
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();

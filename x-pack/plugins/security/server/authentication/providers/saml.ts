@@ -10,8 +10,6 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { isInternalURL } from '@kbn/std';
 
-import type { AuthenticationProviderOptions } from './base';
-import { BaseAuthenticationProvider } from './base';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
@@ -25,6 +23,8 @@ import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -274,9 +274,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         const redirect = isIdPInitiatedSLORequest
           ? await this.performIdPInitiatedSingleLogout(request, this.realm || state?.realm)
           : state
-          ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
-          : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
-            null;
+            ? await this.performUserInitiatedSingleLogout(state.accessToken!, state.refreshToken!)
+            : // Once Elasticsearch can consume logout response we'll be sending it here. See https://github.com/elastic/elasticsearch/issues/40901
+              null;
 
         // Having non-null `redirect` field within logout response means that IdP
         // supports SAML Single Logout and we should redirect user to the specified

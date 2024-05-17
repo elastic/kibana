@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getLogRatePerMinute, getLogErrorRate } from './utils';
+import { getLogErrorRate, getLogRatePerMinute } from './utils';
 
 describe('getLogRatePerMinute', () => {
   it('should log rate per minute for one minute period', () => {

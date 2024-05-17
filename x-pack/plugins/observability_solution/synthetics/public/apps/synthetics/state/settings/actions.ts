@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionConnector } from './api';
 import { DynamicSettings } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
+import { ActionConnector } from './api';
 
 export const getDynamicSettingsAction = createAsyncAction<void, DynamicSettings>(
   'GET_DYNAMIC_SETTINGS'

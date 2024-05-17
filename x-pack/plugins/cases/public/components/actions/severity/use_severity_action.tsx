@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { useCallback } from 'react';
+import type { CasesUI } from '../../../../common';
 import { CaseSeverity } from '../../../../common/types/domain';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
-import type { CasesUI } from '../../../../common';
 
-import * as i18n from './translations';
-import type { UseActionProps } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { severities } from '../../severity/config';
+import type { UseActionProps } from '../types';
+import * as i18n from './translations';
 
 const getSeverityToasterMessage = (severity: CaseSeverity, cases: CasesUI): string => {
   const totalCases = cases.length;

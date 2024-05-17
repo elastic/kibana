@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallow, mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount, shallow } from 'enzyme';
 
 import { I18nProvider, __IntlProvider } from '@kbn/i18n-react';
 

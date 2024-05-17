@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UserActionActions } from '../../../common/types/domain';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { UserActionActions } from '../../../common/types/domain';
 import { UserActionAuditLogger } from './audit_logger';
 import type { EventDetails } from './types';
 

@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiLink,
   EuiSpacer,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { ENABLE_STATUS_ALERT } from '../../../overview/monitor_list/columns/translations';
-import { monitorStatusSelector } from '../../../../state/selectors';
-import { EnableMonitorAlert } from '../../../overview/monitor_list/columns/enable_alert';
-import { MonitorSSLCertificate } from './ssl_certificate';
-import * as labels from '../translations';
-import { StatusByLocations } from './status_by_location';
-import { useStatusBar } from './use_status_bar';
-import { MonitorIDLabel, OverallAvailability } from '../translations';
+import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
 import {
   PROJECT_LABEL,
   TAGS_LABEL,
   URL_LABEL,
 } from '../../../../../../common/translations/translations';
-import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
-import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
-import { MonitorRedirects } from './monitor_redirects';
+import { monitorStatusSelector } from '../../../../state/selectors';
 import { MonitorTags } from '../../../common/monitor_tags';
+import { EnableMonitorAlert } from '../../../overview/monitor_list/columns/enable_alert';
+import { ENABLE_STATUS_ALERT } from '../../../overview/monitor_list/columns/translations';
+import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
+import * as labels from '../translations';
+import { MonitorIDLabel, OverallAvailability } from '../translations';
+import { MonitorRedirects } from './monitor_redirects';
+import { MonitorSSLCertificate } from './ssl_certificate';
+import { StatusByLocations } from './status_by_location';
+import { useStatusBar } from './use_status_bar';
 
 export const renderMonitorType = (type: string | undefined) => {
   switch (type) {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { QuickPromptSettings } from './quick_prompt_settings';
-import { TestProviders } from '../../../mock/test_providers/test_providers';
-import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
+import React from 'react';
 import { mockPromptContexts } from '../../../mock/prompt_context';
+import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { QuickPromptSettings } from './quick_prompt_settings';
 
 const onSelectedQuickPromptChange = jest.fn();
 const setUpdatedQuickPromptSettings = jest.fn().mockImplementation((fn) => {

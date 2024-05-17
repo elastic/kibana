@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type {
-  EmbeddableStateWithType,
   EmbeddableRegistryDefinition,
+  EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
+import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 
 export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
   attributes: SerializableRecord;

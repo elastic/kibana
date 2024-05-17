@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import type { ModalPayload } from '../advanced_detector_modal';
 import { AdvancedDetectorModal } from '../advanced_detector_modal';
-import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 
 interface Props {
   payload: ModalPayload | null;

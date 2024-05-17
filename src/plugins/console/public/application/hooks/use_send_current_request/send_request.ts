@@ -9,8 +9,8 @@
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { KIBANA_API_PREFIX } from '../../../../common/constants';
-import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
+import { extractWarningMessages } from '../../../lib/utils';
 import { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;

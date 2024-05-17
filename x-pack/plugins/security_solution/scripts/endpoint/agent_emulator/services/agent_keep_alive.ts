@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { checkInFleetAgent } from '../../common/fleet_services';
+import { BaseRunningService } from '../../common/base_running_service';
 import {
   fetchEndpointMetadataList,
   sendEndpointMetadataUpdate,
 } from '../../common/endpoint_metadata_services';
-import { BaseRunningService } from '../../common/base_running_service';
+import { checkInFleetAgent } from '../../common/fleet_services';
 
 export class AgentKeepAliveService extends BaseRunningService {
   protected async run(): Promise<void> {

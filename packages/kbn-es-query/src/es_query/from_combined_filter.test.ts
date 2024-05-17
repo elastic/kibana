@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { fields } from '../filters/stubs';
-import { DataViewBase } from './types';
-import { fromCombinedFilter } from './from_combined_filter';
 import {
   BooleanRelation,
   buildCombinedFilter,
@@ -17,6 +14,9 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
 } from '../filters';
+import { fields } from '../filters/stubs';
+import { fromCombinedFilter } from './from_combined_filter';
+import { DataViewBase } from './types';
 
 describe('#fromCombinedFilter', function () {
   const indexPattern: DataViewBase = {

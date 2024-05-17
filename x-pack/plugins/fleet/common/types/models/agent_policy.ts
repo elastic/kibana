@@ -7,11 +7,11 @@
 
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { agentPolicyStatuses } from '../../constants';
 import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
+import type { agentPolicyStatuses } from '../../constants';
 
-import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
+import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 

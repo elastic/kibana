@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 import { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
+import React, { useState, useCallback } from 'react';
 import { STATUS_OPTIONS } from '../constants';
 import * as i18n from '../translations';
 

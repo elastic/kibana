@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 import React, { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 interface HeaderActionMenuProps {
   mounter: { mount: MountPoint | undefined };

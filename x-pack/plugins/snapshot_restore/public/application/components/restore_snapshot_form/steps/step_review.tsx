@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
+  EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
   EuiTitle,
-  EuiLink,
-  EuiIcon,
   EuiToolTip,
-  EuiCodeBlock,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
+import { StepProps } from '.';
 import { serializeRestoreSettings } from '../../../../../common/lib';
 import { useServices } from '../../../app_context';
-import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 

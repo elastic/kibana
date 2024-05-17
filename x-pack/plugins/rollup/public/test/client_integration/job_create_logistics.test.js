@@ -7,10 +7,10 @@
 
 import { mockHttpRequest, pageHelpers } from './helpers';
 
-import { act } from 'react-dom/test-utils';
-import { indexPatterns } from '@kbn/data-plugin/public';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import { act } from 'react-dom/test-utils';
+import { init as initDocumentation, setHttp } from '../../crud_app/services';
 
 const { setup } = pageHelpers.jobCreate;
 

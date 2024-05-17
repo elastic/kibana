@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { extractExportDetails, SavedObjectsExportResultDetails } from './extract_export_details';
+import { SavedObjectsExportResultDetails, extractExportDetails } from './extract_export_details';
 
 describe('extractExportDetails', () => {
   const objLine = (id: string, type: string) => {

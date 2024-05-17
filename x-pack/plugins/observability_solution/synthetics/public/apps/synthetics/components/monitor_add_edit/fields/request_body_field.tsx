@@ -1,3 +1,7 @@
+import { EuiTabbedContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { parse, stringify } from 'query-string';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,13 +9,9 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { stringify, parse } from 'query-string';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { EuiTabbedContent } from '@elastic/eui';
 import { CodeEditorMode, MonacoEditorLangId } from '../types';
-import { KeyValuePairsField, Pair } from './key_value_field';
 import { CodeEditor } from './code_editor';
+import { KeyValuePairsField, Pair } from './key_value_field';
 
 export interface RequestBodyFieldProps {
   onChange: (requestBody: { type: CodeEditorMode; value: string }) => void;

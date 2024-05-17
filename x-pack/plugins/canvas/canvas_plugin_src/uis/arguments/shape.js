@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ShapePickerPopover } from '../../../public/components/shape_picker_popover';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { ArgumentStrings } from '../../../i18n';
+import { ShapePickerPopover } from '../../../public/components/shape_picker_popover';
+import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const { Shape: strings } = ArgumentStrings;
 

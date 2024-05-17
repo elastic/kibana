@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React, { PureComponent } from 'react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { upperFirst } from 'lodash';
-import { Legacy } from '../../legacy_shims';
-import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
-import { INFRA_SOURCE_ID } from '../../../common/constants';
-import { formatDateTimeLocal } from '../../../common/formatting';
+import { EuiBasicTable, EuiCallOut, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { upperFirst } from 'lodash';
+import React, { PureComponent } from 'react';
+import { INFRA_SOURCE_ID } from '../../../common/constants';
+import { formatDateTimeLocal } from '../../../common/formatting';
+import { Legacy } from '../../legacy_shims';
 import { Reason } from './reason';
 
 const getFormattedDateTimeLocal = (timestamp) => {

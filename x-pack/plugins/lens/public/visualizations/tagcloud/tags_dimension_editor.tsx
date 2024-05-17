@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiText } from '@elastic/eui';
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import {
-  PaletteRegistry,
-  CategoricalColorMapping,
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  ColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERTION,
-  PaletteOutput,
   AVAILABLE_PALETTES,
+  CategoricalColorMapping,
+  ColorMapping,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  PaletteOutput,
+  PaletteRegistry,
+  SPECIAL_TOKENS_STRING_CONVERTION,
   getColorsFromMapping,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
-import { useState, MutableRefObject, useCallback } from 'react';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { getColorCategories } from '@kbn/chart-expressions-common';
-import type { TagcloudState } from './types';
+import React from 'react';
+import { MutableRefObject, useCallback, useState } from 'react';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePanelContainer, PalettePicker } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import type { TagcloudState } from './types';
 
 interface Props {
   paletteService: PaletteRegistry;

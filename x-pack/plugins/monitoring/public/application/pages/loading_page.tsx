@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { PageTemplate } from './page_template';
+import { CODE_PATH_ELASTICSEARCH } from '../../../common/constants';
 import { PageLoading } from '../../components';
 import { useClusters } from '../hooks/use_clusters';
-import { CODE_PATH_ELASTICSEARCH } from '../../../common/constants';
+import { PageTemplate } from './page_template';
 
 const CODE_PATHS = [CODE_PATH_ELASTICSEARCH];
 

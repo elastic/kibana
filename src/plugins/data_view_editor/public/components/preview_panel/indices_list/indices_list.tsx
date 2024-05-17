@@ -10,24 +10,24 @@ import React from 'react';
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
+  EuiPopover,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPagination,
-  EuiPopover,
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface IndicesListProps {
   indices: MatchedItem[];

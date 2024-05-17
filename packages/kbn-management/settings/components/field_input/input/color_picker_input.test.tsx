@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
-import { ColorPickerInput, ColorPickerInputProps } from './color_picker_input';
 import { wrap } from '../mocks';
+import { ColorPickerInput, ColorPickerInputProps } from './color_picker_input';
 
 const name = 'Some color field';
 const id = 'some:color:field';

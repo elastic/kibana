@@ -1,3 +1,14 @@
+import {
+  EuiCallOut,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
+import { fromKueryExpression } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -5,35 +16,24 @@
  * 2.0.
  */
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
-import styled from 'styled-components';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-  EuiFilterGroup,
-  EuiPanel,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { fromKueryExpression } from '@kbn/es-query';
-import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
+import semverGte from 'semver/functions/gte';
+import styled from 'styled-components';
 
-import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { TimeRange } from '@kbn/es-query';
+import { createStateContainerReactHelpers } from '@kbn/kibana-utils-plugin/public';
 import { LogStream, type LogStreamProps } from '@kbn/logs-shared-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import type { Agent, AgentPolicy } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
+import type { Agent, AgentPolicy } from '../../../../../types';
 
+import { buildQuery } from './build_query';
 import { DEFAULT_DATE_RANGE } from './constants';
 import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
-import { buildQuery } from './build_query';
 import { SelectLogLevel } from './select_log_level';
 import { ViewLogsButton } from './view_logs_button';
 

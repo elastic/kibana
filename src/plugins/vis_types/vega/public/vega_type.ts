@@ -16,12 +16,12 @@ import {
   VisTypeDefinition,
 } from '@kbn/visualizations-plugin/public';
 
-import { getDefaultSpec } from './default_spec';
-import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
-import { createInspectorAdapters } from './vega_inspector';
-import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
+import { getDefaultSpec } from './default_spec';
+import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
+import { toExpressionAst } from './to_ast';
+import { createInspectorAdapters } from './vega_inspector';
 
 import type { VisParams } from './vega_fn';
 

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { Component, ComponentType } from 'react';
-import { MemoryRouter, withRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { History, LocationDescriptor } from 'history';
+import React, { Component, ComponentType } from 'react';
+import { MemoryRouter, withRouter } from 'react-router-dom';
 
 const stringifyPath = (path: LocationDescriptor): string => {
   if (typeof path === 'string') {
@@ -34,12 +34,11 @@ const locationDescriptorToRoutePath = (
 export const WithMemoryRouter =
   (initialEntries: LocationDescriptor[] = ['/'], initialIndex: number = 0) =>
   (WrappedComponent: ComponentType) =>
-  (props: any) =>
-    (
-      <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
-        <WrappedComponent {...props} />
-      </MemoryRouter>
-    );
+  (props: any) => (
+    <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
+      <WrappedComponent {...props} />
+    </MemoryRouter>
+  );
 
 export function WithRoute<T extends object = Record<string, any>>(
   componentRoutePath: LocationDescriptor | LocationDescriptor[] = ['/'],

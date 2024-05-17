@@ -7,40 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useContext } from 'react';
-import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   EuiErrorBoundary,
-  EuiHeaderLinks,
-  EuiHeaderLink,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHeaderLink,
+  EuiHeaderLinks,
 } from '@elastic/eui';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
-import { HelpCenterContent } from '../../components/help_center_content';
-import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
-import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_metrics_explorer_options';
-import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
-import { MetricsExplorerPage } from './metrics_explorer';
-import { SnapshotPage } from './inventory_view';
-import { NodeDetail } from './metric_detail';
-import { MetricsSettingsPage } from './settings';
-import { SourceLoadingPage } from '../../components/source_loading_page';
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
-import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
+import { HelpCenterContent } from '../../components/help_center_content';
 import { AnomalyDetectionFlyout } from '../../components/ml/anomaly_detection/anomaly_detection_flyout';
-import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
+import { SourceLoadingPage } from '../../components/source_loading_page';
+import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
-import { NotFoundPage } from '../404';
-import { ReactQueryProvider } from '../../containers/react_query_provider';
+import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { usePluginConfig } from '../../containers/plugin_config_context';
-import { HostsPage } from './hosts';
+import { ReactQueryProvider } from '../../containers/react_query_provider';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
+import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
+import { NotFoundPage } from '../404';
+import { HostsPage } from './hosts';
+import { SnapshotPage } from './inventory_view';
+import { NodeDetail } from './metric_detail';
+import { MetricsExplorerPage } from './metrics_explorer';
+import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsSettingsPage } from './settings';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',

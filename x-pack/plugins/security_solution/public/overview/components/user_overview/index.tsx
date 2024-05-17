@@ -10,34 +10,34 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { RiskScoreEntity, buildUserNamesFilter } from '../../../../common/search_strategy';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../common/components/first_last_seen/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { Loader } from '../../../common/components/loader';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { Loader } from '../../../common/components/loader';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import type { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useDarkMode } from '../../../common/lib/kibana';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 
 import * as i18n from './translations';
 
-import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
+import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import { RiskScoreDocTooltip } from '../common';
 
 export interface UserSummaryProps {

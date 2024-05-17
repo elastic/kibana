@@ -15,7 +15,7 @@ import {
 
 import { inputsFormat } from '../../../common/constants';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICIES_MAPPINGS } from '../../constants';
+import { PACKAGE_POLICIES_MAPPINGS, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 

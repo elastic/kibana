@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { tracksOverlays, CanAddNewPanel } from '@kbn/presentation-containers';
+import { CanAddNewPanel, tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 

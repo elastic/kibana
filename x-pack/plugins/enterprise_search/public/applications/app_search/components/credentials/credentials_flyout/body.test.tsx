@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -18,10 +18,10 @@ import { defaultApiToken } from '../credentials_logic';
 
 import { CredentialsFlyoutBody } from './body';
 import {
-  FormKeyName,
-  FormKeyType,
-  FormKeyReadWriteAccess,
   FormKeyEngineAccess,
+  FormKeyName,
+  FormKeyReadWriteAccess,
+  FormKeyType,
   FormKeyUpdateWarning,
 } from './form_components';
 

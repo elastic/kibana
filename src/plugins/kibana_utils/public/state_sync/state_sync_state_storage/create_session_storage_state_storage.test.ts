@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  createSessionStorageStateStorage,
-  ISessionStorageStateStorage,
-} from './create_session_storage_state_storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import {
+  ISessionStorageStateStorage,
+  createSessionStorageStateStorage,
+} from './create_session_storage_state_storage';
 
 describe('SessionStorageStateStorage', () => {
   let browserStorage: StubBrowserStorage;

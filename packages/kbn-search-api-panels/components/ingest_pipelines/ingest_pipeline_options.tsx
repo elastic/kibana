@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-import { EuiFlexItem, EuiText, EuiBadge, EuiFlexGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 
 interface OptionItem {
   value: string;

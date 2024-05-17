@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { deleteKnowledgeBaseRoute } from './delete_knowledge_base';
-import { serverMock } from '../../__mocks__/server';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { getDeleteKnowledgeBaseRequest } from '../../__mocks__/request';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { getDeleteKnowledgeBaseRequest } from '../../__mocks__/request';
+import { requestContextMock } from '../../__mocks__/request_context';
+import { serverMock } from '../../__mocks__/server';
+import { deleteKnowledgeBaseRoute } from './delete_knowledge_base';
 
 describe('Delete Knowledge Base Route', () => {
   let server: ReturnType<typeof serverMock.create>;

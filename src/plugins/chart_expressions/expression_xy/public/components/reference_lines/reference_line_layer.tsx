@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import { Position } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
-import { Position } from '@elastic/charts';
+import React, { FC } from 'react';
 import { ReferenceLineLayerConfig } from '../../../common/types';
+import { AxesMap, GroupsConfiguration, LayerAccessorsTitles } from '../../helpers';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
-import { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
 import { FormattersMap, getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {

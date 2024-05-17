@@ -6,32 +6,32 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import {
   EuiInMemoryTable,
-  HorizontalAlignment,
-  EuiText,
   EuiLink,
   EuiTableDataType,
+  EuiText,
+  HorizontalAlignment,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { get } from 'lodash';
+import React from 'react';
 
 import {
-  SavedObjectRelation,
   SavedObjectManagementTypeInfo,
+  SavedObjectRelation,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 
-import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, SearchFilterConfig } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../plugin';
 import {
-  typeFieldName,
-  typeFieldDescription,
-  titleFieldName,
-  titleFieldDescription,
   filterTitle,
+  titleFieldDescription,
+  titleFieldName,
+  typeFieldDescription,
+  typeFieldName,
 } from './i18n';
 
 const canGoInApp = (

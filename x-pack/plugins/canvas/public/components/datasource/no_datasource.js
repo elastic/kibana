@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 const strings = {
   getPanelDescription: () =>

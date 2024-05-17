@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import { getConversationSearchEsMock } from './conversations_schema.mock';
 import { estypes } from '@elastic/elasticsearch';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { EsConversationSchema } from '../ai_assistant_data_clients/conversations/types';
 import { FindResponse } from '../ai_assistant_data_clients/find';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
 import { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
-import { getPromptsSearchEsMock } from './prompts_schema.mock';
-import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { getAnonymizationFieldsSearchEsMock } from './anonymization_fields_schema.mock';
+import { getConversationSearchEsMock } from './conversations_schema.mock';
+import { getPromptsSearchEsMock } from './prompts_schema.mock';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,

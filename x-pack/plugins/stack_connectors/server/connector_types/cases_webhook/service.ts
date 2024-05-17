@@ -7,30 +7,30 @@
 
 import axios, { AxiosResponse } from 'axios';
 
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
-import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
-  createServiceError,
-  getObjectValueByKeyAsString,
-  stringifyObjValues,
-  removeSlash,
-  throwDescriptiveErrorIfResponseIsNotValid,
-} from './utils';
-import {
-  CreateIncidentParams,
-  ExternalServiceCredentials,
-  ExternalService,
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
+  CreateCommentParams,
+  CreateIncidentParams,
+  ExternalService,
+  ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
-  CreateCommentParams,
 } from './types';
+import {
+  createServiceError,
+  getObjectValueByKeyAsString,
+  removeSlash,
+  stringifyObjValues,
+  throwDescriptiveErrorIfResponseIsNotValid,
+} from './utils';
+import { validateAndNormalizeUrl, validateJson } from './validators';
 
 import * as i18n from './translations';
 

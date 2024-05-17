@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { createValidateRruleBy } from '../../lib/validate_rrule_by';
-import { validateSnoozeStartDate, validateSnoozeEndDate } from '../../lib/validate_snooze_date';
+import { validateSnoozeEndDate, validateSnoozeStartDate } from '../../lib/validate_snooze_date';
 
 export const rRuleSchema = schema.object({
   dtstart: schema.string({ validate: validateSnoozeStartDate }),

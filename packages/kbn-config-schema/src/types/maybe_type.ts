@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type, ExtendsDeepOptions } from './type';
+import { ExtendsDeepOptions, Type } from './type';
 
 import { META_FIELD_X_OAS_OPTIONAL } from '../oas_meta_fields';
 export class MaybeType<V> extends Type<V | undefined> {

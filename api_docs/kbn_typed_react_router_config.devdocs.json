@@ -46,9 +46,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-typed-react-router-config/src/create_router.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -60,9 +58,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-typed-react-router-config/src/create_router.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -105,9 +101,7 @@
             "tags": [],
             "label": "routes",
             "description": [],
-            "signature": [
-              "TRoutes"
-            ],
+            "signature": ["TRoutes"],
             "path": "packages/kbn-typed-react-router-config/src/create_router.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -194,9 +188,7 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-                ],
+                "signature": ["React.ReactElement<any, string | React.JSXElementConstructor<any>>"],
                 "path": "packages/kbn-typed-react-router-config/src/use_current_route.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -208,9 +200,7 @@
                 "tags": [],
                 "label": "children",
                 "description": [],
-                "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-                ],
+                "signature": ["React.ReactElement<any, string | React.JSXElementConstructor<any>>"],
                 "path": "packages/kbn-typed-react-router-config/src/use_current_route.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -270,9 +260,7 @@
                 "tags": [],
                 "label": "element",
                 "description": [],
-                "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-                ],
+                "signature": ["React.ReactElement<any, string | React.JSXElementConstructor<any>>"],
                 "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -394,9 +382,7 @@
         "tags": [],
         "label": "RouteRenderer",
         "description": [],
-        "signature": [
-          "() => JSX.Element"
-        ],
+        "signature": ["() => JSX.Element"],
         "path": "packages/kbn-typed-react-router-config/src/route_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -483,10 +469,7 @@
                 "tags": [],
                 "label": "history",
                 "description": [],
-                "signature": [
-                  "History",
-                  "<unknown>"
-                ],
+                "signature": ["History", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/router_provider.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -581,9 +564,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-typed-react-router-config/src/use_match_routes.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -622,9 +603,7 @@
             "tags": [],
             "label": "args",
             "description": [],
-            "signature": [
-              "any[]"
-            ],
+            "signature": ["any[]"],
             "path": "packages/kbn-typed-react-router-config/src/use_params.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -641,9 +620,7 @@
         "tags": [],
         "label": "useRoutePath",
         "description": [],
-        "signature": [
-          "() => string"
-        ],
+        "signature": ["() => string"],
         "path": "packages/kbn-typed-react-router-config/src/use_route_path.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -704,9 +681,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "signature": [
-              "{}"
-            ],
+            "signature": ["{}"],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -718,9 +693,7 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": [
-              "{}"
-            ],
+            "signature": ["{}"],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -746,9 +719,7 @@
             "tags": [],
             "label": "element",
             "description": [],
-            "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-            ],
+            "signature": ["React.ReactElement<any, string | React.JSXElementConstructor<any>>"],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -781,10 +752,7 @@
             "tags": [],
             "label": "params",
             "description": [],
-            "signature": [
-              "Type",
-              "<any, any, unknown> | undefined"
-            ],
+            "signature": ["Type", "<any, any, unknown> | undefined"],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -796,9 +764,7 @@
             "tags": [],
             "label": "defaults",
             "description": [],
-            "signature": [
-              "Record<string, Record<string, string>> | undefined"
-            ],
+            "signature": ["Record<string, Record<string, string>> | undefined"],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -848,9 +814,7 @@
             "tags": [],
             "label": "route",
             "description": [],
-            "signature": [
-              "TRoute & { path: string; }"
-            ],
+            "signature": ["TRoute & { path: string; }"],
             "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -954,9 +918,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "TPath"
-                ],
+                "signature": ["TPath"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -969,10 +931,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1038,10 +997,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1225,9 +1181,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "TPath"
-                ],
+                "signature": ["TPath"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1240,10 +1194,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1427,9 +1378,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "TPath"
-                ],
+                "signature": ["TPath"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1442,10 +1391,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1458,9 +1404,7 @@
                 "tags": [],
                 "label": "optional",
                 "description": [],
-                "signature": [
-                  "TOptional"
-                ],
+                "signature": ["TOptional"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1644,9 +1588,7 @@
                 "tags": [],
                 "label": "path1",
                 "description": [],
-                "signature": [
-                  "T1"
-                ],
+                "signature": ["T1"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1659,9 +1601,7 @@
                 "tags": [],
                 "label": "path2",
                 "description": [],
-                "signature": [
-                  "T2"
-                ],
+                "signature": ["T2"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1674,10 +1614,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1861,9 +1798,7 @@
                 "tags": [],
                 "label": "path1",
                 "description": [],
-                "signature": [
-                  "T1"
-                ],
+                "signature": ["T1"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1876,9 +1811,7 @@
                 "tags": [],
                 "label": "path2",
                 "description": [],
-                "signature": [
-                  "T2"
-                ],
+                "signature": ["T2"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1891,9 +1824,7 @@
                 "tags": [],
                 "label": "path3",
                 "description": [],
-                "signature": [
-                  "T3"
-                ],
+                "signature": ["T3"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1906,10 +1837,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2093,9 +2021,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "TPath"
-                ],
+                "signature": ["TPath"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2108,10 +2034,7 @@
                 "tags": [],
                 "label": "location",
                 "description": [],
-                "signature": [
-                  "Location",
-                  "<unknown>"
-                ],
+                "signature": ["Location", "<unknown>"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2124,9 +2047,7 @@
                 "tags": [],
                 "label": "optional",
                 "description": [],
-                "signature": [
-                  "TOptional"
-                ],
+                "signature": ["TOptional"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2180,9 +2101,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "TPath"
-                ],
+                "signature": ["TPath"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2296,9 +2215,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2380,9 +2297,7 @@
         "tags": [],
         "label": "Match",
         "description": [],
-        "signature": [
-          "MapRoutes<TRoutes, []>[TPath]"
-        ],
+        "signature": ["MapRoutes<TRoutes, []>[TPath]"],
         "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,

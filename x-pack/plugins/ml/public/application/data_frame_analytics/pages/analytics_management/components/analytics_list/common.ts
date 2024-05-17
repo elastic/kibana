@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { EuiTableActionsColumnType, Ast } from '@elastic/eui';
+import type { Ast, EuiTableActionsColumnType } from '@elastic/eui';
 import { Query } from '@elastic/eui';
 
 import {
   DATA_FRAME_TASK_STATE,
-  type DataFrameAnalyticsId,
-  type DataFrameAnalyticsConfig,
   type DataFrameAnalysisConfigType,
+  type DataFrameAnalyticsConfig,
+  type DataFrameAnalyticsId,
   type DataFrameAnalyticsStats,
   type DataFrameTaskStateType,
 } from '@kbn/ml-data-frame-analytics-utils';
@@ -23,12 +23,12 @@ export enum DATA_FRAME_MODE {
 }
 
 export { Query };
-export type Clause = Parameters<typeof Query['isMust']>[0];
+export type Clause = Parameters<(typeof Query)['isMust']>[0];
 
 type ExtractClauseType<T> = T extends (x: any) => x is infer Type ? Type : never;
-export type TermClause = ExtractClauseType<typeof Ast['Term']['isInstance']>;
-export type FieldClause = ExtractClauseType<typeof Ast['Field']['isInstance']>;
-export type Value = Parameters<typeof Ast['Term']['must']>[0];
+export type TermClause = ExtractClauseType<(typeof Ast)['Term']['isInstance']>;
+export type FieldClause = ExtractClauseType<(typeof Ast)['Field']['isInstance']>;
+export type Value = Parameters<(typeof Ast)['Term']['must']>[0];
 
 export function isDataFrameAnalyticsFailed(state: DataFrameTaskStateType) {
   return state === DATA_FRAME_TASK_STATE.FAILED;

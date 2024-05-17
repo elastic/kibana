@@ -6,17 +6,17 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/css';
+import React, { useCallback } from 'react';
 import type {
   ActiveSections,
   CardId,
   ExpandedCardSteps,
-  ToggleTaskCompleteStatus,
   OnStepClicked,
   SectionId,
   StepId,
+  ToggleTaskCompleteStatus,
 } from '../types';
 
 import { CardItem } from '../card_item';

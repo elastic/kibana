@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render } from '../../rtl_helpers';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { sampleAttribute } from '../../configurations/test_data/sample_attribute';
 import * as pluginHook from '../../../../../hooks/use_plugin_context';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { sampleAttribute } from '../../configurations/test_data/sample_attribute';
+import { render } from '../../rtl_helpers';
 import { ExpViewActionMenuContent } from './action_menu';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {

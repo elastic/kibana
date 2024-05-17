@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
-  useEuiTheme,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiModalBody,
@@ -19,18 +18,19 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
+import { isSupportedField, validateServiceGroupKuery } from '../../../../../common/service_groups';
+import { getDateRange } from '../../../../context/url_params_context/helpers';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { KueryBar } from '../../../shared/kuery_bar';
-import { ServiceListPreview } from './service_list_preview';
 import type { StagedServiceGroup } from './save_modal';
-import { getDateRange } from '../../../../context/url_params_context/helpers';
-import { validateServiceGroupKuery, isSupportedField } from '../../../../../common/service_groups';
+import { ServiceListPreview } from './service_list_preview';
 
 const CentralizedContainer = styled.div`
   display: flex;

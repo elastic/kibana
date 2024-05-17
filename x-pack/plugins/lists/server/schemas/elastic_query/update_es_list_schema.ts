@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { version } from '@kbn/securitysolution-io-ts-types';
 import {
   descriptionOrUndefined,
   metaOrUndefined,
@@ -14,6 +12,8 @@ import {
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { version } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
 export const updateEsListSchema = t.exact(
   t.type({

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { createMockBucketColumns, createMockVisData } from '../mocks';
 import { getDistinctSeries } from './get_distinct_series';
-import { createMockVisData, createMockBucketColumns } from '../mocks';
 
 const visData = createMockVisData();
 const buckets = createMockBucketColumns();

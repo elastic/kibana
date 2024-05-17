@@ -7,10 +7,10 @@
 import { act } from 'react-dom/test-utils';
 
 import { HttpSetup } from '@kbn/core/public';
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { AsyncTestBedConfig, TestBed, registerTestBed } from '@kbn/test-jest-helpers';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
-import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './constant';
+import { WithAppDependencies } from './setup_environment';
 
 const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {

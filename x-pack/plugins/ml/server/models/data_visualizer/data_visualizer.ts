@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, each, last, find } from 'lodash';
+import { each, find, get, last } from 'lodash';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import {
@@ -14,12 +14,12 @@ import {
   getSamplerAggregationsResponsePath,
 } from '@kbn/ml-agg-utils';
 import type { AggCardinality, FieldsForHistograms } from '@kbn/ml-agg-utils';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { PassThrough } from 'stream';
 import { schema } from '@kbn/config-schema';
-import { ActionExecutor } from './action_executor';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
-import { ActionType as ConnectorType } from '../types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { finished } from 'stream/promises';
+import { SecurityConnectorFeatureId } from '../../common';
+import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
+import { ActionType as ConnectorType } from '../types';
 import {
   asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { finished } from 'stream/promises';
-import { PassThrough } from 'stream';
-import { SecurityConnectorFeatureId } from '../../common';
-import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { ActionExecutor } from './action_executor';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();

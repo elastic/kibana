@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 
 const StyledEuiBadge = styled(EuiBadge)`
   .euiBadge__text {

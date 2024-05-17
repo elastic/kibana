@@ -9,9 +9,9 @@
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  updateDataStreams,
   createDataStream,
   createOrUpdateDataStream,
+  updateDataStreams,
 } from './create_or_update_data_stream';
 
 const logger = loggingSystemMock.createLogger();

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
 import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
 import {
@@ -14,8 +14,8 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
 } from '@kbn/timelines-plugin/public';
-import type { RowRenderer } from '../../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
+import type { RowRenderer } from '../../../../../../../common/types';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';

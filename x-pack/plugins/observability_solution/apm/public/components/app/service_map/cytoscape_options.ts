@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
-  getServiceHealthStatusColor,
   ServiceHealthStatus,
+  getServiceHealthStatusColor,
 } from '../../../../common/service_health_status';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { iconForNode } from './icons';

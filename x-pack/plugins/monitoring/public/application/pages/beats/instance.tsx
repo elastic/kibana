@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { find } from 'lodash';
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { find } from 'lodash';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ComponentProps } from '../../route_init';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useCharts } from '../../hooks/use_charts';
 import { Beat } from '../../../components/beats/beat';
+import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
+import { useCharts } from '../../hooks/use_charts';
+import { ComponentProps } from '../../route_init';
 import { BeatsTemplate } from './beats_template';
 
 export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {

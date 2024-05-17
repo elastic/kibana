@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { DataTableToolbar } from './toolbar';
-import { DatatableVisualizationState } from '../visualization';
-import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
-import { PagingState } from '../../../../common/expressions';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { PagingState } from '../../../../common/expressions';
+import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
+import { DatatableVisualizationState } from '../visualization';
+import { DataTableToolbar } from './toolbar';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

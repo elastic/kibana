@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 
-import * as i18n from './translations';
 import type { GetExceptionItemProps } from '.';
+import * as i18n from './translations';
 
 const ITEMS_SCHEMA = {
   strict: true,

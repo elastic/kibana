@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import * as i18n from './translations';
 import { CreateAlertProps } from '.';
+import * as i18n from './translations';
 
 type AdditionalOptionsProps = Pick<
   CreateAlertProps,

@@ -7,12 +7,9 @@
 
 import { upperFirst } from 'lodash';
 
-import {
-  EXISTING_CASE_SELECT_BUTTON,
-  VIEW_CASE_TOASTER_LINK,
-} from '../../../../screens/expandable_flyout/common';
-import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { getNewRule } from '../../../../objects/rule';
 import { ALERT_CHECKBOX, EMPTY_ALERT_TABLE } from '../../../../screens/alerts';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import {
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
@@ -30,11 +27,11 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES,
   DOCUMENT_DETAILS_FLYOUT_HEADER_ICON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
-  DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
@@ -42,6 +39,13 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel';
+import {
+  EXISTING_CASE_SELECT_BUTTON,
+  VIEW_CASE_TOASTER_LINK,
+} from '../../../../screens/expandable_flyout/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   closeFlyout,
   collapseDocumentDetailsExpandableFlyoutLeftSection,
@@ -53,14 +57,10 @@ import {
   openTakeActionButtonAndSelectItem,
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { TOASTER } from '../../../../screens/alerts_detection_rules';
 
 describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();

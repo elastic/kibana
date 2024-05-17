@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { HttpFetchQuery } from '@kbn/core/public';
+import { useEffect, useState } from 'react';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
-import * as i18n from '../translations';
 import { INTERNAL_API_VERSION } from '../helpers';
+import * as i18n from '../translations';
 import { MeteringStatsIndex } from '../types';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';

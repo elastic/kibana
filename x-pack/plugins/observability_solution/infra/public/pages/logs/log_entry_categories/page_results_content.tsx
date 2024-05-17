@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import datemath from '@kbn/datemath';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiSuperDatePicker } from '@elastic/eui';
+import datemath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { IdFormat } from '../../../../common/http_api/latest';
 import { logEntryCategoriesJobType } from '../../../../common/log_analysis';
 import { TimeRange } from '../../../../common/time/time_range';
 import { CategoryJobNoticesSection } from '../../../components/logging/log_analysis_job_status';
@@ -34,7 +35,6 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
-import { IdFormat } from '../../../../common/http_api/latest';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 

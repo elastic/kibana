@@ -7,9 +7,9 @@
 
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 
 import type {
   GetClusterHealthRequest,

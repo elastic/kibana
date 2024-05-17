@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
+import { relative, resolve } from 'path';
 import { Readable } from 'stream';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
-import type { Client } from '@elastic/elasticsearch';
-import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
-import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { ToolingLog } from '@kbn/tooling-log';
+import { concatStreamProviders, createPromiseFromStreams } from '@kbn/utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
 import {
-  isGzip,
+  type LoadActionPerfOptions,
+  Progress,
+  createCreateIndexStream,
+  createDefaultSpace,
+  createIndexDocRecordsStream,
+  createParseArchiveStreams,
   createStats,
+  isGzip,
+  migrateSavedObjectIndices,
   prioritizeMappings,
   readDirectory,
-  createParseArchiveStreams,
-  createCreateIndexStream,
-  createIndexDocRecordsStream,
-  migrateSavedObjectIndices,
-  Progress,
-  createDefaultSpace,
-  type LoadActionPerfOptions,
 } from '../lib';
 
 import soOverrideAllowedList from '../fixtures/override_saved_objects_index/exception_list.json';

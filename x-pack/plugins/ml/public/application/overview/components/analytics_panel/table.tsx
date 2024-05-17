@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useState } from 'react';
 import type { Direction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { DataFrameAnalyticsListColumn } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import {

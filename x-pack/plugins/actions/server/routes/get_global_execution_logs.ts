@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { ActionsRequestHandlerContext } from '../types';
+import { IRouter } from '@kbn/core/server';
 import {
   GetGlobalExecutionLogParams,
   INTERNAL_BASE_ACTION_API_PATH,
   RewriteRequestCase,
 } from '../../common';
-import { verifyAccessAndContext } from './verify_access_and_context';
+import { ILicenseState } from '../lib';
+import { ActionsRequestHandlerContext } from '../types';
 import { rewriteNamespaces } from './rewrite_namespaces';
+import { verifyAccessAndContext } from './verify_access_and_context';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 

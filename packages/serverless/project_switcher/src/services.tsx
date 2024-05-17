@@ -10,7 +10,7 @@ import React, { FC, PropsWithChildren, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Loader } from './loader';
 
-import type { Services, KibanaDependencies } from './types';
+import type { KibanaDependencies, Services } from './types';
 
 const Context = React.createContext<Services | null>(null);
 

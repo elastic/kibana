@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
-import { handleError } from '../../../../../lib/errors';
-import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
-import { MonitoringCore, PipelineMetricKey } from '../../../../../types';
-import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import {
   postLogstashClusterPipelinesRequestParamsRT,
   postLogstashClusterPipelinesRequestPayloadRT,
 } from '../../../../../../common/http_api/logstash';
+import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../../lib/errors';
+import { getClusterStatus } from '../../../../../lib/logstash/get_cluster_status';
+import { getPaginatedPipelines } from '../../../../../lib/logstash/get_paginated_pipelines';
+import { MonitoringCore, PipelineMetricKey } from '../../../../../types';
 
 const throughputMetric = 'logstash_cluster_pipeline_throughput';
 const nodesCountMetric = 'logstash_cluster_pipeline_nodes_count';

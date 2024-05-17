@@ -10,7 +10,7 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
-import { mockEngineValues, mockEngineActions } from '../../__mocks__';
+import { mockEngineActions, mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 

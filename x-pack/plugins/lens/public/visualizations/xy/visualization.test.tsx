@@ -5,62 +5,62 @@
  * 2.0.
  */
 
-import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
-import {
-  Operation,
-  OperationDescriptor,
-  DatasourcePublicAPI,
-  FramePublicAPI,
-  UserMessage,
-  AnnotationGroups,
-} from '../../types';
-import {
-  State,
-  XYState,
-  XYLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  SeriesType,
-  XYByValueAnnotationLayerConfig,
-  XYByReferenceAnnotationLayerConfig,
-  XYAnnotationLayerConfig,
-} from './types';
-import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
+import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { DataViewsState } from '../../state_management';
-import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
-import { createMockDataViewsState } from '../../data_views_service/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import {
-  getAnnotationsLayers,
-  isAnnotationsLayer,
-  isByReferenceAnnotationsLayer,
-} from './visualization_helpers';
-import { cloneDeep } from 'lodash';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { cloneDeep } from 'lodash';
+import { Visualization, layerTypes } from '../..';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
+import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
+import { DataViewsState } from '../../state_management';
+import {
+  AnnotationGroups,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  Operation,
+  OperationDescriptor,
+  UserMessage,
+} from '../../types';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
+import {
+  SeriesType,
+  State,
+  XYAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYState,
+} from './types';
+import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
+import {
+  getAnnotationsLayers,
+  isAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+} from './visualization_helpers';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -3129,8 +3129,9 @@ describe('xy_visualization', () => {
               },
             ],
           };
-          expect(xyVisualization.getUserMessages!(state, { frame: getFrameMock() }))
-            .toMatchInlineSnapshot(`
+          expect(
+            xyVisualization.getUserMessages!(state, { frame: getFrameMock() })
+          ).toMatchInlineSnapshot(`
             Array [
               Object {
                 "displayLocations": Array [
@@ -3787,8 +3788,9 @@ describe('xy_visualization', () => {
 
       expect(savedObjectReferences).toHaveLength(4);
 
-      expect(savedObjectReferences.filter(({ type }) => type === 'index-pattern'))
-        .toMatchInlineSnapshot(`
+      expect(
+        savedObjectReferences.filter(({ type }) => type === 'index-pattern')
+      ).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "some-index-pattern",

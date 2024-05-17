@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
-import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
-import { getInlineErrorFilters } from './use_inline_errors';
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
+import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
+import { getInlineErrorFilters } from './use_inline_errors';
 
 export function useInlineErrorsCount() {
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);

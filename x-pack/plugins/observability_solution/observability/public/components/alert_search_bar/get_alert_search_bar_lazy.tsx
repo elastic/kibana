@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
 import { ObservabilityAlertSearchBarProps } from './types';
 
 const ObservabilityAlertSearchBarLazy = lazy(() => import('./alert_search_bar'));

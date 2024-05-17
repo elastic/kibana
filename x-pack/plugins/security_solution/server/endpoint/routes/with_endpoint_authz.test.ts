@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
+import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
+import { EndpointAuthorizationError } from '../errors';
 import type { EndpointApiNeededAuthz } from './with_endpoint_authz';
 import { withEndpointAuthz } from './with_endpoint_authz';
-import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
-import { EndpointAuthorizationError } from '../errors';
-import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 
 describe('When using `withEndpointAuthz()`', () => {
   let mockRequestHandler: jest.Mocked<RequestHandler>;

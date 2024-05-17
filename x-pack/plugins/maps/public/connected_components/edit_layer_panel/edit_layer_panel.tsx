@@ -8,32 +8,32 @@
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiIcon,
-  EuiFlexItem,
-  EuiTitle,
-  EuiPanel,
   EuiFlexGroup,
-  EuiFlyoutHeader,
+  EuiFlexItem,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiIcon,
+  EuiPanel,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { FilterEditor } from './filter_editor';
-import { JoinEditor, JoinField } from './join_editor';
-import { FlyoutFooter } from './flyout_footer';
-import { LayerSettings } from './layer_settings';
-import { StyleSettings } from './style_settings';
 import { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
-import { getData, getCore } from '../../kibana_services';
-import { ILayer } from '../../classes/layers/layer';
-import { isVectorLayer } from '../../classes/layers/vector_layer';
-import { OnSourceChangeArgs } from '../../classes/sources/source';
-import { isESSource } from '../../classes/sources/es_source';
 import { IField } from '../../classes/fields/field';
-import { isLayerGroup } from '../../classes/layers/layer_group';
 import { isSpatialJoin } from '../../classes/joins/is_spatial_join';
+import { ILayer } from '../../classes/layers/layer';
+import { isLayerGroup } from '../../classes/layers/layer_group';
+import { isVectorLayer } from '../../classes/layers/vector_layer';
+import { isESSource } from '../../classes/sources/es_source';
+import { OnSourceChangeArgs } from '../../classes/sources/source';
+import { getCore, getData } from '../../kibana_services';
+import { FilterEditor } from './filter_editor';
+import { FlyoutFooter } from './flyout_footer';
+import { JoinEditor, JoinField } from './join_editor';
+import { LayerSettings } from './layer_settings';
 import { SourceDetails } from './source_details';
+import { StyleSettings } from './style_settings';
 
 const localStorage = new Storage(window.localStorage);
 

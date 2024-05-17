@@ -8,6 +8,8 @@
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
@@ -18,16 +20,14 @@ import { buildSlo } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/use_capabilities';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
+import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
-import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
-import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),

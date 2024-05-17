@@ -8,13 +8,13 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
-import { TestProviders } from '../../../../../common/mock';
-import { getEmptyStringTag } from '../../../../../common/components/empty_value';
-import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
 import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { TooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
 import { FlowTarget } from '../../../../../../common/search_strategy';
+import { getEmptyStringTag } from '../../../../../common/components/empty_value';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../../../common/components/links';
+import { TestProviders } from '../../../../../common/mock';
+import { PointToolTipContentComponent, getRenderedFieldValue } from './point_tool_tip_content';
 
 describe('PointToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [

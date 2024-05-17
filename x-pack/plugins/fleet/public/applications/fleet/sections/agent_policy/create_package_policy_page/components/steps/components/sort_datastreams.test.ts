@@ -9,7 +9,7 @@ import type { DataStream } from '../../../../../../../../../common/types';
 
 import { sortDatastreamsByDataset } from './sort_datastreams';
 
-const ds = (dataset: string) => ({ dataset } as DataStream);
+const ds = (dataset: string) => ({ dataset }) as DataStream;
 describe('orderDatasets', () => {
   it('should move datasets up that match package name', () => {
     const datasets = sortDatastreamsByDataset(

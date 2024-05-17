@@ -7,9 +7,9 @@
 
 import {
   asDuration,
+  asMillisecondDuration,
   getDurationFormatter,
   toMicroseconds,
-  asMillisecondDuration,
 } from './duration';
 
 describe('duration formatters', () => {

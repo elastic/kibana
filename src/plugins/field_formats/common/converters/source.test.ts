@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SourceFormat } from './source';
-import { HtmlContextTypeConvert } from '../types';
 import { HTML_CONTEXT_TYPE } from '../content_types';
+import { HtmlContextTypeConvert } from '../types';
+import { SourceFormat } from './source';
 
 describe('Source Format', () => {
   let convertHtml: Function;

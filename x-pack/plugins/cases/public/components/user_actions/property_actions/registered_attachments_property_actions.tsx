@@ -11,9 +11,9 @@ import type { AttachmentAction } from '../../../client/attachment_framework/type
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import * as i18n from './translations';
-import { UserActionPropertyActions } from './property_actions';
 import { DeleteAttachmentConfirmationModal } from '../delete_attachment_confirmation_modal';
+import { UserActionPropertyActions } from './property_actions';
+import * as i18n from './translations';
 import { useDeletePropertyAction } from './use_delete_property_action';
 
 interface Props {

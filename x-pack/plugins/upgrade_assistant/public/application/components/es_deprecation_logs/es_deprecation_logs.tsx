@@ -8,18 +8,18 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiPageHeader,
   EuiButtonEmpty,
-  EuiSpacer,
   EuiPageBody,
+  EuiPageHeader,
   EuiPageSection,
+  EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useAppContext } from '../../app_context';
-import { uiMetricService, UIM_ES_DEPRECATION_LOGS_PAGE_LOAD } from '../../lib/ui_metric';
+import { UIM_ES_DEPRECATION_LOGS_PAGE_LOAD, uiMetricService } from '../../lib/ui_metric';
 import { FixDeprecationLogs } from './fix_deprecation_logs';
 
 export const EsDeprecationLogs: FunctionComponent = () => {

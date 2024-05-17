@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { FunctionComponent, useCallback, useState } from 'react';
 
-import { EuiSpacer, EuiText, EuiButton, EuiLink, EuiCode, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiCode, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { parseJson, stringifyJson } from '../../../../../../lib';
 import {
-  getUseField,
   Field,
-  JsonEditorField,
-  useKibana,
   FieldConfig,
-  fieldValidators,
-  ValidationFuncArg,
-  FormHook,
   Form,
+  FormHook,
+  JsonEditorField,
+  ValidationFuncArg,
+  fieldValidators,
+  getUseField,
+  useKibana,
 } from '../../../../../../../shared_imports';
+import { parseJson, stringifyJson } from '../../../../../../lib';
 import { Document } from '../../../../types';
 import { AddDocumentsAccordion } from './add_docs_accordion';
 import { ResetDocumentsModal } from './reset_documents_modal';

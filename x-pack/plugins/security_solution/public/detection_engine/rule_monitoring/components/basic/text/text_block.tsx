@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
+import React from 'react';
 
 const DEFAULT_OVERFLOW_HEIGHT = 320;
 

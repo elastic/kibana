@@ -6,20 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  memo,
-  useCallback,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useMemo,
-  useEffect,
-} from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import {
   EuiBadge,
   EuiButton,
@@ -32,23 +18,37 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, {
+  memo,
+  useCallback,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useMemo,
+  useEffect,
+} from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
-  useExistingFieldsFetcher,
   type ExistingFieldsFetcher,
+  useExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
-import { getSidebarVisibility, SidebarVisibility } from './get_sidebar_visibility';
+import type {
+  SearchMode,
+  UnifiedFieldListSidebarContainerCreationOptions,
+  UnifiedFieldListSidebarContainerStateService,
+} from '../../types';
+import { createStateService } from '../services/state_service';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
   type UnifiedFieldListSidebarProps,
 } from './field_list_sidebar';
-import { createStateService } from '../services/state_service';
-import type {
-  UnifiedFieldListSidebarContainerCreationOptions,
-  UnifiedFieldListSidebarContainerStateService,
-  SearchMode,
-} from '../../types';
+import { SidebarVisibility, getSidebarVisibility } from './get_sidebar_visibility';
 
 export interface UnifiedFieldListSidebarContainerApi {
   sidebarVisibility: SidebarVisibility;

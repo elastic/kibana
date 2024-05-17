@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { GetViewInAppRelativeUrlFnOpts, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { IBasePath, Logger } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 import { i18n } from '@kbn/i18n';
-import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { IBasePath, Logger } from '@kbn/core/server';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { LicenseType } from '@kbn/licensing-plugin/server';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
+import { ObservabilityConfig } from '../../..';
+import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import {
+  CustomThresholdLocators,
+  createCustomThresholdExecutor,
+} from './custom_threshold_executor';
 import {
   alertDetailUrlActionVariableDescription,
   cloudActionVariableDescription,
@@ -34,14 +40,8 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from './translations';
-import { oneOfLiterals, validateKQLStringFilter } from './utils';
-import {
-  createCustomThresholdExecutor,
-  CustomThresholdLocators,
-} from './custom_threshold_executor';
-import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { ObservabilityConfig } from '../../..';
 import { CustomThresholdAlert } from './types';
+import { oneOfLiterals, validateKQLStringFilter } from './utils';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAlert> = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,

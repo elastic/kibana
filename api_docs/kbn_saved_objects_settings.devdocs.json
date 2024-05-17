@@ -29,9 +29,7 @@
         "tags": [],
         "label": "LISTING_LIMIT_SETTING",
         "description": [],
-        "signature": [
-          "\"savedObjects:listingLimit\""
-        ],
+        "signature": ["\"savedObjects:listingLimit\""],
         "path": "packages/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -44,9 +42,7 @@
         "tags": [],
         "label": "PER_PAGE_SETTING",
         "description": [],
-        "signature": [
-          "\"savedObjects:perPage\""
-        ],
+        "signature": ["\"savedObjects:perPage\""],
         "path": "packages/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,

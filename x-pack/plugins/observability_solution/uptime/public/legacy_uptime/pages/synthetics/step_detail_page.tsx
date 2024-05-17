@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useInitApp } from '../../hooks/use_init_app';
-import { StepDetailContainer } from '../../components/monitor/synthetics/step_detail/step_detail_container';
-import { journeySelector } from '../../state/selectors';
-import { JourneyState } from '../../state/reducers/journey';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory, useParams } from 'react-router-dom';
 import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import { StepDetailContainer } from '../../components/monitor/synthetics/step_detail/step_detail_container';
 import { StepPageNavigation } from '../../components/monitor/synthetics/step_detail/step_page_nav';
 import { StepPageTitleContent } from '../../components/monitor/synthetics/step_detail/step_page_title';
+import { useInitApp } from '../../hooks/use_init_app';
 import { getJourneySteps } from '../../state/actions/journey';
+import { JourneyState } from '../../state/reducers/journey';
+import { journeySelector } from '../../state/selectors';
 
 export const useStepDetailPage = (): {
   activeStep?: JourneyStep;

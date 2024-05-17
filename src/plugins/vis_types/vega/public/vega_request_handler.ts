@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
-import { VisParams } from './vega_fn';
 import { getData, getDataViews } from './services';
+import { VisParams } from './vega_fn';
 import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {

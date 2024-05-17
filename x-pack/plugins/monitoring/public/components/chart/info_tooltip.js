@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import './info_tooltip.scss';
 
 export function InfoTooltip({ series, bucketSize }) {

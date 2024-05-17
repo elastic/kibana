@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildResultColumns, Datatable } from '..';
+import { Datatable, buildResultColumns } from '..';
 
 describe('buildResultColumns', () => {
   function getDatatable(columns: Datatable['columns']): Datatable {

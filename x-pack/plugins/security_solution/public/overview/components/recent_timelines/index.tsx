@@ -8,23 +8,23 @@
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SortFieldTimeline, TimelineType } from '../../../../common/api/timeline';
-import { useGetAllTimeline } from '../../../timelines/containers/all';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
+import { useGetAllTimeline } from '../../../timelines/containers/all';
 
+import { APP_UI_ID } from '../../../../common/constants';
+import { Direction } from '../../../../common/search_strategy';
+import { SecurityPageName } from '../../../app/types';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { LinkAnchor } from '../../../common/components/links';
+import { useKibana } from '../../../common/lib/kibana';
+import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
+import { LoadingPlaceholders } from '../loading_placeholders';
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';
 import type { FilterMode } from './types';
-import { LoadingPlaceholders } from '../loading_placeholders';
-import { useTimelineStatus } from '../../../timelines/components/open_timeline/use_timeline_status';
-import { useKibana } from '../../../common/lib/kibana';
-import { SecurityPageName } from '../../../app/types';
-import { APP_UI_ID } from '../../../../common/constants';
-import { useFormatUrl } from '../../../common/components/link_to';
-import { LinkAnchor } from '../../../common/components/links';
-import { Direction } from '../../../../common/search_strategy';
 
 interface Props {
   filterBy: FilterMode;

@@ -15,8 +15,8 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 
 import { UsersTable } from '.';
-import { mockUsersData } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { mockUsersData } from './mock';
 
 jest.mock('../../../../common/lib/kibana');
 

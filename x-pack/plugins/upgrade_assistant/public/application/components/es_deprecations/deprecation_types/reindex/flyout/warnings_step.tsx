@@ -21,9 +21,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  ReindexStatusResponse,
   ReindexWarning,
   ReindexWarningTypes,
-  ReindexStatusResponse,
 } from '../../../../../../../common/types';
 import { useAppContext } from '../../../../../app_context';
 import {
@@ -71,10 +71,13 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   const { links } = docLinks;
 
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(
-    warnings.reduce((initialCheckedIds, warning, index) => {
-      initialCheckedIds[idForWarning(index)] = false;
-      return initialCheckedIds;
-    }, {} as { [id: string]: boolean })
+    warnings.reduce(
+      (initialCheckedIds, warning, index) => {
+        initialCheckedIds[idForWarning(index)] = false;
+        return initialCheckedIds;
+      },
+      {} as { [id: string]: boolean }
+    )
   );
 
   // Do not allow to proceed until all checkboxes are checked.

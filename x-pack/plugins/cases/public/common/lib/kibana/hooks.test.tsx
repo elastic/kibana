@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
 
+import { TestProviders, allCasesPermissions } from '../../mock';
 import { useApplicationCapabilities } from './hooks';
-import { allCasesPermissions, TestProviders } from '../../mock';
 
 describe('hooks', () => {
   describe('useApplicationCapabilities', () => {

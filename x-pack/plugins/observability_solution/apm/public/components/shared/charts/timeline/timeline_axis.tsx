@@ -7,9 +7,9 @@
 
 import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
+import { Mark } from '.';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Mark } from '.';
 import { Marker } from './marker';
 import { PlotValues } from './plot_utils';
 

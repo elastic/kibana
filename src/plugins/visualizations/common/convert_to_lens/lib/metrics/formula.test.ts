@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataViewField, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { SchemaConfig } from '../../..';
-import { getFormulaForPipelineAgg, getFormulaForAgg } from './formula';
+import { getFormulaForAgg, getFormulaForPipelineAgg } from './formula';
 
 const mockGetMetricFromParentPipelineAgg = jest.fn();
 const mockIsPercentileAgg = jest.fn();

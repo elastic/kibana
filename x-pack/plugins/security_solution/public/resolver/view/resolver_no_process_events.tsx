@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiCodeBlock, EuiFlexGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import styled from 'styled-components';
-import { EuiCodeBlock, EuiFlexGroup, EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
 
 const StyledEuiCodeBlock = styled(EuiCodeBlock)`
   align-self: flex-start;

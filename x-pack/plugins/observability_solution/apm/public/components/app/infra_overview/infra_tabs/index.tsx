@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { push } from '../../../shared/links/url_helpers';
 import { EmptyPrompt } from './empty_prompt';
 import { FailurePrompt } from './failure_prompt';
 import { useTabs } from './use_tabs';
-import { push } from '../../../shared/links/url_helpers';
 
 const INITIAL_STATE = {
   containerIds: [],

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEffect, useState } from 'react';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 
 export const useFetchPipelines = () => {

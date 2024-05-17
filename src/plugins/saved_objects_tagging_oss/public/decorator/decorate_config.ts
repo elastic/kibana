@@ -7,8 +7,8 @@
  */
 
 import { SavedObjectConfig } from '@kbn/saved-objects-plugin/public';
-import { injectTagReferences } from './inject_tag_references';
 import { extractTagReferences } from './extract_tag_references';
+import { injectTagReferences } from './inject_tag_references';
 
 export const decorateConfig = (config: SavedObjectConfig) => {
   config.mapping = {

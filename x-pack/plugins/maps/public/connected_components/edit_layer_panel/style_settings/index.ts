@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { connect } from 'react-redux';
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { connect } from 'react-redux';
-import { StyleSettings } from './style_settings';
-import { getSelectedLayer } from '../../../selectors/map_selectors';
+import { CustomIcon, StyleDescriptor } from '../../../../common/descriptor_types';
 import { updateCustomIcons, updateLayerStyleForSelectedLayer } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
-import { CustomIcon, StyleDescriptor } from '../../../../common/descriptor_types';
+import { getSelectedLayer } from '../../../selectors/map_selectors';
+import { StyleSettings } from './style_settings';
 
 function mapStateToProps(state: MapStoreState) {
   return {

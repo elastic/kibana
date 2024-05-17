@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
   ElasticsearchClient,
+  IKibanaResponse,
+  IRouter,
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { NORMALIZED_FIELD_TYPES } from '../../../common';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { filterFieldEntries } from './filter_field_entries';
 import type { FieldsType } from '../types';
+import { filterFieldEntries } from './filter_field_entries';
 
 describe('filter_field_entries', () => {
   beforeAll(() => {

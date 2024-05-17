@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
 import { Logger } from '@kbn/core/server';
+import { Observable, firstValueFrom } from 'rxjs';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { makeStatement } from './make_statement';
 import { QueueVertex } from '../graph/queue_vertex';
+import { makeStatement } from './make_statement';
 import { isVertexPipelineStage } from './utils';
 
 function getInputStatements(pipelineGraph) {

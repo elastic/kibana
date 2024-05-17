@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mount } from 'enzyme';
 import React from 'react';
 import { HelloWorldEmbeddable, HelloWorldEmbeddableReact } from '../../tests/fixtures';
 import { EmbeddableRoot } from './embeddable_root';
-import { mount } from 'enzyme';
-import { findTestSubject } from '@elastic/eui/lib/test';
 
 test('EmbeddableRoot renders an embeddable', async () => {
   const embeddable = new HelloWorldEmbeddable({ id: 'hello' });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { OverviewGridItemLoader } from './overview_grid_item_loader';
 
 export const OverviewLoader = ({ rows }: { rows?: number }) => {

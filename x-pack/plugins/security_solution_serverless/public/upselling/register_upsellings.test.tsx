@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { SecurityProductTypes } from '../../common/config';
+import { ProductLine, ProductTier } from '../../common/product';
+import { mockServices } from '../common/services/__mocks__/services.mock';
 import {
   registerUpsellings,
   upsellingMessages,
   upsellingPages,
   upsellingSections,
 } from './register_upsellings';
-import { ProductLine, ProductTier } from '../../common/product';
-import type { SecurityProductTypes } from '../../common/config';
-import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
-import { mockServices } from '../common/services/__mocks__/services.mock';
 
 const mockGetProductProductFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({

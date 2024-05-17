@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import moment from 'moment';
 
+import { CanvasTemplate, CanvasWorkpad } from '../../../types';
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';
 import { CanvasWorkpadService } from '../workpad';
-import { CanvasTemplate, CanvasWorkpad } from '../../../types';
 
 type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService>;
 

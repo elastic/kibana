@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiExpression,
-  EuiPopover,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
   EuiSelect,
-  EuiFieldNumber,
-  EuiComboBoxOptionOption,
-  EuiComboBox,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { IErrorObject } from '../../types';
 import { builtInGroupByTypes } from '../constants';
 import { FieldOption, GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
-import { IErrorObject } from '../../types';
 
 interface GroupByOverFieldOption {
   label: string;

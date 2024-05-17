@@ -11,30 +11,30 @@ import React, { useCallback, useState } from 'react';
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
+import { FEATURE_INFLUENCE, isOutlierAnalysis } from '@kbn/ml-data-frame-analytics-utils';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
+  useColorRange,
 } from '../../../../../components/color_range_legend';
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 
-import { defaultSearchQuery, useResultsViewConfig, getDestinationIndex } from '../../../../common';
+import { defaultSearchQuery, getDestinationIndex, useResultsViewConfig } from '../../../../common';
 
 import {
-  ExpandableSectionSplom,
   ExpandableSectionAnalytics,
   ExpandableSectionResults,
+  ExpandableSectionSplom,
 } from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
+import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
+import { DataViewPrompt } from '../data_view_prompt';
+import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
-import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
-import type { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
-import { DataViewPrompt } from '../data_view_prompt';
 
 export type TableItem = Record<string, any>;
 

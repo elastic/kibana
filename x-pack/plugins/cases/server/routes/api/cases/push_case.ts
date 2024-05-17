@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_PUSH_URL } from '../../../../common/constants';
-import type { CaseRoute } from '../types';
-import { createCaseError } from '../../../common/error';
-import { createCasesRoute } from '../create_cases_route';
 import { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
+import { createCaseError } from '../../../common/error';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
+import { createCasesRoute } from '../create_cases_route';
+import type { CaseRoute } from '../types';
 
 export const pushCaseRoute: CaseRoute = createCasesRoute({
   method: 'post',

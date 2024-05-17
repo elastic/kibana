@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { transparentize } from '@elastic/eui';
+import { PaletteOutput } from '@kbn/coloring';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-plugin/public/data_views';
+import { euiLightVars } from '@kbn/ui-theme';
 import {
   EventAnnotationConfig,
   FillTypes,
@@ -13,27 +17,23 @@ import {
   XYLayerConfig,
   YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { PaletteOutput } from '@kbn/coloring';
-import { v4 } from 'uuid';
-import { transparentize } from '@elastic/eui';
 import Color from 'color';
-import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
+import { v4 } from 'uuid';
+import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
-import { SUPPORTED_METRICS } from '../../metrics';
-import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
-import { getSeriesAgg } from '../../series';
 import {
-  isPercentileRanksColumnWithMeta,
-  isPercentileColumnWithMeta,
+  AnyColumnWithReferences,
   Column,
   Layer,
-  AnyColumnWithReferences,
+  isPercentileColumnWithMeta,
+  isPercentileRanksColumnWithMeta,
 } from '../../convert';
-import { getChartType } from './chart_type';
 import { extractOrGenerateDatasourceInfo } from '../../datasource';
+import { SUPPORTED_METRICS } from '../../metrics';
+import { getSeriesAgg } from '../../series';
+import { getChartType } from './chart_type';
 
 export const isColumnWithReference = (column: Column): column is AnyColumnWithReferences =>
   Boolean((column as AnyColumnWithReferences).references);
@@ -112,8 +112,8 @@ export const getLayers = async (
               ? 'right'
               : 'left'
             : isSingleAxis
-            ? 'left'
-            : getAxisMode(series, model),
+              ? 'left'
+              : getAxisMode(series, model),
           ...(isReferenceLine && {
             fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
             lineWidth: series.line_width,

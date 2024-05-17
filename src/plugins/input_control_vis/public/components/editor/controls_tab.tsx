@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { PureComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { PureComponent } from 'react';
 
 import {
   EuiButton,
@@ -19,22 +19,22 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { ControlEditor } from './control_editor';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
+  CONTROL_TYPES,
+  ControlParams,
+  ControlParamsOptions,
   addControl,
   moveControl,
   newControl,
   removeControl,
   setControl,
-  ControlParams,
-  CONTROL_TYPES,
-  ControlParamsOptions,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { InputControlVisDependencies } from '../../plugin';
 import { InputControlVisParams } from '../../types';
+import { ControlEditor } from './control_editor';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 
 export const javaDefinition: LanguageDefinition = {
   id: Languages.JAVA,
@@ -108,8 +108,8 @@ for (Book book : books) {
     br.operations(op -> op
         .index(idx -> idx
             .index("${indexName}")${
-    ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''
-  }
+              ingestPipeline ? `\n            .pipeline("${ingestPipeline}")` : ''
+            }
             .id(product.getId())
             .document(book)
         )

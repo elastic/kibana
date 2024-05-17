@@ -9,13 +9,13 @@
 import { schema } from '@kbn/config-schema';
 import { SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
 
+import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../common/constants';
 import {
   fieldSpecSchema,
+  fieldSpecSchemaFields,
   runtimeFieldSchema,
   serializedFieldFormatSchema,
-  fieldSpecSchemaFields,
 } from '../../common/schemas';
-import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../common/constants';
 
 export const dataViewSpecSchema = schema.object({
   title: schema.string(),

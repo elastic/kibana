@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TableSuggestion, TableSuggestionColumn } from '../../types';
 import { getSuggestions } from './metric_suggestions';
-import { TableSuggestionColumn, TableSuggestion } from '../../types';
 
 describe('metric_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {

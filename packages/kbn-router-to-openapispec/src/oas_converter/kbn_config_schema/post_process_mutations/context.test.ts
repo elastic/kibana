@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, metaFields } from '@kbn/config-schema';
+import { metaFields, schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../parse';
 import { createCtx } from './context';
 

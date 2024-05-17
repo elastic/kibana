@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { CoreStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import type { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { CellActionsProvider } from '@kbn/cell-actions';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { CASES_FEATURE_ID } from '../../../common';
 import { ReactQueryClientProvider } from '../containers/query_client/query_client_provider';
 import { createMockStore } from './create_store';

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
+import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
-import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
 
 export type HttpResourcesMock = jest.Mocked<PublicMethodsOf<HttpResourcesService>>;
 

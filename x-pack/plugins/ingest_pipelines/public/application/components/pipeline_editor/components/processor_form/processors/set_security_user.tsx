@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 
-import { FIELD_TYPES, UseField, ComboBoxField } from '../../../../../../shared_imports';
+import { ComboBoxField, FIELD_TYPES, UseField } from '../../../../../../shared_imports';
 
-import { FieldsConfig, to, from } from './shared';
+import { FieldsConfig, from, to } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';
 

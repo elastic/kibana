@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getPivotDropdownOptions } from '.';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterAggForm } from './filter_agg/components';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { getPivotDropdownOptions } from '.';
+import { FilterAggForm } from './filter_agg/components';
 import { PercentilesAggForm } from './percentiles_agg/percentiles_form_component';
 
 describe('Transform: Define Pivot Common', () => {

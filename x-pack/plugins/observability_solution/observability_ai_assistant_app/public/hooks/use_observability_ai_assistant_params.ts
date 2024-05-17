@@ -8,7 +8,7 @@ import { type PathsOf, type TypeOf, useParams } from '@kbn/typed-react-router-co
 import type { ObservabilityAIAssistantRoutes } from '../routes/config';
 
 export function useObservabilityAIAssistantParams<
-  TPath extends PathsOf<ObservabilityAIAssistantRoutes>
+  TPath extends PathsOf<ObservabilityAIAssistantRoutes>,
 >(path: TPath): TypeOf<ObservabilityAIAssistantRoutes, TPath> {
   return useParams(path)! as TypeOf<ObservabilityAIAssistantRoutes, TPath>;
 }

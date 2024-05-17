@@ -11,11 +11,11 @@ import { mergeMap, toArray } from 'rxjs';
 
 import { maybeMap } from '../common';
 
-import { OptimizerConfig } from './optimizer_config';
-import { BundleCacheEvent } from './bundle_cache';
-import { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
+import { BundleCacheEvent } from './bundle_cache';
 import { observeWorker } from './observe_worker';
+import { OptimizerConfig } from './optimizer_config';
+import { ChangeEvent } from './watcher';
 
 /**
  * Create a stream of all worker events, these include messages

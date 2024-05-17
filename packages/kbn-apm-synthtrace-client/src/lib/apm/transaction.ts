@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ApmError } from './apm_error';
-import { Event } from './event';
-import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
+import { ApmError } from './apm_error';
 import { ApmFields } from './apm_fields';
+import { BaseSpan } from './base_span';
+import { Event } from './event';
 import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
 
 export class Transaction extends BaseSpan {

@@ -9,7 +9,7 @@ import React, { FunctionComponent } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiText, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { PhaseExceptDelete } from '../../../../../../common/types';
 

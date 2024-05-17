@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
 import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  EuiButton,
   EuiButtonIcon,
-  EuiPopover,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import React, { Component } from 'react';
 import { DRAW_SHAPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
-import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
-import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
 import { DrawState } from '../../../../common/descriptor_types';
+import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
+import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 const DRAW_SHAPE_LABEL = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
   defaultMessage: 'Draw shape to filter data',

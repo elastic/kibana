@@ -8,18 +8,18 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import type { AgentStatus } from '../../../common/types';
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
-import type { AgentStatus } from '../../../common/types';
 
 import { auditLoggingService } from '../audit_logging';
 
 import {
   closePointInTime,
-  getAgentsByKuery,
   getAgentTags,
+  getAgentsByKuery,
   openPointInTime,
   updateAgent,
 } from './crud';

@@ -18,16 +18,16 @@ import type {
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
-import {
-  getSessionIndexSettings,
-  SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME,
-  SessionIndex,
-} from './session_index';
-import { sessionIndexMock } from './session_index.mock';
 import { auditLoggerMock } from '../audit/mocks';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
+import {
+  SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME,
+  SessionIndex,
+  getSessionIndexSettings,
+} from './session_index';
+import { sessionIndexMock } from './session_index.mock';
 
 describe('Session index', () => {
   let mockElasticsearchClient: ReturnType<

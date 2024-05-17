@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ElementRef } from 'react';
-import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
-import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
+import type { EuiMarkdownAstNode, EuiMarkdownEditorProps } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
-import { usePlugins } from './use_plugins';
+import type { ElementRef } from 'react';
+import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
+import { usePlugins } from './use_plugins';
 
 interface MarkdownEditorProps {
   ariaLabel: string;

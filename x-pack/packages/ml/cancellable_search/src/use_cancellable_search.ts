@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { useCallback, useRef, useState } from 'react';
+import { tap } from 'rxjs';
 
 export interface UseCancellableSearch {
   runRequest: <RequestBody, ResponseType extends IKibanaSearchResponse>(

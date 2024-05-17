@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TestScheduler } from 'rxjs/testing';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import { TestScheduler } from 'rxjs/testing';
 import { licenseMock } from '../common/licensing.mock';
-import { getPluginStatus$ } from './plugin_status';
 import type { ILicense } from '../common/types';
+import { getPluginStatus$ } from './plugin_status';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {

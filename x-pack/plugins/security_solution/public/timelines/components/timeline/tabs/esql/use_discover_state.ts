@@ -10,12 +10,12 @@ import type { InternalState } from '@kbn/discover-plugin/public/application/main
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import type { State } from '../../../../../common/store';
 import {
   updateDiscoverAppState,
   updateDiscoverInternalState,
   updateDiscoverSavedSearchState,
 } from '../../../../../common/store/discover/actions';
-import type { State } from '../../../../../common/store';
 
 export const useDiscoverState = () => {
   const discoverAppState = useSelector<State, DiscoverAppState | undefined>((state) => {

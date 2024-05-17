@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Content } from './content';
 import {
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButtonEmpty,
   EuiImage,
   EuiLink,
-  EuiBetaBadge,
   EuiPageHeader,
-  EuiButtonEmpty,
   EuiSpacer,
-  EuiBadge,
 } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Content } from './content';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { TutorialsCategory } from '../../../../common/constants';

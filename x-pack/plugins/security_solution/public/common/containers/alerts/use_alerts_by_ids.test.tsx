@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useAlertsByIds } from './use_alerts_by_ids';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_query', () => ({

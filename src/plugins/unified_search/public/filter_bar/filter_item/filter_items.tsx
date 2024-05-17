@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import type { Filter } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FilterItem, FilterItemProps } from './filter_item';
-import type { IUnifiedSearchPluginServices } from '../../types';
+import React, { useRef } from 'react';
 import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { IUnifiedSearchPluginServices } from '../../types';
+import { FilterItem, FilterItemProps } from './filter_item';
 
 /**
  * Properties for the filter items component, which will render a single filter pill for every filter that is sent in

@@ -5,53 +5,53 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
   PackagePolicyClient,
   PackageService,
 } from '@kbn/fleet-plugin/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment';
-import { Installation, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { schema } from '@kbn/config-schema';
-import { VersionedRoute } from '@kbn/core-http-server/src/versioning/types';
 import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  STATUS_ROUTE_PATH,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  VULNERABILITIES_INDEX_PATTERN,
-  KSPM_POLICY_TEMPLATE,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSPM_POLICY_TEMPLATE,
-  POSTURE_TYPES,
-  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
-  VULN_MGMT_POLICY_TEMPLATE,
-  POSTURE_TYPE_ALL,
-  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  FINDINGS_INDEX_PATTERN,
+  KSPM_POLICY_TEMPLATE,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_RETENTION_POLICY,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  POSTURE_TYPES,
+  POSTURE_TYPE_ALL,
+  STATUS_ROUTE_PATH,
+  VULNERABILITIES_INDEX_PATTERN,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import type {
-  CspApiRequestHandlerContext,
-  CspRequestHandlerContext,
-  CspRouter,
-  StatusResponseInfo,
-} from '../../types';
 import type {
   CspSetupStatus,
   CspStatusCode,
   IndexStatus,
   PostureTypes,
 } from '../../../common/types_old';
+import { checkIndexStatus } from '../../lib/check_index_status';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
   getCspPackagePolicies,
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
-import { checkIndexStatus } from '../../lib/check_index_status';
+import type {
+  CspApiRequestHandlerContext,
+  CspRequestHandlerContext,
+  CspRouter,
+  StatusResponseInfo,
+} from '../../types';
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 export const INDEX_TIMEOUT_IN_MINUTES_CNVM = 240;

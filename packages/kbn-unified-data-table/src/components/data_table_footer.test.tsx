@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { UnifiedDataTableFooter } from './data_table_footer';
-import { servicesMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { servicesMock } from '../../__mocks__/services';
+import { UnifiedDataTableFooter } from './data_table_footer';
 
 describe('UnifiedDataTableFooter', function () {
   it('should not render anything when not on the last page', async () => {

@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { RightPanelContext } from '../context';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { CorrelationsOverview } from './correlations_overview';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import {
+  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
+  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
+} from '../../../shared/components/test_ids';
+import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { LeftPanelInsightsTab } from '../../left';
+import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
+import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
+import { RightPanelContext } from '../context';
+import { CorrelationsOverview } from './correlations_overview';
 import {
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
@@ -24,22 +40,6 @@ import {
   CORRELATIONS_TEST_ID,
   SUMMARY_ROW_VALUE_TEST_ID,
 } from './test_ids';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
-import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
-import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
-import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
-import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
-import {
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../../shared/components/test_ids';
 
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');

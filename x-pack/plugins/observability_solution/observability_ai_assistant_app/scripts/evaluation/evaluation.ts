@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import Path from 'path';
+import { format, parse } from 'url';
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
 import * as fastGlob from 'fast-glob';
 import inquirer from 'inquirer';
-import yargs from 'yargs';
-import chalk from 'chalk';
 import { castArray, omit } from 'lodash';
 // @ts-expect-error
 import Mocha from 'mocha';
-import Path from 'path';
 import * as table from 'table';
 import { TableUserConfig } from 'table';
-import { format, parse } from 'url';
-import { ToolingLog } from '@kbn/tooling-log';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import yargs from 'yargs';
 import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
 import { KibanaClient } from './kibana_client';

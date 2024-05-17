@@ -10,9 +10,9 @@ import { tlsFormatters } from './tls_formatters';
 
 import { Formatter, commonFormatters } from './common_formatters';
 import {
-  stringToJsonFormatter,
   arrayToJsonFormatter,
   objectToJsonFormatter,
+  stringToJsonFormatter,
 } from './formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;

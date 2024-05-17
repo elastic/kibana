@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Chart, LineSeries, Axis, Tooltip } from '@elastic/charts';
+import { Axis, Chart, LineSeries, Tooltip } from '@elastic/charts';
 
 import { AnalyticsChart } from '.';
 

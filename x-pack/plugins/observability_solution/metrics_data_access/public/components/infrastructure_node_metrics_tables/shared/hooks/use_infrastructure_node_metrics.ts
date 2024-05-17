@@ -16,9 +16,9 @@ import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
 } from '../../../../../common/metrics_explorer_views/types';
+import { MetricsDataClient } from '../../../../lib/metrics_client';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import { NodeMetricsTableData } from '../types';
-import { MetricsDataClient } from '../../../../lib/metrics_client';
 
 export interface SortState<T> {
   field: keyof T;
@@ -165,12 +165,12 @@ export const useInfrastructureNodeMetrics = <T>(
       errors.length > 0
         ? { state: 'error', errors }
         : metricIndicesExist == null
-        ? { state: 'unknown' }
-        : !metricIndicesExist
-        ? { state: 'no-indices' }
-        : nodes.length <= 0
-        ? { state: 'empty-indices' }
-        : { state: 'data', currentPageIndex, pageCount, rows: nodes },
+          ? { state: 'unknown' }
+          : !metricIndicesExist
+            ? { state: 'no-indices' }
+            : nodes.length <= 0
+              ? { state: 'empty-indices' }
+              : { state: 'data', currentPageIndex, pageCount, rows: nodes },
     [currentPageIndex, errors, metricIndicesExist, nodes, pageCount]
   );
 

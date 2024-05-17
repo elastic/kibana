@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { injectMapPropsIntoSpec } from './vsi_helper';
 import { VegaSpec } from '../../../data_model/types';
+import { injectMapPropsIntoSpec } from './vsi_helper';
 
 describe('vega_map_view/vsi_helper', () => {
   describe('injectMapPropsIntoSpec', () => {

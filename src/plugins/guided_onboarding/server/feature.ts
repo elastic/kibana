@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { PLUGIN_FEATURE, PLUGIN_ID } from '../common/constants';
 import { guideStateSavedObjectsType, pluginStateSavedObjectsType } from './saved_objects';
 

@@ -7,10 +7,10 @@
  */
 
 import { get, last } from 'lodash';
-import { overwrite, getBucketsPath, bucketTransform } from '../../helpers';
-import { getFieldsForTerms } from '../../../../../common/fields_utils';
-import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
 import { basicAggs } from '../../../../../common/basic_aggs';
+import { BASIC_AGGS_TYPES } from '../../../../../common/enums';
+import { getFieldsForTerms } from '../../../../../common/fields_utils';
+import { bucketTransform, getBucketsPath, overwrite } from '../../helpers';
 
 import type { TableRequestProcessorsFunction } from './types';
 

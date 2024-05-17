@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaReactOverlays } from '../overlays';
+import React, { FC, PropsWithChildren } from 'react';
 import { KibanaReactNotifications } from '../notifications';
+import { KibanaReactOverlays } from '../overlays';
 
 export type KibanaServices = Partial<CoreStart>;
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../../hooks/use_fetcher';
-import { MetricItem } from './metric_item';
 import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
+import { MetricItem } from './metric_item';
 
 const valueFormatter = (value: number, suffix = '') => {
   return `${value} ${suffix}`;

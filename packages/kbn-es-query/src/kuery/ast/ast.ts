@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { JsonObject } from '@kbn/utility-types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeTypes } from '../node_types';
+import { JsonObject } from '@kbn/utility-types';
 import { KQLSyntaxError } from '../kuery_syntax_error';
+import { nodeTypes } from '../node_types';
 import type { KqlContext, KueryNode, KueryParseOptions, KueryQueryOptions } from '../types';
 
-import { parse as parseKuery } from '../grammar';
 import { DataViewBase } from '../../..';
+import { parse as parseKuery } from '../grammar';
 
 const fromExpression = (
   expression: string | estypes.QueryDslQueryContainer,

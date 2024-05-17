@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { memo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { NotFoundPage } from '../../../app/404';
+import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../common/constants';
 import type { EndpointAction } from './store/action';
 import { EndpointList } from './view';
-import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../common/constants';
-import { NotFoundPage } from '../../../app/404';
 
 /**
  * Provides the routing container for the hosts related views

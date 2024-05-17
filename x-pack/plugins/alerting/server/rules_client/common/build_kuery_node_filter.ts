@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { KueryNode, fromKueryExpression } from '@kbn/es-query';
 
 export const buildKueryNodeFilter = (filter?: string | KueryNode | null): KueryNode | null => {
   let optionsFilter: KueryNode | string | null = filter ?? null;

@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { useStorage } from '@kbn/ml-local-storage';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
+import { useStorage } from '@kbn/ml-local-storage';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
+import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
+import { CollapsiblePanel } from '../../../components/collapsible_panel';
 import {
   OverviewStatsBar,
   type StatEntry,
 } from '../../../components/collapsible_panel/collapsible_panel';
-import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
-import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
-import { AnalyticsTable } from './table';
-import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
-import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { type AnalyticStatsBarStats } from '../../../components/stats_bar';
 import { useMlLink } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
+import { getAnalyticsFactory } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import { useRefresh } from '../../../routing/use_refresh';
 import type { GetDataFrameAnalyticsStatsResponseError } from '../../../services/ml_api_service/data_frame_analytics';
-import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analytics_management/components/empty_prompt';
 import { overviewPanelDefaultState } from '../../overview_page';
-import { CollapsiblePanel } from '../../../components/collapsible_panel';
+import { AnalyticsTable } from './table';
 
 interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;

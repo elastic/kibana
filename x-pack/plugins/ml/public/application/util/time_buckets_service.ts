@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { TimeBuckets, type TimeBucketsInterval, type TimeRangeBounds } from '@kbn/ml-time-buckets';
 import moment from 'moment';
-import { type TimeRangeBounds, type TimeBucketsInterval, TimeBuckets } from '@kbn/ml-time-buckets';
+import { useMemo } from 'react';
 import { useMlKibana } from '../contexts/kibana';
 
 // TODO Consolidate with legacy code in `ml/public/application/util/time_buckets.js`.

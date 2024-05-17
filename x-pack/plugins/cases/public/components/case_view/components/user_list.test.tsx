@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
 import { screen } from '@testing-library/react';
-import { UserList } from './user_list';
-import * as i18n from '../translations';
-import { basicCase } from '../../../containers/mock';
-import { useCaseViewNavigation } from '../../../common/navigation/hooks';
+import userEvent from '@testing-library/user-event';
+import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import userEvent from '@testing-library/user-event';
+import { useCaseViewNavigation } from '../../../common/navigation/hooks';
+import { basicCase } from '../../../containers/mock';
 import { userProfilesMap } from '../../../containers/user_profiles/api.mock';
+import * as i18n from '../translations';
+import { UserList } from './user_list';
 
 jest.mock('../../../common/navigation/hooks');
 

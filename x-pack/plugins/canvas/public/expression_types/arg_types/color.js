@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { templateFromReactComponent } from '../../lib/template_from_react_component';
-import { ColorPickerPopover } from '../../components/color_picker_popover';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { ArgTypesStrings } from '../../../i18n';
+import { ColorPickerPopover } from '../../components/color_picker_popover';
+import { templateFromReactComponent } from '../../lib/template_from_react_component';
 
 const { Color: strings } = ArgTypesStrings;
 

@@ -17,11 +17,11 @@ jest.mock('../../../kibana_services', () => ({
   },
 }));
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import React from 'react';
 
-import { LayerControl } from './layer_control';
 import { ILayer } from '../../../classes/layers/layer';
+import { LayerControl } from './layer_control';
 
 const defaultProps = {
   isReadOnly: false,

@@ -8,13 +8,13 @@
 import {
   CoreSetup,
   CoreStart,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
   IRouter,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
-import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 import { registerRoutes } from './routes';
+import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 
 export class SessionViewPlugin implements Plugin {
   private logger: Logger;

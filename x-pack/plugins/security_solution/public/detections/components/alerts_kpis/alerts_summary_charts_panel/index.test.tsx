@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { TestProviders } from '../../../../common/mock';
 import { AlertsSummaryChartsPanel } from '.';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { TestProviders } from '../../../../common/mock';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 
 jest.mock('../../../../common/lib/kibana');

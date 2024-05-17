@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useEffect } from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import { get } from 'lodash';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { useKibana, useFormData } from '../../../../../../../shared_imports';
+import { DescribedFormRow, FieldLoadingError, LearnMoreLink } from '../../..';
+import { useFormData, useKibana } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfiguration, UseField, globalFields } from '../../../../form';
-import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
-import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
+import { UseField, globalFields, useConfiguration } from '../../../../form';
 import { RepositoryComboBoxField } from './repository_combobox_field';
+import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
 import './_searchable_snapshot_field.scss';
 

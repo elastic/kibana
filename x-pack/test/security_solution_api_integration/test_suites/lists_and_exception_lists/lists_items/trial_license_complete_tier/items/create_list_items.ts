@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { LIST_URL, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEM_URL, LIST_URL } from '@kbn/securitysolution-list-constants';
 
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import * as t from 'io-ts';
 import { version } from '@kbn/securitysolution-io-ts-types';
+import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { description } from '../../common/description';
 import { id } from '../../common/id';
-import { _version } from '../../common/underscore_version';
 import { meta } from '../../common/meta';
 import { name } from '../../common/name';
-import { description } from '../../common/description';
+import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import { _version } from '../../common/underscore_version';
 
 export const patchListSchema = t.intersection([
   t.exact(

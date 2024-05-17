@@ -6,12 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
-import { rgba } from 'polished';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import styled from 'styled-components';
+import { rgba } from 'polished';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
@@ -21,12 +21,12 @@ import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_
 import { timelineActions } from '../../../store';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
-import { AddDataProviderPopover } from './add_data_provider_popover';
-import type { BrowserFields } from '../../../../common/containers/source';
 import {
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
 } from '../../../../common/components/drag_and_drop/helpers';
+import type { BrowserFields } from '../../../../common/containers/source';
+import { AddDataProviderPopover } from './add_data_provider_popover';
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 import { DataProviderType, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';

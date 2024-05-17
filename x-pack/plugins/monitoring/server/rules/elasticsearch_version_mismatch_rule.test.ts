@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismatch_rule';
-import { RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
-import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
+import { ElasticsearchVersionMismatchRule } from './elasticsearch_version_mismatch_rule';
 
 const RealDate = Date;
 

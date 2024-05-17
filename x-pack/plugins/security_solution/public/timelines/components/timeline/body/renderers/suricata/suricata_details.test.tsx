@@ -9,11 +9,11 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
+import { waitFor } from '@testing-library/react';
 import { mockTimelineData } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { SuricataDetails } from './suricata_details';
-import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../../common/lib/kibana');
 

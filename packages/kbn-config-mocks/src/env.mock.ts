@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { Env, type EnvOptions, type RawPackageInfo } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
-import { Env, type RawPackageInfo, type EnvOptions } from '@kbn/config';
 
 type DeepPartial<T> = {
   [P in keyof T]?: P extends 'repoPackages'
     ? T[P]
     : T[P] extends Array<infer R>
-    ? Array<DeepPartial<R>>
-    : DeepPartial<T[P]>;
+      ? Array<DeepPartial<R>>
+      : DeepPartial<T[P]>;
 };
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {

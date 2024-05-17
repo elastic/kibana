@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportRequestParams } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, RouteConfig, SavedObjectsClientContract } from '@kbn/core/server';
 import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
-import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { subscribeToAborted$ } from '../../cancel_request_on_abort';
 import {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
@@ -26,7 +27,6 @@ import {
   InfraServerPluginStartDeps,
   InfraVersionedRouteConfig,
 } from './adapter_types';
-import { subscribeToAborted$ } from '../../cancel_request_on_abort';
 
 interface FrozenIndexParams {
   ignore_throttled?: boolean;

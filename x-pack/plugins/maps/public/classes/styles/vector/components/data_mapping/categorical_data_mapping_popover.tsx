@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFormRow, EuiIcon, EuiSwitch, EuiSwitchEvent, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataMappingPopover } from './data_mapping_popover';
+import React from 'react';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
+import { DataMappingPopover } from './data_mapping_popover';
 
 interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;

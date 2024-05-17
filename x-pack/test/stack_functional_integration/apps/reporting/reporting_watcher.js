@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getWatcher, deleteWatcher, putWatcher } from './util';
+import { deleteWatcher, getWatcher, putWatcher } from './util';
 
 export default function ({ getService, getPageObjects }) {
   describe('watcher app', function describeIndexTests() {

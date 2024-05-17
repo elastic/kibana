@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import { EuiFilterButton, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { FILTER_NAMES } from '../translations';
 import type { FilterName } from './hooks';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilterPopover = memo(
   ({

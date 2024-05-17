@@ -13,8 +13,8 @@ import {
   type ProjectSwitcherStorybookParams,
 } from '../mocks/storybook.mock';
 
-import { ProjectSwitcher as Component } from './switcher';
 import { ProjectSwitcherProvider as Provider } from './services';
+import { ProjectSwitcher as Component } from './switcher';
 
 import mdx from '../README.mdx';
 

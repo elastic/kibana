@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { hsl } from 'color';
+import _ from 'lodash';
 
 import { seedColors } from './seed_colors';
 

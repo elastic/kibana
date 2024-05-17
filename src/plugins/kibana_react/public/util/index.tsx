@@ -9,11 +9,11 @@
 import React from 'react';
 import { Observable } from 'rxjs';
 
-import { I18nProvider } from '@kbn/i18n-react';
-import type { MountPoint } from '@kbn/core/public';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { CoreTheme, ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { MountPoint } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { defaultTheme } from '@kbn/react-kibana-context-common';
 
 import { toMountPoint as _toMountPoint } from '@kbn/react-kibana-mount';

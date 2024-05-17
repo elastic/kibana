@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 export const PanelSpinner: React.FC = () => {
   return (

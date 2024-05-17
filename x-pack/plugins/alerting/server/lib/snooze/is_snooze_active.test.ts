@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
+import moment from 'moment';
 import sinon from 'sinon';
 import { RRuleRecord } from '../../types';
 import { isSnoozeActive } from './is_snooze_active';

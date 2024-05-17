@@ -7,19 +7,19 @@
 
 // Service for obtaining data for the ML Results dashboards.
 
-import { useMemo } from 'react';
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
+import type { ML_JOB_ID, ML_PARTITION_FIELD_VALUE, MlEntityField } from '@kbn/ml-anomaly-utils';
 import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
+import { useMemo } from 'react';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import type {
-  GetStoppedPartitionResult,
-  GetDatafeedResultsChartDataResult,
-} from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
-import type { PartitionFieldsConfig } from '../../../../common/types/storage';
+import type {
+  GetDatafeedResultsChartDataResult,
+  GetStoppedPartitionResult,
+} from '../../../../common/types/results';
 import type { ExplorerChartsData } from '../../../../common/types/results';
+import type { PartitionFieldsConfig } from '../../../../common/types/storage';
 
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';

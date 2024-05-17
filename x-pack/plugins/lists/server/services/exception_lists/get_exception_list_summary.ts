@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ExceptionListSummarySchema,
   FilterOrUndefined,
@@ -13,7 +14,6 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 

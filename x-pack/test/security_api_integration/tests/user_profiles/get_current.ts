@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { parse as parseCookie } from 'tough-cookie';
 import { expect } from 'expect';
+import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

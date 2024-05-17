@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
 import { stringify } from 'query-string';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
-import { selectedFiltersSelector } from '../state/selectors';
-import { setSelectedFilters } from '../state/actions/selected_filters';
-import { getFiltersFromMap } from './use_selected_filters';
 import { getParsedParams } from '../lib/helper/parse_search';
+import { setSelectedFilters } from '../state/actions/selected_filters';
+import { selectedFiltersSelector } from '../state/selectors';
+import { getFiltersFromMap } from './use_selected_filters';
 
 export type GetUrlParams = () => UptimeUrlParams;
 export type UpdateUrlParams = (updatedParams: {

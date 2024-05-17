@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
+import React from 'react';
 import {
   KqlQueryType,
   ThreeWayDiffOutcome,
@@ -12,8 +14,6 @@ import {
 } from '../../../../../common/api/detection_engine';
 import type { PartialRuleDiff } from '../../../../../common/api/detection_engine';
 import { TestProviders } from '../../../../common/mock';
-import { render } from '@testing-library/react';
-import React from 'react';
 import { PerFieldRuleDiffTab } from './per_field_rule_diff_tab';
 
 const ruleFieldsDiffBaseFieldsMock = {

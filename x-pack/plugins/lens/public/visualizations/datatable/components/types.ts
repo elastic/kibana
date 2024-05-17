@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { CoreSetup } from '@kbn/core/public';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
+import type { DatatableProps, LensGridDirection } from '../../../../common/expressions';
+import type { FormatFactory } from '../../../../common/types';
 import type {
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
   LensEditEvent,
 } from '../../../types';
 import {
-  LENS_EDIT_SORT_ACTION,
-  LENS_EDIT_RESIZE_ACTION,
-  LENS_TOGGLE_ACTION,
   LENS_EDIT_PAGESIZE_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+  LENS_EDIT_SORT_ACTION,
+  LENS_TOGGLE_ACTION,
 } from './constants';
-import type { FormatFactory } from '../../../../common/types';
-import type { DatatableProps, LensGridDirection } from '../../../../common/expressions';
 
 export interface LensSortActionData {
   columnId: string | undefined;

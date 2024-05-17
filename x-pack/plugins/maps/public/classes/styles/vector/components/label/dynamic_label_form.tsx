@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldSelect } from '../field_select';
-import { StyleField } from '../../style_fields_helper';
+import React, { ReactNode } from 'react';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { LabelDynamicOptions } from '../../../../../../common/descriptor_types';
 import { DynamicTextProperty } from '../../properties/dynamic_text_property';
+import { StyleField } from '../../style_fields_helper';
+import { FieldSelect } from '../field_select';
 
 interface Props {
   fields: StyleField[];

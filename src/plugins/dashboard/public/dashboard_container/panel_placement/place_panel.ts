@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { PanelState, EmbeddableInput, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, EmbeddableInput, PanelState } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../common';
-import { IProvidesLegacyPanelPlacementSettings } from './types';
-import { runPanelPlacementStrategy } from './place_new_panel_strategies';
 import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   PanelPlacementStrategy,
 } from '../../dashboard_constants';
+import { runPanelPlacementStrategy } from './place_new_panel_strategies';
+import { IProvidesLegacyPanelPlacementSettings } from './types';
 
 export const providesLegacyPanelPlacementSettings = (
   value: unknown

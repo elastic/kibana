@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import type { FC } from 'react';
-import { EuiPanel } from '@elastic/eui';
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  SearchBar,
   EmptyViewerState,
+  SearchBar,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
+import { ListExceptionItems } from '..';
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import { EditExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/edit_exception_flyout';
-import * as i18n from '../../translations';
 import { useListWithSearchComponent } from '../../hooks/use_list_with_search';
-import { ListExceptionItems } from '..';
+import * as i18n from '../../translations';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListSchema;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -16,11 +15,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { memo, useMemo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
 import { getEmptyValue } from '../../../common/components/empty_value';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const emptyValue = getEmptyValue();
 

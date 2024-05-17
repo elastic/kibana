@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { waitFor, render } from '@testing-library/react';
-import { TestProviders } from '../../mock';
-import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-import type { SessionsComponentsProps } from './types';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { licenseService } from '../../hooks/use_license';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { render, waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
+import React, { useEffect } from 'react';
+import { SessionsView, TEST_ID, defaultSessionsFilter } from '.';
+import { licenseService } from '../../hooks/use_license';
+import { TestProviders } from '../../mock';
 import type { EventsViewerProps } from '../events_viewer';
+import type { SessionsComponentsProps } from './types';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../utils/normalize_time_range');

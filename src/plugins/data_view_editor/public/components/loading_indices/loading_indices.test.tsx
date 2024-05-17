@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { shallow } from 'enzyme';
 import React from 'react';
 import { LoadingIndices } from '.';
-import { shallow } from 'enzyme';
 
 describe('LoadingIndices', () => {
   it('should render normally', () => {

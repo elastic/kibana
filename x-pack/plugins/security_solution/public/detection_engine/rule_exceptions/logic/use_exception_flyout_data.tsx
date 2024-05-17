@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
 
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import type { Rule } from '../../rule_management/logic/types';
-import { useKibana } from '../../../common/lib/kibana';
 import { useFetchIndex } from '../../../common/containers/source';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../common/lib/kibana';
+import type { Rule } from '../../rule_management/logic/types';
 
 import * as i18n from '../../../common/containers/source/translations';
-import { useRuleIndices } from '../../rule_management/logic/use_rule_indices';
 import { getMachineLearningJobId } from '../../../detections/pages/detection_engine/rules/helpers';
+import { useRuleIndices } from '../../rule_management/logic/use_rule_indices';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;

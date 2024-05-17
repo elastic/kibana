@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { ToolingLog } from '@kbn/tooling-log';
 import { CleanupTask } from '@kbn/dev-cli-runner';
 import { createTestEsCluster } from '@kbn/test';
-import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
+import { ToolingLog } from '@kbn/tooling-log';
+import deepEqual from 'fast-deep-equal';
 import { checkAdditiveOnlyChange } from './check_additive_only_change';
 import { checkIncompatibleMappings } from './check_incompatible_mappings';
 import { readCurrentMappings, writeCurrentMappings } from './current_mappings';
+import { extractMappingsFromPlugins } from './extract_mappings_from_plugins';
 
 export const runMappingsCompatibilityChecks = async ({
   fix,

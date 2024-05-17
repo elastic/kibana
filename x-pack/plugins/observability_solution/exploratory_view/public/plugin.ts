@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import {
   AppMountParameters,
   AppUpdater,
@@ -17,30 +16,31 @@ import {
   Plugin as PluginClass,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-import getAppDataView from './utils/observability_data_views/get_app_data_view';
-import { registerDataHandler } from './data_handler';
+import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { APP_ROUTE } from './constants';
+import { registerDataHandler } from './data_handler';
+import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export interface ExploratoryViewPublicPluginsSetup {
   data: DataPublicPluginSetup;

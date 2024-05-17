@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { IEventLoopDelaysMonitor, IntervalHistogram } from '@kbn/core-metrics-server';
 import type { IntervalHistogram as PerfIntervalHistogram } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
-import type { IntervalHistogram, IEventLoopDelaysMonitor } from '@kbn/core-metrics-server';
 
 /**
  * Nanosecond to milisecond conversion unit

@@ -7,16 +7,16 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { ValueOf } from '..';
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
-  monitoringTypes,
   installationStatuses,
+  monitoringTypes,
 } from '../../constants';
-import type { ValueOf } from '..';
 
-import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
+import type { PackageSpecCategory, PackageSpecIcon, PackageSpecManifest } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -560,7 +560,7 @@ export enum INSTALL_STATES {
   UPDATE_SO = 'update_so',
 }
 type StatesKeys = keyof typeof INSTALL_STATES;
-export type StateNames = typeof INSTALL_STATES[StatesKeys];
+export type StateNames = (typeof INSTALL_STATES)[StatesKeys];
 
 export interface LatestExecutedState<T> {
   name: T;

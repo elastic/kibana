@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { random } from 'lodash';
-import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import expect from '@kbn/expect';
+import { BulkUpdateTaskResult, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import { random } from 'lodash';
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;

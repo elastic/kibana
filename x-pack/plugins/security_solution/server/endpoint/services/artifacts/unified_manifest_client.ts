@@ -12,15 +12,15 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { createSoFindIterable } from '../../utils/create_so_find_iterable';
-import { mapUnifiedManifestSavedObjectToUnifiedManifest } from './utils';
+import { ManifestConstants } from '../../lib/artifacts';
 import type {
   InternalUnifiedManifestBaseSchema,
   InternalUnifiedManifestSchema,
   InternalUnifiedManifestUpdateSchema,
 } from '../../schemas';
-import { ManifestConstants } from '../../lib/artifacts';
+import { createSoFindIterable } from '../../utils/create_so_find_iterable';
 import { normalizeKuery } from '../../utils/normalize_kuery';
+import { mapUnifiedManifestSavedObjectToUnifiedManifest } from './utils';
 
 interface FetchAllUnifiedManifestsOptions {
   perPage?: number;

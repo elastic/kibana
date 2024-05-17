@@ -7,8 +7,8 @@
 
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { DEFAULT_ELEMENT_CSS } from '../../../common/lib/constants';
-import { testTable } from './__fixtures__/test_tables';
 import { fontStyle, getContainerStyle } from './__fixtures__/test_styles';
+import { testTable } from './__fixtures__/test_tables';
 import { render } from './render';
 
 const renderTable = {

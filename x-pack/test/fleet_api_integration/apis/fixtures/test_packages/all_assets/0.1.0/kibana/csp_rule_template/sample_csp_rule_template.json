@@ -18,12 +18,7 @@
     "rego_rule_id": "cis_1_2_2",
     "remediation": "Follow the documentation and configure alternate mechanisms for\nauthentication. Then,\nedit the API server pod specification file `/etc/kubernetes/manifests/kube-apiserver.yaml` \non the control plane node and remove the `--token-auth-file=<filename>`\nparameter.\n",
     "section": "API Server",
-    "tags": [
-      "CIS",
-      "Kubernetes",
-      "CIS 1.2.2",
-      "API Server"
-    ],
+    "tags": ["CIS", "Kubernetes", "CIS 1.2.2", "API Server"],
     "version": "1.0"
   },
   "id": "sample_csp_rule_template",

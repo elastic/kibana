@@ -8,11 +8,11 @@
 
 import type {
   SavedObjectMigrationContext,
-  SavedObjectMigrationMap,
   SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
-import { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './merge_migrations';
+import { mergeSavedObjectMigrationMaps, mergeSavedObjectMigrations } from './merge_migrations';
 
 describe('mergeSavedObjectMigrations', () => {
   test('merges migration parameters with a migration function', () => {

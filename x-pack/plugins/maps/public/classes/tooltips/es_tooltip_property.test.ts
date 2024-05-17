@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { FIELD_ORIGIN } from '../../../common/constants';
+import { AbstractField } from '../fields/field';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
-import { AbstractField } from '../fields/field';
-import { FIELD_ORIGIN } from '../../../common/constants';
 
 class MockField extends AbstractField {}
 

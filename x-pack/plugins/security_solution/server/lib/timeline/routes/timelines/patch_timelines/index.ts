@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
+import type { ConfigType } from '../../../../..';
 import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { patchTimelineSchema } from '../../../../../../common/api/timeline';
-import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
-import { createTimelines } from '../create_timelines';
-import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
 import type { PatchTimelinesResponse } from '../../../../../../common/api/timeline';
+import { TimelineStatusActions, buildFrameworkRequest } from '../../../utils/common';
+import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
+import { createTimelines } from '../create_timelines';
 
 export const patchTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

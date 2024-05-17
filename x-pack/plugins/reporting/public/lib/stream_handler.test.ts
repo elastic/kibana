@@ -8,8 +8,8 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 
-import { JobSummary, JobSummarySet } from '../types';
 import { Job, ReportingAPIClient } from '@kbn/reporting-public';
+import { JobSummary, JobSummarySet } from '../types';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
 /**
@@ -27,10 +27,30 @@ class TestReportingNotifierStreamHandler extends ReportingNotifierStreamHandler 
 }
 
 const mockJobsFound: Job[] = [
-  { id: 'job-source-mock1', status: 'completed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
-  { id: 'job-source-mock2', status: 'failed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
-  { id: 'job-source-mock3', status: 'pending', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
-  { id: 'job-source-mock4', status: 'completed', output: { csv_contains_formulas: true, max_size_reached: false }, payload: { title: 'specimen' } },
+  {
+    id: 'job-source-mock1',
+    status: 'completed',
+    output: { csv_contains_formulas: false, max_size_reached: false },
+    payload: { title: 'specimen' },
+  },
+  {
+    id: 'job-source-mock2',
+    status: 'failed',
+    output: { csv_contains_formulas: false, max_size_reached: false },
+    payload: { title: 'specimen' },
+  },
+  {
+    id: 'job-source-mock3',
+    status: 'pending',
+    output: { csv_contains_formulas: false, max_size_reached: false },
+    payload: { title: 'specimen' },
+  },
+  {
+    id: 'job-source-mock4',
+    status: 'completed',
+    output: { csv_contains_formulas: true, max_size_reached: false },
+    payload: { title: 'specimen' },
+  },
 ].map((j) => new Job(j as ReportApiJSON)); // prettier-ignore
 
 const coreSetup = coreMock.createSetup();

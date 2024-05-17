@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import moment from 'moment';
+import { useMemo } from 'react';
 
 import { ConfigKey } from '../../../../../../common/constants/monitor_management';
 import { SourceType } from '../../../../../../common/runtime_types';

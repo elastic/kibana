@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  EmbeddableFactoryDefinition,
   Container,
+  EmbeddableFactoryDefinition,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
-import type { SearchInput, SearchOutput } from './types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { extract, inject } from '../../common/embeddable';
+import type { DiscoverServices } from '../build_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import type { SavedSearchEmbeddable } from './saved_search_embeddable';
-import type { DiscoverServices } from '../build_services';
-import { inject, extract } from '../../common/embeddable';
+import type { SearchInput, SearchOutput } from './types';
 
 export interface StartServices {
   executeTriggerActions: UiActionsStart['executeTriggerActions'];

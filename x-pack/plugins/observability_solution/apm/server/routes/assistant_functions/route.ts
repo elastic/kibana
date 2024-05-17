@@ -10,11 +10,11 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
 import {
+  type APMDownstreamDependency,
   downstreamDependenciesRouteRt,
   getAssistantDownstreamDependencies,
-  type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
-import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_apm_timeseries';
+import { type ApmTimeseries, getApmTimeseries, getApmTimeseriesRt } from './get_apm_timeseries';
 
 const getApmTimeSeriesRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/assistant/get_apm_timeseries',

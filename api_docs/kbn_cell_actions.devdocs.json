@@ -289,9 +289,7 @@
             "description": [
               "\nCellActionsData containing the field spec but not the value for the compatibility check"
             ],
-            "signature": [
-              "Omit<C[\"data\"][number], \"value\">[]"
-            ],
+            "signature": ["Omit<C[\"data\"][number], \"value\">[]"],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -302,12 +300,8 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "metadata",
-            "description": [
-              "\nExtra configurations for actions."
-            ],
-            "signature": [
-              "C[\"metadata\"] | undefined"
-            ],
+            "description": ["\nExtra configurations for actions."],
+            "signature": ["C[\"metadata\"] | undefined"],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -371,12 +365,8 @@
             "type": "Object",
             "tags": [],
             "label": "nodeRef",
-            "description": [
-              "\nRef to the node where the cell action are rendered."
-            ],
-            "signature": [
-              "React.MutableRefObject<HTMLElement | null>"
-            ],
+            "description": ["\nRef to the node where the cell action are rendered."],
+            "signature": ["React.MutableRefObject<HTMLElement | null>"],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -387,12 +377,8 @@
             "type": "Object",
             "tags": [],
             "label": "metadata",
-            "description": [
-              "\nExtra configurations for actions."
-            ],
-            "signature": [
-              "Metadata | undefined"
-            ],
+            "description": ["\nExtra configurations for actions."],
+            "signature": ["Metadata | undefined"],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -428,9 +414,7 @@
             "tags": [],
             "label": "Unnamed",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-cell-actions/src/actions/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -511,9 +495,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "field",
-            "description": [
-              "\nThe field specification"
-            ],
+            "description": ["\nThe field specification"],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -560,9 +542,7 @@
             "type": "CompoundType",
             "tags": [],
             "label": "value",
-            "description": [
-              "\nCommon set of properties used by most actions."
-            ],
+            "description": ["\nCommon set of properties used by most actions."],
             "signature": [
               "string[] | undefined[] | boolean[] | number[] | ",
               {
@@ -691,9 +671,7 @@
             "description": [
               "\nOptional trigger ID to used to retrieve the cell actions.\nreturns empty array if not provided"
             ],
-            "signature": [
-              "string | undefined"
-            ],
+            "signature": ["string | undefined"],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -751,9 +729,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -766,9 +742,7 @@
                 "tags": [],
                 "label": "rowIndex",
                 "description": [],
-                "signature": [
-                  "number"
-                ],
+                "signature": ["number"],
                 "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -783,14 +757,8 @@
             "type": "Object",
             "tags": [],
             "label": "dataGridRef",
-            "description": [
-              "\nref to the EuiDataGrid instance"
-            ],
-            "signature": [
-              "React.MutableRefObject<",
-              "EuiDataGridRefProps",
-              " | null>"
-            ],
+            "description": ["\nref to the EuiDataGrid instance"],
+            "signature": ["React.MutableRefObject<", "EuiDataGridRefProps", " | null>"],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -807,12 +775,8 @@
         "type": "Type",
         "tags": [],
         "label": "CellActionExtend",
-        "description": [
-          "\nAction factory extend parameter type,"
-        ],
-        "signature": [
-          "Partial<C> & { id: string; }"
-        ],
+        "description": ["\nAction factory extend parameter type,"],
+        "signature": ["Partial<C> & { id: string; }"],
         "path": "packages/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -906,9 +870,7 @@
         "description": [
           "\nCell action factory template with optional `id`.\nThe id override is required when using the action factory so it\ncan be omitted in the original action creator"
         ],
-        "signature": [
-          "{ [P in Exclude<keyof C, \"id\">]: C[P]; }"
-        ],
+        "signature": ["{ [P in Exclude<keyof C, \"id\">]: C[P]; }"],
         "path": "packages/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -921,9 +883,7 @@
         "tags": [],
         "label": "DefaultActionsSupportedValue",
         "description": [],
-        "signature": [
-          "string[] | boolean[] | number[]"
-        ],
+        "signature": ["string[] | boolean[] | number[]"],
         "path": "packages/kbn-cell-actions/src/actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1039,11 +999,7 @@
         "tags": [],
         "label": "UseDataGridColumnsCellActions",
         "description": [],
-        "signature": [
-          "(props: P) => ",
-          "EuiDataGridColumnCellAction",
-          "[][]"
-        ],
+        "signature": ["(props: P) => ", "EuiDataGridColumnCellAction", "[][]"],
         "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -1056,9 +1012,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": [
-              "P"
-            ],
+            "signature": ["P"],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
             "trackAdoption": false

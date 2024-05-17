@@ -15,24 +15,24 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import {
-  profilingCo2PerKWH,
-  profilingDatacenterPUE,
-  profilingPervCPUWattX86,
-  profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingAzureCostDiscountRate,
+  profilingCo2PerKWH,
   profilingCostPervCPUPerHour,
-  profilingShowErrorFrames,
+  profilingDatacenterPUE,
   profilingFetchTopNFunctionsFromStacktraces,
+  profilingPervCPUWattArm64,
+  profilingPervCPUWattX86,
+  profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';

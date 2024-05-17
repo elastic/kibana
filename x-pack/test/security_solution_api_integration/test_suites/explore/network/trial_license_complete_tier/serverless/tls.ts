@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import {
-  NetworkQueries,
   Direction,
-  NetworkTlsFields,
   FlowTarget,
+  NetworkQueries,
+  NetworkTlsFields,
   NetworkTlsStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../../../test_serverless/shared/services';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
 const TO = '3000-01-01T00:00:00.000Z';

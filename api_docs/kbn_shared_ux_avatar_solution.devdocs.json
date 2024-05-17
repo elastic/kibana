@@ -79,11 +79,7 @@
         "tags": [],
         "label": "KibanaSolutionAvatarProps",
         "description": [],
-        "signature": [
-          "KnownSolutionProps",
-          " | ",
-          "IconTypeProps"
-        ],
+        "signature": ["KnownSolutionProps", " | ", "IconTypeProps"],
         "path": "packages/shared-ux/avatar/solution/src/solution_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,

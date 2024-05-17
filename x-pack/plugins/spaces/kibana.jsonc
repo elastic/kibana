@@ -7,25 +7,10 @@
     "id": "spaces",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "spaces"
-    ],
-    "requiredPlugins": [
-      "features",
-      "licensing"
-    ],
-    "optionalPlugins": [
-      "home",
-      "management",
-      "usageCollection"
-    ],
-    "requiredBundles": [
-      "esUiShared",
-      "kibanaReact"
-    ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "configPath": ["xpack", "spaces"],
+    "requiredPlugins": ["features", "licensing"],
+    "optionalPlugins": ["home", "management", "usageCollection"],
+    "requiredBundles": ["esUiShared", "kibanaReact"],
+    "extraPublicDirs": ["common"]
   }
 }

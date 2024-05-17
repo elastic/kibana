@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import numeral from '@elastic/numeral';
 import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import React from 'react';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   ACTIVE_NOW_LABEL,

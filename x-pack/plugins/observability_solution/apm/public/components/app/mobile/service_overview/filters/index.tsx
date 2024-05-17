@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { MobileProperty } from '../../../../../../common/mobile_types';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { useFetcher, FETCH_STATUS } from '../../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { push } from '../../../../shared/links/url_helpers';
 

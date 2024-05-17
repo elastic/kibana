@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
-import { useEuiTheme, useEuiBackgroundColor } from '@elastic/eui';
+import { useMemo } from 'react';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();

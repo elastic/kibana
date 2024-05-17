@@ -10,10 +10,10 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
+import { FileActionsPopoverButton } from './file_actions_popover_button';
+import { FileNameLink } from './file_name_link';
 import * as i18n from './translations';
 import { parseMimeType } from './utils';
-import { FileNameLink } from './file_name_link';
-import { FileActionsPopoverButton } from './file_actions_popover_button';
 
 export interface FilesTableColumnsProps {
   caseId: string;

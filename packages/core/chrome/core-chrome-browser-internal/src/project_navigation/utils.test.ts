@@ -1,3 +1,4 @@
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +7,7 @@
  * Side Public License, v 1.
  */
 import { createLocation } from 'history';
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
-import { flattenNav, findActiveNodes } from './utils';
+import { findActiveNodes, flattenNav } from './utils';
 
 const getDeepLink = (id: string, path: string, title = ''): ChromeNavLink => ({
   id,

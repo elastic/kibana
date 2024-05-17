@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
-import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { Dictionary } from '@kbn/ml-url-state';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type { GroupTableItem } from '@kbn/aiops-components';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { Dictionary } from '@kbn/ml-url-state';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 

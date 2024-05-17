@@ -6,15 +6,15 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
 import { loggerMock } from '@kbn/logging-mocks';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { getConversation } from './get_conversation';
 import {
   UpdateConversationSchema,
   transformToUpdateScheme,
   updateConversation,
 } from './update_conversation';
-import { getConversation } from './get_conversation';
-import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',

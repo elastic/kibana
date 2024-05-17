@@ -13,8 +13,8 @@ import type { KibanaNoDataPageStorybookParams } from '@kbn/shared-ux-page-kibana
 
 import { KibanaNoDataPage as Component } from './kibana_no_data_page';
 
-import { KibanaNoDataPageProvider } from './services';
 import mdx from '../README.mdx';
+import { KibanaNoDataPageProvider } from './services';
 
 export default {
   title: 'No Data/Page/Kibana',

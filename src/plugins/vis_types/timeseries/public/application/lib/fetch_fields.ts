@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getCoreStart, getDataViewsStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import type { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
-import { getIndexPatternKey } from '../../../common/index_patterns_utils';
 import { toSanitizedFieldType } from '../../../common/fields_utils';
+import { getIndexPatternKey } from '../../../common/index_patterns_utils';
+import type { IndexPatternValue, SanitizedFieldType } from '../../../common/types';
+import { getCoreStart, getDataViewsStart } from '../../services';
 
 export type VisFields = Record<string, SanitizedFieldType[]>;
 

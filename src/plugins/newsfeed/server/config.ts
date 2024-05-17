@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import {
-  NEWSFEED_DEFAULT_SERVICE_PATH,
   NEWSFEED_DEFAULT_SERVICE_BASE_URL,
+  NEWSFEED_DEFAULT_SERVICE_PATH,
 } from '../common/constants';
 
 export const configSchema = schema.object({

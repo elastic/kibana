@@ -9,8 +9,8 @@ import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import React from 'react';
 
-import * as i18n from './translations';
 import type { ErrorSummary } from '../../../types';
+import * as i18n from './translations';
 
 export const EMPTY_PLACEHOLDER = '--';
 

@@ -1,3 +1,4 @@
+import { errors as EsErrors } from '@elastic/elasticsearch';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +7,13 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
-import * as Option from 'fp-ts/lib/Option';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import * as Either from 'fp-ts/lib/Either';
+import * as Option from 'fp-ts/lib/Option';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
 import {
-  catchRetryableEsClientErrors,
   type RetryableEsClientError,
+  catchRetryableEsClientErrors,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */

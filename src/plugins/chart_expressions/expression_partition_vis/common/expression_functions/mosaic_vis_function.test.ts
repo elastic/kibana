@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import {
-  MosaicVisConfig,
-  LabelPositions,
-  ValueFormats,
-  LegendDisplay,
-} from '../types/expression_renderers';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
-import { mosaicVisFunction } from './mosaic_vis_function';
-import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';
+import {
+  LabelPositions,
+  LegendDisplay,
+  MosaicVisConfig,
+  ValueFormats,
+} from '../types/expression_renderers';
+import { mosaicVisFunction } from './mosaic_vis_function';
 
 describe('interpreter/functions#mosaicVis', () => {
   const fn = functionWrapper(mosaicVisFunction());

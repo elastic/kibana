@@ -7,14 +7,14 @@
  */
 
 import {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasLegacyLibraryTransforms,
+  PublishesPanelTitle,
   apiCanAccessViewMode,
   apiHasLegacyLibraryTransforms,
-  EmbeddableApiContext,
-  getPanelTitle,
-  PublishesPanelTitle,
-  CanAccessViewMode,
   getInheritedViewMode,
-  HasLegacyLibraryTransforms,
+  getPanelTitle,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { pluginServices } from '../services/plugin_services';

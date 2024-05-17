@@ -99,9 +99,7 @@
             "type": "Function",
             "tags": [],
             "label": "load",
-            "description": [
-              "\nLoad a journey from a file path"
-            ],
+            "description": ["\nLoad a journey from a file path"],
             "signature": [
               "(path: string) => Promise<",
               {
@@ -124,9 +122,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -186,9 +182,7 @@
             "description": [
               "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys_e2e directory."
             ],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -200,10 +194,7 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": [
-                  "JourneyConfigOptions",
-                  "<CtxExt> | undefined"
-                ],
+                "signature": ["JourneyConfigOptions", "<CtxExt> | undefined"],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -237,9 +228,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -252,11 +241,7 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": [
-                  "(ctx: ",
-                  "BaseStepCtx",
-                  " & CtxExt) => Promise<void>"
-                ],
+                "signature": ["(ctx: ", "BaseStepCtx", " & CtxExt) => Promise<void>"],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -271,14 +256,8 @@
             "type": "Function",
             "tags": [],
             "label": "testProvider",
-            "description": [
-              "called by FTR to setup tests"
-            ],
-            "signature": [
-              "({ getService }: ",
-              "FtrProviderContext",
-              ") => void"
-            ],
+            "description": ["called by FTR to setup tests"],
+            "signature": ["({ getService }: ", "FtrProviderContext", ") => void"],
             "path": "packages/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -290,9 +269,7 @@
                 "tags": [],
                 "label": "{ getService }",
                 "description": [],
-                "signature": [
-                  "FtrProviderContext"
-                ],
+                "signature": ["FtrProviderContext"],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -332,10 +309,7 @@
             "tags": [],
             "label": "#opts",
             "description": [],
-            "signature": [
-              "JourneyConfigOptions",
-              "<CtxExt>"
-            ],
+            "signature": ["JourneyConfigOptions", "<CtxExt>"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -369,9 +343,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -383,9 +355,7 @@
                 "tags": [],
                 "label": "path",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -398,10 +368,7 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": [
-                  "JourneyConfigOptions",
-                  "<CtxExt>"
-                ],
+                "signature": ["JourneyConfigOptions", "<CtxExt>"],
                 "path": "packages/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -417,9 +384,7 @@
             "tags": [],
             "label": "getFtrConfigPath",
             "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
+            "signature": ["() => string | undefined"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -433,9 +398,7 @@
             "tags": [],
             "label": "getEsArchives",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -449,9 +412,7 @@
             "tags": [],
             "label": "getKbnArchives",
             "description": [],
-            "signature": [
-              "() => string[]"
-            ],
+            "signature": ["() => string[]"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -465,9 +426,7 @@
             "tags": [],
             "label": "isXpack",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -481,9 +440,7 @@
             "tags": [],
             "label": "getExtraApmLabels",
             "description": [],
-            "signature": [
-              "() => { [x: string]: string; }"
-            ],
+            "signature": ["() => { [x: string]: string; }"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -497,9 +454,7 @@
             "tags": [],
             "label": "getRepoRelPath",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -513,9 +468,7 @@
             "tags": [],
             "label": "getPath",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -529,9 +482,7 @@
             "tags": [],
             "label": "getName",
             "description": [],
-            "signature": [
-              "() => string"
-            ],
+            "signature": ["() => string"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -545,9 +496,7 @@
             "tags": [],
             "label": "shouldAutoLogin",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -561,9 +510,7 @@
             "tags": [],
             "label": "isSkipped",
             "description": [],
-            "signature": [
-              "() => boolean"
-            ],
+            "signature": ["() => boolean"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -601,13 +548,7 @@
             "tags": [],
             "label": "getExtendedStepCtx",
             "description": [],
-            "signature": [
-              "(ctx: ",
-              "BaseStepCtx",
-              ") => ",
-              "BaseStepCtx",
-              " & CtxExt"
-            ],
+            "signature": ["(ctx: ", "BaseStepCtx", ") => ", "BaseStepCtx", " & CtxExt"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -619,9 +560,7 @@
                 "tags": [],
                 "label": "ctx",
                 "description": [],
-                "signature": [
-                  "BaseStepCtx"
-                ],
+                "signature": ["BaseStepCtx"],
                 "path": "packages/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -637,11 +576,7 @@
             "tags": [],
             "label": "getBeforeStepsFn",
             "description": [],
-            "signature": [
-              "(ctx: ",
-              "BaseStepCtx",
-              " & CtxExt) => Promise<void>"
-            ],
+            "signature": ["(ctx: ", "BaseStepCtx", " & CtxExt) => Promise<void>"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -653,10 +588,7 @@
                 "tags": [],
                 "label": "ctx",
                 "description": [],
-                "signature": [
-                  "BaseStepCtx",
-                  " & CtxExt"
-                ],
+                "signature": ["BaseStepCtx", " & CtxExt"],
                 "path": "packages/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -672,9 +604,7 @@
             "tags": [],
             "label": "getSynthtraceConfig",
             "description": [],
-            "signature": [
-              "() => JourneySynthtrace<CtxExt, any> | undefined"
-            ],
+            "signature": ["() => JourneySynthtrace<CtxExt, any> | undefined"],
             "path": "packages/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -724,9 +654,7 @@
                 "tags": [],
                 "label": "journeyName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -775,9 +703,7 @@
                 "tags": [],
                 "label": "steps",
                 "description": [],
-                "signature": [
-                  "never[]"
-                ],
+                "signature": ["never[]"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -791,9 +717,7 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": [
-              "any"
-            ],
+            "signature": ["any"],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -805,9 +729,7 @@
                 "tags": [],
                 "label": "journeyName",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
+                "signature": ["string"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -823,10 +745,7 @@
             "tags": [],
             "label": "#isLocked",
             "description": [],
-            "signature": [
-              "BehaviorSubject",
-              "<boolean>"
-            ],
+            "signature": ["BehaviorSubject", "<boolean>"],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -838,9 +757,7 @@
             "tags": [],
             "label": "lock",
             "description": [],
-            "signature": [
-              "(fn: () => Promise<void>) => Promise<void>"
-            ],
+            "signature": ["(fn: () => Promise<void>) => Promise<void>"],
             "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -852,9 +769,7 @@
                 "tags": [],
                 "label": "fn",
                 "description": [],
-                "signature": [
-                  "() => Promise<void>"
-                ],
+                "signature": ["() => Promise<void>"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -886,9 +801,7 @@
                 "tags": [],
                 "label": "step",
                 "description": [],
-                "signature": [
-                  "AnyStep"
-                ],
+                "signature": ["AnyStep"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -901,9 +814,7 @@
                 "tags": [],
                 "label": "screenshot",
                 "description": [],
-                "signature": [
-                  "Buffer"
-                ],
+                "signature": ["Buffer"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -916,9 +827,7 @@
                 "tags": [],
                 "label": "fullscreenScreenshot",
                 "description": [],
-                "signature": [
-                  "Buffer"
-                ],
+                "signature": ["Buffer"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -950,9 +859,7 @@
                 "tags": [],
                 "label": "step",
                 "description": [],
-                "signature": [
-                  "AnyStep"
-                ],
+                "signature": ["AnyStep"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -965,9 +872,7 @@
                 "tags": [],
                 "label": "screenshot",
                 "description": [],
-                "signature": [
-                  "Buffer"
-                ],
+                "signature": ["Buffer"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -980,9 +885,7 @@
                 "tags": [],
                 "label": "fullscreenScreenshot",
                 "description": [],
-                "signature": [
-                  "Buffer"
-                ],
+                "signature": ["Buffer"],
                 "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1167,11 +1070,7 @@
             "tags": [],
             "label": "fn",
             "description": [],
-            "signature": [
-              "(ctx: ",
-              "BaseStepCtx",
-              " & CtxExt) => Promise<void>"
-            ],
+            "signature": ["(ctx: ", "BaseStepCtx", " & CtxExt) => Promise<void>"],
             "path": "packages/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1183,10 +1082,7 @@
                 "tags": [],
                 "label": "ctx",
                 "description": [],
-                "signature": [
-                  "BaseStepCtx",
-                  " & CtxExt"
-                ],
+                "signature": ["BaseStepCtx", " & CtxExt"],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1223,11 +1119,7 @@
         "tags": [],
         "label": "ScalabilityAction",
         "description": [],
-        "signature": [
-          "RampConcurrentUsersAction",
-          " | ",
-          "ConstantConcurrentUsersAction"
-        ],
+        "signature": ["RampConcurrentUsersAction", " | ", "ConstantConcurrentUsersAction"],
         "path": "packages/kbn-journeys/journey/journey_config.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1369,9 +1261,7 @@
                 "tags": [],
                 "label": "performancePhase",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1383,9 +1273,7 @@
                 "tags": [],
                 "label": "branch",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1397,9 +1285,7 @@
                 "tags": [],
                 "label": "gitRev",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1411,9 +1297,7 @@
                 "tags": [],
                 "label": "ciBuildName",
                 "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
+                "signature": ["string | undefined"],
                 "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false

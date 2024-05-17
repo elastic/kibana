@@ -11,11 +11,11 @@ import { ILicenseState } from '../../lib';
 import { ActionsRequestHandlerContext } from '../../types';
 import { createActionRoute } from './create';
 import { deleteActionRoute } from './delete';
-import { getAllActionRoute } from './get_all';
-import { getActionRoute } from './get';
-import { updateActionRoute } from './update';
-import { listActionTypesRoute } from './list_action_types';
 import { executeActionRoute } from './execute';
+import { getActionRoute } from './get';
+import { getAllActionRoute } from './get_all';
+import { listActionTypesRoute } from './list_action_types';
+import { updateActionRoute } from './update';
 
 export function defineLegacyRoutes(
   router: IRouter<ActionsRequestHandlerContext>,

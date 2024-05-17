@@ -41,9 +41,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<LoggingServiceContract>"
-            ],
+            "signature": ["() => jest.Mocked<LoggingServiceContract>"],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,11 +79,7 @@
             "tags": [],
             "label": "createInternalPrebootContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalLoggingServicePreboot",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalLoggingServicePreboot", ">"],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -99,11 +93,7 @@
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "InternalLoggingServicePreboot",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "InternalLoggingServicePreboot", ">"],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -131,11 +121,7 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": [
-              "() => jest.Mocked<",
-              "ILoggingSystem",
-              ">"
-            ],
+            "signature": ["() => jest.Mocked<", "ILoggingSystem", ">"],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -311,9 +297,7 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": [
-                  "string[]"
-                ],
+                "signature": ["string[]"],
                 "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

@@ -1,11 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-import type { FC } from 'react';
-import React, { useMemo } from 'react';
 import type {
   ExceptionListItemIdentifiers,
   GetExceptionItemProps,
@@ -15,15 +7,23 @@ import type {
 import { ExceptionItems } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 import type { Pagination } from '@elastic/eui';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import { getFormattedComments } from '../../utils/ui.helpers';
-import { LinkToRuleDetails } from '../link_to_rule_details';
-import { ExceptionsUtility } from '../exceptions_utility';
-import * as i18n from '../../translations/list_exception_items';
-import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 import { ShowValueListModal } from '../../../value_list/components/show_value_list_modal';
+import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
+import * as i18n from '../../translations/list_exception_items';
+import { getFormattedComments } from '../../utils/ui.helpers';
+import { ExceptionsUtility } from '../exceptions_utility';
+import { LinkToRuleDetails } from '../link_to_rule_details';
 
 interface ListExceptionItemsProps {
   isReadOnly: boolean;

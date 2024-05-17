@@ -27,11 +27,7 @@ export function multiply(
   const s33 = a31 * b13 + a32 * b23 + a33 * b33;
 
   // prettier-ignore
-  return [
-    s11, s12, s13,
-    s21, s22, s23,
-    s31, s32, s33,
-  ];
+  return [s11, s12, s13, s21, s22, s23, s31, s32, s33];
 }
 
 /**

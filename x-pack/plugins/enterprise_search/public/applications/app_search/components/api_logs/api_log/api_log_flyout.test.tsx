@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 import { mockApiLog } from '../__mocks__/api_log.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFlyout, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
 
 import { ApiLogFlyout, ApiLogHeading } from './api_log_flyout';
 

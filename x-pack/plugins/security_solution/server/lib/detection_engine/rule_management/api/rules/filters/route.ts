@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   GetRuleManagementFiltersResponse,
   RULE_MANAGEMENT_FILTERS_URL,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildSiemResponse } from '../../../../routes/utils';
 import { findRules } from '../../../logic/search/find_rules';
 import { readTags } from '../../tags/read_tags/read_tags';
 

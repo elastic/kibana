@@ -9,18 +9,18 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import {
+  EuiComboBox,
+  EuiFieldNumber,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiComboBox,
-  EuiFieldNumber,
 } from '@elastic/eui';
 
-import { ml } from '../../../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { tabColor } from '../../../../../../../common/util/group_color_utils';
+import { ml } from '../../../../../services/ml_api_service';
 
 export class JobDetails extends Component {
   constructor(props) {

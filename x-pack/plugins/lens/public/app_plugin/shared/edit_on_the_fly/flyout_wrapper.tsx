@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
+  EuiBetaBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiTitle,
   EuiToolTip,
-  EuiButton,
-  EuiLink,
-  EuiBetaBadge,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import React from 'react';
 import type { FlyoutWrapperProps } from './types';
 
 export const FlyoutWrapper = ({
@@ -104,10 +104,12 @@ export const FlyoutWrapper = ({
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
-            ${!isScrollable &&
-            `
+            ${
+              !isScrollable &&
+              `
                 overflow-y: hidden;
-              `}
+              `
+            }
             > * {
               pointer-events: auto;
             }

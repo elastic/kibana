@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { withApmSpan } from '../../../../utils/with_apm_span';
-import { getHeapMemoryChart } from './heap_memory';
-import { getNonHeapMemoryChart } from './non_heap_memory';
-import { getThreadCountChart } from './thread_count';
-import { getCPUChartData } from '../shared/cpu';
-import { getMemoryChartData } from '../shared/memory';
-import { getOTelSystemCPUChartDataForJava } from './otel_cpu';
-import { getGcRateChart } from './gc/get_gc_rate_chart';
-import { getGcTimeChart } from './gc/get_gc_time_chart';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { withApmSpan } from '../../../../utils/with_apm_span';
+import { getCPUChartData } from '../shared/cpu';
+import { getMemoryChartData } from '../shared/memory';
+import { getGcRateChart } from './gc/get_gc_rate_chart';
+import { getGcTimeChart } from './gc/get_gc_time_chart';
+import { getHeapMemoryChart } from './heap_memory';
+import { getNonHeapMemoryChart } from './non_heap_memory';
+import { getOTelSystemCPUChartDataForJava } from './otel_cpu';
+import { getThreadCountChart } from './thread_count';
 
 export function getJavaMetricsCharts({
   environment,

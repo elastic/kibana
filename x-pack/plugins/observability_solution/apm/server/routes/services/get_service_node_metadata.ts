@@ -6,13 +6,13 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { HOST_NAME, CONTAINER_ID } from '../../../common/es_fields/apm';
-import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
+import { CONTAINER_ID, HOST_NAME } from '../../../common/es_fields/apm';
 import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
 
 export interface ServiceNodeMetadataResponse {
   host: string | number;

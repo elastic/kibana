@@ -1,3 +1,4 @@
+import url from 'url';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import qs from 'query-string';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import url from 'url';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view';
 

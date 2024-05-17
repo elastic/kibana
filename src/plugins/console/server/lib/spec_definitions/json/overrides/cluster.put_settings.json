@@ -36,11 +36,7 @@
               }
             },
             "allocation.allow_rebalance": {
-              "__one_of": [
-                "always",
-                "indices_primaries_active",
-                "indices_all_active"
-              ]
+              "__one_of": ["always", "indices_primaries_active", "indices_all_active"]
             },
             "allocation.cluster_concurrent_rebalance": 2,
             "allocation.node_initial_primaries_recoveries": 4,
@@ -93,11 +89,7 @@
               }
             },
             "allocation.allow_rebalance": {
-              "__one_of": [
-                "always",
-                "indices_primaries_active",
-                "indices_all_active"
-              ]
+              "__one_of": ["always", "indices_primaries_active", "indices_all_active"]
             },
             "allocation.cluster_concurrent_rebalance": 2,
             "allocation.node_initial_primaries_recoveries": 4,

@@ -9,23 +9,23 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
-  EuiTitle,
   EuiFlexItem,
   EuiText,
+  EuiTitle,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
 import { JourneyStep } from '../../../../../common/runtime_types';
-import { STATUS_LABEL } from '../../monitor/ping_list/translations';
-import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
-import { StatusBadge } from '../status_badge';
+import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { StepDetailLink } from '../../common/step_detail_link';
+import { STATUS_LABEL } from '../../monitor/ping_list/translations';
 import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';
+import { StatusBadge } from '../status_badge';
+import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
+import { StepDuration } from './step_duration';
 import { StepImage } from './step_image';
 import { useExpandedRow } from './use_expanded_row';
-import { StepDuration } from './step_duration';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 interface Props {
   data: JourneyStep[];

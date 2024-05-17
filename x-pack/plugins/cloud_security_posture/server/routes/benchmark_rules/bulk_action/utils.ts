@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   CspBenchmarkRule,
-  RulesToUpdate,
   CspBenchmarkRulesStates,
   CspSettings,
+  RulesToUpdate,
 } from '../../../../common/types/rules/v4';
 import {
   convertRuleTagsToMatchAllKQL,

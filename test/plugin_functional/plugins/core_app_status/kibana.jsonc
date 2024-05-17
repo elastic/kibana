@@ -6,8 +6,6 @@
     "id": "coreAppStatus",
     "server": false,
     "browser": true,
-    "configPath": [
-      "core_app_status"
-    ]
+    "configPath": ["core_app_status"]
   }
 }

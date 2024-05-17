@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { ReactWrapper, mount as enzymeMount } from 'enzyme';
 import { keys } from '@elastic/eui';
+import { ReactWrapper, mount as enzymeMount } from 'enzyme';
+import React from 'react';
 
 import {
-  getExitFullScreenButtonServicesMock,
   getExitFullScreenButtonKibanaDependenciesMock,
+  getExitFullScreenButtonServicesMock,
 } from '../mocks';
 
+import { of } from 'rxjs';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './services';
-import { of } from 'rxjs';
 
 const componentServices = getExitFullScreenButtonServicesMock();
 const kibanaServices = getExitFullScreenButtonKibanaDependenciesMock();

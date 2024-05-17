@@ -6,8 +6,8 @@
  */
 
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
+import { Render } from '../../../types';
 
 export interface Arguments {
   column: string;

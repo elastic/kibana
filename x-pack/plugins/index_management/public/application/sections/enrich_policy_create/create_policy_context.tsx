@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useState } from 'react';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import React, { createContext, useContext, useState } from 'react';
 
 export type DraftPolicy = Partial<SerializedEnrichPolicy>;
 

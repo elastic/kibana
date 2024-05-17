@@ -7,10 +7,10 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { InputsModelId } from '../../store/inputs/constants';
 
 interface UseInspectModalProps {
   inputId?: InputsModelId.global | InputsModelId.timeline;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
+import React from 'react';
 import { RightPanelContext } from '../context';
 import { JsonTab } from './json_tab';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';

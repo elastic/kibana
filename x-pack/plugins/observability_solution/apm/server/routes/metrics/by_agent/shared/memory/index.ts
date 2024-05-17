@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { withApmSpan } from '../../../../../utils/with_apm_span';
+import { APMConfig } from '../../../../..';
 import {
   FAAS_ID,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
+  METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
 } from '../../../../../../common/es_fields/apm';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
-import { APMConfig } from '../../../../..';
-import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   memoryUsedMax: {

@@ -7,16 +7,16 @@
 
 import { InventoryMetrics } from '../../types';
 
-import { sqsMessagesVisible } from './snapshot/sqs_messages_visible';
 import { sqsMessagesDelayed } from './snapshot/sqs_messages_delayed';
 import { sqsMessagesEmpty } from './snapshot/sqs_messages_empty';
 import { sqsMessagesSent } from './snapshot/sqs_messages_sent';
+import { sqsMessagesVisible } from './snapshot/sqs_messages_visible';
 import { sqsOldestMessage } from './snapshot/sqs_oldest_message';
 
-import { awsSQSMessagesVisible } from './tsvb/aws_sqs_messages_visible';
 import { awsSQSMessagesDelayed } from './tsvb/aws_sqs_messages_delayed';
-import { awsSQSMessagesSent } from './tsvb/aws_sqs_messages_sent';
 import { awsSQSMessagesEmpty } from './tsvb/aws_sqs_messages_empty';
+import { awsSQSMessagesSent } from './tsvb/aws_sqs_messages_sent';
+import { awsSQSMessagesVisible } from './tsvb/aws_sqs_messages_visible';
 import { awsSQSOldestMessage } from './tsvb/aws_sqs_oldest_message';
 
 const awsSQSSnapshotMetrics = {

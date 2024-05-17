@@ -5,54 +5,36 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import type SuperTest from 'supertest';
 import { createHash } from 'node:crypto';
-import stringify from 'json-stable-stringify';
-import {
-  CasesConnectorRunParams,
-  OracleRecordAttributes,
-} from '@kbn/cases-plugin/server/connectors/cases/types';
+import { Client } from '@elastic/elasticsearch';
 import { AttachmentType, CasePostRequest } from '@kbn/cases-plugin/common';
+import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 import {
   AlertAttachment,
   Attachments,
   Case,
-  CaseStatuses,
   CaseSeverity,
+  CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { KbnClient } from '@kbn/test';
-import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import {
   SEVERITY_EXTERNAL_TO_ESMODEL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '@kbn/cases-plugin/server/common/constants';
-import { Client } from '@elastic/elasticsearch';
+import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import {
+  CasesConnectorRunParams,
+  OracleRecordAttributes,
+} from '@kbn/cases-plugin/server/connectors/cases/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import { User } from '../../../../../common/lib/authentication/types';
-import {
-  globalRead,
-  noKibanaPrivileges,
-  onlyActions,
-} from '../../../../../common/lib/authentication/users';
-import {
-  deleteAllCaseItems,
-  executeSystemConnector,
-  findCases,
-  getAllComments,
-  updateCase,
-  getCase,
-  getConfigurationRequest,
-  createConfiguration,
-  createComment,
-} from '../../../../../common/lib/api';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import expect from '@kbn/expect';
+import { KbnClient } from '@kbn/test';
+import stringify from 'json-stable-stringify';
+import type SuperTest from 'supertest';
 import { roles as api_int_roles } from '../../../../../../api_integration/apis/cases/common/roles';
 import {
+  users as api_int_users,
   casesAllUser,
   obsCasesAllUser,
   obsCasesReadUser,
@@ -61,9 +43,27 @@ import {
   secAllCasesReadUser,
   secAllSpace1User,
   secAllUser,
-  users as api_int_users,
 } from '../../../../../../api_integration/apis/cases/common/users';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import {
+  createComment,
+  createConfiguration,
+  deleteAllCaseItems,
+  executeSystemConnector,
+  findCases,
+  getAllComments,
+  getCase,
+  getConfigurationRequest,
+  updateCase,
+} from '../../../../../common/lib/api';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../../common/lib/authentication';
+import { User } from '../../../../../common/lib/authentication/types';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  onlyActions,
+} from '../../../../../common/lib/authentication/users';
+import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

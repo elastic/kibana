@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import type { BuildThreatDescription } from './types';
 import type {
   MitreSubTechnique,
   MitreTactic,
   MitreTechnique,
 } from '../../../../detections/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
+import type { BuildThreatDescription } from './types';
 
 const lazyMitreConfiguration = () => {
   /**

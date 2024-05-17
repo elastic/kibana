@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as usng from 'usng.js';
 import { i18n } from '@kbn/i18n';
+import * as usng from 'usng.js';
 // @ts-ignore
 export const converter = new usng.Converter();
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
-import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 export const createSetupDepsMock = () => {
   const cloud = cloudMock.createSetup();

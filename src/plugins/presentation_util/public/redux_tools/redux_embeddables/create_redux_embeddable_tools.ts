@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { Draft, AnyAction, Middleware, PayloadAction } from '@reduxjs/toolkit';
+import { AnyAction, Draft, Middleware, PayloadAction } from '@reduxjs/toolkit';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
-import { ReduxToolsReducers } from '../types';
 import { createReduxTools } from '../create_redux_tools';
-import { syncReduxEmbeddable } from './sync_redux_embeddable';
+import { ReduxToolsReducers } from '../types';
 import { cleanStateForRedux } from './clean_redux_embeddable_state';
-import { ReduxEmbeddableTools, ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
+import { syncReduxEmbeddable } from './sync_redux_embeddable';
+import { ReduxEmbeddableState, ReduxEmbeddableSyncSettings, ReduxEmbeddableTools } from './types';
 
 export const createReduxEmbeddableTools = <
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>
+  ReducerType extends
+    ReduxToolsReducers<ReduxEmbeddableStateType> = ReduxToolsReducers<ReduxEmbeddableStateType>,
 >({
   reducers,
   embeddable,

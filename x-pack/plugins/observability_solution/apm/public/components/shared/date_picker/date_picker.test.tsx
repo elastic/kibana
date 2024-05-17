@@ -8,12 +8,12 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import { MemoryHistory, createMemoryHistory } from 'history';
+import qs from 'query-string';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import qs from 'query-string';
-import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { DatePicker } from '.';
+import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 let history: MemoryHistory;
 
