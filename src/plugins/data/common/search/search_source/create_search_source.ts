@@ -50,12 +50,6 @@ export const createSearchSource = (
         } else {
           fields.index = await indexPatterns.create(searchSourceFields.index);
         }
-      } else {
-        if (typeof searchSourceFields.index === 'string') {
-          fields.index = await indexPatterns.getDataViewLazy(searchSourceFields.index);
-        } else {
-          fields.index = await indexPatterns.createDataViewLazy(searchSourceFields.index);
-        }
       }
     }
 
@@ -79,8 +73,21 @@ export const createSearchSource = (
     if (typeof query !== 'undefined') {
       searchSource.setField('query', migrateLegacyQuery(query));
     }
-    if (useDataViewLazy) {
-      await searchSource.loadDataViewFields();
+    if (useDataViewLazy && searchSourceFields.index) {
+      const dataViewLazy =
+        typeof searchSourceFields.index === 'string'
+          ? await indexPatterns.getDataViewLazy(searchSourceFields.index)
+          : await indexPatterns.createDataViewLazy(searchSourceFields.index);
+
+      const indexPattern =
+        typeof searchSourceFields.index === 'object'
+          ? await indexPatterns.create(searchSourceFields.index, true)
+          : await indexPatterns.get(searchSourceFields.index, false, false);
+      const lazyFields = await searchSource.loadDataViewFields(dataViewLazy);
+      if (lazyFields) {
+        indexPattern.fields.replaceAll(lazyFields);
+      }
+      searchSource.setField('index', indexPattern);
     }
 
     return searchSource;

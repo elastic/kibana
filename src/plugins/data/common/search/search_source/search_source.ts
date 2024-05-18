@@ -798,9 +798,8 @@ export class SearchSource {
     return field;
   }
 
-  public async loadDataViewFields() {
-    const dataView = this.getField('index');
-    if (!dataView || !(dataView instanceof DataViewLazy)) {
+  public async loadDataViewFields(dataView: DataViewLazy) {
+    if (!dataView) {
       return;
     }
     // eslint-disable-next-line no-console
@@ -826,22 +825,20 @@ export class SearchSource {
     if (filters) {
       const filtersArr = Array.isArray(filters) ? filters : [filters];
       for (const f of filtersArr) {
-        fields = fields.concat(f.meta.field);
+        fields = fields.concat(f.meta.key);
       }
     }
     fields = fields.filter((f) => Boolean(f));
+    console.log('loadDataViewFields', fields);
+    const fieldsFetched =
+      dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length
+        ? await dataView.getFields({ fieldName: ['*'] })
+        : await dataView.getFields({
+            fieldName: fields,
+            // fieldTypes: ['date', 'date_nanos'],
+          });
 
-    if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
-      // if source filtering is enabled, we need to fetch all the fields
-      await dataView.getFields({ fieldName: ['*'] });
-    } else if (fields.length) {
-      const fieldSpec = await dataView.getFields({
-        fieldName: fields,
-        // fieldTypes: ['date', 'date_nanos'],
-      });
-      const spec = Object.values(fieldSpec.getFieldMap()).map((field) => field.spec);
-      dataView.setFields(spec);
-    }
+    return Object.values(fieldsFetched.getFieldMap()).map((field) => field.spec);
   }
 
   private flatten() {
