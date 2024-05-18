@@ -25,7 +25,6 @@ describe('RuleManagementClient.upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
 
   beforeEach(() => {
-    // jest.resetAllMocks();
     rulesClient = rulesClientMock.create();
   });
 
@@ -35,7 +34,7 @@ describe('RuleManagementClient.upgradePrebuiltRule', () => {
       version: 1,
       rule_id: 'rule-id',
     };
-    // Read rules must return that it didn't find any matching rules so this fails
+
     (readRules as jest.Mock).mockResolvedValue(null);
     await expect(upgradePrebuiltRule(rulesClient, { ruleAsset })).rejects.toThrow(
       `Failed to find rule ${ruleAsset.rule_id}`

@@ -17,7 +17,6 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
-import { readRules } from '../crud/read_rules';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
@@ -39,7 +38,6 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param rulesClient {object}
  * @param rulesManagementClient {object}
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
@@ -99,47 +97,22 @@ export const importRules = async ({
               importRuleResponse = [...importRuleResponse, ...exceptionErrors];
 
               throwAuthzError(await mlAuthz.validateRuleType(parsedRule.type));
-              const rule = await readRules({
-                rulesClient,
-                ruleId: parsedRule.rule_id,
-                id: undefined,
+
+              const importedRule = await rulesManagementClient.importRule({
+                ruleToImport: {
+                  ...parsedRule,
+                  exceptions_list: [...exceptions],
+                },
+                overwriteRules,
+                options: {
+                  allowMissingConnectorSecrets,
+                },
               });
 
-              if (rule == null) {
-                await rulesManagementClient.importNewRule({
-                  ruleToImport: {
-                    ...parsedRule,
-                    exceptions_list: [...exceptions],
-                  },
-                  options: {
-                    allowMissingConnectorSecrets,
-                  },
-                });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
-                });
-              } else if (rule != null && overwriteRules) {
-                await rulesManagementClient.importExistingRule({
-                  ruleToImport: {
-                    ...parsedRule,
-                    exceptions_list: [...exceptions],
-                  },
-                  existingRule: rule,
-                });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
-                });
-              } else if (rule != null) {
-                resolve(
-                  createBulkErrorObject({
-                    ruleId: parsedRule.rule_id,
-                    statusCode: 409,
-                    message: `rule_id: "${parsedRule.rule_id}" already exists`,
-                  })
-                );
-              }
+              resolve({
+                rule_id: importedRule.id,
+                status_code: 200,
+              });
             } catch (err) {
               resolve(
                 createBulkErrorObject({

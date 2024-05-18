@@ -27,6 +27,7 @@ import {
 } from '../../normalization/rule_converters';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
+import { createBulkErrorObject } from '../../../routes/utils';
 
 export interface CreateRuleOptions {
   /* Optionally pass an ID to use for the rule document. If not provided, an ID will be generated. */
@@ -71,9 +72,15 @@ interface ImportRuleOptions {
   allowMissingConnectorSecrets?: boolean;
 }
 
+interface ImportRuleProps {
+  ruleToImport: RuleToImport;
+  overwriteRules?: boolean;
+  options: ImportRuleOptions;
+}
+
 interface ImportNewRuleProps {
   ruleToImport: RuleToImport;
-  options?: ImportRuleOptions;
+  options: ImportRuleOptions;
 }
 
 interface ImportExistingRuleProps {
@@ -92,8 +99,7 @@ export interface IRulesManagementClient {
   upgradePrebuiltRule: (
     upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
   ) => Promise<RuleAlertType>;
-  importNewRule: (importRulePayload: ImportNewRuleProps) => Promise<RuleAlertType>;
-  importExistingRule: (importRulePayload: ImportExistingRuleProps) => Promise<RuleAlertType>;
+  importRule: (importRulePayload: ImportRuleProps) => Promise<RuleAlertType>;
 }
 
 export const createRulesManagementClient = (rulesClient: RulesClient) => {
@@ -128,14 +134,8 @@ export const createRulesManagementClient = (rulesClient: RulesClient) => {
       return upgradePrebuiltRule(rulesClient, upgradePrebuiltRulePayload);
     },
 
-    importNewRule: async (importRulePayload: ImportNewRuleProps): Promise<RuleAlertType> => {
-      return importNewRule(rulesClient, importRulePayload);
-    },
-
-    importExistingRule: async (
-      importRulePayload: ImportExistingRuleProps
-    ): Promise<RuleAlertType> => {
-      return importExistingRule(rulesClient, importRulePayload);
+    importRule: async (importRulePayload: ImportRuleProps): Promise<RuleAlertType> => {
+      return importRule(rulesClient, importRulePayload);
     },
   };
 
@@ -240,28 +240,29 @@ export const upgradePrebuiltRule = async (
   return updatedRule;
 };
 
-export const importNewRule = async (
+export const importRule = async (
   rulesClient: RulesClient,
-  importRulePayload: ImportNewRuleProps
+  importRulePayload: ImportRuleProps
 ): Promise<RuleAlertType> => {
-  const { ruleToImport, options } = importRulePayload;
+  const { ruleToImport, overwriteRules, options } = importRulePayload;
 
-  return _createRule(rulesClient, ruleToImport, {
-    immutable: false,
-    allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
+  const existingRule = await readRules({
+    rulesClient,
+    ruleId: ruleToImport.rule_id,
+    id: undefined,
   });
-};
 
-export const importExistingRule = async (
-  rulesClient: RulesClient,
-  importRulePayload: ImportExistingRuleProps
-): Promise<RuleAlertType> => {
-  const { ruleToImport, existingRule } = importRulePayload;
-
-  return _updateRule(rulesClient, {
-    existingRule,
-    ruleUpdate: ruleToImport,
-  });
+  if (!existingRule) {
+    return _importNewRule(rulesClient, { ruleToImport, options });
+  } else if (existingRule && overwriteRules) {
+    return _importExistingRule(rulesClient, { ruleToImport, existingRule });
+  } else {
+    throw createBulkErrorObject({
+      ruleId: existingRule.params.ruleId,
+      statusCode: 409,
+      message: `rule_id: "${existingRule.params.ruleId}" already exists`,
+    });
+  }
 };
 
 /* -------- Internal Methods -------- */
@@ -351,4 +352,28 @@ export const _toggleRuleEnabledOnUpdate = async (
   } else if (!existingRule.enabled && enabled === true) {
     await rulesClient.enable({ id: existingRule.id });
   }
+};
+
+export const _importNewRule = async (
+  rulesClient: RulesClient,
+  importRulePayload: ImportNewRuleProps
+): Promise<RuleAlertType> => {
+  const { ruleToImport, options } = importRulePayload;
+
+  return _createRule(rulesClient, ruleToImport, {
+    immutable: false,
+    allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
+  });
+};
+
+export const _importExistingRule = async (
+  rulesClient: RulesClient,
+  importRulePayload: ImportExistingRuleProps
+): Promise<RuleAlertType> => {
+  const { ruleToImport, existingRule } = importRulePayload;
+
+  return _updateRule(rulesClient, {
+    existingRule,
+    ruleUpdate: ruleToImport,
+  });
 };
