@@ -38,11 +38,13 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const mountComponent = async ({
   hideChart = false,
+  isEsqlMode = false,
   isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
   storage,
 }: {
   hideChart?: boolean;
+  isEsqlMode?: boolean;
   isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
   storage?: Storage;
@@ -100,6 +102,10 @@ const mountComponent = async ({
     columns: [],
   });
 
+  if (isEsqlMode) {
+    stateContainer.appState.update({ query: { esql: 'from * ' } });
+  }
+
   const props: DiscoverMainContentProps = {
     dataView,
     stateContainer,
@@ -148,7 +154,7 @@ describe('Discover main content component', () => {
     });
 
     it('should include DocumentViewModeToggle when in ES|QL mode', async () => {
-      const component = await mountComponent();
+      const component = await mountComponent({ isEsqlMode: true });
       expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
