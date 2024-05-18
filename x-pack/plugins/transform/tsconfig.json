@@ -77,7 +77,8 @@
     "@kbn/rule-data-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/core-elasticsearch-server-mocks"
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*",
