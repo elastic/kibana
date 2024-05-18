@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { IRulesManagementClient } from '../rules_management_client';
+import type {
+  IRulesManagementClient,
+  CreateRuleOptions,
+  _UpdateRuleProps,
+  _PatchRuleProps,
+} from '../rules_management_client';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,
@@ -14,11 +19,6 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { RuleAlertType } from '../../../../rule_schema';
-import type {
-  CreateRuleOptions,
-  _UpdateRuleProps,
-  _PatchRuleProps,
-} from '../internal_methods.rules_management_client';
 
 export type RulesManagementClientMock = jest.Mocked<IRulesManagementClient>;
 

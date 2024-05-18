@@ -22,7 +22,6 @@ import type {
 } from '..';
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../../rule_types/__mocks__/es_results';
-import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
 export const getBaseRuleParams = (): BaseRuleParams => {
   return {
@@ -242,18 +241,3 @@ export const getCompleteRuleMock = <T extends RuleParams>(params: T): CompleteRu
   ruleParams: params,
   ruleConfig: getRuleConfigMock(),
 });
-
-export const getPrebuiltRuleAsset = (): PrebuiltRuleAsset => {
-  return {
-    name: 'Prebuilt Rule',
-    description: 'A prebuilt rule asset',
-    type: 'query',
-    language: 'kuery',
-    query: 'user.name: root or user.name: admin',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    version: 1,
-    rule_id: 'prebuilt-rule-1',
-    risk_score: 50,
-    severity: 'medium',
-  };
-};

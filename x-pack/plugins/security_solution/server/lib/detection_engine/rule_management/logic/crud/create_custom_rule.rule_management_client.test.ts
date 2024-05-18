@@ -9,32 +9,117 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
 import { createCustomRule } from './rules_management_client';
 
-import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-// import { createRuleMock } from './__mocks__/rules_management_client';
+import {
+  getCreateRulesSchemaMock,
+  getCreateMachineLearningRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaMock,
+} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 
-import { _createRule } from './internal_methods.rules_management_client';
-jest.mock('./internal_methods.rules_management_client', () => ({
-  _createRule: jest.fn(),
-}));
-
-describe('RuleManagementClient.createPrebuiltRule', () => {
+describe('RuleManagementClient.createCustomRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  // let createRuleSpy: typeof createRuleMock;
 
   beforeEach(() => {
     jest.resetAllMocks();
     rulesClient = rulesClientMock.create();
   });
 
-  it('should call _createRule with the correct arguments and options', async () => {
-    const ruleParams = getCreateRulesSchemaMock();
+  it('should create a rule with the correct parameters and options', async () => {
+    const params = getCreateRulesSchemaMock();
 
-    await createCustomRule(rulesClient, { params: getCreateRulesSchemaMock() });
+    await createCustomRule(rulesClient, { params });
 
-    expect(_createRule).toHaveBeenCalledTimes(1);
-    expect(_createRule).toHaveBeenCalledWith(rulesClient, ruleParams, {
-      immutable: false,
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          enabled: true,
+          params: expect.objectContaining({
+            description: params.description,
+            immutable: false,
+          }),
+        }),
+        options: {},
+        allowMissingConnectorSecrets: undefined,
+      })
+    );
+  });
+
+  it('calls the rulesClient with legacy ML params', async () => {
+    await createCustomRule(rulesClient, { params: getCreateMachineLearningRulesSchemaMock() });
+
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            anomalyThreshold: 58,
+            machineLearningJobId: ['typical-ml-job-id'],
+            immutable: false,
+          }),
+        }),
+        options: {},
+        allowMissingConnectorSecrets: undefined,
+      })
+    );
+  });
+
+  it('calls the rulesClient with ML params', async () => {
+    await createCustomRule(rulesClient, {
+      params: {
+        ...getCreateMachineLearningRulesSchemaMock(),
+        machine_learning_job_id: ['new_job_1', 'new_job_2'],
+      },
     });
-    // expect(result).toEqual(mockedRule);
+
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            anomalyThreshold: 58,
+            machineLearningJobId: ['new_job_1', 'new_job_2'],
+            immutable: false,
+          }),
+        }),
+        options: {},
+        allowMissingConnectorSecrets: undefined,
+      })
+    );
+  });
+
+  it('populates a threatIndicatorPath value for threat_match rule if empty', async () => {
+    const params = getCreateThreatMatchRulesSchemaMock();
+    delete params.threat_indicator_path;
+
+    await createCustomRule(rulesClient, {
+      params,
+    });
+
+    expect(rulesClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
+            immutable: false,
+          }),
+        }),
+        options: {},
+        allowMissingConnectorSecrets: undefined,
+      })
+    );
+  });
+
+  it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
+    await createCustomRule(rulesClient, { params: getCreateRulesSchemaMock() });
+    expect(rulesClient.create).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
+            immutable: false,
+          }),
+        }),
+        options: {},
+        allowMissingConnectorSecrets: undefined,
+      })
+    );
   });
 });
