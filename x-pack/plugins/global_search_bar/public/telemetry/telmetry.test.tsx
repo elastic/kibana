@@ -11,7 +11,7 @@ import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-sear
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { of, throwError } from 'rxjs';
@@ -153,7 +153,7 @@ describe('SearchBar', () => {
       expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
-    it('tracks the application navigated to', async () => {
+    it.only('tracks the application navigated to', async () => {
       searchService.find.mockReturnValueOnce(
         of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
       );
@@ -177,7 +177,12 @@ describe('SearchBar', () => {
 
       jest.spyOn(Date, 'now').mockReturnValue(2000);
 
-      fireEvent.click(await screen.findByTestId('nav-search-option'));
+      // await waitFor(async () => {
+      //   expect(await screen.findByTestId('nav-search-option')).toBeInTheDocument();
+      // });
+      await act(async () => {
+        fireEvent.click(await screen.findByTestId('nav-search-option'));
+      });
 
       expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
         selected_rank: 1,

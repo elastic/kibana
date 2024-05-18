@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import type { UseDetailPanelConfig } from './use_detail_panel';
 import { useDetailPanel } from './use_detail_panel';
@@ -62,30 +62,24 @@ describe('useDetailPanel', () => {
   const renderUseDetailPanel = (props = defaultProps) =>
     renderHook(() => useDetailPanel(props), { wrapper });
 
-  test('should return open fns (event, host, network, user), handleOnDetailsPanelClosed fn, shouldShowDetailsPanel, and the DetailsPanel component', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderUseDetailPanel();
-      await waitForNextUpdate();
+  test('should return open fns (event, host, network, user), handleOnDetailsPanelClosed fn, shouldShowDetailsPanel, and the DetailsPanel component', () => {
+    const { result } = renderUseDetailPanel();
 
-      expect(result.current.openEventDetailsPanel).toBeDefined();
-      expect(result.current.shouldShowDetailsPanel).toBe(false);
-      expect(result.current.DetailsPanel).toBeNull();
-    });
+    expect(result.current.openEventDetailsPanel).toBeDefined();
+    expect(result.current.shouldShowDetailsPanel).toBe(false);
+    expect(result.current.DetailsPanel).toBeNull();
   });
 
-  test('should fire redux action to open event details panel', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderUseDetailPanel();
-      await waitForNextUpdate();
+  test('should fire redux action to open event details panel', () => {
+    const { result } = renderUseDetailPanel();
 
-      result.current?.openEventDetailsPanel('123');
+    result.current?.openEventDetailsPanel('123');
 
-      expect(mockDispatch).toHaveBeenCalled();
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
-    });
+    expect(mockDispatch).toHaveBeenCalled();
+    expect(timelineActions.toggleDetailPanel).toHaveBeenCalled();
   });
 
-  test('should show the details panel', async () => {
+  test('should show the details panel', () => {
     mockGetExpandedDetail.mockImplementation(() => ({
       [TimelineTabs.session]: {
         panelView: 'somePanel',
@@ -96,11 +90,9 @@ describe('useDetailPanel', () => {
       tabType: TimelineTabs.session,
     };
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderUseDetailPanel(updatedProps);
-      await waitForNextUpdate();
+    const { result } = renderUseDetailPanel(updatedProps);
 
-      expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
+    expect(result.current.DetailsPanel).toMatchInlineSnapshot(`
         <Memo(DetailsPanel)
           browserFields={Object {}}
           handleOnPanelClosed={[Function]}
@@ -108,6 +100,5 @@ describe('useDetailPanel', () => {
           tabType="session"
         />
       `);
-    });
   });
 });

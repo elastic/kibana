@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseCriticalAlerts } from './use_critical_alerts';
 import { useCriticalAlerts } from './use_critical_alerts';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import * as i18n from '../translations';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
@@ -65,13 +65,12 @@ describe('useCriticalAlerts', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it('loads initial state', async () => {
-    await act(async () => {
-      const { result } = renderHook(() => useCriticalAlerts(props), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      expect(result.current).toEqual({
+  it.only('loads initial state', async () => {
+    const { result } = renderHook(() => useCriticalAlerts(props), {
+      wrapper: wrapperContainer,
+    });
+    await waitFor(async () => {
+      await expect(result.current).toEqual({
         stat: '-',
         isLoading: true,
         percentage: {

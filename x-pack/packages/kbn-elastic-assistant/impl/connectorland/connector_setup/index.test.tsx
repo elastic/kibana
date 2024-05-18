@@ -97,7 +97,7 @@ describe('useConnectorSetup', () => {
 
   it('should NOT set the api config for each conversation when a new connector is saved and updateConversationsOnSaveConnector is false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useConnectorSetup({
             ...defaultProps,
@@ -107,7 +107,7 @@ describe('useConnectorSetup', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
+
       const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
         wrapper: TestProviders,
       });

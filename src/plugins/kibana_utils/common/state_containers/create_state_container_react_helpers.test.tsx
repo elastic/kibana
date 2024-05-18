@@ -7,22 +7,10 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { render } from '@testing-library/react';
 import { act, Simulate } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
-
-let container: HTMLDivElement | null;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-});
-
-afterEach(() => {
-  document.body.removeChild(container!);
-  container = null;
-});
 
 test('can create React context', () => {
   const context = createStateContainerReactHelpers();
@@ -39,8 +27,7 @@ test('<Provider> passes state to <Consumer>', () => {
   const stateContainer = createStateContainer({ hello: 'world' });
   const { Provider, Consumer } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  const root = createRoot(container!);
-  root.render(
+  const { container } = render(
     <Provider value={stateContainer}>
       <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
     </Provider>
@@ -71,9 +58,7 @@ test('<Provider> passes state to connect()()', () => {
   const mergeProps = ({ hello }: State1) => ({ message: hello });
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
-  const root = createRoot(container!);
-
-  root.render(
+  const { container } = render(
     <Provider value={stateContainer}>
       <DemoConnected stop="?" />
     </Provider>
@@ -86,9 +71,7 @@ test('context receives stateContainer', () => {
   const stateContainer = createStateContainer({ foo: 'bar' });
   const { Provider, context } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  const root = createRoot(container!);
-
-  root.render(
+  const { container } = render(
     /* eslint-disable @typescript-eslint/no-shadow */
     <Provider value={stateContainer}>
       <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
@@ -110,9 +93,7 @@ describe('hooks', () => {
         return <>{stateContainer.get().foo}</>;
       };
 
-      const root = createRoot(container!);
-
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -131,9 +112,7 @@ describe('hooks', () => {
         return <>{foo}</>;
       };
 
-      const root = createRoot(container!);
-
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -155,9 +134,7 @@ describe('hooks', () => {
         return <>{foo}</>;
       };
 
-      const root = createRoot(container!);
-
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -198,9 +175,7 @@ describe('hooks', () => {
         );
       };
 
-      const root = createRoot(container!);
-
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -234,9 +209,7 @@ describe('hooks', () => {
         return <>{value}</>;
       };
 
-      const root = createRoot(container!);
-
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -259,9 +232,8 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
-      const root = createRoot(container!);
 
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -291,9 +263,8 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
-      const root = createRoot(container!);
 
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -328,9 +299,8 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{JSON.stringify(value)}</>;
       };
-      const root = createRoot(container!);
 
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>
@@ -371,9 +341,8 @@ describe('hooks', () => {
         const value = useSelector(selector, comparator);
         return <>{JSON.stringify(value)}</>;
       };
-      const root = createRoot(container!);
 
-      root.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
         </Provider>

@@ -8,27 +8,26 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { render } from '@testing-library/react';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 
-let container: HTMLDivElement | null;
+// let container: HTMLDivElement | null;
 
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-});
+// beforeEach(() => {
+//   container = document.createElement('div');
+//   document.body.appendChild(container);
+// });
 
-afterEach(() => {
-  document.body.removeChild(container!);
-  container = null;
-});
+// afterEach(() => {
+//   document.body.removeChild(container!);
+//   container = null;
+// });
 
 test('can mount <Provider> without crashing', () => {
   const services = coreMock.createStart();
-  const root = createRoot(container!);
-
-  root.render(
+  render(
     <context.Provider value={{ services } as any}>
       <div>Hello world</div>
     </context.Provider>
@@ -43,9 +42,8 @@ const TestConsumer = () => {
 test('useKibana() hook retrieves Kibana context', () => {
   const core = coreMock.createStart();
   (core as any).foo = 'bar';
-  const root = createRoot(container!);
 
-  root.render(
+  const { container } = render(
     <context.Provider value={{ services: core } as any}>
       <TestConsumer />
     </context.Provider>
@@ -60,9 +58,8 @@ test('createContext() creates context that can be consumed by useKibana() hook',
     foo: 'baz',
   } as Partial<CoreStart>;
   const { Provider } = createKibanaReactContext(services);
-  const root = createRoot(container!);
 
-  root.render(
+  const { container } = render(
     <Provider>
       <TestConsumer />
     </Provider>
@@ -83,9 +80,8 @@ test('services, notifications and overlays objects are always available', () => 
     });
     return null;
   };
-  const root = createRoot(container!);
 
-  root.render(
+  render(
     <Provider>
       <Test />
     </Provider>
@@ -102,9 +98,8 @@ test('<KibanaContextProvider> provider provides default kibana-react context', (
     });
     return null;
   };
-  const root = createRoot(container!);
 
-  root.render(
+  render(
     <KibanaContextProvider>
       <Test />
     </KibanaContextProvider>
@@ -117,9 +112,8 @@ test('<KibanaContextProvider> can set custom services in context', () => {
     expect(services.test).toBe('quux');
     return null;
   };
-  const root = createRoot(container!);
 
-  root.render(
+  render(
     <KibanaContextProvider services={{ test: 'quux' }}>
       <Test />
     </KibanaContextProvider>
@@ -134,9 +128,8 @@ test('nested <KibanaContextProvider> override and merge services', () => {
     expect(services.baz).toBe('baz3');
     return null;
   };
-  const root = createRoot(container!);
 
-  root.render(
+  render(
     <KibanaContextProvider services={{ foo: 'foo', bar: 'bar', baz: 'baz' }}>
       <KibanaContextProvider services={{ foo: 'foo2' }}>
         <KibanaContextProvider services={{ baz: 'baz3' }}>
@@ -163,9 +156,7 @@ test('overlays wrapper uses the closest overlays service', () => {
     overlays: overlayServiceMock.createStartContract(),
   } as Partial<CoreStart>;
 
-  const root = createRoot(container!);
-
-  root.render(
+  render(
     <KibanaContextProvider services={core1}>
       <KibanaContextProvider services={core2}>
         <Test />
@@ -202,9 +193,7 @@ test('notifications wrapper uses the closest notifications service', () => {
     } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
-  const root = createRoot(container!);
-
-  root.render(
+  render(
     <KibanaContextProvider services={core1}>
       <KibanaContextProvider services={core2}>
         <Test />
@@ -241,9 +230,8 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
   } as Partial<CoreStart>;
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);
-  const root = createRoot(container!);
 
-  root.render(
+  render(
     <KibanaContextProvider services={core1}>
       <KibanaContextProvider services={core2}>
         <Test />

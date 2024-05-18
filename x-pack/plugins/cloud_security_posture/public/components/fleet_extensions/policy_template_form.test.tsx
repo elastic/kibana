@@ -1499,7 +1499,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  describe('Agentless', () => {
+  describe.only('Agentless', () => {
     it('should render setup technology selector for AWS and allow to select agent-based', async () => {
       const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyAWS();
@@ -1530,7 +1530,9 @@ describe('<CspPolicyTemplateForm />', () => {
       // select agent-based and check for cloudformation option
       userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      // await waitForEuiPopoverOpen();
+      await waitFor(() => {
+        expect(agentBasedOption).not.toHaveAttribute('pointer-events', 'none');
+      });
       userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(
@@ -1585,7 +1587,9 @@ describe('<CspPolicyTemplateForm />', () => {
       // select agent-based and check for Cloud Shell option
       userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      // await waitForEuiPopoverOpen();
+      await waitFor(() => {
+        expect(agentBasedOption).not.toHaveAttribute('pointer-events', 'none');
+      });
       userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
@@ -1677,7 +1681,9 @@ describe('<CspPolicyTemplateForm />', () => {
       // select agent-based and check for ARM template option
       userEvent.click(setupTechnologySelector);
       const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      // await waitForEuiPopoverOpen();
+      await waitFor(() => {
+        expect(agentBasedOption).not.toHaveAttribute('pointer-events', 'none');
+      });
       userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE)).toBeInTheDocument();

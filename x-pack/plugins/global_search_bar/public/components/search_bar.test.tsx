@@ -11,7 +11,7 @@ import { GlobalSearchBatchedResults, GlobalSearchResult } from '@kbn/global-sear
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { filter, map } from 'rxjs';
@@ -119,7 +119,10 @@ describe('SearchBar', () => {
 
       await focusAndUpdate();
 
-      expect(searchService.find).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(searchService.find).toHaveBeenCalledTimes(1);
+      });
+
       expect(searchService.find).toHaveBeenCalledWith({}, {});
       await assertSearchResults(['Canvas • Kibana', 'Discover • Kibana', 'Graph • Kibana']);
 
@@ -179,8 +182,9 @@ describe('SearchBar', () => {
 
       await focusAndUpdate();
 
-      expect(searchService.find).toHaveBeenCalledTimes(1);
-      //
+      await waitFor(() => {
+        expect(searchService.find).toHaveBeenCalledTimes(1);
+      });
       simulateTypeChar('d');
       await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
 

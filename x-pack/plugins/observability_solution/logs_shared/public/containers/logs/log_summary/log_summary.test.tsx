@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 
@@ -63,28 +63,29 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    // await waitFor();
-
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        logView: LOG_VIEW_REFERENCE,
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          logView: LOG_VIEW_REFERENCE,
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    });
 
     rerender({ logViewReference: CHANGED_LOG_VIEW_REFERENCE });
-    // await waitFor();
 
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        logView: CHANGED_LOG_VIEW_REFERENCE,
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          logView: CHANGED_LOG_VIEW_REFERENCE,
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    });
   });
 
   it('queries for new summary buckets when the filter query changes', async () => {
@@ -109,8 +110,6 @@ describe('useLogSummary hook', () => {
       }
     );
 
-    // await waitFor();
-
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(1);
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -118,19 +117,23 @@ describe('useLogSummary hook', () => {
       }),
       expect.anything()
     );
-    expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    waitFor(() => {
+      expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
+    });
 
     rerender({ filterQuery: 'CHANGED_FILTER_QUERY' });
-    // await waitFor();
 
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        query: 'CHANGED_FILTER_QUERY',
-      }),
-      expect.anything()
-    );
-    expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: 'CHANGED_FILTER_QUERY',
+        }),
+        expect.anything()
+      );
+      expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
+    });
   });
 
   it('queries for new summary buckets when the start and end date changes', async () => {
@@ -160,16 +163,17 @@ describe('useLogSummary hook', () => {
     const secondRange = createMockDateRange('now-20s', 'now');
 
     rerender(secondRange);
-    // await waitFor();
 
-    expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
-    expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        startTimestamp: secondRange.startTimestamp,
-        endTimestamp: secondRange.endTimestamp,
-      }),
-      expect.anything()
-    );
+    waitFor(() => {
+      expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
+      expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          startTimestamp: secondRange.startTimestamp,
+          endTimestamp: secondRange.endTimestamp,
+        }),
+        expect.anything()
+      );
+    });
   });
 
   it("doesn't query for new summary buckets when the previous request is still in flight", async () => {

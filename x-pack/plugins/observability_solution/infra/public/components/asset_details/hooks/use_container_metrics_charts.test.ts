@@ -44,10 +44,10 @@ describe('useDockerContainerCharts', () => {
       async (metric) => {
         const expectedOrder = getContainerChartsExpectedOrder(metric);
 
-        const { result, waitForNextUpdate } = renderHook(() =>
+        const { result } = renderHook(() =>
           useDockerContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-        await waitForNextUpdate();
+
 
         const { charts } = result.current;
 
@@ -64,10 +64,10 @@ describe('useDockerContainerCharts', () => {
 describe('useDockerKPIMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const expectedOrder = ['cpuUsage', 'memoryUsage'];
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useDockerContainerKpiCharts({ dataViewId: metricsDataViewId })
     );
-    await waitForNextUpdate();
+
     expect(result.current).toHaveLength(expectedOrder.length);
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);
@@ -82,10 +82,10 @@ describe('useK8sContainerCharts', () => {
       async (metric) => {
         const expectedOrder = getK8sContainerChartsExpectedOrder(metric);
 
-        const { result, waitForNextUpdate } = renderHook(() =>
+        const { result } = renderHook(() =>
           useK8sContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-        await waitForNextUpdate();
+
 
         const { charts } = result.current;
 
@@ -102,10 +102,10 @@ describe('useK8sContainerCharts', () => {
 describe('useK8sContainerKPIMetricsCharts', () => {
   it('should return an array of charts with correct order', async () => {
     const expectedOrder = ['k8sCpuUsage', 'k8sMemoryUsage'];
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useK8sContainerKpiCharts({ dataViewId: metricsDataViewId })
     );
-    await waitForNextUpdate();
+
     expect(result.current).toHaveLength(expectedOrder.length);
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);
