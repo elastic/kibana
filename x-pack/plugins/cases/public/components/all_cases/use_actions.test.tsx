@@ -8,10 +8,7 @@
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import {
-  waitForEuiPopoverOpen,
-  waitForEuiContextMenuPanelTransition,
-} from '@elastic/eui/lib/test/rtl';
+import { waitForEuiContextMenuPanelTransition } from '@elastic/eui/lib/test/rtl';
 
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';

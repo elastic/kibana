@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import { ManageMLJobComponent } from './manage_ml_job';
 import {
   render,
