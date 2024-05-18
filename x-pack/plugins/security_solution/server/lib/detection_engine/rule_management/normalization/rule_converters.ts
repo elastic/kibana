@@ -21,10 +21,6 @@ import {
 
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
-<<<<<<< HEAD
-=======
-  RequiredFieldArray,
->>>>>>> 149f6352e6a (Created updateRule)
   RuleCreateProps,
   RuleUpdateProps,
   TypeSpecificCreateProps,
