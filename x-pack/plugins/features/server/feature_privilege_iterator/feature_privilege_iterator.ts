@@ -110,24 +110,48 @@ function mergeWithSubFeatures(
 
     mergedConfig.alerting = {
       rule: {
-        all: mergeArrays(
-          mergedConfig.alerting?.rule?.all ?? [],
-          subFeaturePrivilege.alerting?.rule?.all ?? []
-        ),
-        read: mergeArrays(
-          mergedConfig.alerting?.rule?.read ?? [],
-          subFeaturePrivilege.alerting?.rule?.read ?? []
-        ),
+        all: {
+          ruleTypeIds: mergeArrays(
+            mergedConfig.alerting?.rule?.all?.ruleTypeIds ?? [],
+            subFeaturePrivilege.alerting?.rule?.all?.ruleTypeIds ?? []
+          ),
+          consumers: mergeArrays(
+            mergedConfig.alerting?.rule?.all?.consumers ?? [],
+            subFeaturePrivilege.alerting?.rule?.all?.consumers ?? []
+          ),
+        },
+        read: {
+          ruleTypeIds: mergeArrays(
+            mergedConfig.alerting?.rule?.read?.ruleTypeIds ?? [],
+            subFeaturePrivilege.alerting?.rule?.read?.ruleTypeIds ?? []
+          ),
+          consumers: mergeArrays(
+            mergedConfig.alerting?.rule?.read?.consumers ?? [],
+            subFeaturePrivilege.alerting?.rule?.read?.consumers ?? []
+          ),
+        },
       },
       alert: {
-        all: mergeArrays(
-          mergedConfig.alerting?.alert?.all ?? [],
-          subFeaturePrivilege.alerting?.alert?.all ?? []
-        ),
-        read: mergeArrays(
-          mergedConfig.alerting?.alert?.read ?? [],
-          subFeaturePrivilege.alerting?.alert?.read ?? []
-        ),
+        all: {
+          ruleTypeIds: mergeArrays(
+            mergedConfig.alerting?.alert?.all?.ruleTypeIds ?? [],
+            subFeaturePrivilege.alerting?.alert?.all?.ruleTypeIds ?? []
+          ),
+          consumers: mergeArrays(
+            mergedConfig.alerting?.alert?.all?.consumers ?? [],
+            subFeaturePrivilege.alerting?.alert?.all?.consumers ?? []
+          ),
+        },
+        read: {
+          ruleTypeIds: mergeArrays(
+            mergedConfig.alerting?.alert?.read?.ruleTypeIds ?? [],
+            subFeaturePrivilege.alerting?.alert?.read?.ruleTypeIds ?? []
+          ),
+          consumers: mergeArrays(
+            mergedConfig.alerting?.alert?.read?.consumers ?? [],
+            subFeaturePrivilege.alerting?.alert?.read?.consumers ?? []
+          ),
+        },
       },
     };
 

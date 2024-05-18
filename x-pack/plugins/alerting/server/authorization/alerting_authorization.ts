@@ -93,6 +93,7 @@ export class AlertingAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly featuresIds: Promise<Set<string>>;
+  private readonly allRuleTypeIds: Promise<Set<string>>;
   private readonly allPossibleConsumers: Promise<AuthorizedConsumers>;
   private readonly spaceId: string | undefined;
   private readonly features: FeaturesPluginStart;
@@ -110,33 +111,36 @@ export class AlertingAuthorization {
     this.features = features;
     this.spaceId = getSpaceId(request);
 
-    this.featuresIds = getSpace(request)
+    const alertingFeaturesPromise = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
-      .then(
-        (disabledFeatures) =>
-          new Set(
-            features
-              .getKibanaFeatures()
-              .filter(
-                ({ id, alerting }) =>
-                  // ignore features which are disabled in the user's space
-                  !disabledFeatures.has(id) &&
-                  // ignore features which don't grant privileges to alerting
-                  ((alerting?.ruleTypeIds?.length ?? 0 > 0) ||
-                    (alerting?.consumers?.length ?? 0 > 0))
-              )
-              .map((feature) => feature.id)
-          )
-      )
-      .catch(() => {
-        // failing to fetch the space means the user is likely not privileged in the
-        // active space at all, which means that their list of features should be empty
-        return new Set();
-      });
+      .then((disabledFeatures) =>
+        features.getKibanaFeatures().filter(
+          ({ id, alerting }) =>
+            // ignore features which are disabled in the user's space
+            !disabledFeatures.has(id) &&
+            // ignore features which don't grant privileges to alerting
+            ((alerting?.ruleTypeIds?.length ?? 0 > 0) || (alerting?.consumers?.length ?? 0 > 0))
+        )
+      );
 
-    this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
-      return featuresIds.size
-        ? asAuthorizedConsumers([ALERTING_FEATURE_ID, ...featuresIds], {
+    this.allRuleTypeIds = alertingFeaturesPromise.then(
+      (alertingFeatures) =>
+        new Set(
+          alertingFeatures.flatMap((alertingFeature) => alertingFeature.alerting?.ruleTypeIds ?? [])
+        )
+    );
+
+    this.featuresIds = alertingFeaturesPromise.then(
+      (alertingFeatures) => new Set(alertingFeatures.map((alertingFeature) => alertingFeature.id))
+    );
+
+    this.allPossibleConsumers = alertingFeaturesPromise.then((alertingFeatures) => {
+      const consumers = alertingFeatures
+        .flatMap((alertingFeature) => alertingFeature.alerting?.consumers)
+        .filter(Boolean) as string[];
+
+      return consumers.length
+        ? asAuthorizedConsumers([ALERTING_FEATURE_ID, ...consumers], {
             read: true,
             all: true,
           })
@@ -323,6 +327,88 @@ export class AlertingAuthorization {
     ruleTypes: Set<RegistryRuleType>,
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity,
+    consumers?: Set<string>
+  ): Promise<{
+    username?: string;
+    hasAllRequested: boolean;
+    authorizedRuleTypes: Set<RegistryAlertTypeWithAuth>;
+  }> {
+    const allPossibleConsumers = await this.allPossibleConsumers;
+    const consumersToAuthorize = consumers ?? new Set(Object.keys(allPossibleConsumers));
+    const requiredPrivileges = new Map<
+      string,
+      [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
+    >();
+    const authorizedRuleTypes = new Set<RegistryAlertTypeWithAuth>();
+
+    if (this.authorization && this.shouldCheckAuthorization()) {
+      const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
+        this.request
+      );
+
+      const ruleTypesWithAuthorization = Array.from(
+        this.augmentWithAuthorizedConsumers(ruleTypes, {})
+      );
+
+      for (const ruleTypeWithAuth of ruleTypesWithAuthorization) {
+        for (const consumerToAuthorize of consumersToAuthorize) {
+          for (const operation of operations) {
+            requiredPrivileges.set(
+              this.authorization!.actions.alerting.get(
+                ruleTypeWithAuth.id,
+                consumerToAuthorize,
+                authorizationEntity,
+                operation
+              ),
+              [
+                ruleTypeWithAuth,
+                consumerToAuthorize,
+                hasPrivilegeByOperation(operation),
+                ruleTypeWithAuth.producer === consumerToAuthorize,
+              ]
+            );
+          }
+        }
+      }
+
+      const { username, hasAllRequested, privileges } = await checkPrivileges({
+        kibana: [...requiredPrivileges.keys()],
+      });
+
+      for (const { authorized, privilege } of privileges.kibana) {
+        if (authorized && requiredPrivileges.has(privilege)) {
+          const [ruleType, consumer, hasPrivileges, isAuthorizedAtProducerLevel] =
+            requiredPrivileges.get(privilege)!;
+
+          ruleType.authorizedConsumers[consumer] = mergeHasPrivileges(
+            hasPrivileges,
+            ruleType.authorizedConsumers[consumer]
+          );
+
+          authorizedRuleTypes.add(ruleType);
+        }
+      }
+
+      return {
+        username,
+        hasAllRequested,
+        authorizedRuleTypes,
+      };
+    } else {
+      return {
+        hasAllRequested: true,
+        authorizedRuleTypes: this.augmentWithAuthorizedConsumers(
+          new Set([...ruleTypes]),
+          allPossibleConsumers
+        ),
+      };
+    }
+  }
+
+  private async _augmentRuleTypesWithAuthorization(
+    ruleTypes: Set<RegistryRuleType>,
+    operations: Array<ReadOperations | WriteOperations>,
+    authorizationEntity: AlertingAuthorizationEntity,
     featuresIds?: Set<string>
   ): Promise<{
     username?: string;
@@ -346,13 +432,17 @@ export class AlertingAuthorization {
         string,
         [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
       >();
+
       const allPossibleConsumers = await this.allPossibleConsumers;
+
       const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
         legacyConsumer === ALERTING_FEATURE_ID || isEmpty(featuresIds);
+
       for (const feature of fIds) {
         const featureDef = this.features
           .getKibanaFeatures()
           .find((kFeature) => kFeature.id === feature);
+
         for (const ruleTypeId of featureDef?.alerting?.ruleTypeIds ?? []) {
           const ruleTypeAuth = ruleTypesWithAuthorization.find((rtwa) => rtwa.id === ruleTypeId);
           if (ruleTypeAuth) {

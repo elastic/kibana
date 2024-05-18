@@ -41,17 +41,8 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         insightsAndAlerting: ['triggersActions'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
-      alerting: {},
       privileges: {
         all: {
-          alerting: {
-            rule: {
-              all: {},
-            },
-            alert: {
-              all: {},
-            },
-          },
           savedObject: {
             all: [],
             read: [],
@@ -62,18 +53,6 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
           ui: [],
         },
         read: {
-          alerting: {
-            rule: {
-              read: {
-                ruleTypeIds: [],
-              },
-            },
-            alert: {
-              read: {
-                ruleTypeIds: [],
-              },
-            },
-          },
           savedObject: {
             all: [],
             read: [],
@@ -89,7 +68,7 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
     features.registerKibanaFeature({
       id: 'alertingExampleRule',
       name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
-        defaultMessage: 'Alerting Examples',
+        defaultMessage: 'Alerting Examples Rule',
       }),
       app: [],
       management: {

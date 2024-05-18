@@ -1028,11 +1028,11 @@ export class AlertsClient {
     }
   }
 
-  public async getAuthorizedAlertsIndices(featureIds: string[]): Promise<string[] | undefined> {
+  public async getAuthorizedAlertsIndices(consumers: string[]): Promise<string[] | undefined> {
     try {
       const authorizedRuleTypes = await this.authorization.getAuthorizedRuleTypes(
         AlertingAuthorizationEntity.Alert,
-        new Set(featureIds)
+        new Set(consumers)
       );
       const indices = this.getAlertIndicesAlias(
         authorizedRuleTypes.map((art: { id: any }) => art.id),
