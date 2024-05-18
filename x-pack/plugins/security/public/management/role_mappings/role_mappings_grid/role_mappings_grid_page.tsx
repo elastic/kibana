@@ -39,6 +39,7 @@ import {
 } from '../../management_urls';
 import { RoleTableDisplay } from '../../role_table_display';
 import type { RolesAPIClient } from '../../roles';
+import type { SecurityFeaturesAPIClient } from '../../security_features';
 import {
   DeleteProvider,
   NoCompatibleRealms,
@@ -50,6 +51,7 @@ import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
+  securityFeaturesAPI: PublicMethodsOf<SecurityFeaturesAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
@@ -447,17 +449,15 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const { canManageRoleMappings, hasCompatibleRealms } =
-        await this.props.roleMappingsAPI.checkRoleMappingFeatures();
-
-      const canLoad = canManageRoleMappings || this.props.readOnly;
+      const { canReadSecurity, hasCompatibleRealms } =
+        await this.props.securityFeaturesAPI.checkFeatures();
 
       this.setState({
-        loadState: canLoad ? this.state.loadState : 'permissionDenied',
+        loadState: canReadSecurity ? this.state.loadState : 'permissionDenied',
         hasCompatibleRealms,
       });
 
-      if (canLoad) {
+      if (canReadSecurity) {
         this.performInitialLoad();
       }
     } catch (e) {
