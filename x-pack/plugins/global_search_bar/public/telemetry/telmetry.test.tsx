@@ -153,7 +153,7 @@ describe('SearchBar', () => {
       expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
-    it.only('tracks the application navigated to', async () => {
+    it('tracks the application navigated to', async () => {
       searchService.find.mockReturnValueOnce(
         of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
       );

@@ -1499,7 +1499,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  describe.only('Agentless', () => {
+  describe('Agentless', () => {
     it('should render setup technology selector for AWS and allow to select agent-based', async () => {
       const agentlessPolicy = getMockAgentlessAgentPolicy();
       const newPackagePolicy = getMockPolicyAWS();

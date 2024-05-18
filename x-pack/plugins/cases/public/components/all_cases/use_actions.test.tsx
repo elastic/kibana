@@ -6,8 +6,7 @@
  */
 
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { waitForEuiContextMenuPanelTransition } from '@elastic/eui/lib/test/rtl';
 
 import { useActions } from './use_actions';
