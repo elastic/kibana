@@ -18,7 +18,6 @@ import { buildRouteValidationWithZod } from '../../../../../../utils/build_valid
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
-import { RulesManagementClient } from '../../../logic/crud/rules_management_client';
 
 export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

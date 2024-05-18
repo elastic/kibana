@@ -40,6 +40,7 @@ describe('Update rule route', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.rulesManagementClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     updateRuleRoute(server.router, ml);

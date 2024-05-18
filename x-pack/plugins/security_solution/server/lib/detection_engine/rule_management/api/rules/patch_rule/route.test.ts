@@ -40,6 +40,7 @@ describe('Patch rule route', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.rulesManagementClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     patchRuleRoute(server.router, ml);
   });
@@ -50,6 +51,7 @@ describe('Patch rule route', () => {
         getPatchRequest(),
         requestContextMock.convertContext(context)
       );
+
       expect(response.status).toEqual(200);
     });
 
@@ -80,7 +82,7 @@ describe('Patch rule route', () => {
     });
 
     test('catches error if update throws error', async () => {
-      clients.rulesClient.update.mockImplementation(async () => {
+      clients.rulesManagementClient.patchRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(
@@ -100,28 +102,32 @@ describe('Patch rule route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
+
+      const anomalyThreshold = 4;
+      const machineLearningJobId = 'some_job_id';
+      clients.rulesManagementClient.patchRule.mockResolvedValueOnce(
+        getRuleMock(
+          getMlRuleParams({
+            anomalyThreshold,
+            machineLearningJobId: [machineLearningJobId],
+          })
+        )
+      );
+
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
         body: {
           type: 'machine_learning',
           rule_id: 'my-rule-id',
-          anomaly_threshold: 4,
-          machine_learning_job_id: 'some_job_id',
+          anomaly_threshold: anomalyThreshold,
+          machine_learning_job_id: machineLearningJobId,
         },
       });
-      await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(clients.rulesClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            params: expect.objectContaining({
-              anomalyThreshold: 4,
-              machineLearningJobId: ['some_job_id'],
-            }),
-          }),
-        })
-      );
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+      expect(response.body.machine_learning_job_id).toEqual([machineLearningJobId]);
+      expect(response.body.anomaly_threshold).toEqual(anomalyThreshold);
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {

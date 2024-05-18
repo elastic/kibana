@@ -56,7 +56,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
           const savedObjectsClient = (await context.core).savedObjects.client;
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
+          const rulesManagementClient = (await context.securitySolution).getRulesManagementClient();
 
           const mlAuthz = buildMlAuthz({
             license: (await context.licensing).license,

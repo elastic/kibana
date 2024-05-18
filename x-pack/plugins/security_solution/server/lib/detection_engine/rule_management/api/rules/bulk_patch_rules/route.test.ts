@@ -39,6 +39,7 @@ describe('Bulk patch rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
+    clients.rulesManagementClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     bulkPatchRulesRoute(server.router, ml, logger);
   });
@@ -68,11 +69,23 @@ describe('Bulk patch rules route', () => {
     });
 
     test('allows ML Params to be patched', async () => {
+      const anomalyThreshold = 4;
+      const machineLearningJobId = 'some_job_id';
+
       clients.rulesClient.get.mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       clients.rulesClient.find.mockResolvedValueOnce({
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
+      clients.rulesManagementClient.patchRule.mockResolvedValueOnce(
+        getRuleMock(
+          getMlRuleParams({
+            anomalyThreshold,
+            machineLearningJobId: [machineLearningJobId],
+          })
+        )
+      );
+
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/bulk_update`,
@@ -80,23 +93,16 @@ describe('Bulk patch rules route', () => {
           {
             type: 'machine_learning',
             rule_id: 'my-rule-id',
-            anomaly_threshold: 4,
-            machine_learning_job_id: 'some_job_id',
+            anomaly_threshold: anomalyThreshold,
+            machine_learning_job_id: machineLearningJobId,
           },
         ],
       });
-      await server.inject(request, requestContextMock.convertContext(context));
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(clients.rulesClient.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            params: expect.objectContaining({
-              anomalyThreshold: 4,
-              machineLearningJobId: ['some_job_id'],
-            }),
-          }),
-        })
-      );
+      expect(response.status).toEqual(200);
+      expect(response.body[0].machine_learning_job_id).toEqual([machineLearningJobId]);
+      expect(response.body[0].anomaly_threshold).toEqual(anomalyThreshold);
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {

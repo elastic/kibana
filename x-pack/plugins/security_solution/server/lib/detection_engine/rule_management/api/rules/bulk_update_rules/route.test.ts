@@ -37,7 +37,7 @@ describe('Bulk update rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
+    clients.rulesManagementClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
     bulkUpdateRulesRoute(server.router, ml, logger);
@@ -71,7 +71,7 @@ describe('Bulk update rules route', () => {
     });
 
     test('returns an error if update throws', async () => {
-      clients.rulesClient.update.mockImplementation(() => {
+      clients.rulesManagementClient.updateRule.mockImplementation(() => {
         throw new Error('Test error');
       });
 
