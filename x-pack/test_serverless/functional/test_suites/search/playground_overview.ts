@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'svlPlaygroundUI']);
@@ -22,6 +23,10 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     it('playground app is loaded', async () => {
       await pageObjects.svlPlaygroundUI.PlaygrounStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
       await pageObjects.svlPlaygroundUI.PlaygrounStartChatPage.expectPlaygroundHeaderComponentsToExist();
+    });
+
+    it('has embedded console', async () => {
+      await testHasEmbeddedConsole(pageObjects);
     });
   });
 }
