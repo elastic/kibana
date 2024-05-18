@@ -36,6 +36,9 @@ describe('Create rule route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
+    clients.rulesManagementClient.createCustomRule.mockResolvedValue(
+      getRuleMock(getQueryRuleParams())
+    );
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -108,6 +111,9 @@ describe('Create rule route', () => {
 
     test('catches error if creation throws', async () => {
       clients.rulesClient.create.mockImplementation(async () => {
+        throw new Error('Test error');
+      });
+      clients.rulesManagementClient.createCustomRule.mockImplementation(async () => {
         throw new Error('Test error');
       });
       const response = await server.inject(

@@ -30,8 +30,7 @@ const createRulesManagementClientMock = () => {
     patchRule: jest.fn(),
     deleteRule: jest.fn(),
     upgradePrebuiltRule: jest.fn(),
-    importNewRule: jest.fn(),
-    importExistingRule: jest.fn(),
+    importRule: jest.fn(),
   };
   return mocked;
 };
