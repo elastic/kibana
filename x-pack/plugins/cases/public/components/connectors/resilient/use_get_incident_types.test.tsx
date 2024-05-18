@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -19,14 +19,13 @@ jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-// FLAKY: https://github.com/elastic/kibana/issues/182845
-describe.skip('useGetIncidentTypes', () => {
+describe('useGetIncidentTypes', () => {
   const { http } = useKibanaMock().services;
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
@@ -40,7 +39,9 @@ describe.skip('useGetIncidentTypes', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    // await waitFor();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalled();
+    });
 
     expect(spy).toHaveBeenCalledWith({
       http,
@@ -80,8 +81,9 @@ describe.skip('useGetIncidentTypes', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    // await waitFor();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 
   it('calls addError when the getIncidentTypes api returns successfully but contains an error', async () => {
@@ -104,7 +106,8 @@ describe.skip('useGetIncidentTypes', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    // await waitFor();
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

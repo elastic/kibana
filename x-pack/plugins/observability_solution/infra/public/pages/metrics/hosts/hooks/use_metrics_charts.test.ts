@@ -6,16 +6,17 @@
  */
 
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 import { useMetricsCharts } from './use_metrics_charts';
 
 describe('useMetricsCharts', () => {
-  it('should return an array of charts with breakdown config', async () => {
+  it('should return an array of charts with breakdown config', () => {
     const { result } = renderHook(() => useMetricsCharts({ dataViewId: 'dataViewId' }));
-    // await waitFor();
 
-    expect(result.current).toHaveLength(11);
+    waitFor(() => {
+      expect(result.current).toHaveLength(11);
+    });
 
     result.current.forEach((chart) => {
       const seriesLayer = chart.layers.find((layer) => layer.type === 'series') as LensSeriesLayer;
@@ -26,9 +27,8 @@ describe('useMetricsCharts', () => {
     });
   });
 
-  it('should return an array of charts with correct order', async () => {
+  it('should return an array of charts with correct order', () => {
     const { result } = renderHook(() => useMetricsCharts({ dataViewId: 'dataViewId' }));
-    // await waitFor();
 
     const expectedOrder = [
       'cpuUsage',
@@ -44,7 +44,9 @@ describe('useMetricsCharts', () => {
       'tx',
     ];
 
-    expect(result.current).toHaveLength(expectedOrder.length);
+    waitFor(() => {
+      expect(result.current).toHaveLength(expectedOrder.length);
+    });
 
     result.current.forEach((chart, index) => {
       expect(chart).toHaveProperty('id', expectedOrder[index]);

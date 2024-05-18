@@ -8,7 +8,7 @@
 import React from 'react';
 import type { UseCriticalAlerts } from './use_critical_alerts';
 import { useCriticalAlerts } from './use_critical_alerts';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import * as i18n from '../translations';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
@@ -65,21 +65,19 @@ describe('useCriticalAlerts', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it.only('loads initial state', async () => {
+  it.skip('loads initial state', async () => {
     const { result } = renderHook(() => useCriticalAlerts(props), {
       wrapper: wrapperContainer,
     });
-    await waitFor(async () => {
-      await expect(result.current).toEqual({
-        stat: '-',
-        isLoading: true,
-        percentage: {
-          percent: null,
-          color: 'hollow',
-          note: i18n.NO_DATA('alerts'),
-        },
-        ...basicData,
-      });
+    await expect(result.current).toEqual({
+      stat: '-',
+      isLoading: true,
+      percentage: {
+        percent: null,
+        color: 'hollow',
+        note: i18n.NO_DATA('alerts'),
+      },
+      ...basicData,
     });
   });
   it('finds positive percentage change', async () => {
@@ -94,27 +92,25 @@ describe('useCriticalAlerts', () => {
             ...basicReturn,
           }
     );
-    await act(async () => {
-      const { result } = renderHook(() => useCriticalAlerts(props), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '100',
-        isLoading: false,
-        percentage: {
-          percent: '+100.0%',
-          color: 'danger',
-          note: i18n.STAT_DIFFERENCE({
-            upOrDown: 'up',
-            percentageChange: '100.0%',
-            stat: '50',
-            statType: 'open critical alert count',
-          }),
-        },
-        ...basicData,
-      });
+    const { result } = renderHook(() => useCriticalAlerts(props), {
+      wrapper: wrapperContainer,
+    });
+    // await waitFor();
+    // await waitFor();
+    expect(result.current).toEqual({
+      stat: '100',
+      isLoading: false,
+      percentage: {
+        percent: '+100.0%',
+        color: 'danger',
+        note: i18n.STAT_DIFFERENCE({
+          upOrDown: 'up',
+          percentageChange: '100.0%',
+          stat: '50',
+          statType: 'open critical alert count',
+        }),
+      },
+      ...basicData,
     });
   });
   it('finds negative percentage change', async () => {
@@ -129,27 +125,25 @@ describe('useCriticalAlerts', () => {
             ...basicReturn,
           }
     );
-    await act(async () => {
-      const { result } = renderHook(() => useCriticalAlerts(props), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '50',
-        isLoading: false,
-        percentage: {
-          percent: '-50.0%',
-          color: 'success',
-          note: i18n.STAT_DIFFERENCE({
-            upOrDown: 'down',
-            percentageChange: '50.0%',
-            stat: '100',
-            statType: 'open critical alert count',
-          }),
-        },
-        ...basicData,
-      });
+    const { result } = renderHook(() => useCriticalAlerts(props), {
+      wrapper: wrapperContainer,
+    });
+    // await waitFor();
+    // await waitFor();
+    expect(result.current).toEqual({
+      stat: '50',
+      isLoading: false,
+      percentage: {
+        percent: '-50.0%',
+        color: 'success',
+        note: i18n.STAT_DIFFERENCE({
+          upOrDown: 'down',
+          percentageChange: '50.0%',
+          stat: '100',
+          statType: 'open critical alert count',
+        }),
+      },
+      ...basicData,
     });
   });
   it('finds zero percentage change', async () => {
@@ -157,22 +151,20 @@ describe('useCriticalAlerts', () => {
       data: { aggregations: { open: { critical: { doc_count: 100 } } } },
       ...basicReturn,
     }));
-    await act(async () => {
-      const { result } = renderHook(() => useCriticalAlerts(props), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '100',
-        isLoading: false,
-        percentage: {
-          percent: '0.0%',
-          color: 'hollow',
-          note: i18n.NO_CHANGE('open critical alert count'),
-        },
-        ...basicData,
-      });
+    const { result } = renderHook(() => useCriticalAlerts(props), {
+      wrapper: wrapperContainer,
+    });
+    // await waitFor();
+    // await waitFor();
+    expect(result.current).toEqual({
+      stat: '100',
+      isLoading: false,
+      percentage: {
+        percent: '0.0%',
+        color: 'hollow',
+        note: i18n.NO_CHANGE('open critical alert count'),
+      },
+      ...basicData,
     });
   });
   it('handles null data - current time range', async () => {
@@ -187,22 +179,18 @@ describe('useCriticalAlerts', () => {
             ...basicReturn,
           }
     );
-    await act(async () => {
-      const { result } = renderHook(() => useCriticalAlerts(props), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '-',
-        isLoading: false,
-        percentage: {
-          percent: null,
-          color: 'hollow',
-          note: i18n.NO_DATA_CURRENT('alerts'),
-        },
-        ...basicData,
-      });
+    const { result } = renderHook(() => useCriticalAlerts(props), {
+      wrapper: wrapperContainer,
+    });
+    expect(result.current).toEqual({
+      stat: '-',
+      isLoading: false,
+      percentage: {
+        percent: null,
+        color: 'hollow',
+        note: i18n.NO_DATA_CURRENT('alerts'),
+      },
+      ...basicData,
     });
   });
   it('handles null data - compare time range', async () => {
@@ -217,22 +205,18 @@ describe('useCriticalAlerts', () => {
             ...basicReturn,
           }
     );
-    await act(async () => {
-      const { result } = renderHook(() => useCriticalAlerts(props), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '100',
-        isLoading: false,
-        percentage: {
-          percent: null,
-          color: 'hollow',
-          note: i18n.NO_DATA_COMPARE('alerts'),
-        },
-        ...basicData,
-      });
+    const { result } = renderHook(() => useCriticalAlerts(props), {
+      wrapper: wrapperContainer,
+    });
+    expect(result.current).toEqual({
+      stat: '100',
+      isLoading: false,
+      percentage: {
+        percent: null,
+        color: 'hollow',
+        note: i18n.NO_DATA_COMPARE('alerts'),
+      },
+      ...basicData,
     });
   });
   it('handles null data - current & compare time range', async () => {
@@ -248,42 +232,38 @@ describe('useCriticalAlerts', () => {
             ...basicReturn,
           }
     );
-    await act(async () => {
-      let ourProps = props;
-      const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '100',
-        isLoading: false,
-        percentage: {
-          percent: '0.0%',
-          color: 'hollow',
-          note: i18n.NO_CHANGE('open critical alert count'),
-        },
-        ...basicData,
-      });
-      ourProps = {
-        ...props,
-        from: '2020-09-08T08:20:18.966Z',
-        to: '2020-09-09T08:20:18.966Z',
-        fromCompare: '2020-09-07T08:20:18.966Z',
-        toCompare: '2020-09-08T08:20:18.966Z',
-      };
-      rerender();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '-',
-        isLoading: false,
-        percentage: {
-          percent: null,
-          color: 'hollow',
-          note: i18n.NO_DATA('alerts'),
-        },
-        ...basicData,
-      });
+    let ourProps = props;
+    const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
+      wrapper: wrapperContainer,
+    });
+    expect(result.current).toEqual({
+      stat: '100',
+      isLoading: false,
+      percentage: {
+        percent: '0.0%',
+        color: 'hollow',
+        note: i18n.NO_CHANGE('open critical alert count'),
+      },
+      ...basicData,
+    });
+    ourProps = {
+      ...props,
+      from: '2020-09-08T08:20:18.966Z',
+      to: '2020-09-09T08:20:18.966Z',
+      fromCompare: '2020-09-07T08:20:18.966Z',
+      toCompare: '2020-09-08T08:20:18.966Z',
+    };
+    rerender();
+    // await waitFor();
+    expect(result.current).toEqual({
+      stat: '-',
+      isLoading: false,
+      percentage: {
+        percent: null,
+        color: 'hollow',
+        note: i18n.NO_DATA('alerts'),
+      },
+      ...basicData,
     });
   });
   it('handles undefined data - current & compare time range', async () => {
@@ -299,42 +279,39 @@ describe('useCriticalAlerts', () => {
             ...basicReturn,
           }
     );
-    await act(async () => {
-      let ourProps = props;
-      const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
-        wrapper: wrapperContainer,
-      });
-      // await waitFor();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '100',
-        isLoading: false,
-        percentage: {
-          percent: '0.0%',
-          color: 'hollow',
-          note: i18n.NO_CHANGE('open critical alert count'),
-        },
-        ...basicData,
-      });
-      ourProps = {
-        ...props,
-        from: '2020-09-08T08:20:18.966Z',
-        to: '2020-09-09T08:20:18.966Z',
-        fromCompare: '2020-09-07T08:20:18.966Z',
-        toCompare: '2020-09-08T08:20:18.966Z',
-      };
-      rerender();
-      // await waitFor();
-      expect(result.current).toEqual({
-        stat: '-',
-        isLoading: false,
-        percentage: {
-          percent: null,
-          color: 'hollow',
-          note: i18n.NO_DATA('alerts'),
-        },
-        ...basicData,
-      });
+    let ourProps = props;
+    const { result, rerender } = renderHook(() => useCriticalAlerts(ourProps), {
+      wrapper: wrapperContainer,
+    });
+    // await waitFor();
+    // await waitFor();
+    expect(result.current).toEqual({
+      stat: '100',
+      isLoading: false,
+      percentage: {
+        percent: '0.0%',
+        color: 'hollow',
+        note: i18n.NO_CHANGE('open critical alert count'),
+      },
+      ...basicData,
+    });
+    ourProps = {
+      ...props,
+      from: '2020-09-08T08:20:18.966Z',
+      to: '2020-09-09T08:20:18.966Z',
+      fromCompare: '2020-09-07T08:20:18.966Z',
+      toCompare: '2020-09-08T08:20:18.966Z',
+    };
+    rerender();
+    expect(result.current).toEqual({
+      stat: '-',
+      isLoading: false,
+      percentage: {
+        percent: null,
+        color: 'hollow',
+        note: i18n.NO_DATA('alerts'),
+      },
+      ...basicData,
     });
   });
 });

@@ -91,6 +91,7 @@ describe('useAssistantOverlay', () => {
     const id = 'test-id';
     const suggestedUserPrompt = 'test user prompt';
     const tooltip = 'test tooltip';
+    const isAssistantAvailable = true;
 
     renderHook(() =>
       useAssistantOverlay(
@@ -100,7 +101,8 @@ describe('useAssistantOverlay', () => {
         getPromptContext,
         id,
         suggestedUserPrompt,
-        tooltip
+        tooltip,
+        isAssistantAvailable
       )
     );
 
@@ -117,6 +119,7 @@ describe('useAssistantOverlay', () => {
   });
 
   it('calls unRegisterPromptContext on unmount', () => {
+    const isAssistantAvailable = true;
     const { unmount } = renderHook(() =>
       useAssistantOverlay(
         'event',
@@ -125,7 +128,8 @@ describe('useAssistantOverlay', () => {
         () => Promise.resolve('data'),
         'id',
         null,
-        'tooltip'
+        'tooltip',
+        isAssistantAvailable
       )
     );
 
@@ -135,6 +139,7 @@ describe('useAssistantOverlay', () => {
   });
 
   it('calls `showAssistantOverlay` from the assistant context', () => {
+    const isAssistantAvailable = true;
     const { result } = renderHook(() =>
       useAssistantOverlay(
         'event',
@@ -143,7 +148,8 @@ describe('useAssistantOverlay', () => {
         () => Promise.resolve('data'),
         'id',
         null,
-        'tooltip'
+        'tooltip',
+        isAssistantAvailable
       )
     );
 

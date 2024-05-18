@@ -4585,6 +4585,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entities-schema@link:x-pack/packages/kbn-entities-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/error-boundary-example-plugin@link:examples/error_boundary":
   version "0.0.0"
   uid ""
@@ -10267,7 +10271,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@20.10.5", "@types/node@>= 8", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=18.0.0", "@types/node@^14.0.10 || ^16.0.0", "@types/node@^14.14.20 || ^16.0.0", "@types/node@^18.0.0", "@types/node@^18.11.18", "@types/node@^18.17.5":
+"@types/node@*", "@types/node@20.10.5", "@types/node@>= 8", "@types/node@>=12.12.47", "@types/node@>=13.7.0", "@types/node@>=18.0.0", "@types/node@^14.0.10 || ^16.0.0", "@types/node@^14.14.20 || ^16.0.0", "@types/node@^18.0.0", "@types/node@^18.11.18":
   version "20.10.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.10.5.tgz#47ad460b514096b7ed63a1dae26fad0914ed3ab2"
   integrity sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==
@@ -14663,14 +14667,13 @@ cypress-recurse@^1.35.2:
   dependencies:
     humanize-duration "^3.27.3"
 
-cypress@13.6.2:
-  version "13.6.2"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-13.6.2.tgz#c70df09db0a45063298b3cecba2fa21109768e08"
-  integrity sha512-TW3bGdPU4BrfvMQYv1z3oMqj71YI4AlgJgnrycicmPZAXtvywVFZW9DAToshO65D97rCWfG/kqMFsYB6Kp91gQ==
+cypress@13.6.3:
+  version "13.6.3"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-13.6.3.tgz#54f03ca07ee56b2bc18211e7bd32abd2533982ba"
+  integrity sha512-d/pZvgwjAyZsoyJ3FOsJT5lDsqnxQ/clMqnNc++rkHjbkkiF2h9s0JsZSyyH4QXhVFW3zPFg82jD25roFLOdZA==
   dependencies:
     "@cypress/request" "^3.0.0"
     "@cypress/xvfb" "^1.2.4"
-    "@types/node" "^18.17.5"
     "@types/sinonjs__fake-timers" "8.1.1"
     "@types/sizzle" "^2.3.2"
     arch "^2.2.0"

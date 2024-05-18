@@ -147,11 +147,10 @@ export class ModalService {
               }),
           };
 
-          render(
+          this.root.render(
             <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
               <EuiConfirmModal {...props} />
-            </KibanaRenderContextProvider>,
-            targetDomElement
+            </KibanaRenderContextProvider>
           );
         });
       },

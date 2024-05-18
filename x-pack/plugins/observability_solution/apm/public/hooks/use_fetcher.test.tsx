@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, RenderHookResult } from '@testing-library/react';
+import { act, renderHook, RenderHookResult, waitFor } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -66,13 +66,13 @@ describe('useFetcher', () => {
 
     it('should show success after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      // await hook.waitFor();
-
-      expect(hook.result.current).toEqual({
-        data: 'response from hook',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'success',
+      await waitFor(() => {
+        expect(hook.result.current).toEqual({
+          data: 'response from hook',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'success',
+        });
       });
     });
   });
@@ -114,15 +114,16 @@ describe('useFetcher', () => {
       });
     });
 
-    it('should show error after 1 second', async () => {
+    it('should show error after 1 second', () => {
       jest.advanceTimersByTime(1000);
-      // await hook.waitFor();
 
-      expect(hook.result.current).toEqual({
-        data: undefined,
-        error: expect.any(Error),
-        refetch: expect.any(Function),
-        status: 'failure',
+      waitFor(() => {
+        expect(hook.result.current).toEqual({
+          data: undefined,
+          error: expect.any(Error),
+          refetch: expect.any(Function),
+          status: 'failure',
+        });
       });
     });
   });
@@ -142,51 +143,59 @@ describe('useFetcher', () => {
           wrapper,
         }
       );
-      expect(hook.result.current).toEqual({
-        data: undefined,
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'loading',
+
+      waitFor(() => {
+        expect(hook.result.current).toEqual({
+          data: undefined,
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'loading',
+        });
       });
 
-      // await hook.waitFor();
-
       // assert: first response has loaded and should be rendered
-      expect(hook.result.current).toEqual({
-        data: 'first response',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'success',
+      waitFor(() => {
+        expect(hook.result.current).toEqual({
+          data: 'first response',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'success',
+        });
       });
 
       // act: re-render hook with async callback
-      hook.rerender({
-        callback: async () => {
-          await delay(500);
-          return 'second response';
-        },
-        args: ['b'],
+      act(() => {
+        hook.rerender({
+          callback: async () => {
+            await delay(500);
+            return 'second response';
+          },
+          args: ['b'],
+        });
       });
 
       jest.advanceTimersByTime(100);
 
       // assert: while loading new data the previous data should still be rendered
-      expect(hook.result.current).toEqual({
-        data: 'first response',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'loading',
+      waitFor(() => {
+        expect(hook.result.current).toEqual({
+          data: 'first response',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'loading',
+        });
       });
 
       jest.advanceTimersByTime(500);
-      // await hook.waitFor();
 
       // assert: "second response" has loaded and should be rendered
-      expect(hook.result.current).toEqual({
-        data: 'second response',
-        error: undefined,
-        refetch: expect.any(Function),
-        status: 'success',
+      waitFor(() => {
+        expect(hook.result.current).toEqual({
+          data: 'second response',
+          error: undefined,
+          refetch: expect.any(Function),
+          status: 'success',
+        });
       });
     });
 
@@ -202,13 +211,14 @@ describe('useFetcher', () => {
           wrapper,
         }
       );
-      // await hook.waitFor();
       const firstResult = hook.result.current;
       hook.rerender();
       const secondResult = hook.result.current;
 
       // assert: subsequent rerender returns the same object reference
-      expect(secondResult === firstResult).toEqual(true);
+      waitFor(() => {
+        expect(secondResult === firstResult).toEqual(true);
+      });
 
       hook.rerender({
         callback: async () => {
@@ -216,11 +226,12 @@ describe('useFetcher', () => {
         },
         args: ['b'],
       });
-      // await hook.waitFor();
       const thirdResult = hook.result.current;
 
       // assert: rerender with different data returns a new object
-      expect(secondResult === thirdResult).toEqual(false);
+      waitFor(() => {
+        expect(secondResult === thirdResult).toEqual(false);
+      });
     });
   });
 

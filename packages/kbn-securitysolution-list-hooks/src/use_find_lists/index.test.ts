@@ -28,7 +28,6 @@ describe('useFindLists', () => {
     act(() => {
       result.current.start({ http: httpMock, pageIndex: 1, pageSize: 10 });
     });
-    // await waitFor();
 
     expect(Api.findLists).toHaveBeenCalledWith(
       expect.objectContaining({ http: httpMock, pageIndex: 1, pageSize: 10 })

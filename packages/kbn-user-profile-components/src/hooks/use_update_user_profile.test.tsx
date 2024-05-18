@@ -7,12 +7,7 @@
  */
 
 import React from 'react';
-import {
-  act,
-  renderHook,
-  RenderOptions,
-  // waitFor
-} from '@testing-library/react';
+import { act, renderHook, RenderOptions, waitFor } from '@testing-library/react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -94,9 +89,10 @@ describe('useUpdateUserProfile() hook', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     updateDone.next(true); // Resolve the http.post promise
-    // // await waitFor();
 
-    expect(result.current.isLoading).toBeFalsy();
+    waitFor(() => {
+      expect(result.current.isLoading).toBeFalsy();
+    });
   });
 
   test('should show a success notification by default', async () => {

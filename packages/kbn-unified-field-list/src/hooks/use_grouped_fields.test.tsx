@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
@@ -59,13 +59,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    // await waitFor();
-
-    let fieldListGroupedProps = result.current.fieldListGroupedProps;
-    expect(fieldListGroupedProps.fieldGroups).toMatchSnapshot();
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
-    expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    waitFor(() => {
+      const fieldListGroupedProps = result.current.fieldListGroupedProps;
+      expect(fieldListGroupedProps.fieldGroups).toMatchSnapshot();
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+      expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    });
 
     rerender({
       ...props,
@@ -73,10 +73,12 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: null,
     });
 
-    fieldListGroupedProps = result.current.fieldListGroupedProps;
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
-    expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    waitFor(() => {
+      fieldListGroupedProps = result.current.fieldListGroupedProps;
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+      expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    });
   });
 
   it('should work correctly for no data', async () => {
@@ -104,8 +106,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    // await waitFor();
-
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
 
@@ -124,9 +124,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SmartFields-0',
     ]);
 
-    expect(fieldGroups).toMatchSnapshot();
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+    waitFor(() => {
+      expect(fieldGroups).toMatchSnapshot();
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+    });
 
     rerender({
       ...props,
@@ -238,34 +240,34 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    // await waitFor();
-
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
     const scrollToTopResetCounter1 = fieldListGroupedProps.scrollToTopResetCounter;
 
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-1',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+    waitFor(() => {
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-1',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
 
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
-    expect(result.current.allFieldsModified).toStrictEqual([
-      ...allFields,
-      new DataViewField(newField),
-    ]);
-    expect(result.current.hasNewFields).toBe(true);
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+      expect(result.current.allFieldsModified).toStrictEqual([
+        ...allFields,
+        new DataViewField(newField),
+      ]);
+      expect(result.current.hasNewFields).toBe(true);
+    });
 
     rerender({
       ...props,
@@ -273,15 +275,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields,
     });
 
-    fieldListGroupedProps = result.current.fieldListGroupedProps;
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
-    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
-      scrollToTopResetCounter1
-    );
-    expect(result.current.allFieldsModified).toBe(allFields);
-    expect(result.current.hasNewFields).toBe(false);
-
+    waitFor(() => {
+      fieldListGroupedProps = result.current.fieldListGroupedProps;
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+      expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
+        scrollToTopResetCounter1
+      );
+      expect(result.current.allFieldsModified).toBe(allFields);
+      expect(result.current.hasNewFields).toBe(false);
+    });
     (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
 
@@ -295,27 +298,27 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       initialProps: props,
     });
 
-    // await waitFor();
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    let fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0-0',
-      'SelectedFields-0-0',
-      'PopularFields-0-0',
-      'AvailableFields-25-25',
-      'UnmappedFields-28-28',
-      'EmptyFields-0-0',
-      'MetaFields-3-3',
-      'SmartFields-0-0',
-    ]);
+    waitFor(() => {
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) =>
+            `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+              fieldGroups![key as FieldsGroupNames]?.fieldCount
+            }`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0-0',
+        'SelectedFields-0-0',
+        'PopularFields-0-0',
+        'AvailableFields-25-25',
+        'UnmappedFields-28-28',
+        'EmptyFields-0-0',
+        'MetaFields-3-3',
+        'SmartFields-0-0',
+      ]);
+    });
 
     act(() => {
       result.current.fieldListFiltersProps.onChangeNameFilter('@');
@@ -400,24 +403,24 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-23',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-23',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
+    });
   });
 
   it('should work correctly when selected fields are present', async () => {
@@ -431,24 +434,24 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-4',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-4',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
+    });
   });
 
   it('should work correctly for text-based queries (no data view)', async () => {
@@ -539,8 +542,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
-
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(fieldGroups[FieldsGroupNames.SelectedFields]?.helpText).toBe('test');
@@ -574,7 +575,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
-    // await waitFor();
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -602,8 +602,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       dataViewId: anotherDataView.id!,
       allFields: anotherDataView.fields,
     });
-
-    // await waitFor();
 
     fieldListGroupedProps = result.current.fieldListGroupedProps;
     fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -642,31 +640,31 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-3',
+        'AvailableFields-24',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
 
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-3',
-      'AvailableFields-24',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
-
-    expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
-      '@timestamp,time,ssl'
-    );
+      expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
+        '@timestamp,time,ssl'
+      );
+    });
   });
 
-  it('should work correctly when global filters are set', async () => {
+  it('should work correctly when global filters are set', () => {
     const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
@@ -676,10 +674,10 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
-
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-    expect(fieldGroups).toMatchSnapshot();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+      expect(fieldGroups).toMatchSnapshot();
+    });
   });
 
   it('should work correctly and show unmapped fields separately', async () => {
@@ -691,24 +689,24 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-28',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-28',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
+    });
   });
 
   it('should work correctly when custom selected fields are provided', async () => {
@@ -726,26 +724,26 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-3',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
 
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-3',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
-
-    expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+      expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+    });
   });
 
   it('should include filters props', async () => {
@@ -757,16 +755,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
-
     const { fieldListFiltersProps, fieldListGroupedProps } = result.current;
-    const fieldGroups = fieldListGroupedProps.fieldGroups;
+    waitFor(() => {
+      const fieldGroups = fieldListGroupedProps.fieldGroups;
 
-    expect(fieldGroups.AvailableFields?.fields?.length).toBe(25);
-    expect(fieldGroups.AvailableFields?.fieldSearchHighlight).toBeUndefined();
-    expect(fieldListFiltersProps.screenReaderDescriptionId).toBe(
-      fieldListGroupedProps.screenReaderDescriptionId
-    );
+      expect(fieldGroups.AvailableFields?.fields?.length).toBe(25);
+      expect(fieldGroups.AvailableFields?.fieldSearchHighlight).toBeUndefined();
+      expect(fieldListFiltersProps.screenReaderDescriptionId).toBe(
+        fieldListGroupedProps.screenReaderDescriptionId
+      );
+    });
 
     act(() => {
       fieldListFiltersProps.onChangeNameFilter('Me');
@@ -814,23 +812,25 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    // await waitFor();
-    const fieldListGroupedProps = result.current.fieldListGroupedProps;
-    const fieldGroups = fieldListGroupedProps.fieldGroups;
-    expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-1',
-    ]);
+    waitFor(() => {
+      const fieldListGroupedProps = result.current.fieldListGroupedProps;
+      const fieldGroups = fieldListGroupedProps.fieldGroups;
+
+      expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-1',
+      ]);
+    });
   });
 });

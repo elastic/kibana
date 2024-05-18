@@ -280,13 +280,14 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       });
       mockSearchResult.complete();
-      // await hook.waitFor();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([
-      ElasticRequestState.Found,
-      buildDataTableRecord(record),
-    ]);
+    await waitFor(() => {
+      expect(hook.result.current.slice(0, 2)).toEqual([
+        ElasticRequestState.Found,
+        buildDataTableRecord(record),
+      ]);
+    });
   });
 
   test('useEsDocSearch for text based languages', async () => {

@@ -27,10 +27,10 @@ describe('useIntegrations', () => {
     const mockIntegrations = { items: [] };
     const { result } = renderUseQuery(mockIntegrations);
 
-    await waitFor(() => result.current.isLoading);
-
-    expect(result.current.isLoading).toBeTruthy();
-    expect(result.current.data).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current.isLoading).toBeTruthy();
+      expect(result.current.data).toBeUndefined();
+    });
   });
 
   it('should return integrations on success', async () => {
@@ -45,9 +45,9 @@ describe('useIntegrations', () => {
     };
     const { result } = renderUseQuery(mockIntegrations);
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.isLoading).toBeFalsy();
-    expect(result.current.data).toEqual(mockIntegrations);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBeFalsy();
+      expect(result.current.data).toEqual(mockIntegrations);
+    });
   });
 });

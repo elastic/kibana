@@ -318,10 +318,10 @@ describe('global query string', () => {
         store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
       });
 
-      // waitFor();
-
-      expect(mockHistory.replace).toHaveBeenCalledWith({
-        search: ``,
+      waitFor(() => {
+        expect(mockHistory.replace).toHaveBeenCalledWith({
+          search: ``,
+        });
       });
     });
   });

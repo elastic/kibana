@@ -26,10 +26,10 @@ describe('usePolicies', () => {
     const mockPolicies = { items: [] };
     const { result } = renderUseQuery(mockPolicies);
 
-    await waitFor(() => result.current.isLoading);
-
-    expect(result.current.isLoading).toBeTruthy();
-    expect(result.current.data).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current.isLoading).toBeTruthy();
+      expect(result.current.data).toBeUndefined();
+    });
   });
 
   it('should return policies on success', async () => {
@@ -43,9 +43,9 @@ describe('usePolicies', () => {
     };
     const { result } = renderUseQuery(mockPolicies);
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.isLoading).toBeFalsy();
-    expect(result.current.data).toEqual(mockPolicies);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBeFalsy();
+      expect(result.current.data).toEqual(mockPolicies);
+    });
   });
 });

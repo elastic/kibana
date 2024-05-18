@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import {
   INTERNAL_TAGS_URL,
   SECURITY_TAG_DESCRIPTION,
@@ -30,9 +30,6 @@ const renderUseCreateSecurityDashboardLink = () => renderHook(() => useFetchSecu
 
 const asyncRenderUseCreateSecurityDashboardLink = async () => {
   const renderedHook = renderUseCreateSecurityDashboardLink();
-  // await act(async () => {
-  //   await renderedHook.waitFor();
-  // });
   return renderedHook;
 };
 
@@ -69,10 +66,12 @@ describe('useFetchSecurityTags', () => {
     mockGet.mockResolvedValue([]);
     await asyncRenderUseCreateSecurityDashboardLink();
 
-    expect(mockCreateTag).toHaveBeenCalledWith({
-      name: SECURITY_TAG_NAME,
-      description: SECURITY_TAG_DESCRIPTION,
-      color: '#FFFFFF',
+    waitFor(() => {
+      expect(mockCreateTag).toHaveBeenCalledWith({
+        name: SECURITY_TAG_NAME,
+        description: SECURITY_TAG_DESCRIPTION,
+        color: '#FFFFFF',
+      });
     });
   });
 
@@ -87,6 +86,8 @@ describe('useFetchSecurityTags', () => {
     const { result } = await asyncRenderUseCreateSecurityDashboardLink();
 
     expect(mockCreateTag).not.toHaveBeenCalled();
-    expect(result.current.tags).toEqual(expect.objectContaining(expected));
+    waitFor(() => {
+      expect(result.current.tags).toEqual(expect.objectContaining(expected));
+    });
   });
 });

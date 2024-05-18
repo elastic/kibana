@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createConversations } from './provider';
@@ -155,15 +155,14 @@ describe('createConversations', () => {
   });
 
   it('should call bulk conversations with the transformed conversations from the local storage', async () => {
-    await act(async () => {
-      renderHook(() =>
-        createConversations(
-          coreMock.createStart().notifications,
-          http,
-          mockStorage as unknown as Storage
-        )
-      );
-      // await waitFor();
+    renderHook(() =>
+      createConversations(
+        coreMock.createStart().notifications,
+        http,
+        mockStorage as unknown as Storage
+      )
+    );
+    waitFor(() => {
       expect(http.fetch.mock.calls[0][0]).toBe(
         '/api/elastic_assistant/current_user/conversations/_bulk_action'
       );
@@ -177,15 +176,14 @@ describe('createConversations', () => {
   });
 
   it('should add missing actionTypeId to apiConfig', async () => {
-    await act(async () => {
-      renderHook(() =>
-        createConversations(
-          coreMock.createStart().notifications,
-          http,
-          mockStorage as unknown as Storage
-        )
-      );
-      // await waitFor();
+    renderHook(() =>
+      createConversations(
+        coreMock.createStart().notifications,
+        http,
+        mockStorage as unknown as Storage
+      )
+    );
+    waitFor(() => {
       expect(http.fetch.mock.calls[0][0]).toBe(
         '/api/elastic_assistant/current_user/conversations/_bulk_action'
       );

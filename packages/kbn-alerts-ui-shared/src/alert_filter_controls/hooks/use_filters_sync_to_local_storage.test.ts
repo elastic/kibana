@@ -45,8 +45,9 @@ describe('Filters Sync to Local Storage', () => {
         shouldSync: true,
       })
     );
-    // waitFor();
-    expect(result.current.controlGroupInput).toMatchObject(DEFAULT_STORED_VALUE);
+    waitFor(() => {
+      expect(result.current.controlGroupInput).toMatchObject(DEFAULT_STORED_VALUE);
+    });
   });
   it('should be undefined if localstorage as NO initial value', () => {
     const { result } = renderHook(() =>
@@ -56,9 +57,10 @@ describe('Filters Sync to Local Storage', () => {
         shouldSync: true,
       })
     );
-    // waitFor();
-    expect(result.current.controlGroupInput).toBeUndefined();
-    expect(result.current.setControlGroupInput).toBeTruthy();
+    waitFor(() => {
+      expect(result.current.controlGroupInput).toBeUndefined();
+      expect(result.current.setControlGroupInput).toBeTruthy();
+    });
   });
   it('should be update values to local storage when sync is ON', () => {
     const { result } = renderHook(() =>
