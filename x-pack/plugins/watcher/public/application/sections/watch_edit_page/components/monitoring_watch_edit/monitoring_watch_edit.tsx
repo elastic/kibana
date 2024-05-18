@@ -20,7 +20,7 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const systemWatchMessage = (
     <FormattedMessage
       id="xpack.watcher.sections.watchEdit.monitoring.edit.calloutDescriptionText"
-      defaultMessage="Watch '{watchName}' is a system watch and cannot be edited."
+      defaultMessage="Watch ''{watchName}'' is a system watch and cannot be edited."
       values={{
         watchName: watch.name,
       }}

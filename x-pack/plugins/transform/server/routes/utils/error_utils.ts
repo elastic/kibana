@@ -49,7 +49,7 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
   const reason = i18n.translate(
     'xpack.transform.models.transformService.requestToActionTimedOutErrorMessage',
     {
-      defaultMessage: `Request to {action} '{id}' timed out. {extra}`,
+      defaultMessage: `Request to {action} ''{id}'' timed out. {extra}`,
       values: {
         id,
         action,

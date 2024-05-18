@@ -80,7 +80,7 @@ export const editCluster = (cluster) => async (dispatch) => {
     // A toast is only needed if we're leaving the app.
     toasts.addSuccess(
       i18n.translate('xpack.remoteClusters.editAction.successTitle', {
-        defaultMessage: `Edited remote cluster '{name}'`,
+        defaultMessage: `Edited remote cluster ''{name}''`,
         values: { name: cluster.name },
       })
     );

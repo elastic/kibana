@@ -150,7 +150,7 @@ export const font: ExpressionFunctionFont = {
     if (!Object.values(FontWeight).includes(args.weight!)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidFontWeightErrorMessage', {
-          defaultMessage: "Invalid font weight: '{weight}'",
+          defaultMessage: "Invalid font weight: ''{weight}''",
           values: {
             weight: args.weight,
           },
@@ -160,7 +160,7 @@ export const font: ExpressionFunctionFont = {
     if (!Object.values(TextAlignment).includes(args.align!)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidTextAlignmentErrorMessage', {
-          defaultMessage: "Invalid text alignment: '{align}'",
+          defaultMessage: "Invalid text alignment: ''{align}''",
           values: {
             align: args.align,
           },
@@ -176,7 +176,7 @@ export const font: ExpressionFunctionFont = {
     if (args.sizeUnit && !availableSizeUnits.includes(args.sizeUnit)) {
       throw new Error(
         i18n.translate('expressions.functions.font.invalidSizeUnitErrorMessage', {
-          defaultMessage: "Invalid size unit: '{sizeUnit}'",
+          defaultMessage: "Invalid size unit: ''{sizeUnit}''",
           values: {
             sizeUnit: args.sizeUnit,
           },

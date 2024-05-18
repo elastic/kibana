@@ -201,7 +201,7 @@ export const EditPackagePolicyForm = memo<{
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
-          defaultMessage: `Successfully updated '{packagePolicyName}'`,
+          defaultMessage: `Successfully updated ''{packagePolicyName}''`,
           values: {
             packagePolicyName: packagePolicy.name,
           },
@@ -210,7 +210,7 @@ export const EditPackagePolicyForm = memo<{
         text:
           agentCount && agentPolicy
             ? i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+                defaultMessage: `Fleet will deploy updates to all agents that use the ''{agentPolicyName}'' policy`,
                 values: {
                   agentPolicyName: agentPolicy.name,
                 },
@@ -221,7 +221,7 @@ export const EditPackagePolicyForm = memo<{
       if (error.statusCode === 409) {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packagePolicyName}'`,
+            defaultMessage: `Error updating ''{packagePolicyName}''`,
             values: {
               packagePolicyName: packagePolicy.name,
             },
@@ -236,7 +236,7 @@ export const EditPackagePolicyForm = memo<{
       } else {
         notifications.toasts.addError(error, {
           title: i18n.translate('xpack.fleet.editPackagePolicy.failedNotificationTitle', {
-            defaultMessage: `Error updating '{packagePolicyName}'`,
+            defaultMessage: `Error updating ''{packagePolicyName}''`,
             values: {
               packagePolicyName: packagePolicy.name,
             },

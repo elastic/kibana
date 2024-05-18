@@ -24,15 +24,11 @@ import {
 } from 'enzyme';
 import React, { ReactElement } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
+import propTypes from 'prop-types';
+import { createIntl } from '@formatjs/intl';
+import { i18n } from '@kbn/i18n';
 
-// Use fake component to extract `intl` property to use in tests.
-const { intl } = mount(
-  <I18nProvider>
-    <br />
-  </I18nProvider>
-)
-  .find('IntlProvider')
-  .instance().state;
+const intl = createIntl(i18n.getTranslation());
 
 /**
  * When using @kbn/i18n `injectI18n` on components, props.intl is required.
@@ -46,6 +42,9 @@ function getOptions(context = {}, props = {}) {
     context: {
       ...context,
       intl,
+    },
+    childContextTypes: {
+      intl: propTypes.object,
     },
     ...props,
   };
@@ -77,9 +76,13 @@ export function shallowWithIntl(node: React.ReactElement, options?: ShallowRende
  *  @return The wrapper instance around the rendered output with intl object in context
  */
 export function mountWithIntl(node: React.ReactElement, options?: MountRendererProps) {
+  const { context, ...props } = options || {};
+
+  const optionsWithIntl = getOptions(context, props);
+
   return mount(nodeWithIntlProp(node), {
     wrappingComponent: I18nProvider,
-    ...options,
+    ...optionsWithIntl,
   });
 }
 
@@ -90,14 +93,14 @@ export function mountWithIntl(node: React.ReactElement, options?: MountRendererP
  *  @param options properties to pass into render wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function renderWithIntl<T>(node: React.ReactElement<T>) {
-  return render(node, {
+export function renderWithIntl<T>(node: React.ReactElement<T>, options?: any) {
+  const { context, ...props } = options || {};
+
+  const optionsWithIntl = getOptions(context, props);
+
+  return render(nodeWithIntlProp(node), {
     wrappingComponent: I18nProvider,
-    wrappingComponentProps: {
-      locale: 'en',
-      defaultLocale: 'en',
-      messages: {},
-    },
+    ...optionsWithIntl,
   });
 }
 

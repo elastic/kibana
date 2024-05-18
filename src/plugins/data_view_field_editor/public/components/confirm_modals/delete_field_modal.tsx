@@ -20,7 +20,7 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
       ? i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteSingleTitle',
           {
-            defaultMessage: `Remove field '{name}'`,
+            defaultMessage: `Remove field ''{name}''`,
             values: { name: fieldsToDelete[0] },
           }
         )

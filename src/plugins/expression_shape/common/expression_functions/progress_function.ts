@@ -66,7 +66,7 @@ export const errors = {
   invalidMaxValue: (max: number) =>
     new Error(
       i18n.translate('expressionShape.functions.progress.invalidMaxValueErrorMessage', {
-        defaultMessage: "Invalid {arg} value: '{max, number}'. '{arg}' must be greater than 0",
+        defaultMessage: "Invalid {arg} value: ''{max, number}''. ''{arg}'' must be greater than 0",
         values: {
           arg: 'max',
           max,
@@ -77,7 +77,7 @@ export const errors = {
     new Error(
       i18n.translate('expressionShape.functions.progress.invalidValueErrorMessage', {
         defaultMessage:
-          "Invalid value: '{value, number}'. Value must be between 0 and {max, number}",
+          "Invalid value: ''{value, number}''. Value must be between 0 and {max, number}",
         values: {
           value,
           max,

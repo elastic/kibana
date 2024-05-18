@@ -155,7 +155,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
                   aria-label={i18n.translate(
                     'xpack.snapshotRestore.policyDetails.lastFailure.detailsAriaLabel',
                     {
-                      defaultMessage: `Last failure details for policy '{name}'`,
+                      defaultMessage: `Last failure details for policy ''{name}''`,
                       values: { name },
                     }
                   )}

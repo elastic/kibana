@@ -24,10 +24,9 @@ exports[`it renders without crashing 1`] = `
               hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Remote clusters"
                   id="xpack.security.management.editRole.remoteClusterPrivilegeForm.clustersFormRowLabel"
-                  values={Object {}}
                 />
               }
               labelType="label"
@@ -60,10 +59,9 @@ exports[`it renders without crashing 1`] = `
               hasEmptyLabelSpace={false}
               isInvalid={false}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Privileges"
                   id="xpack.security.management.editRole.remoteClusterPrivilegeForm.privilegesFormRowLabel"
-                  values={Object {}}
                 />
               }
               labelType="label"

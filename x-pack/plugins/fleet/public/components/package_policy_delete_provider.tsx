@@ -104,7 +104,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 values: { count: successfulResults.length },
               })
             : i18n.translate('xpack.fleet.deletePackagePolicy.successSingleNotificationTitle', {
-                defaultMessage: "Deleted integration '{id}'",
+                defaultMessage: "Deleted integration ''{id}''",
                 values: { id: successfulResults[0].name || successfulResults[0].id },
               });
           notifications.toasts.addSuccess(successMessage);
@@ -118,7 +118,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                 values: { count: failedResults.length },
               })
             : i18n.translate('xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle', {
-                defaultMessage: "Error deleting integration '{id}'",
+                defaultMessage: "Error deleting integration ''{id}''",
                 values: { id: failedResults[0].id },
               });
           notifications.toasts.addDanger(failureMessage);

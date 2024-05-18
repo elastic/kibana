@@ -84,7 +84,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
           : i18n.translate(
               'xpack.security.management.apiKeys.deleteApiKey.successSingleNotificationTitle',
               {
-                defaultMessage: "Deleted API key '{name}'",
+                defaultMessage: "Deleted API key ''{name}''",
                 values: { name: itemsInvalidated[0].name },
               }
             );
@@ -113,7 +113,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         : i18n.translate(
             'xpack.security.management.apiKeys.deleteApiKey.errorSingleNotificationTitle',
             {
-              defaultMessage: "Error deleting API key '{name}'",
+              defaultMessage: "Error deleting API key ''{name}''",
               values: { name: (errors && errors[0].name) || apiKeys[0].name },
             }
           );
@@ -136,7 +136,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
             ? i18n.translate(
                 'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteSingleTitle',
                 {
-                  defaultMessage: "Delete API key '{name}'?",
+                  defaultMessage: "Delete API key ''{name}''?",
                   values: { name: apiKeys[0].name },
                 }
               )

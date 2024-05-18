@@ -44,8 +44,8 @@ Array [
       "text": MountPoint {
         "reactNode": <React.Fragment>
           <p>
-            <FormattedMessage
-              defaultMessage="The report '{reportObjectTitle}' contains characters which spreadsheet applications can interpret as formulas."
+            <Memo(MemoizedFormattedMessage)
+              defaultMessage="The report ''{reportObjectTitle}'' contains characters which spreadsheet applications can interpret as formulas."
               id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage"
               values={
                 Object {
@@ -74,7 +74,7 @@ Array [
         </React.Fragment>,
       },
       "title": MountPoint {
-        "reactNode": <FormattedMessage
+        "reactNode": <Memo(MemoizedFormattedMessage)
           defaultMessage="{reportType} may contain formulas"
           id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
           values={
@@ -109,7 +109,7 @@ Array [
           </EuiCallOut>
           <EuiSpacer />
           <p>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Go to {path} for details."
               id="xpack.reporting.publicNotifier.error.checkManagement"
               values={
@@ -117,10 +117,9 @@ Array [
                   "path": <a
                     href="/#management"
                   >
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="Stack Management > Kibana > Reporting"
                       id="xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel"
-                      values={Object {}}
                     />
                   </a>,
                 }
@@ -130,8 +129,8 @@ Array [
         </React.Fragment>,
       },
       "title": MountPoint {
-        "reactNode": <FormattedMessage
-          defaultMessage="Cannot create {reportType} report for '{reportObjectTitle}'."
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="Cannot create {reportType} report for ''{reportObjectTitle}''."
           id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
           values={
             Object {
@@ -154,10 +153,9 @@ Array [
       "text": MountPoint {
         "reactNode": <React.Fragment>
           <p>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="The report reached the max size and contains partial data."
               id="xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription"
-              values={Object {}}
             />
           </p>
           <p>
@@ -180,8 +178,8 @@ Array [
         </React.Fragment>,
       },
       "title": MountPoint {
-        "reactNode": <FormattedMessage
-          defaultMessage="Created partial {reportType} for '{reportObjectTitle}'"
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="Created partial {reportType} for ''{reportObjectTitle}''"
           id="xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle"
           values={
             Object {
@@ -226,8 +224,8 @@ Array [
         </React.Fragment>,
       },
       "title": MountPoint {
-        "reactNode": <FormattedMessage
-          defaultMessage="{reportType} created for '{reportObjectTitle}'"
+        "reactNode": <Memo(MemoizedFormattedMessage)
+          defaultMessage="{reportType} created for ''{reportObjectTitle}''"
           id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
           values={
             Object {

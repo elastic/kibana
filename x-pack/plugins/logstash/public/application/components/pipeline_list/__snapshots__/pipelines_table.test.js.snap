@@ -94,10 +94,9 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         isDisabled={false}
         onClick={[MockFunction]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Create pipeline"
           id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
-          values={Object {}}
         />
       </EuiButton>,
     }

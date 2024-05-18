@@ -75,7 +75,7 @@ export class SideCarFilePicker extends Component<Props, State> {
           initialPromptText={i18n.translate(
             'xpack.fileUpload.shapefile.sideCarFilePicker.promptText',
             {
-              defaultMessage: `Select '{ext}' file`,
+              defaultMessage: `Select ''{ext}'' file`,
               values: { ext: this.props.ext },
             }
           )}

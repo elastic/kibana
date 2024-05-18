@@ -97,7 +97,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               ) : (
                 <FormattedMessage
                   id="xpack.fleet.agentDetails.agentDetailsTitle"
-                  defaultMessage="Agent '{id}'"
+                  defaultMessage="Agent ''{id}''"
                   values={{
                     id: agentId,
                   }}

@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { HealthCheck } from './health_check';
-
+import { I18nProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { HealthContextProvider } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
@@ -23,11 +23,13 @@ describe('health check', () => {
       .fn()
       .mockImplementationOnce(() => new Promise(() => {}));
     const { queryByText, container } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'shouldnt render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'shouldnt render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -43,11 +45,13 @@ describe('health check', () => {
       .mockImplementationOnce(() => new Promise(() => {}));
 
     const { queryByText, container } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={false}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={false}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -69,11 +73,13 @@ describe('health check', () => {
       isAlertsAvailable: true,
     });
     const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -93,11 +99,13 @@ describe('health check', () => {
       isAlertsAvailable: true,
     }));
     const { queryAllByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -131,11 +139,13 @@ describe('health check', () => {
       isAlertsAvailable: true,
     }));
     const { queryByText, queryByRole } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -168,11 +178,13 @@ describe('health check', () => {
     }));
 
     const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run
@@ -201,11 +213,13 @@ describe('health check', () => {
       // result from alerting health
       .mockRejectedValueOnce(new Error('for example, not authorized for rules / 403 response'));
     const { queryByText } = render(
-      <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <p>{'should render'}</p>
-        </HealthCheck>
-      </HealthContextProvider>
+      <I18nProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <p>{'should render'}</p>
+          </HealthCheck>
+        </HealthContextProvider>
+      </I18nProvider>
     );
     await act(async () => {
       // wait for useEffect to run

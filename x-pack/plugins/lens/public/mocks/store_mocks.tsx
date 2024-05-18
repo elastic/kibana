@@ -6,7 +6,8 @@
  */
 
 import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
@@ -142,7 +143,7 @@ export const mountWithProvider = async (
   let instance: ReactWrapper = {} as ReactWrapper;
 
   await act(async () => {
-    instance = mount(mountArgs.component, mountArgs.options);
+    instance = mountWithIntl(mountArgs.component, mountArgs.options);
   });
   return { instance, lensStore, deps };
 };

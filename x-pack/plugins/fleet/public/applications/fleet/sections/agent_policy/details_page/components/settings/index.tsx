@@ -98,7 +98,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         if (data) {
           notifications.toasts.addSuccess(
             i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
-              defaultMessage: "Successfully updated '{name}' settings",
+              defaultMessage: "Successfully updated ''{name}'' settings",
               values: { name: agentPolicy.name },
             })
           );

@@ -6,10 +6,9 @@ exports[`scaling form should disable clusters option when clustering is not supp
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scaling"
         id="xpack.maps.esSearch.scaleTitle"
-        values={Object {}}
       />
        
       <ScalingDocumenationPopover
@@ -82,10 +81,9 @@ exports[`scaling form should render 1`] = `
     size="xs"
   >
     <h5>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scaling"
         id="xpack.maps.esSearch.scaleTitle"
-        values={Object {}}
       />
        
       <ScalingDocumenationPopover

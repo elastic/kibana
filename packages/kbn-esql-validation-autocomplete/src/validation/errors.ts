@@ -187,7 +187,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         message: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.validation.unknownInterval',
           {
-            defaultMessage: `Unexpected time interval qualifier: '{value}'`,
+            defaultMessage: `Unexpected time interval qualifier: ''{value}''`,
             values: {
               value: out.value,
             },

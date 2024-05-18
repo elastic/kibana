@@ -20,14 +20,16 @@ export interface FormattedRelativeProps {
  * Mimic `FormattedRelative` previous behavior from formatJS v2
  */
 export const FormattedRelative = ({
-  value: valueDate,
+  value: valueInput,
   updateIntervalInSeconds,
 }: FormattedRelativeProps) => {
-  const { value, unit } = selectUnit(moment(Date.now()).diff(moment(valueDate)));
+  const normalizedValue = typeof valueInput === 'string' ? moment(valueInput).toDate() : valueInput;
+  const { value, unit } = selectUnit(new Date(), normalizedValue);
 
   return (
     <FormattedRelativeTime
       value={value}
+      numeric="auto"
       unit={unit}
       updateIntervalInSeconds={updateIntervalInSeconds}
     />

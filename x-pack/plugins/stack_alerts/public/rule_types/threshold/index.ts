@@ -27,7 +27,7 @@ export function getRuleType(): RuleTypeModel<IndexThresholdRuleParams> {
         defaultMessage: `Rule '{{rule.name}}' is active for group '{{context.group}}':
 
 - Value: '{{context.value}}'
-- Conditions Met: '{{context.conditions}}' over '{{rule.params.timeWindowSize}}''{{rule.params.timeWindowUnit}}'
+- Conditions Met: '{{context.conditions}}' over '{{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}'
 - Timestamp: '{{context.date}}'`,
       }
     ),

@@ -12,10 +12,9 @@ exports[`renders correctly 1`] = `
         size="xs"
       >
         <h3>
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Describe this space"
             id="xpack.spaces.management.manageSpacePage.describeSpaceTitle"
-            values={Object {}}
           />
         </h3>
       </EuiTitle>
@@ -56,10 +55,9 @@ exports[`renders correctly 1`] = `
           color="subdued"
           size="xs"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Optional"
             id="xpack.spaces.management.manageSpacePage.optionalLabel"
-            values={Object {}}
           />
         </EuiText>
       }
@@ -83,18 +81,16 @@ exports[`renders correctly 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="You can't change the URL identifier once created."
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForSpaceIdentifierDescription"
-          values={Object {}}
         />
       }
       isInvalid={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="URL identifier"
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
-          values={Object {}}
         />
       }
       labelType="label"
@@ -136,10 +132,9 @@ exports[`renders correctly 1`] = `
         size="xs"
       >
         <h3>
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Create an avatar"
             id="xpack.spaces.management.manageSpacePage.avatarTitle"
-            values={Object {}}
           />
         </h3>
       </EuiTitle>

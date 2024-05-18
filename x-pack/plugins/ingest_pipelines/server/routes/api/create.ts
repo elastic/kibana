@@ -46,7 +46,7 @@ export const registerCreateRoute = ({
           return res.conflict({
             body: new Error(
               i18n.translate('xpack.ingestPipelines.createRoute.duplicatePipelineIdErrorMessage', {
-                defaultMessage: "There is already a pipeline with name '{name}'.",
+                defaultMessage: "There is already a pipeline with name ''{name}''.",
                 values: {
                   name,
                 },

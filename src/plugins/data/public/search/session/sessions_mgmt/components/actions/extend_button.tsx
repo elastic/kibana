@@ -42,7 +42,8 @@ const ExtendConfirm = ({ ...props }: ExtendButtonProps & { onActionDismiss: OnAc
     defaultMessage: 'Cancel',
   });
   const message = i18n.translate('data.mgmt.searchSessions.extendModal.extendMessage', {
-    defaultMessage: "The search session '{name}' expiration would be extended until {newExpires}.",
+    defaultMessage:
+      "The search session ''{name}'' expiration would be extended until {newExpires}.",
     values: {
       name,
       newExpires: newExpiration.toLocaleString(),

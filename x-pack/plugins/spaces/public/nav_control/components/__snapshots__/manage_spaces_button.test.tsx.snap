@@ -8,10 +8,9 @@ exports[`ManageSpacesButton renders as expected 1`] = `
   onClick={[Function]}
   size="s"
 >
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="Manage spaces"
     id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
-    values={Object {}}
   />
 </EuiButton>
 `;

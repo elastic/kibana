@@ -80,7 +80,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       if (data) {
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.deleteAgentPolicy.successSingleNotificationTitle', {
-            defaultMessage: "Deleted agent policy '{id}'",
+            defaultMessage: "Deleted agent policy ''{id}''",
             values: { id: data.name || data.id },
           })
         );
@@ -90,7 +90,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
       } else {
         notifications.toasts.addDanger(
           i18n.translate('xpack.fleet.deleteAgentPolicy.failureSingleNotificationTitle', {
-            defaultMessage: "Error deleting agent policy '{id}'",
+            defaultMessage: "Error deleting agent policy ''{id}''",
             values: { id: agentPolicy },
           })
         );
