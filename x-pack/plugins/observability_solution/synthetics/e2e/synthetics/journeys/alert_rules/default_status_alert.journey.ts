@@ -10,15 +10,11 @@ import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '../../../../server/alert_rules/status_rule/message_utils';
-import { recordVideo } from '../../../helpers/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
 journey(`DefaultStatusAlert`, async ({ page, params }) => {
-  recordVideo(page);
-
-  page.setDefaultTimeout(60 * 1000);
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
 
