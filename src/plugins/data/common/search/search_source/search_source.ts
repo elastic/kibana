@@ -829,6 +829,7 @@ export class SearchSource {
       }
     }
     fields = fields.filter((f) => Boolean(f));
+    // eslint-disable-next-line no-console
     console.log('loadDataViewFields', fields);
     const fieldsFetched =
       dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length
