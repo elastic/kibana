@@ -341,6 +341,9 @@ export class AlertingAuthorization {
     >();
     const authorizedRuleTypes = new Set<RegistryAlertTypeWithAuth>();
 
+    const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
+      legacyConsumer === ALERTING_FEATURE_ID || isEmpty(consumers);
+
     if (this.authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
         this.request
@@ -367,6 +370,32 @@ export class AlertingAuthorization {
                 ruleTypeWithAuth.producer === consumerToAuthorize,
               ]
             );
+
+            // FUTURE ENGINEER
+            // We are just trying to add back the legacy consumers associated
+            // to the rule type to get back the privileges that was given at one point
+            if (!isEmpty(ruleTypeWithAuth.validLegacyConsumers)) {
+              ruleTypeWithAuth.validLegacyConsumers.forEach((legacyConsumer) => {
+                if (addLegacyConsumerPrivileges(legacyConsumer)) {
+                  if (!allPossibleConsumers[legacyConsumer]) {
+                    allPossibleConsumers[legacyConsumer] = {
+                      read: true,
+                      all: true,
+                    };
+                  }
+
+                  requiredPrivileges.set(
+                    this.authorization!.actions.alerting.get(
+                      ruleTypeWithAuth.id,
+                      legacyConsumer,
+                      authorizationEntity,
+                      operation
+                    ),
+                    [ruleTypeWithAuth, legacyConsumer, hasPrivilegeByOperation(operation), false]
+                  );
+                }
+              });
+            }
           }
         }
       }
