@@ -40,8 +40,7 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import { ProfilesProvider, rootProfileService } from '../../context_awareness';
-import { ComposableProfile } from '../../context_awareness/composable_profile';
+import { ComposableProfile, ProfilesProvider, rootProfileService } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 

@@ -108,19 +108,11 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
         );
       },
       message: (props) => {
-        const { field, value } = getMessageFieldWithFallbacks(
+        const { value } = getMessageFieldWithFallbacks(
           props.row.flattened as unknown as LogDocumentOverview
         );
 
-        if (!value) {
-          return <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
-        }
-
-        return (
-          <>
-            <strong>{field}:</strong> <span>{value}</span>
-          </>
-        );
+        return value || <span css={{ color: euiThemeVars.euiTextSubduedColor }}>(None)</span>;
       },
     }),
   },
