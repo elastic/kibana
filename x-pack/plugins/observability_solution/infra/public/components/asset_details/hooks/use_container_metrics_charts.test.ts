@@ -48,7 +48,6 @@ describe('useDockerContainerCharts', () => {
           useDockerContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
 
-
         const { charts } = result.current;
 
         expect(charts).toHaveLength(expectedOrder.length);
@@ -85,7 +84,6 @@ describe('useK8sContainerCharts', () => {
         const { result } = renderHook(() =>
           useK8sContainerPageViewMetricsCharts({ metricsDataViewId, metric })
         );
-
 
         const { charts } = result.current;
 
