@@ -12,7 +12,7 @@ import { createMetricsClientMock } from '../test_helpers';
 
 jest.mock('../shared', () => ({
   ...jest.requireActual('../shared'),
-  useInfrastructureNodeMetrics: jest.fn(),
+  useInfrastructureNodeMetrics: jest.fn().mockReturnValue({} as any),
 }));
 
 describe('usePodMetricsTable hook', () => {

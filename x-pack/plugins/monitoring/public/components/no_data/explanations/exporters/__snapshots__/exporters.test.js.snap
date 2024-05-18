@@ -3,15 +3,15 @@
 exports[`ExplainExporters should explain about xpack.monitoring.exporters setting 1`] = `
 Array [
   <h2
-    class="euiTitle emotion-euiTitle-l"
+    class="euiTitle css-nei9rn-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
   <span
-    class="emotion-euiTextColor-subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText css-1py2xv4-euiText-m"
     >
       <p>
         To run monitoring please perform the following steps
@@ -19,10 +19,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText eui-textLeft emotion-euiText-m"
+    class="euiText eui-textLeft css-1py2xv4-euiText-m"
   >
     <p>
       We checked the 
@@ -72,68 +72,68 @@ Array [
 exports[`ExplainExportersCloud should explain about xpack.monitoring.exporters setting in a cloud environment 1`] = `
 Array [
   <span
-    class="emotion-euiTextColor-subdued"
+    class="css-xv0fhq-euiTextColor-subdued"
   >
     <div
-      class="euiText emotion-euiText-m"
+      class="euiText css-1py2xv4-euiText-m"
     >
       <p>
         Configure monitoring through 
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink css-4ljoze-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener noreferrer"
           target="_blank"
         >
           Elasticsearch Service Console
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1yz4dya-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly"
+            class="css-gb1zbv-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
         </a>
          Go to 
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink css-4ljoze-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener noreferrer"
           target="_blank"
         >
           Logs and metrics
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1yz4dya-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly"
+            class="css-gb1zbv-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink emotion-euiLink-primary"
+          class="euiLink css-4ljoze-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener noreferrer"
           target="_blank"
         >
           the documentation page.
           <span
-            class="emotion-EuiExternalLinkIcon"
+            class="css-1yz4dya-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly"
+            class="css-gb1zbv-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
@@ -142,10 +142,10 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
-    class="euiText eui-textLeft emotion-euiText-m"
+    class="euiText eui-textLeft css-1py2xv4-euiText-m"
   >
     <p>
       In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster.

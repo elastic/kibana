@@ -124,6 +124,12 @@ describe('ConnectorsForm ', () => {
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
     // await waitForEuiPopoverOpen();
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).not.toHaveAttribute(
+        'point-events',
+        'none'
+      );
+    });
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -176,7 +182,12 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    // await waitForEuiPopoverOpen();
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).not.toHaveAttribute(
+        'point-events',
+        'none'
+      );
+    });
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -266,7 +277,12 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    // await waitForEuiPopoverOpen();
+    await waitFor(() => {
+      expect(screen.getAllByTestId('dropdown-connector-no-connector')[0]).not.toHaveAttribute(
+        'point-events',
+        'none'
+      );
+    });
     userEvent.click(screen.getAllByTestId('dropdown-connector-no-connector')[0]);
 
     userEvent.click(screen.getByTestId('edit-connectors-submit'));
@@ -289,7 +305,12 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    // await waitForEuiPopoverOpen();
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).not.toHaveAttribute(
+        'point-events',
+        'none'
+      );
+    });
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -322,7 +343,12 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    // await waitForEuiPopoverOpen();
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-resilient-2')).not.toHaveAttribute(
+        'point-events',
+        'none'
+      );
+    });
     userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
@@ -372,7 +398,12 @@ describe('ConnectorsForm ', () => {
     });
 
     userEvent.click(screen.getByTestId('dropdown-connectors'));
-    // await waitForEuiPopoverOpen();
+    await waitFor(() => {
+      expect(screen.getByTestId('dropdown-connector-servicenow-2')).not.toHaveAttribute(
+        'point-events',
+        'none'
+      );
+    });
     userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
 
     await waitFor(() => {

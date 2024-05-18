@@ -47,7 +47,6 @@ describe('library notification popover', () => {
     await userEvent.click(
       await screen.findByTestId('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION')
     );
-    // await waitForEuiPopoverOpen();
   };
 
   it('renders the unlink button', async () => {

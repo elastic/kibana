@@ -10,27 +10,27 @@ exports[`Node Listing Metric Cell should format N/A as the metric for an offline
 
 exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+  class="euiFlexGroup css-i9roje-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   />
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
+      class="euiFlexGroup css-bqv98l-euiFlexGroup-responsive-xs-flexStart-stretch-row"
       data-test-subj="testCell2"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <div
-          class="euiPopover emotion-euiPopover-inline-block"
+          class="euiPopover css-n7tnex-euiPopover-inline-block"
         >
           <button
             aria-label="More information about this metric"
-            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+            class="euiButtonIcon css-13giw8n-euiButtonIcon-xs-empty-text"
             data-test-subj="monitoringCellIcon-testCell2"
             title="More information about this metric"
             type="button"
@@ -45,10 +45,10 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
         </div>
       </div>
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText css-1py2xv4-euiText-m"
         >
           206.3 GB
         </div>
@@ -60,27 +60,27 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
 
 exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
 <div
-  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+  class="euiFlexGroup css-i9roje-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
 >
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   />
   <div
-    class="euiFlexItem emotion-euiFlexItem-growZero"
+    class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row"
+      class="euiFlexGroup css-bqv98l-euiFlexGroup-responsive-xs-flexStart-stretch-row"
       data-test-subj="testCell"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <div
-          class="euiPopover emotion-euiPopover-inline-block"
+          class="euiPopover css-n7tnex-euiPopover-inline-block"
         >
           <button
             aria-label="More information about this metric"
-            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+            class="euiButtonIcon css-13giw8n-euiButtonIcon-xs-empty-text"
             data-test-subj="monitoringCellIcon-testCell"
             title="More information about this metric"
             type="button"
@@ -95,10 +95,10 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
         </div>
       </div>
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem css-kpsrin-euiFlexItem-growZero"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiText css-1py2xv4-euiText-m"
         >
           0%
         </div>

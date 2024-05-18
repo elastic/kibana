@@ -1169,7 +1169,7 @@ export class Embeddable
           </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
-              this.badgeDomNode = el;
+              this.badgeDomNode = createRoot(el);
               this.renderBadgeMessages();
             }}
           />
@@ -1215,7 +1215,7 @@ export class Embeddable
           </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
-              this.badgeDomNode = el;
+              this.badgeRoot = el;
               this.renderBadgeMessages();
             }}
           />
@@ -1226,7 +1226,7 @@ export class Embeddable
     this.renderBadgeMessages();
   }
 
-  badgeDomNode?: HTMLDivElement;
+  badgeRoot?: HTMLDivElement;
 
   /**
    * This method is called on every render, and also whenever the badges dom node is created
@@ -1241,13 +1241,12 @@ export class Embeddable
       ({ severity }) => severity !== 'info'
     );
 
-    if (this.badgeDomNode) {
-      render(
+    if (this.badgeRoot) {
+      this.badgeRoot.render(
         <KibanaRenderContextProvider {...this.deps.coreStart}>
           <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
           <EmbeddableFeatureBadge messages={infoMessages} />
-        </KibanaRenderContextProvider>,
-        this.badgeDomNode
+        </KibanaRenderContextProvider>
       );
     }
   };

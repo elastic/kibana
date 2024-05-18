@@ -65,24 +65,24 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
                         </style>
                       </head>,
@@ -97,14 +97,14 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
                         </style>,
                       ],
@@ -189,24 +189,24 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
                         </style>
                       </head>,
@@ -221,14 +221,14 @@ exports[`Doc table cell component renders a cell with filter buttons if it is fi
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock{display:inline-block;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiToolTipAnchor-inlineBlock *[disabled]{pointer-events:none;}
                         </style>,
                       ],

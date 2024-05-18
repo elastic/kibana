@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -45,11 +45,8 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('initializes hook', async () => {
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -61,19 +58,14 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: undefined,
         })
-      );
-      // await waitFor();
+    );
 
-      expect(result.current).toEqual([false, true, [], result.current[3]]);
-    });
+    expect(result.current).toEqual([false, true, [], result.current[3]]);
   });
 
   test('does not call autocomplete service if "operatorType" is "exists"', async () => {
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -85,22 +77,17 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: getField('machine.os'),
         })
-      );
-      // await waitFor();
+    );
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
+    const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
 
-      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
-      expect(result.current).toEqual(expectedResult);
-    });
+    expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    expect(result.current).toEqual(expectedResult);
   });
 
   test('does not call autocomplete service if "selectedField" is undefined', async () => {
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -112,22 +99,17 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: undefined,
         })
-      );
-      // await waitFor();
+    );
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
+    const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
 
-      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
-      expect(result.current).toEqual(expectedResult);
-    });
+    expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    expect(result.current).toEqual(expectedResult);
   });
 
   test('does not call autocomplete service if "indexPattern" is undefined', async () => {
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -139,43 +121,38 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: getField('machine.os'),
         })
-      );
-      // await waitFor();
+    );
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
+    const expectedResult: UseFieldValueAutocompleteReturn = [false, true, [], result.current[3]];
 
-      expect(getValueSuggestionsMock).not.toHaveBeenCalled();
-      expect(result.current).toEqual(expectedResult);
-    });
+    expect(getValueSuggestionsMock).not.toHaveBeenCalled();
+    expect(result.current).toEqual(expectedResult);
   });
 
   test('it uses full path name for nested fields to fetch suggestions', async () => {
     const suggestionsMock = jest.fn().mockResolvedValue([]);
 
-    await act(async () => {
-      const selectedField: DataViewFieldBase | undefined = getField('nestedField.child');
-      if (selectedField == null) {
-        throw new TypeError('selectedField for this test should always be defined');
-      }
+    const selectedField: DataViewFieldBase | undefined = getField('nestedField.child');
+    if (selectedField == null) {
+      throw new TypeError('selectedField for this test should always be defined');
+    }
 
-      const { signal } = new AbortController();
-      renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(() =>
-        useFieldValueAutocomplete({
-          autocompleteService: {
-            ...autocompleteStartMock,
-            getValueSuggestions: suggestionsMock,
-          },
-          fieldValue: '',
-          indexPattern: stubIndexPatternWithFields,
-          operatorType: OperatorTypeEnum.MATCH,
-          query: '',
-          selectedField: { ...selectedField, name: 'child' },
-        })
-      );
-      // Note: initial `waitFor` is hook initialization
-      // await waitFor();
-      // await waitFor();
+    const { signal } = new AbortController();
+    renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(() =>
+      useFieldValueAutocomplete({
+        autocompleteService: {
+          ...autocompleteStartMock,
+          getValueSuggestions: suggestionsMock,
+        },
+        fieldValue: '',
+        indexPattern: stubIndexPatternWithFields,
+        operatorType: OperatorTypeEnum.MATCH,
+        query: '',
+        selectedField: { ...selectedField, name: 'child' },
+      })
+    );
 
+    waitFor(() => {
       expect(suggestionsMock).toHaveBeenCalledWith({
         field: { ...getField('nestedField.child'), name: 'nestedField.child' },
         indexPattern: {
@@ -200,11 +177,8 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('returns "isSuggestingValues" of false if field type is boolean', async () => {
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -216,13 +190,11 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: getField('ssl'),
         })
-      );
-      // Note: initial `waitFor` is hook initialization
-      // await waitFor();
-      // await waitFor();
+    );
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
+    const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
+    waitFor(() => {
       expect(getValueSuggestionsMock).not.toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);
     });
@@ -231,11 +203,8 @@ describe('use_field_value_autocomplete', () => {
   test('returns "isSuggestingValues" of false to note that autocomplete service is not in use if no autocomplete suggestions available', async () => {
     const suggestionsMock = jest.fn().mockResolvedValue([]);
 
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -247,25 +216,20 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: getField('bytes'),
         })
-      );
-      // Note: initial `waitFor` is hook initialization
-      // await waitFor();
-      // await waitFor();
+    );
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
+    const expectedResult: UseFieldValueAutocompleteReturn = [false, false, [], result.current[3]];
 
+    waitFor(() => {
       expect(suggestionsMock).toHaveBeenCalled();
       expect(result.current).toEqual(expectedResult);
     });
   });
 
   test('returns suggestions', async () => {
-    await act(async () => {
-      const { signal } = new AbortController();
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { signal } = new AbortController();
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -277,18 +241,16 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: getField('@tags'),
         })
-      );
-      // Note: initial `waitFor` is hook initialization
-      // await waitFor();
-      // await waitFor();
+    );
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [
-        false,
-        true,
-        ['value 1', 'value 2'],
-        result.current[3],
-      ];
+    const expectedResult: UseFieldValueAutocompleteReturn = [
+      false,
+      true,
+      ['value 1', 'value 2'],
+      result.current[3],
+    ];
 
+    waitFor(() => {
       expect(getValueSuggestionsMock).toHaveBeenCalledWith({
         field: getField('@tags'),
         indexPattern: stubIndexPatternWithFields,
@@ -301,11 +263,8 @@ describe('use_field_value_autocomplete', () => {
   });
 
   test('returns new suggestions on subsequent calls', async () => {
-    await act(async () => {
-      const { result } = renderHook<
-        UseFieldValueAutocompleteReturn,
-        UseFieldValueAutocompleteProps
-      >(() =>
+    const { result } = renderHook<UseFieldValueAutocompleteReturn, UseFieldValueAutocompleteProps>(
+      () =>
         useFieldValueAutocomplete({
           autocompleteService: {
             ...autocompleteStartMock,
@@ -317,33 +276,31 @@ describe('use_field_value_autocomplete', () => {
           query: '',
           selectedField: getField('@tags'),
         })
-      );
-      // Note: initial `waitFor` is hook initialization
-      // await waitFor();
-      // await waitFor();
+    );
 
+    waitFor(() => {
       expect(result.current[3]).not.toBeNull();
+    });
 
-      // Added check for typescripts sake, if null,
-      // would not reach below logic as test would stop above
-      if (result.current[3] != null) {
-        result.current[3]({
-          fieldSelected: getField('@tags'),
-          patterns: stubIndexPatternWithFields,
-          searchQuery: '',
-          value: 'hello',
-        });
-      }
+    // Added check for typescripts sake, if null,
+    // would not reach below logic as test would stop above
+    if (result.current[3] != null) {
+      result.current[3]({
+        fieldSelected: getField('@tags'),
+        patterns: stubIndexPatternWithFields,
+        searchQuery: '',
+        value: 'hello',
+      });
+    }
 
-      // await waitFor();
+    const expectedResult: UseFieldValueAutocompleteReturn = [
+      false,
+      true,
+      ['value 1', 'value 2'],
+      result.current[3],
+    ];
 
-      const expectedResult: UseFieldValueAutocompleteReturn = [
-        false,
-        true,
-        ['value 1', 'value 2'],
-        result.current[3],
-      ];
-
+    waitFor(() => {
       expect(getValueSuggestionsMock).toHaveBeenCalledTimes(2);
       expect(result.current).toEqual(expectedResult);
     });

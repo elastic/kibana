@@ -635,42 +635,42 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>
                       </head>,
@@ -685,28 +685,28 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>,
                       ],
@@ -755,42 +755,42 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -805,28 +805,28 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -1195,42 +1195,42 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -1245,28 +1245,28 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -4824,50 +4824,50 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>
                       </head>,
@@ -4882,28 +4882,28 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>,
                       ],
@@ -4952,50 +4952,50 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -5010,28 +5010,28 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -5400,50 +5400,50 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -5458,28 +5458,28 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -7074,46 +7074,46 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>
                       </head>,
@@ -7128,28 +7128,28 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>,
                       ],
@@ -7198,46 +7198,46 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -7252,28 +7252,28 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -7642,46 +7642,46 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -7696,28 +7696,28 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -9962,54 +9962,54 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                       "container": <head>
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-styled="active"
-                          data-styled-version="5.1.0"
+                          data-styled-version="5.3.11"
                         />
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>
                       </head>,
@@ -10024,28 +10024,28 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                         </style>,
                         <style
                           data-emotion="css"
                           data-s=""
                         >
-                          
+
                           .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                         </style>,
                       ],
@@ -10094,54 +10094,54 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -10156,28 +10156,28 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],
@@ -10546,54 +10546,54 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                             "container": <head>
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-styled="active"
-                                data-styled-version="5.1.0"
+                                data-styled-version="5.3.11"
                               />
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>
                             </head>,
@@ -10608,28 +10608,28 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;gap:4px;-webkit-box-pack:start;-ms-flex-pack:start;-webkit-justify-content:flex-start;justify-content:flex-start;-webkit-align-items:stretch;-webkit-box-align:stretch;-ms-flex-align:stretch;align-items:stretch;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 @media only screen and (max-width: 767px){.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row{-webkit-box-flex-wrap:wrap;-webkit-flex-wrap:wrap;-ms-flex-wrap:wrap;flex-wrap:wrap;}.emotion-euiFlexGroup-responsive-xs-flexStart-stretch-row&gt;.euiFlexItem{inline-size:100%;-webkit-flex-basis:100%;-ms-flex-preferred-size:100%;flex-basis:100%;}}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-growZero{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-box-flex:0;-webkit-flex-grow:0;-ms-flex-positive:0;flex-grow:0;-webkit-flex-basis:auto;-ms-flex-preferred-size:auto;flex-basis:auto;}
                               </style>,
                               <style
                                 data-emotion="css"
                                 data-s=""
                               >
-                                
+
                                 .emotion-euiFlexItem-grow-1{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-flex-direction:column;-ms-flex-direction:column;flex-direction:column;-webkit-flex-basis:0%;-ms-flex-preferred-size:0%;flex-basis:0%;-webkit-box-flex:1;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;}
                               </style>,
                             ],

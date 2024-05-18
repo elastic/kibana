@@ -11,8 +11,7 @@
 
 import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { ReactWrapper, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act, render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
@@ -103,7 +102,7 @@ describe('alert_form', () => {
   };
 
   describe('alert_form edit alert', () => {
-    let wrapper: ReactWrapper<any>;
+    let wrapper: ReturnType<typeof mountWithIntl>;
 
     beforeEach(async () => {
       const { useLoadRuleTypesQuery } = jest.requireMock(
@@ -248,7 +247,7 @@ describe('alert_form', () => {
 
         const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
-        const actionWrapper = mount(
+        const actionWrapper = render(
           <I18nProvider>
             <KibanaReactContext.Provider>
               <ActionForm
@@ -275,21 +274,23 @@ describe('alert_form', () => {
           </I18nProvider>
         );
 
-        // Wait for active space to resolve before requesting the component to update
-        await act(async () => {
-          await nextTick();
-          actionWrapper.update();
-        });
+        // // Wait for active space to resolve before requesting the component to update
+        // await act(async () => {
+        //   await nextTick();
+        //   actionWrapper.update();
+        // });
 
         return actionWrapper;
       }
 
       it('renders available action cards', async () => {
-        const wrapperTwo = await setup();
-        const actionOption = wrapperTwo.find(
-          `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
-        );
-        expect(actionOption.exists()).toBeTruthy();
+        const { getByTestId } = await setup();
+        waitFor(() => {
+          const actionOption = getByTestId(
+            `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
+          );
+          expect(actionOption).toBeInTheDocument();
+        });
       });
     });
   });

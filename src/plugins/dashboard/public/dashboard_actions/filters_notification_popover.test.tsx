@@ -75,7 +75,6 @@ describe('filters notification popover', () => {
       </I18nProvider>
     );
     await userEvent.click(await screen.findByTestId(`embeddablePanelNotification-${api.uuid}`));
-    // await waitForEuiPopoverOpen();
   };
 
   it('calls get all dataviews from the parent', async () => {

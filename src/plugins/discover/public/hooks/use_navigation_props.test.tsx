@@ -7,7 +7,7 @@
  */
 
 import React, { MouseEvent } from 'react';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useNavigationProps } from './use_navigation_props';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -80,14 +80,20 @@ describe('useNavigationProps', () => {
       referrer: 'mock-referrer',
     };
 
-    await result.current.onOpenContextView({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    act(() => {
+      result.current.onOpenContextView({
+        preventDefault: jest.fn(),
+      } as unknown as MouseEvent);
+    });
     expect(mockServices.contextLocator.navigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       columns: ['mock-column'],
       filters: [],
     });
 
-    await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    act(() => {
+      result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as MouseEvent);
+    });
     expect(mockServices.singleDocLocator.navigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       rowIndex: 'mock-index',
@@ -97,7 +103,9 @@ describe('useNavigationProps', () => {
   test('should create valid links to the context and single doc pages', async () => {
     const { result } = await render();
 
-    expect(result.current.singleDocHref).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
-    expect(result.current.contextViewHref).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
+    waitFor(() => {
+      expect(result.current.singleDocHref).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
+      expect(result.current.contextViewHref).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
+    });
   });
 });

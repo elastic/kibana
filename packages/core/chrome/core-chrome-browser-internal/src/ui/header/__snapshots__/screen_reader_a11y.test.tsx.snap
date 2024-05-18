@@ -236,12 +236,12 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
                     data-emotion="css"
                     data-s=""
                   >
-                    
+
                     .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                   </style>
                   <style
                     data-styled="active"
-                    data-styled-version="5.1.0"
+                    data-styled-version="5.3.11"
                   />
                 </head>,
                 "ctr": 1,
@@ -255,7 +255,7 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
                     data-emotion="css"
                     data-s=""
                   >
-                    
+
                     .emotion-euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);-webkit-clip-path:inset(50%);clip-path:inset(50%);overflow:hidden;margin:-1px;}
                   </style>,
                 ],
@@ -276,10 +276,10 @@ exports[`ScreenReaderRouteAnnouncements renders 1`] = `
   /* Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text */
   inset-inline-start: -10000px;
   /* The element must have a size (for some screen readers) */
-  
+
     inline-size: 1px;
     block-size: 1px;
-  
+
   /* But reduce the visible size to nothing */
   clip: rect(0 0 0 0);
   clip-path: inset(50%);

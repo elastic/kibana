@@ -187,7 +187,7 @@ export async function mountApp({
 
   const root = createRoot(element);
 
-  root.render(app, element);
+  root.render(app);
   return () => {
     dataStart.search.session.clear();
     unlistenParentHistory();

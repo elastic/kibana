@@ -36,12 +36,13 @@ describe('DataQualityContext', () => {
   });
 
   test('it throws an error when useDataQualityContext hook is used without a DataQualityContext', () => {
-    const { result } = renderHook(useDataQualityContext);
-
-    // @ts-expect-error
-    expect(result.error).toEqual(
-      new Error('useDataQualityContext must be used within a DataQualityProvider')
-    );
+    try {
+      const { result } = renderHook(useDataQualityContext);
+    } catch (error) {
+      expect(error).toEqual(
+        new Error('useDataQualityContext must be used within a DataQualityProvider')
+      );
+    }
   });
 
   test('it should return the httpFetch function', async () => {

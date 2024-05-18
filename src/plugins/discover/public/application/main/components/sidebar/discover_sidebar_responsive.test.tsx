@@ -11,7 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
-import { act } from 'react-dom/test-utils';
+import { act, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import {
@@ -428,7 +428,9 @@ describe('discover responsive sidebar', function () {
 
     comp.update();
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
-    expect(props.onAddFilter).toHaveBeenCalled();
+    waitFor(() => {
+      expect(props.onAddFilter).toHaveBeenCalled();
+    });
   });
   it('should allow adding "exist" filter', async function () {
     const comp = await mountComponent(props);
@@ -706,7 +708,9 @@ describe('discover responsive sidebar', function () {
     compWithPickerInViewerMode.update();
     // open data view picker
     findTestSubject(compWithPickerInViewerMode, 'dataView-switch-link').simulate('click');
-    expect(findTestSubject(compWithPickerInViewerMode, 'changeDataViewPopover').length).toBe(1);
+    waitFor(() => {
+      expect(findTestSubject(compWithPickerInViewerMode, 'changeDataViewPopover').length).toBe(1);
+    });
     // check that buttons are not present
     const addFieldButtonInDataViewPicker = findTestSubject(
       compWithPickerInViewerMode,

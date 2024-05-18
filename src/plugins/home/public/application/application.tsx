@@ -27,7 +27,7 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
-  const root = createRoot(domNode);
+  const root = createRoot(element);
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
   // FIXME: use featureCatalogue.getFeatures$()

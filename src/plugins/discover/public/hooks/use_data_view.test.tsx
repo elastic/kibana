@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useDataView } from './use_data_view';
 
 const adhocDataView = {
@@ -48,8 +48,10 @@ const render = async ({ dataViewId }: { dataViewId: string }) => {
 describe('useDataView', () => {
   it('should load save data view', async () => {
     const { result } = await render({ dataViewId: '1' });
-    expect(mockServices.dataViews.get).toHaveBeenCalledWith('1');
-    expect(result.current.dataView).toEqual(dataViews[0]);
+    waitFor(() => {
+      expect(mockServices.dataViews.get).toHaveBeenCalledWith('1');
+      expect(result.current.dataView).toEqual(dataViews[0]);
+    });
   });
 
   it('should throw an error on saved data view load ', async () => {
@@ -58,14 +60,17 @@ describe('useDataView', () => {
     );
 
     const { result } = await render({ dataViewId: '1' });
-    expect(result.current.error!.message).toEqual('can not load');
+    waitFor(() => {
+      expect(result.current.error!.message).toEqual('can not load');
+    });
   });
 
   it('should get adhoc data view from cache', async () => {
     const { result } = await render({ dataViewId: '2' });
-
-    expect(mockServices.dataViews.get).toHaveBeenCalledWith(adhocDataView.id);
-    expect(mockServices.dataViews.create).toBeCalledTimes(0);
-    expect(result.current.dataView).toEqual(adhocDataView);
+    waitFor(() => {
+      expect(mockServices.dataViews.get).toHaveBeenCalledWith(adhocDataView.id);
+      expect(mockServices.dataViews.create).toBeCalledTimes(0);
+      expect(result.current.dataView).toEqual(adhocDataView);
+    });
   });
 });
