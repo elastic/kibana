@@ -144,7 +144,7 @@ export const LatestVulnerabilitiesContainer = () => {
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar query={urlQuery.query} setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -153,7 +153,7 @@ export const LatestVulnerabilitiesContainer = () => {
   }
   return (
     <>
-      <FindingsSearchBar query={urlQuery.query} setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
       <div>
         {renderChildComponent({

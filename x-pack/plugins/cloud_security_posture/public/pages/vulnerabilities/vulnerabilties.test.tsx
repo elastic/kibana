@@ -27,7 +27,7 @@ import { bsearchVulnerabilitiesPageDefault } from '../../test/handlers/bsearch/v
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '../../common/navigation/constants';
 
-const server = setupMockServiceWorker(true);
+const server = setupMockServiceWorker();
 
 const renderVulnerabilitiesPage = () => {
   return render(

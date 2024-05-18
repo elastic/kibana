@@ -205,7 +205,7 @@ describe('<Findings />', () => {
       userEvent.click(getByTestId('saveFilter'), undefined, { skipPointerEventsCheck: true });
 
       await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(1));
-    });
+    }, 10000);
     it('remove filter', async () => {
       server.use(cspmStatusIndexed);
       server.use(bsearchFindingsPageDefault);

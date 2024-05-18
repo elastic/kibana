@@ -16,7 +16,7 @@ import {
 } from '../test/handlers/status_handlers';
 import { getMockServerServicesSetup, setupMockServiceWorker } from '../test/mock_server';
 
-const server = setupMockServiceWorker(true);
+const server = setupMockServiceWorker();
 
 const renderWrapper = (children: React.ReactNode) => {
   return render(<TestProvider {...getMockServerServicesSetup()}>{children}</TestProvider>);
