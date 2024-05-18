@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 
 export const createDataView = async ({
@@ -15,7 +15,7 @@ export const createDataView = async ({
   title,
   logger,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   id: string;
   name: string;
   title: string;
@@ -50,7 +50,7 @@ export const deleteDataView = async ({
   id,
   logger,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   id: string;
   logger: ToolingLog;
 }) => {

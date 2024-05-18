@@ -36,7 +36,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -45,22 +44,9 @@ const mockSearchBarCustomization: SearchBarCustomization = {
     .mockName('CustomDataViewPickerMock'),
 };
 
-const smartFields = [
-  new DataViewField({
-    name: 'mock_field',
-    type: 'mock_field',
-    searchable: false,
-    aggregatable: false,
-  }),
-];
-
-const additionalFieldGroups = {
-  smartFields,
-};
-
 const mockFieldListCustomisation: FieldListCustomization = {
   id: 'field_list',
-  additionalFieldGroups,
+  logsFieldsEnabled: true,
 };
 
 let mockUseCustomizations = false;
@@ -778,7 +764,7 @@ describe('discover responsive sidebar', function () {
 
       const smartFieldsCount = findTestSubject(comp, 'fieldListGroupedSmartFields-count');
 
-      expect(smartFieldsCount.text()).toBe('1');
+      expect(smartFieldsCount.text()).toBe('2');
     });
   });
 });

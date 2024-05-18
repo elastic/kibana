@@ -162,6 +162,21 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
+  const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
+    if (fieldName === '_exists_') {
+      return 'is_not_null';
+    }
+    if (values == null && operation === '-') {
+      return 'is_not_null';
+    }
+
+    if (values == null && operation === '+') {
+      return 'is_null';
+    }
+
+    return operation;
+  };
+
   const onPopulateWhereClause = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
       if (!field || !isOfAggregateQueryType(query)) {
@@ -176,8 +191,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       const updatedQuery = appendWhereClauseToESQLQuery(
         query.esql,
         fieldName === '_exists_' ? String(values) : fieldName,
-        fieldName === '_exists_' ? undefined : values,
-        fieldName === '_exists_' ? '_exists_' : operation,
+        fieldName === '_exists_' || values == null ? undefined : values,
+        getOperator(fieldName, values, operation),
         fieldType
       );
       data.query.queryString.setQuery({

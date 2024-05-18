@@ -37,6 +37,7 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const EMPTY_FIELD_COUNTS = {};
@@ -328,7 +329,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
-  const fieldListCustomization = useDiscoverCustomization('field_list');
+  const additionalFieldGroups = useAdditionalFieldGroups();
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
@@ -405,7 +406,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddFilter={onAddFilter}
             onFieldEdited={onFieldEdited}
             prependInFlyout={prependDataViewPickerForMobile}
-            additionalFieldGroups={fieldListCustomization?.additionalFieldGroups}
+            additionalFieldGroups={additionalFieldGroups}
           />
         ) : null}
       </EuiFlexItem>

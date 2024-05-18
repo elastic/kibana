@@ -65,6 +65,7 @@ import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const containerStyles = css`
@@ -256,11 +257,9 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const {
-    customCellRenderer: externalCustomRenderers,
-    customGridColumnsConfiguration,
-    customControlColumnsConfiguration,
-  } = useDiscoverCustomization('data_table') || {};
+  const { customControlColumnsConfiguration } = useDiscoverCustomization('data_table') || {};
+  const { customCellRenderer, customGridColumnsConfiguration } =
+    useContextualGridCustomisations() || {};
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -424,7 +423,7 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
-                  externalCustomRenderers={externalCustomRenderers}
+                  externalCustomRenderers={customCellRenderer}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
                   customControlColumnsConfiguration={customControlColumnsConfiguration}
                 />
