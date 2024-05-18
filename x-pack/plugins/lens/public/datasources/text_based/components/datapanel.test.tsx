@@ -24,7 +24,7 @@ import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { TextBasedPrivateState } from '../types';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
@@ -139,7 +139,7 @@ ReactDOM.createPortal = jest.fn((element) => element);
 async function mountAndWaitForLazyModules(component: React.ReactElement): Promise<ReactWrapper> {
   let inst: ReactWrapper;
   await act(async () => {
-    inst = await mountWithIntl(component);
+    inst = await mountWithI18nProvider(component);
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));
     inst.update();

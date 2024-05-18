@@ -6,8 +6,7 @@
  */
 
 import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ReactWrapper, mount } from 'enzyme';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
@@ -143,7 +142,7 @@ export const mountWithProvider = async (
   let instance: ReactWrapper = {} as ReactWrapper;
 
   await act(async () => {
-    instance = mountWithIntl(mountArgs.component, mountArgs.options);
+    instance = mount(mountArgs.component, mountArgs.options);
   });
   return { instance, lensStore, deps };
 };
@@ -160,7 +159,9 @@ const getMountWithProviderParams = (
   const { store: lensStore, deps } = makeLensStore(store || {});
 
   let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
-    <Provider store={lensStore}>{children}</Provider>
+    <I18nProvider>
+      <Provider store={lensStore}>{children}</Provider>
+    </I18nProvider>
   );
 
   let restOptions: {

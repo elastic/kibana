@@ -88,7 +88,7 @@ exports[`Flyout apm part two should show instructions to disable internal collec
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Add the following setting in the APM server's configuration file ({file}):"
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.description"
                   values={
@@ -115,10 +115,9 @@ exports[`Flyout apm part two should show instructions to disable internal collec
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="You'll need to restart the APM server after making this change."
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.disableInternalCollection.note"
-                  values={Object {}}
                 />
               </p>
             </EuiText>
@@ -159,10 +158,9 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.installMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -182,7 +180,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="By default the module will collect APM server monitoring metrics from http://localhost:5066. If the local APM server has a different address, you must specify it via the {hosts} setting in the {file} file."
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.enableMetricbeatModuleDescription"
                   values={
@@ -207,7 +205,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -218,10 +216,9 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -238,7 +235,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
         Object {
           "children": <React.Fragment>
             <EuiText>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Make these changes in your {file}."
                 id="xpack.monitoring.metricbeatMigration.apmInstructions.configureMetricbeatDescription"
                 values={
@@ -274,7 +271,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -285,10 +282,9 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -308,10 +304,9 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
               <EuiLink
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.apmInstructions.startMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -421,7 +416,7 @@ exports[`Flyout beats part two should show instructions to disable internal coll
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Add the following setting in {beatType}'s configuration file ({file}):"
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.description"
                   values={
@@ -449,7 +444,7 @@ exports[`Flyout beats part two should show instructions to disable internal coll
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="You'll need to restart {beatType} after making this change."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.note"
                   values={
@@ -497,10 +492,9 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -520,7 +514,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the {beatType} instance being monitored has a different address, you must specify it via the {hosts} setting in the {file} file."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleDescription"
                   values={
@@ -546,7 +540,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
               title={
                 <EuiText>
                   <p>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
                       id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirections"
                       values={
@@ -555,7 +549,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <EuiLink
                             target="_blank"
                           >
-                            <FormattedMessage
+                            <Memo(MemoizedFormattedMessage)
                               defaultMessage="enable an HTTP endpoint for the {beatType} instance being monitored"
                               id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
                               values={
@@ -581,7 +575,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -592,10 +586,9 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -612,7 +605,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
         Object {
           "children": <React.Fragment>
             <EuiText>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Make these changes in your {file}."
                 id="xpack.monitoring.metricbeatMigration.beatsInstructions.configureMetricbeatDescription"
                 values={
@@ -648,7 +641,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -659,10 +652,9 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -682,10 +674,9 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
               <EuiLink
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -795,7 +786,7 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Disable self monitoring of Elasticsearch monitoring metrics. Set {monospace} to false on each server in the production cluster."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionDescription"
                   values={
@@ -860,10 +851,9 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow these instructions."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -891,7 +881,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="By default the module collects Elasticsearch metrics from {url}. If the local server has a different address, add it to the hosts setting in {module}."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
                   values={
@@ -916,7 +906,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -927,10 +917,9 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -947,7 +936,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
         Object {
           "children": <React.Fragment>
             <EuiText>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Modify {file} to set the connection information."
                 id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.configureMetricbeatDescription"
                 values={
@@ -983,7 +972,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -994,10 +983,9 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -1017,10 +1005,9 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
               <EuiLink
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow these instructions."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -1130,7 +1117,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Add this setting to {file}."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.description"
                   values={
@@ -1157,7 +1144,7 @@ exports[`Flyout kibana part two should show instructions to disable internal col
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="For {config}, leave the default value of ({defaultValue})."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
                   values={
@@ -1210,10 +1197,9 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -1233,7 +1219,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="By default the module will collect Kibana monitoring metrics from http://localhost:5601. If the local Kibana instance has a different address, you must specify it via the {hosts} setting in the {file} file."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.enableMetricbeatModuleDescription"
                   values={
@@ -1258,7 +1244,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -1269,10 +1255,9 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -1289,7 +1274,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
         Object {
           "children": <React.Fragment>
             <EuiText>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Make these changes in your {file}."
                 id="xpack.monitoring.metricbeatMigration.kibanaInstructions.configureMetricbeatDescription"
                 values={
@@ -1325,7 +1310,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -1336,10 +1321,9 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -1359,10 +1343,9 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
               <EuiLink
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -1472,7 +1455,7 @@ exports[`Flyout logstash part two should show instructions to disable internal c
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Add the following setting in the Logstash configuration file ({file}):"
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.description"
                   values={
@@ -1499,10 +1482,9 @@ exports[`Flyout logstash part two should show instructions to disable internal c
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="You'll need to restart Logstash after making this change."
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.disableInternalCollection.note"
-                  values={Object {}}
                 />
               </p>
             </EuiText>
@@ -1543,10 +1525,9 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -1566,7 +1547,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="By default the module will collect Logstash monitoring metrics from http://localhost:9600. If the local Logstash instance has a different address, you must specify it via the {hosts} setting in the {file} file."
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.enableMetricbeatModuleDescription"
                   values={
@@ -1591,7 +1572,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -1601,10 +1582,9 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                             <EuiLink
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -1621,7 +1601,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
         Object {
           "children": <React.Fragment>
             <EuiText>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Make these changes in your {file}."
                 id="xpack.monitoring.metricbeatMigration.logstashInstructions.configureMetricbeatDescription"
                 values={
@@ -1657,7 +1637,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -1667,10 +1647,9 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                             <EuiLink
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -1690,10 +1669,9 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
               <EuiLink
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -1740,7 +1718,7 @@ exports[`Flyout should render the beat type for beats for the disabling internal
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Add the following setting in {beatType}'s configuration file ({file}):"
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.description"
                   values={
@@ -1769,7 +1747,7 @@ exports[`Flyout should render the beat type for beats for the disabling internal
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="You'll need to restart {beatType} after making this change."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.disableInternalCollection.note"
                   values={
@@ -1817,10 +1795,9 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                 href="jest-metadata-mock-url"
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -1840,7 +1817,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="By default the module will collect {beatType} monitoring metrics from http://localhost:5066. If the {beatType} instance being monitored has a different address, you must specify it via the {hosts} setting in the {file} file."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleDescription"
                   values={
@@ -1866,7 +1843,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
               title={
                 <EuiText>
                   <p>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
                       id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirections"
                       values={
@@ -1875,7 +1852,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <EuiLink
                             target="_blank"
                           >
-                            <FormattedMessage
+                            <Memo(MemoizedFormattedMessage)
                               defaultMessage="enable an HTTP endpoint for the {beatType} instance being monitored"
                               id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
                               values={
@@ -1901,7 +1878,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -1912,10 +1889,9 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -1932,7 +1908,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
         Object {
           "children": <React.Fragment>
             <EuiText>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Make these changes in your {file}."
                 id="xpack.monitoring.metricbeatMigration.beatsInstructions.configureMetricbeatDescription"
                 values={
@@ -1968,7 +1944,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                 iconType="help"
                 title={
                   <EuiText>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="If security is enabled, {link} might be required."
                       id="xpack.monitoring.metricbeatMigration.securitySetup"
                       values={
@@ -1979,10 +1955,9 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                               href="jest-metadata-mock-url"
                               target="_blank"
                             >
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="additional setup"
                                 id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
-                                values={Object {}}
                               />
                             </EuiLink>
                           </React.Fragment>,
@@ -2002,10 +1977,9 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
               <EuiLink
                 target="_blank"
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Follow the instructions here."
                   id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
-                  values={Object {}}
                 />
               </EuiLink>
             </p>
@@ -2036,7 +2010,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
           "children": <React.Fragment>
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Add this setting to {file}."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.description"
                   values={
@@ -2063,7 +2037,7 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
             />
             <EuiText>
               <p>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="For {config}, leave the default value of ({defaultValue})."
                   id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.note"
                   values={
@@ -2090,10 +2064,9 @@ exports[`Flyout should show a restart warning for restarting the primary Kibana 
               >
                 <EuiText>
                   <p>
-                    <FormattedMessage
+                    <Memo(MemoizedFormattedMessage)
                       defaultMessage="Expect errors until the server is running again."
                       id="xpack.monitoring.metricbeatMigration.kibanaInstructions.disableInternalCollection.restartNote"
-                      values={Object {}}
                     />
                   </p>
                 </EuiText>

@@ -163,7 +163,7 @@ function validateConnectorTypeConfig(
       i18n.translate('xpack.stackConnectors.webhook.configurationErrorNoHostname', {
         defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );
