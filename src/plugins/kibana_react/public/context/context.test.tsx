@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
 import { render } from '@testing-library/react';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
