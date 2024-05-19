@@ -123,6 +123,19 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return { available: response.success };
   }
 
+  /** Retrieve access token based on the GCP service account credential json file */
+  private async getAccessToken(): Promise<string> {
+    const credentials = JSON.parse(this.secrets.credentialsJson);
+
+    const auth = new GoogleAuth({
+      credentials,
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
+
+    const token = await auth.getAccessToken();
+    return token || ''; 
+  }
+
   private async makeApiRequest(
     params: SubActionRequestParams<RunApiResponse> 
   ): Promise<RunActionResponse> {
@@ -148,9 +161,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    // set model on per request basis
    const currentModel = reqModel ?? this.model;
    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-   const accessToken = this.secrets.credentialsJson;
    const data = JSON.stringify(JSON.parse(body)['messages']);
-   const token = await getAccessToken(accessToken);
+   const token = await this.getAccessToken();
 
    const requestArgs = {
      url: `${this.url}${path}`,
@@ -168,17 +180,4 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
  }
 }
 
-/** Retrieve access token based on the GCP service account credential json file */
-const getAccessToken = async (credentialsJson: string) => {
-  const credentials = JSON.parse(credentialsJson);
-
-    const auth = new GoogleAuth({
-      credentials,
-      scopes: 'https://www.googleapis.com/auth/cloud-platform',
-    });
-
-    const token = await auth.getAccessToken();
-
-    return token;
-}
 
