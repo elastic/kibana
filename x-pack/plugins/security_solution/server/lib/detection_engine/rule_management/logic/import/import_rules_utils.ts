@@ -12,8 +12,6 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
@@ -48,7 +46,6 @@ export const importRules = async ({
   rulesResponseAcc,
   mlAuthz,
   overwriteRules,
-  rulesClient,
   rulesManagementClient,
   existingLists,
   allowMissingConnectorSecrets,
@@ -57,7 +54,6 @@ export const importRules = async ({
   rulesResponseAcc: ImportRuleResponse[];
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
-  rulesClient: RulesClient;
   rulesManagementClient: IRulesManagementClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
@@ -110,15 +106,16 @@ export const importRules = async ({
               });
 
               resolve({
-                rule_id: importedRule.id,
+                rule_id: importedRule.params.ruleId,
                 status_code: 200,
               });
             } catch (err) {
+              const { rule_id: ruleId, error } = err;
               resolve(
                 createBulkErrorObject({
-                  ruleId: parsedRule.rule_id,
-                  statusCode: err.statusCode ?? 400,
-                  message: err.message,
+                  ruleId,
+                  statusCode: error.status_code ?? 400,
+                  message: error.message,
                 })
               );
             }

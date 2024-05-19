@@ -84,6 +84,44 @@ describe('RuleManagementClient.importRule', () => {
       );
     });
 
+    /**
+     * Existing rule may have nullable fields set to a value (e.g. `timestamp_override` is set to `some.value`) but
+     * a rule to import doesn't have these fields set (e.g. `timestamp_override` is NOT present at all in the ndjson file).
+     * We expect the updated rule won't have such fields preserved (e.g. `timestamp_override` will be removed).
+     *
+     * Unit test is only able to check `updateRules()` receives a proper update object.
+     */
+    it('ensures overwritten rule DOES NOT preserve fields missed in the imported rule when "overwriteRules" is "true" and matching rule found', async () => {
+      const existingRuleWithTimestampOverride = {
+        ...existingRule,
+        params: {
+          ...existingRule.params,
+          timestamp_override: '2020-01-01T00:00:00Z',
+        },
+      };
+      (readRules as jest.Mock).mockResolvedValue(existingRuleWithTimestampOverride);
+
+      await importRule(rulesClient, {
+        ruleToImport: {
+          ...ruleToImport,
+          timestamp_override: undefined,
+        },
+        overwriteRules: true,
+        options: { allowMissingConnectorSecrets },
+      });
+
+      expect(rulesClient.create).not.toHaveBeenCalled();
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: existingRule.id,
+          data: expect.not.objectContaining({
+            timestamp_override: expect.anything(),
+            timestampOverride: expect.anything(),
+          }),
+        })
+      );
+    });
+
     it('rejects when overwriteRules is false', async () => {
       (readRules as jest.Mock).mockResolvedValue(existingRule);
       await expect(
