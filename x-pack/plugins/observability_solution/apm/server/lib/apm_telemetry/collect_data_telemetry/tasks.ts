@@ -229,10 +229,9 @@ export const tasks: TelemetryTask[] = [
         {
           terms: {
             script: `
-              if (doc['transaction.type'].value == 'page-load' && doc['user_agent.name'].size() > 0) {
-                return doc['user_agent.name'].value;
+              if ($('transaction.type', '') == 'page-load') {
+                return $('user_agent.name', null);
               }
-
               return null;
             `,
             missing_bucket: true,
@@ -241,7 +240,7 @@ export const tasks: TelemetryTask[] = [
         // transaction.root
         {
           terms: {
-            script: `return doc['parent.id'].size() == 0`,
+            script: `return $('parent.id', '') == ''`,
             missing_bucket: true,
           },
         },
@@ -258,8 +257,8 @@ export const tasks: TelemetryTask[] = [
           {
             terms: {
               script: `
-                if (doc['transaction.type'].value == 'page-load' && doc['client.geo.country_iso_code'].size() > 0) {
-                  return doc['client.geo.country_iso_code'].value;
+                if ($('transaction.type', '') == 'page-load') {
+                  return $('client.geo.country_iso_code', null);
                 }
                 return null;
               `,
