@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createConversations } from './provider';
