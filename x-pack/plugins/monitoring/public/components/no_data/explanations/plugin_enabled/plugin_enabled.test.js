@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ExplainPluginEnabled } from './plugin_enabled';
 
 describe('ExplainPluginEnabled', () => {
@@ -16,7 +16,7 @@ describe('ExplainPluginEnabled', () => {
       data: 'false',
       context: 'cluster',
     };
-    const component = renderWithIntl(<ExplainPluginEnabled {...{ reason }} />);
+    const component = renderWithI18nProvider(<ExplainPluginEnabled {...{ reason }} />);
     expect(component).toMatchSnapshot();
   });
 });

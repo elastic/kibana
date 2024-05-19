@@ -20,7 +20,7 @@ exports[`Header should render normally 1`] = `
   onConfirm={[Function]}
   title={
     <Memo(MemoizedFormattedMessage)
-      defaultMessage="Delete field filter '{value}'?"
+      defaultMessage="Delete field filter ''{value}''?"
       id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
       values={
         Object {

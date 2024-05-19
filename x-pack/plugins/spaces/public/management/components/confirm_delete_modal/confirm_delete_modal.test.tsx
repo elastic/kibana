@@ -36,7 +36,7 @@ describe('ConfirmDeleteModal', () => {
         isLoading={false}
         onCancel={[MockFunction]}
         onConfirm={[Function]}
-        title="Delete space {name}?"
+        title="Delete space 'My Space'?"
       >
         <EuiText>
           <p>

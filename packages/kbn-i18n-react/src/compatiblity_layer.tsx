@@ -24,7 +24,7 @@ export const FormattedRelative = ({
   updateIntervalInSeconds,
 }: FormattedRelativeProps) => {
   const normalizedValue = typeof valueInput === 'string' ? moment(valueInput).toDate() : valueInput;
-  const { value, unit } = selectUnit(new Date(), normalizedValue);
+  const { value, unit } = selectUnit(normalizedValue, new Date());
 
   return (
     <FormattedRelativeTime

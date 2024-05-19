@@ -11,7 +11,7 @@ exports[`DocumentsPanel renders 1`] = `
           "field": "added",
           "name": <EuiToolTip
             content={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Number of {index} operations the connector sent to the Elasticsearch _bulk API, including updates to existing documents. Note that the number of documents upserted and the number of documents in the index may differ."
                 id="searchConnectors.index.syncJobs.documents.upserted.tooltip"
                 values={
@@ -42,7 +42,7 @@ exports[`DocumentsPanel renders 1`] = `
           "field": "removed",
           "name": <EuiToolTip
             content={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Number of {delete} operations the connector sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted when the connector determines they are no longer present in the third-party source."
                 id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
                 values={
@@ -73,7 +73,7 @@ exports[`DocumentsPanel renders 1`] = `
           "field": "volume",
           "name": <EuiToolTip
             content={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Volume (in MB) of JSON data sent with {index} operations to the Elasticsearch _bulk API. The Elasticsearch index may be larger, depending on index mappings and settings, or smaller, if data is trimmed by ingest processors."
                 id="searchConnectors.index.syncJobs.documents.volume.tooltip"
                 values={

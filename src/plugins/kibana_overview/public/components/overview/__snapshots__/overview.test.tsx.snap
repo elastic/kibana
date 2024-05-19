@@ -113,7 +113,6 @@ exports[`Overview renders correctly 1`] = `
         },
       },
       "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
       "fallbackOnEmptyString": true,
       "formatDate": [Function],
       "formatDateTimeRange": [Function],
@@ -142,9 +141,7 @@ exports[`Overview renders correctly 1`] = `
       "messages": Object {},
       "onError": [Function],
       "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
       "timeZone": undefined,
-      "wrapRichTextChunksInFragment": undefined,
     }
   }
   newsFetchResult={
@@ -355,7 +352,6 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
         },
       },
       "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
       "fallbackOnEmptyString": true,
       "formatDate": [Function],
       "formatDateTimeRange": [Function],
@@ -384,9 +380,7 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
       "messages": Object {},
       "onError": [Function],
       "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
       "timeZone": undefined,
-      "wrapRichTextChunksInFragment": undefined,
     }
   }
   newsFetchResult={
@@ -1261,7 +1255,6 @@ exports[`Overview renders correctly without features 1`] = `
         },
       },
       "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
       "fallbackOnEmptyString": true,
       "formatDate": [Function],
       "formatDateTimeRange": [Function],
@@ -1290,9 +1283,7 @@ exports[`Overview renders correctly without features 1`] = `
       "messages": Object {},
       "onError": [Function],
       "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
       "timeZone": undefined,
-      "wrapRichTextChunksInFragment": undefined,
     }
   }
   newsFetchResult={
@@ -1503,7 +1494,6 @@ exports[`Overview renders correctly without solutions 1`] = `
         },
       },
       "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
       "fallbackOnEmptyString": true,
       "formatDate": [Function],
       "formatDateTimeRange": [Function],
@@ -1532,9 +1522,7 @@ exports[`Overview renders correctly without solutions 1`] = `
       "messages": Object {},
       "onError": [Function],
       "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
       "timeZone": undefined,
-      "wrapRichTextChunksInFragment": undefined,
     }
   }
   newsFetchResult={
