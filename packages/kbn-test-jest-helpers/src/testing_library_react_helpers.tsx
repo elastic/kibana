@@ -19,5 +19,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 export const renderReactTestingLibraryWithI18n = (...args: Parameters<typeof render>) => {
   const [ui, ...remainingRenderArgs] = args;
+  // Avoid using { wrapper: I18nProvider } in case the caller adds a custom wrapper.
   return render(<I18nProvider>{ui}</I18nProvider>, ...remainingRenderArgs);
 };

@@ -190,3 +190,7 @@ export function mountWithI18nProvider<T>(child: ReactElement<T>, options?: Mount
   const wrapped = mount(<I18nProvider>{child}</I18nProvider>, options);
   return wrapped.children().childAt(0);
 }
+
+export function renderWithI18nProvider<T>(child: ReactElement<T>, options?: MountRendererProps) {
+  return render(<I18nProvider>{child}</I18nProvider>, options);
+}

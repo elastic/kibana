@@ -9,10 +9,9 @@ exports[`StringFormatEditor should render normally 1`] = `
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Transform"
         id="indexPatternFieldEditor.string.transformLabel"
-        values={Object {}}
       />
     }
     labelType="label"

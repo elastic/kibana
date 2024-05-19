@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, renderWithI18nProvider, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from './expanded_row';
 import { Ping } from '../../../../../common/runtime_types';
@@ -77,7 +77,7 @@ describe('PingListExpandedRow', () => {
   it(`renders link to docs if body is not recorded but it is present`, () => {
     // @ts-ignore this shouldn't be undefined unless the beforeEach block is modified
     delete ping.http.response.body.content;
-    expect(renderWithIntl(<PingListExpandedRowComponent ping={ping} />)).toMatchSnapshot();
+    expect(renderWithI18nProvider(<PingListExpandedRowComponent ping={ping} />)).toMatchSnapshot();
   });
 
   it(`mount component to find link to docs if body is not recorded but it is present`, () => {

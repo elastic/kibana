@@ -176,7 +176,7 @@ export function ErrorGroupingKeyField({
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.errorKeySelectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
+          defaultMessage: `Add '{searchValue}' as a new error grouping key`,
         })}
         defaultValue={currentValue}
         fieldName={ERROR_GROUP_ID}
