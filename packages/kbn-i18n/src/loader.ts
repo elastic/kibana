@@ -125,11 +125,16 @@ export async function getTranslationsByLocale(locale: string): Promise<Translati
 
   const fileTrasnlationDetails = files.map((file) => loadedFiles[file]);
 
-  return fileTrasnlationDetails.reduce((translation, acc) => ({
-    locale: acc.locale || translation.locale,
-    formats: acc.formats || translation.formats,
+  const filesLocale = fileTrasnlationDetails[0].locale || locale;
+  const translationInput = fileTrasnlationDetails.reduce((acc, translation) => ({
+    locale,
+    formats: translation.formats
+      ? Object.assign(acc.formats || {}, translation.formats)
+      : undefined,
     messages: Object.assign(acc.messages, translation.messages),
   }));
+
+  return { ...translationInput, locale: filesLocale };
 }
 
 /**
