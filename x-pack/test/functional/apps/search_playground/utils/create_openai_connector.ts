@@ -12,7 +12,7 @@ export async function createOpenAIConnector({
   requestHeader = {},
   apiKeyHeader = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   requestHeader?: Record<string, string>;
   apiKeyHeader?: Record<string, string>;
 }): Promise<() => Promise<void>> {
