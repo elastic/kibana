@@ -65,6 +65,7 @@ describe('saved_searches_utils', () => {
               "aggs": Object {
                 "createAggConfigs": [MockFunction],
               },
+              "fieldFormats": Object {},
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
               "scriptedFieldsEnabled": true,

@@ -882,7 +882,7 @@ export class SearchSource {
     body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
-    let filteredDocvalueFields = docvalueFields;
+    let filteredDocvalueFields = docvalueFields || [];
     if (index) {
       const sourceFilters = index.getSourceFiltering();
       if (!body.hasOwnProperty('_source')) {
@@ -964,7 +964,7 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    body.fields = body.fields.filter((field: string) => Boolean(field));
+    body.fields = body.fields?.filter((field: string) => Boolean(field));
 
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
