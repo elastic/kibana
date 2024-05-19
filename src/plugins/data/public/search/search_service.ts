@@ -295,7 +295,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         }
         return response;
       },
-      fieldFormats,
       scriptedFieldsEnabled,
     };
 

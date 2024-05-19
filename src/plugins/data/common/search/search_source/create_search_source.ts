@@ -7,6 +7,7 @@
  */
 
 import { DataViewsContract, DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { SerializedSearchSourceFields } from '../..';
@@ -56,7 +57,8 @@ export const createSearchSource = (
           dataViewLazy = await indexPatterns.getDataViewLazy(searchSourceFields.index);
           const dataView = new DataView({
             spec: await dataViewLazy.toSpec(),
-            fieldFormats: searchSourceDependencies.fieldFormats,
+            // field format functionality is not used within search source
+            fieldFormats: {} as FieldFormatsStartCommon,
             // shortDotsEnable?: boolean;
             metaFields: dataViewLazy.metaFields,
           });
@@ -66,7 +68,8 @@ export const createSearchSource = (
           dataViewLazy = await indexPatterns.createDataViewLazy(searchSourceFields.index);
           const dataView = new DataView({
             spec: await dataViewLazy.toSpec(),
-            fieldFormats: searchSourceDependencies.fieldFormats,
+            // field format functionality is not used within search source
+            fieldFormats: {} as FieldFormatsStartCommon,
             // shortDotsEnable?: boolean;
             metaFields: dataViewLazy.metaFields,
           });

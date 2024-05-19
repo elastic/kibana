@@ -24,7 +24,6 @@ import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
 
@@ -104,7 +103,7 @@ export async function fetchSearchSourceQuery({
 
 export async function updateSearchSource(
   searchSource: ISearchSource,
-  index: DataView | DataViewLazy,
+  index: DataView,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   dateStart: string,

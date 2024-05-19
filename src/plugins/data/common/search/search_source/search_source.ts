@@ -74,8 +74,6 @@ import {
 } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
-// import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
@@ -139,7 +137,6 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
-  fieldFormats: FieldFormatsStartCommon;
   scriptedFieldsEnabled: boolean;
 }
 

@@ -9,7 +9,6 @@
 import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
@@ -74,5 +73,4 @@ export const createSearchSourceMock = (
       ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
     scriptedFieldsEnabled: true,
-    fieldFormats: {} as FieldFormatsStartCommon,
   });
