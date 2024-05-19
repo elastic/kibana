@@ -25,13 +25,15 @@ export interface DocumentContext {
 
 export type DocumentProfile = Pick<Profile, 'getDocViewsRegistry'>;
 
-export const documentProfileService = new ProfileService<
+export class DocumentProfileService extends ProfileService<
   DocumentProfile,
   DocumentProfileProviderParams,
   DocumentContext
->();
+> {}
 
-export type DocumentProfileProvider = Parameters<typeof documentProfileService.registerProvider>[0];
+export type DocumentProfileProvider = Parameters<DocumentProfileService['registerProvider']>[0];
+
+export const documentProfileService = new DocumentProfileService();
 
 export const recordHasProfile = (
   record?: DataTableRecord

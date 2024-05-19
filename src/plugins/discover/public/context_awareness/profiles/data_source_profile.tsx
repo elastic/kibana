@@ -29,11 +29,13 @@ export interface DataSourceContext {
 
 export type DataSourceProfile = Profile;
 
-export const dataSourceProfileService = new AsyncProfileService<
+export class DataSourceProfileService extends AsyncProfileService<
   DataSourceProfile,
   DataSourceProfileProviderParams,
   DataSourceContext
->();
+> {}
+
+export const dataSourceProfileService = new DataSourceProfileService();
 
 export type DataSourceProfileProvider = Parameters<
   typeof dataSourceProfileService.registerProvider
