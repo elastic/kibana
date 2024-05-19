@@ -22,18 +22,15 @@ const generation_config = {
   maxOutputTokens: DEFAULT_TOKEN_LIMIT,
 }
 
-const messageBody = {
-  contents: [
-    {role: 'user',
-      parts:[{
-       text: 'Write the first line of a story about a magic backpack.'}]}
-  ],
-  generation_config,
-}
+const contents = [
+  {role: 'user',
+    parts:[{
+     text: 'Write the first line of a story about a magic backpack.'}]}
+]
 
 export const DEFAULT_BODY = JSON.stringify({
-  gemini_version: DEFAULT_GEMINI_MODEL,
-  messages: messageBody,
+  contents,
+  generation_config
 });
 
 export const geminiConfig: ConfigFieldSchema[] = [
