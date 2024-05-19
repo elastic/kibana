@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { DataViewsContract, DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { SerializedSearchSourceFields } from '../..';
@@ -33,6 +33,7 @@ export const createSearchSource = (
   indexPatterns: DataViewsContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => {
+  let dataViewLazy: DataViewLazy | undefined;
   const createFields = async (
     searchSourceFields: SerializedSearchSourceFields = {},
     useDataViewLazy = false
@@ -52,9 +53,24 @@ export const createSearchSource = (
         }
       } else {
         if (typeof searchSourceFields.index === 'string') {
-          fields.index = await indexPatterns.getDataViewLazy(searchSourceFields.index);
+          dataViewLazy = await indexPatterns.getDataViewLazy(searchSourceFields.index);
+          const dataView = new DataView({
+            spec: await dataViewLazy.toSpec(),
+            fieldFormats: searchSourceDependencies.fieldFormats,
+            // shortDotsEnable?: boolean;
+            metaFields: dataViewLazy.metaFields,
+          });
+
+          fields.index = dataView;
         } else {
-          fields.index = await indexPatterns.createDataViewLazy(searchSourceFields.index);
+          dataViewLazy = await indexPatterns.createDataViewLazy(searchSourceFields.index);
+          const dataView = new DataView({
+            spec: await dataViewLazy.toSpec(),
+            fieldFormats: searchSourceDependencies.fieldFormats,
+            // shortDotsEnable?: boolean;
+            metaFields: dataViewLazy.metaFields,
+          });
+          fields.index = dataView;
         }
       }
     }
@@ -70,7 +86,7 @@ export const createSearchSource = (
     searchSourceFields: SerializedSearchSourceFields = {},
     useDataViewLazy?: boolean
   ) => {
-    const fields = await createFields(searchSourceFields, useDataViewLazy);
+    const fields = await createFields(searchSourceFields, !!useDataViewLazy);
     const searchSource = new SearchSource(fields, searchSourceDependencies);
 
     // todo: move to migration script .. create issue
@@ -79,8 +95,10 @@ export const createSearchSource = (
     if (typeof query !== 'undefined') {
       searchSource.setField('query', migrateLegacyQuery(query));
     }
-    if (useDataViewLazy) {
-      await searchSource.loadDataViewFields();
+    // using the dataViewLazy check as a type guard
+    if (useDataViewLazy && dataViewLazy) {
+      const dataViewFields = await searchSource.loadDataViewFields(dataViewLazy);
+      fields.index?.fields.replaceAll(Object.values(dataViewFields).map((fld) => fld.toSpec()));
     }
 
     return searchSource;

@@ -74,6 +74,8 @@ import {
 } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
+// import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
@@ -137,6 +139,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  fieldFormats: FieldFormatsStartCommon;
   scriptedFieldsEnabled: boolean;
 }
 
@@ -803,11 +806,7 @@ export class SearchSource {
     return field;
   }
 
-  public async loadDataViewFields() {
-    const dataView = this.getField('index');
-    if (!dataView || !(dataView instanceof DataViewLazy)) {
-      return;
-    }
+  public async loadDataViewFields(dataView: DataViewLazy) {
     // eslint-disable-next-line no-console
     console.log('loadDataViewFields because of DataViewLazy');
     const request = this.mergeProps(this, { body: {} }, ['query', 'filter']);
@@ -838,15 +837,20 @@ export class SearchSource {
 
     if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
       // if source filtering is enabled, we need to fetch all the fields
-      await dataView.getFields({ fieldName: ['*'] });
+      return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
     } else if (fields.length) {
-      const fieldSpec = await dataView.getFields({
-        fieldName: fields,
-        // fieldTypes: ['date', 'date_nanos'],
-      });
-      const spec = Object.values(fieldSpec.getFieldMap()).map((field) => field.spec);
-      dataView.setFields(spec);
+      return (
+        await dataView.getFields({
+          // const fieldSpec = await dataView.getFields({
+          fieldName: fields,
+          // fieldTypes: ['date', 'date_nanos'],
+        })
+      ).getFieldMapSorted();
+      // const spec = Object.values(fieldSpec.getFieldMap()).map((field) => field.spec);
+      // dataView.setFields(spec);
     }
+    // no fields needed to be loaded for query
+    return {};
   }
 
   private flatten() {

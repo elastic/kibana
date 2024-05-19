@@ -304,6 +304,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
           const aggsStart = await aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser);
+          const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
           // cache ui settings, only including items which are explicitly needed by SearchSource
           const uiSettingsCache = pick(
@@ -316,6 +317,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
+            fieldFormats: formats,
             scriptedFieldsEnabled: true,
           };
 
