@@ -78,6 +78,18 @@ export class TestSubActionConnector extends SubActionConnector<TestConfig, TestS
 
     return res;
   }
+
+  public async testAuth({ headers }: { headers?: Record<string, unknown> } = {}) {
+    const res = await this.request({
+      url: 'https://example.com',
+      data: {},
+      auth: { username: 'username', password: 'password' },
+      headers: { 'X-Test-Header': 'test', ...headers },
+      responseSchema: schema.object({ status: schema.string() }),
+    });
+
+    return res;
+  }
 }
 
 export class TestNoSubActions extends SubActionConnector<TestConfig, TestSecrets> {
