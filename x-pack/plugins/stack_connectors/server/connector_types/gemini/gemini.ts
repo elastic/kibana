@@ -28,7 +28,7 @@ import {
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/gemini/types';
-import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
+import { SUB_ACTION, DEFAULT_TIMEOUT_MS, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -185,17 +185,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return token || null; 
   }
 
-  private async makeApiRequest(
-    params: SubActionRequestParams<RunApiResponse> 
-  ): Promise<RunActionResponse> {
-
-    const response = await this.request(params);
-    const candidate = response.data.candidates[0];
-    const completionText = candidate.content.parts[0].text;
-    return { completion: completionText }
-
-  }
-
   /**
    * responsible for making a POST request to the Vertex AI API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
@@ -220,10 +209,15 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
        'Content-Type': 'application/json'
      },
      signal,
-     timeout,
-   };
+     timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+     responseSchema: RunApiResponseSchema,
+    } as SubActionRequestParams<RunApiResponse>;
 
-   return this.makeApiRequest({ ...requestArgs, responseSchema: RunApiResponseSchema });
+    const response = await this.request(requestArgs);
+    const candidate = response.data.candidates[0];
+    const completionText = candidate.content.parts[0].text;
+    return { completion: completionText };
+
  }
 
   private async streamAPI({
