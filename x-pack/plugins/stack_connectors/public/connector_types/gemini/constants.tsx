@@ -131,18 +131,18 @@ export const geminiConfig: ConfigFieldSchema[] = [
 
 export const geminiSecrets: SecretsFieldSchema[] = [
   {
-    id: 'accessToken',
-    label: i18n.API_KEY,
+    id: 'credentialsJson',
+    label: i18n.CREDENTIALS_JSON,
     isPasswordField: true,
     helpText: (
       <FormattedMessage
-        defaultMessage="To authenticate to Gemini API please provide the Bearer Token. You can get it my running `gcloud auth application-default print-access-token`. For more information, refer to the {geminiAuthDocs}."
+        defaultMessage="To authenticate to Gemini API please provide your GCP Service Account credentials JSON data .For more information, refer to the {geminiAuthDocs}."
         id="xpack.stackConnectors.components.gemini.geminiSecretDocumentation"
         values={{
           geminiAuthDocs: (
             <EuiLink
               data-test-subj="aws-api-keys-doc"
-              href="https://cloud.google.com/iam/docs/create-short-lived-credentials-direct"
+              href="https://cloud.google.com/iam/docs/keys-list-get"
               target="_blank"
             >
               {`${i18n.gemini} ${i18n.DOCUMENTATION}`}

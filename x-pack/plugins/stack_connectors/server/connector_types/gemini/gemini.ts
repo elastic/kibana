@@ -7,21 +7,19 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
+import {GoogleAuth} from 'google-auth-library';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
-  InvokeAIActionParamsSchema,
-  RunApiLatestResponseSchema,
+  RunApiResponseSchema,
 } from '../../../common/gemini/schema';
 import {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
-  InvokeAIActionParams,
-  InvokeAIActionResponse,
-  RunApiLatestResponse,
+  RunApiResponse,
 } from '../../../common/gemini/types';
 import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
 import {
@@ -30,24 +28,6 @@ import {
 } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
-/** Interfaces to define the Gemini model response type */
-
-interface MessagePart {
-  text: string;
-}
-
-interface MessageContent {
-  role: string;
-  parts: MessagePart[];
-}
-
-interface Payload {
-  contents: MessageContent[];
-  generation_config: {
-      temperature: number;
-      maxOutputTokens: number;
-  };
-}
 
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   private url;
@@ -81,14 +61,10 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
     this.registerSubAction({
       name: SUB_ACTION.TEST,
-      method: 'runTestApi',
+      method: 'runApi',
       schema: RunActionParamsSchema,
     });
-    this.registerSubAction({
-      name: SUB_ACTION.INVOKE_AI,
-      method: 'invokeAI',
-      schema: InvokeAIActionParamsSchema,
-    });
+    
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
@@ -147,8 +123,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     return { available: response.success };
   }
 
-  private async runApiLatest(
-    params: SubActionRequestParams<RunApiLatestResponse> 
+  private async makeApiRequest(
+    params: SubActionRequestParams<RunApiResponse> 
   ): Promise<RunActionResponse> {
 
     const response = await this.request(params);
@@ -156,33 +132,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     const completionText = candidate.content.parts[0].text;
     return { completion: completionText }
 
-  }
-
-  /**
-   * This method is called on TEST subaction
-   * responsible for making a POST request to the external API endpoint and returning the response data
-   * @param body The stringified request body to be sent in the POST request.
-   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
-   */
-   public async runTestApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
-    // set model on per request basis
-    const currentModel = reqModel ?? this.model;
-    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-    const accessToken = this.secrets.accessToken;
-    const data = JSON.stringify(JSON.parse(body)['messages']);
-
-    const requestArgs = {
-      url: `${this.url}${path}`,
-      method: 'post' as Method,
-      data: data,
-      headers: { 
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 120000,
-    };
-    
-    return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
   }
 
   /**
@@ -199,61 +148,37 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    // set model on per request basis
    const currentModel = reqModel ?? this.model;
    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-   const accessToken = this.secrets.accessToken;
+   const accessToken = this.secrets.credentialsJson;
    const data = JSON.stringify(JSON.parse(body)['messages']);
-   const payload = formatGeminiPayload(data);
-   
+   const token = await getAccessToken(accessToken);
+
    const requestArgs = {
      url: `${this.url}${path}`,
      method: 'post' as Method,
-     data: JSON.stringify(payload),
+     data,
      headers: {
-       'Authorization': `Bearer ${accessToken}`,
+       'Authorization': `Bearer ${token}`,
        'Content-Type': 'application/json'
      },
      signal,
-     timeout: 120000,
+     timeout,
    };
 
-   return this.runApiLatest({ ...requestArgs, responseSchema: RunApiLatestResponseSchema });
+   return this.makeApiRequest({ ...requestArgs, responseSchema: RunApiResponseSchema });
  }
-
-  public async invokeAI({
-    messages,
-    model,
-    temperature,
-    timeout,
-  }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({
-        body: JSON.stringify({messages}),
-        model,
-        timeout,
-    });
-
-    return { message: res.completion };
-  }
 }
 
-/** Format the json body to meet Gemini payload requirements */
-const formatGeminiPayload = (data: string): Payload => {
-    let payload: Payload = {
-        contents: [],
-        generation_config: {
-            temperature: 0,
-            maxOutputTokens: DEFAULT_TOKEN_LIMIT
-        }
-    };
-    
-    for (const row of JSON.parse(data)) {
-        payload.contents.push({
-            role: row.role,
-            parts: [
-                {
-                    text: row.content
-                }
-            ]
-        });
-    }
-    
-    return payload;
-  };
+/** Retrieve access token based on the GCP service account credential json file */
+const getAccessToken = async (credentialsJson: string) => {
+  const credentials = JSON.parse(credentialsJson);
+
+    const auth = new GoogleAuth({
+      credentials,
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
+
+    const token = await auth.getAccessToken();
+
+    return token;
+}
+

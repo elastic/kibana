@@ -33,7 +33,6 @@ export enum LLMs {
   openai = 'openai',
   openai_azure = 'openai_azure',
   bedrock = 'bedrock',
-  gemini = 'gemini',
 }
 
 export interface ChatRequestData {

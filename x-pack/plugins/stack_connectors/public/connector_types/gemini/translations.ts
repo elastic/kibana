@@ -45,8 +45,8 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.se
   defaultMessage: 'Secret',
 });
 
-export const API_KEY = i18n.translate('xpack.stackConnectors.components.gemini.apiKey', {
-  defaultMessage: 'Access Token',
+export const CREDENTIALS_JSON = i18n.translate('xpack.stackConnectors.components.gemini.apiKey', {
+  defaultMessage: 'Credentials JSON',
 });
 
 export const gemini = i18n.translate('xpack.stackConnectors.components.gemini.title', {

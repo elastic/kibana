@@ -20,7 +20,7 @@ export interface Config {
 }
 
 export interface Secrets {
-  accessToken: string;
+  credentialsJson: string;
 }
 
 export type GeminiConnector = ConnectorTypeModel<Config, Secrets, GeminiActionParams>;

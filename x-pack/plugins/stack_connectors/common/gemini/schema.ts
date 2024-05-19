@@ -17,7 +17,7 @@ export const ConfigSchema = schema.object({
 });
 
 export const SecretsSchema = schema.object({
-  accessToken: schema.string(),
+  credentialsJson: schema.string(),
 });
 
 export const RunActionParamsSchema = schema.object({
@@ -40,7 +40,7 @@ export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
 });
 
-export const RunApiLatestResponseSchema = schema.object(
+export const RunApiResponseSchema = schema.object(
   {
     candidates: schema.any(),
     usageMetadata: schema.object(
