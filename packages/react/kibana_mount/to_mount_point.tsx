@@ -28,7 +28,11 @@ export const toMountPoint = (node: React.ReactNode, params: ToMountPointParams):
   const mount = (element: HTMLElement) => {
     const root = createRoot(element);
     root.render(<KibanaRenderContextProvider {...params}>{node}</KibanaRenderContextProvider>);
-    return () => root.unmount();
+    return () => {
+      setTimeout(() => {
+        root.unmount();
+      });
+    };
   };
 
   // only used for tests and snapshots serialization

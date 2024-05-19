@@ -10,7 +10,7 @@ import React from 'react';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   DataViewBase,
@@ -441,7 +441,8 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private root;
+  private root?: Root;
+  private badgeRoot?: Root;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
@@ -1080,8 +1081,11 @@ export class Embeddable
    * @param {ContainerState} containerState
    */
   render(domNode: HTMLElement | Element) {
+    if (domNode !== this.domNode && !this.root) {
+      this.root = createRoot(domNode);
+    }
     this.domNode = domNode;
-    this.root = createRoot(domNode);
+
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
@@ -1169,7 +1173,9 @@ export class Embeddable
           </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
-              this.badgeDomNode = createRoot(el);
+              // if (!this.badgeRoot) {
+              //   this.badgeRoot = createRoot(el);
+              // }
               this.renderBadgeMessages();
             }}
           />
@@ -1215,7 +1221,7 @@ export class Embeddable
           </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
-              this.badgeRoot = el;
+              // this.badgeRoot = createRoot(el);
               this.renderBadgeMessages();
             }}
           />
@@ -1225,8 +1231,6 @@ export class Embeddable
 
     this.renderBadgeMessages();
   }
-
-  badgeRoot?: HTMLDivElement;
 
   /**
    * This method is called on every render, and also whenever the badges dom node is created
@@ -1636,7 +1640,9 @@ export class Embeddable
       });
     }
     if (this.root) {
-      this.root.unmount();
+      setTimeout(() => {
+        this.root.unmount();
+      });
     }
   }
 

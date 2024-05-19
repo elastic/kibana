@@ -578,6 +578,10 @@ export class ControlGroupContainer extends Container<
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
     this.cleanupStateTools();
-    if (this.root) this.root.unmount();
+    if (this.root) {
+      setTimeout(() => {
+        this.root.unmount();
+      });
+    }
   }
 }

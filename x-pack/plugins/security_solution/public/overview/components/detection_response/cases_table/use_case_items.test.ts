@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { mockCasesResult, parsedCasesItems } from './mock_data';
 import { useCaseItems } from './use_case_items';
@@ -65,22 +65,22 @@ describe('useCaseItems', () => {
   it('should return default values', async () => {
     const { result } = renderUseCaseItems();
 
-    // await waitFor();
+    waitFor(() => {
+      expect(result.current).toEqual({
+        items: [],
+        isLoading: false,
+        updatedAt: dateNow,
+      });
 
-    expect(result.current).toEqual({
-      items: [],
-      isLoading: false,
-      updatedAt: dateNow,
-    });
-
-    expect(mockCasesApi).toBeCalledWith({
-      from: '2020-07-07T08:20:18.966Z',
-      to: '2020-07-08T08:20:18.966Z',
-      owner: 'securitySolution',
-      sortField: 'createdAt',
-      sortOrder: 'desc',
-      page: 1,
-      perPage: 4,
+      expect(mockCasesApi).toBeCalledWith({
+        from: '2020-07-07T08:20:18.966Z',
+        to: '2020-07-08T08:20:18.966Z',
+        owner: 'securitySolution',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        page: 1,
+        perPage: 4,
+      });
     });
   });
 
@@ -88,34 +88,34 @@ describe('useCaseItems', () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
     const { result } = renderUseCaseItems();
 
-    // await waitFor();
-
-    expect(result.current).toEqual({
-      items: parsedCasesItems,
-      isLoading: false,
-      updatedAt: dateNow,
+    waitFor(() => {
+      expect(result.current).toEqual({
+        items: parsedCasesItems,
+        isLoading: false,
+        updatedAt: dateNow,
+      });
     });
   });
 
   test('it should call setQuery when fetching', async () => {
     mockCasesApi.mockReturnValue(mockCasesResult);
-    const {} = renderUseCaseItems();
+    renderUseCaseItems();
 
-    // await waitFor();
-
-    expect(mockSetQuery).toHaveBeenCalled();
+    waitFor(() => {
+      expect(mockSetQuery).toHaveBeenCalled();
+    });
   });
 
   test('it should call deleteQuery when unmounting', async () => {
     const { unmount } = renderUseCaseItems();
 
-    // await waitFor();
-
     act(() => {
       unmount();
     });
 
-    expect(mockDeleteQuery).toHaveBeenCalled();
+    waitFor(() => {
+      expect(mockDeleteQuery).toHaveBeenCalled();
+    });
   });
 
   it('should return new updatedAt', async () => {
@@ -126,13 +126,13 @@ describe('useCaseItems', () => {
 
     const { result } = renderUseCaseItems();
 
-    // await waitFor();
-
-    expect(mockDateNow).toHaveBeenCalled();
-    expect(result.current).toEqual({
-      items: parsedCasesItems,
-      isLoading: false,
-      updatedAt: newDateNow,
+    waitFor(() => {
+      expect(mockDateNow).toHaveBeenCalled();
+      expect(result.current).toEqual({
+        items: parsedCasesItems,
+        isLoading: false,
+        updatedAt: newDateNow,
+      });
     });
   });
 

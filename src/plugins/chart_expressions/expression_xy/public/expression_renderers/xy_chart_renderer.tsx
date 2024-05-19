@@ -200,17 +200,23 @@ export const getXyChartRenderer = ({
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers) => {
+  render: async (root: Element, config: XYChartProps, handlers) => {
     const deps = await getStartDeps();
 
-    const root = createRoot(domNode);
+    // console.error('domNode', domNode, domNode.hasOwnProperty('_reactRootContainer'));
+
+    // const root = createRoot(domNode);
     // Lazy loaded parts
     const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
       import('../components/xy_chart'),
       import('../helpers'),
     ]);
 
-    handlers.onDestroy(() => root.unmount());
+    handlers.onDestroy(() => {
+      setTimeout(() => {
+        root.unmount();
+      });
+    });
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };

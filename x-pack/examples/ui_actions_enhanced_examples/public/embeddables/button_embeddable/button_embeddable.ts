@@ -47,6 +47,10 @@ export class ButtonEmbeddable extends Embeddable {
 
   public destroy() {
     super.destroy();
-    if (this.root) this.root.unmount();
+    if (this.root) {
+      setTimeout(() => {
+        this.root.unmount();
+      });
+    }
   }
 }

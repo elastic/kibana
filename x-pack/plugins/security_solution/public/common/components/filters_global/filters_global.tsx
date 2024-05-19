@@ -26,13 +26,13 @@ export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children, show = 
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
 
   return (
-    <InPortal node={globalKQLHeaderPortalNode}>
-      <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
-        <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
-          {children}
-        </FiltersGlobalContainer>
-      </EuiPanel>
-    </InPortal>
+    // <InPortal node={globalKQLHeaderPortalNode}>
+    <EuiPanel borderRadius="none" color="subdued" paddingSize="none">
+      <FiltersGlobalContainer data-test-subj="filters-global-container" show={show}>
+        {children}
+      </FiltersGlobalContainer>
+    </EuiPanel>
+    // </InPortal>
   );
 });
 

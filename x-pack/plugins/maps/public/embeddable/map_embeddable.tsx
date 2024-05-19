@@ -786,7 +786,9 @@ export class MapEmbeddable
     }
 
     if (this._root) {
-      this._root.unmount();
+      setTimeout(() => {
+        this._root.unmount();
+      });
     }
 
     this._subscriptions.forEach((subscription) => {

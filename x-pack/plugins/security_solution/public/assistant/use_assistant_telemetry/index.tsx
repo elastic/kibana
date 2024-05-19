@@ -29,7 +29,8 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     async ({
       fn,
       params: { conversationId, ...rest },
-    }: any): Promise<{
+    }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any): Promise<{
       fn: keyof AssistantTelemetry;
       params: AssistantTelemetry[keyof AssistantTelemetry];
     }> =>

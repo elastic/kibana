@@ -437,7 +437,6 @@ export async function mountApp(
   return () => {
     data.search.session.clear();
     root.unmount();
-    unmountComponentAtNode(params.element);
     lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());

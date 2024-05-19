@@ -7,10 +7,11 @@
  */
 
 import type { Reducer, RefObject } from 'react';
-import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
+import { useRef, useEffect, useLayoutEffect, useReducer, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import { createRoot } from 'react-dom/client';
 import {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
@@ -91,7 +92,7 @@ export function useExpressionRenderer(
   useEffect(() => {
     expressionLoaderRef.current =
       nodeRef.current &&
-      new ExpressionLoader(nodeRef.current, debouncedExpression, {
+      new ExpressionLoader(createRoot(nodeRef.current), debouncedExpression, {
         ...debouncedLoaderParams,
         // react component wrapper provides different
         // error handling api which is easier to work with from react
@@ -115,9 +116,11 @@ export function useExpressionRenderer(
 
     return () => {
       subscription?.unsubscribe();
-      expressionLoaderRef.current?.destroy();
       expressionLoaderRef.current = null;
       errorRenderHandlerRef.current = null;
+      setTimeout(() => {
+        expressionLoaderRef.current?.destroy();
+      });
     };
   }, [
     debouncedLoaderParams.onRenderError,

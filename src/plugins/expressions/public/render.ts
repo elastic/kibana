@@ -13,6 +13,7 @@ import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
+import { createRoot } from 'react-dom/client';
 import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
@@ -158,6 +159,7 @@ export class ExpressionRenderHandler {
     this.eventsSubject.complete();
     this.updateSubject.complete();
     if (this.destroyFn) {
+      console.error('ss', this.destroyFn);
       this.destroyFn();
     }
   };

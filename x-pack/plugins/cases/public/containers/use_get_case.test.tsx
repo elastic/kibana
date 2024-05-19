@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useGetCase } from './use_get_case';
 import * as api from './api';
-import { waitFor } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

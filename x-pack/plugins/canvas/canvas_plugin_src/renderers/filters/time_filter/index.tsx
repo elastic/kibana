@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -40,7 +41,6 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
     help: strings.getHelpDescription(),
     reuseDomNode: true, // must be true, otherwise popovers don't work
     render: async (domNode: HTMLElement, config: Arguments, handlers: RendererHandlers) => {
-      const root = createRoot(domNode);
       let filterExpression = handlers.getFilter();
 
       if (filterExpression === undefined || filterExpression.indexOf('timefilter') !== 0) {
@@ -59,6 +59,7 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
         }
       }
 
+      const root = createRoot(domNode);
       root.render(
         <KibanaRenderContextProvider {...core}>
           <TimeFilter
@@ -72,7 +73,9 @@ export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (
       );
 
       handlers.onDestroy(() => {
-        root.unmount();
+        setTimeout(() => {
+          root.unmount();
+        });
       });
     },
   });

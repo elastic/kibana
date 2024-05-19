@@ -82,8 +82,10 @@ export const createInputControlVisController = (
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
-      root.unmount();
       this.controls.forEach((control) => control.destroy());
+      setTimeout(() => {
+        root.unmount();
+      });
     }
 
     drawVis = () => {

@@ -7,7 +7,7 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react';
+import { renderHook, render, screen } from '@testing-library/react';
 import { getUseCellActionsHook } from './use_cell_actions';
 import { columns as mockColumns, data as mockData } from './mock/data';
 import type {
@@ -17,7 +17,6 @@ import type {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
 import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'react';
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';

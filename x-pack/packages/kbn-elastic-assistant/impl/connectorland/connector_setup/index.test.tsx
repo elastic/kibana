@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { useConnectorSetup } from '.';
-import { act, renderHook } from '@testing-library/react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, renderHook, fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EuiCommentList } from '@elastic/eui';

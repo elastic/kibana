@@ -436,7 +436,11 @@ export class DashboardContainer
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
-    if (this.root) this.root.unmount();
+    if (this.root) {
+      setTimeout(() => {
+        this.root.unmount();
+      });
+    }
   }
 
   // ------------------------------------------------------------------------------------------------------

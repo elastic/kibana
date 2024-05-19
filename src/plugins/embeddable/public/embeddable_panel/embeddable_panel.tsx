@@ -43,7 +43,9 @@ const getComponentFromEmbeddable = async (
         setNode(nextNode);
       }
       return () => {
-        unwrappedEmbeddable.destroy();
+        setTimeout(() => {
+          unwrappedEmbeddable.destroy();
+        });
       };
     }, [embeddableRoot]);
 

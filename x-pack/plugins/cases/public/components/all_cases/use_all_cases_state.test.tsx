@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
-import { waitFor } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { CaseStatuses } from '@kbn/cases-components';
 
 import { TestProviders } from '../../common/mock';

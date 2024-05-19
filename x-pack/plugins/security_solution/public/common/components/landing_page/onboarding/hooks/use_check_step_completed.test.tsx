@@ -67,7 +67,7 @@ describe('useCheckStepCompleted', () => {
     });
     const mockToggleTask = jest.fn();
 
-    const { waitFor } = renderHook(() =>
+    renderHook(() =>
       useCheckStepCompleted({
         autoCheckIfStepCompleted: mockAutoCheck,
         cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,

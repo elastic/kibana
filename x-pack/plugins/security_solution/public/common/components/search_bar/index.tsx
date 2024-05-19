@@ -6,11 +6,8 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
-import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
-import type { Dispatch } from 'redux';
+import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
@@ -21,7 +18,6 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { inputsActions } from '../../store/inputs';
-import type { InputsRange } from '../../store/inputs/model';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { State, inputsModel } from '../../store';
 import { formatDate } from '../super_date_picker';
@@ -55,22 +51,12 @@ interface SiemSearchBarProps {
 
 export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
-    end,
-    filterQuery,
-    fromStr,
     hideFilterBar = false,
     hideQueryInput = false,
     id,
-    isLoading = false,
     pollForSignalIndex,
     queries,
-    savedQuery,
-    setSavedQuery,
-    setSearchBarFilter,
     sourcererDataView,
-    start,
-    toStr,
-    updateSearch,
     dataTestSubj,
   }) => {
     const {
@@ -87,6 +73,105 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     } = useKibana().services;
 
     const dispatch = useDispatch();
+
+    const inputsRange = useSelector((state: State) => state.inputs[id] || {});
+    const end = useSelector(endSelector(inputsRange));
+    const fromStr = useSelector(fromStrSelector(inputsRange));
+    const isLoading = useSelector(isLoadingSelector(inputsRange));
+    const queries = useSelector((state: State) => queriesSelector(state, id));
+    const start = useSelector(startSelector(inputsRange));
+    const toStr = useSelector(toStrSelector(inputsRange));
+    const filterQuery = useSelector(filterQuerySelector(inputsRange));
+    const savedQuery = useSelector(savedQuerySelector(inputsRange));
+    const setSearchBarFilter = useCallback(
+      (payload) => dispatch(inputsActions.setSearchBarFilter(payload)),
+      [dispatch]
+    );
+    const updateSearch = useCallback(
+      ({
+        end: _end,
+        filters,
+        id: _id,
+        isQuickSelection,
+        query,
+        resetSavedQuery,
+        savedQuery: _savedQuery,
+        start: _start,
+        timelineId,
+        updateTime = false,
+        filterManager: _filterManager,
+        setTablesActivePageToZero,
+      }: UpdateReduxSearchBar): void => {
+        if (updateTime) {
+          const fromDate = formatDate(_start);
+          let toDate = formatDate(_end, { roundUp: true });
+          if (isQuickSelection) {
+            if (_end === _start) {
+              dispatch(
+                inputsActions.setAbsoluteRangeDatePicker({
+                  id,
+                  fromStr: _start,
+                  toStr: _end,
+                  from: fromDate,
+                  to: toDate,
+                })
+              );
+            } else {
+              dispatch(
+                inputsActions.setRelativeRangeDatePicker({
+                  id,
+                  fromStr: _start,
+                  toStr: _end,
+                  from: fromDate,
+                  to: toDate,
+                })
+              );
+            }
+          } else {
+            toDate = formatDate(_end);
+            dispatch(
+              inputsActions.setAbsoluteRangeDatePicker({
+                id,
+                from: formatDate(_start),
+                to: formatDate(_end),
+              })
+            );
+          }
+          if (timelineId != null) {
+            dispatch(
+              timelineActions.updateRange({
+                id: timelineId,
+                start: fromDate,
+                end: toDate,
+              })
+            );
+          }
+        }
+        if (query != null) {
+          dispatch(
+            inputsActions.setFilterQuery({
+              id,
+              ...query,
+            })
+          );
+        }
+        if (filters != null) {
+          _filterManager.setFilters(filters);
+        }
+
+        if (_savedQuery != null || resetSavedQuery) {
+          dispatch(inputsActions.setSavedQuery({ id, savedQuery: _savedQuery }));
+        }
+
+        setTablesActivePageToZero();
+      },
+      [dispatch, id]
+    );
+    const setSavedQuery = useCallback(
+      (payload) => dispatch(inputsActions.setSavedQuery(payload)),
+      [dispatch]
+    );
+
     const setTablesActivePageToZero = useCallback(() => {
       dispatch(usersActions.setUsersTablesActivePageToZero());
       dispatch(hostsActions.setHostTablesActivePageToZero());
@@ -344,45 +429,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     ) : null;
   },
   (prevProps, nextProps) =>
-    prevProps.end === nextProps.end &&
-    prevProps.filterQuery === nextProps.filterQuery &&
-    prevProps.fromStr === nextProps.fromStr &&
     deepEqual(prevProps.sourcererDataView, nextProps.sourcererDataView) &&
     prevProps.id === nextProps.id &&
-    prevProps.isLoading === nextProps.isLoading &&
-    prevProps.savedQuery === nextProps.savedQuery &&
-    prevProps.setSavedQuery === nextProps.setSavedQuery &&
-    prevProps.setSearchBarFilter === nextProps.setSearchBarFilter &&
-    prevProps.start === nextProps.start &&
-    prevProps.toStr === nextProps.toStr &&
-    prevProps.updateSearch === nextProps.updateSearch &&
     prevProps.dataTestSubj === nextProps.dataTestSubj &&
     deepEqual(prevProps.queries, nextProps.queries)
 );
-
-const makeMapStateToProps = () => {
-  const getEndSelector = endSelector();
-  const getFromStrSelector = fromStrSelector();
-  const getIsLoadingSelector = isLoadingSelector();
-  const getQueriesSelector = queriesSelector();
-  const getStartSelector = startSelector();
-  const getToStrSelector = toStrSelector();
-  const getFilterQuerySelector = filterQuerySelector();
-  const getSavedQuerySelector = savedQuerySelector();
-  return (state: State, { id }: SiemSearchBarProps) => {
-    const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
-    return {
-      end: getEndSelector(inputsRange),
-      fromStr: getFromStrSelector(inputsRange),
-      filterQuery: getFilterQuerySelector(inputsRange),
-      isLoading: getIsLoadingSelector(inputsRange),
-      queries: getQueriesSelector(state, id),
-      savedQuery: getSavedQuerySelector(inputsRange),
-      start: getStartSelector(inputsRange),
-      toStr: getToStrSelector(inputsRange),
-    };
-  };
-};
 
 SearchBarComponent.displayName = 'SiemSearchBar';
 
@@ -398,96 +449,4 @@ interface UpdateReduxSearchBar extends OnTimeChangeProps {
   setTablesActivePageToZero: () => void;
 }
 
-export const dispatchUpdateSearch =
-  (dispatch: Dispatch) =>
-  ({
-    end,
-    filters,
-    id,
-    isQuickSelection,
-    query,
-    resetSavedQuery,
-    savedQuery,
-    start,
-    timelineId,
-    updateTime = false,
-    filterManager,
-    setTablesActivePageToZero,
-  }: UpdateReduxSearchBar): void => {
-    if (updateTime) {
-      const fromDate = formatDate(start);
-      let toDate = formatDate(end, { roundUp: true });
-      if (isQuickSelection) {
-        if (end === start) {
-          dispatch(
-            inputsActions.setAbsoluteRangeDatePicker({
-              id,
-              fromStr: start,
-              toStr: end,
-              from: fromDate,
-              to: toDate,
-            })
-          );
-        } else {
-          dispatch(
-            inputsActions.setRelativeRangeDatePicker({
-              id,
-              fromStr: start,
-              toStr: end,
-              from: fromDate,
-              to: toDate,
-            })
-          );
-        }
-      } else {
-        toDate = formatDate(end);
-        dispatch(
-          inputsActions.setAbsoluteRangeDatePicker({
-            id,
-            from: formatDate(start),
-            to: formatDate(end),
-          })
-        );
-      }
-      if (timelineId != null) {
-        dispatch(
-          timelineActions.updateRange({
-            id: timelineId,
-            start: fromDate,
-            end: toDate,
-          })
-        );
-      }
-    }
-    if (query != null) {
-      dispatch(
-        inputsActions.setFilterQuery({
-          id,
-          ...query,
-        })
-      );
-    }
-    if (filters != null) {
-      filterManager.setFilters(filters);
-    }
-
-    if (savedQuery != null || resetSavedQuery) {
-      dispatch(inputsActions.setSavedQuery({ id, savedQuery }));
-    }
-
-    setTablesActivePageToZero();
-  };
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  updateSearch: dispatchUpdateSearch(dispatch),
-  setSavedQuery: ({ id, savedQuery }: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
-    dispatch(inputsActions.setSavedQuery({ id, savedQuery })),
-  setSearchBarFilter: ({ id, filters }: { id: InputsModelId; filters: Filter[] }) =>
-    dispatch(inputsActions.setSearchBarFilter({ id, filters })),
-});
-
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const SiemSearchBar = connector(SearchBarComponent);
+export const SiemSearchBar = SearchBarComponent;

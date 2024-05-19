@@ -90,7 +90,7 @@ const DashboardRendererComponent = ({
      * locators in that refactor, as well - not only would this clean up some tech debt, it would also make it so that
      * control selections could also be translated to filter pills on navigation.
      */
-    async (params: any) => {
+    async (params) => {
       navigateTo({
         url: getSecuritySolutionDashboardUrl(params),
       });

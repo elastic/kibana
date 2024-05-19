@@ -87,7 +87,9 @@ export function useEmbeddableFactory<I extends EmbeddableInput>({
     return () => {
       canceled = true;
       if (createdEmbeddableRef) {
-        createdEmbeddableRef.destroy();
+        setTimeout(() => {
+          createdEmbeddableRef?.destroy();
+        });
       }
     };
   }, [factory]);

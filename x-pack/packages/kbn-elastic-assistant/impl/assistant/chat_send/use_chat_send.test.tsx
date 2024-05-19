@@ -11,8 +11,7 @@ import { useConversation } from '../use_conversation';
 import { emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
 import { useChatSend, UseChatSendProps } from './use_chat_send';
-import { renderHook } from '@testing-library/react';
-import { waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAssistantContext } from '../../..';
 

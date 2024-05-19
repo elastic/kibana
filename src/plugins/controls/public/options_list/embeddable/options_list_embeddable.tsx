@@ -455,7 +455,11 @@ export class OptionsListEmbeddable
     this.cleanupStateTools();
     this.abortController?.abort();
     this.subscriptions.unsubscribe();
-    if (this.root) this.root.unmount();
+    if (this.root) {
+      setTimeout(() => {
+        this.root.unmount();
+      });
+    }
   };
 
   public render = (node: HTMLElement) => {

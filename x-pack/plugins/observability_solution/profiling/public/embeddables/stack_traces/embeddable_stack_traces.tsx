@@ -45,8 +45,10 @@ export class EmbeddableStackTraces extends Embeddable<
   }
 
   public destroy() {
-    if (this._root) {
-      this._root.unmount();
+       if (this._root) {
+      setTimeout(() => {
+        this._root.unmount();
+      });
     }
   }
 
