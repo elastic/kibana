@@ -23,6 +23,8 @@ export const SecretsSchema = schema.object({
 export const RunActionParamsSchema = schema.object({
   body: schema.string(),
   model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
 });
@@ -39,6 +41,8 @@ export const InvokeAIActionParamsSchema = schema.object({
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
 });
+
+export const StreamingResponseSchema = schema.any();
 
 export const RunApiResponseSchema = schema.object(
   {

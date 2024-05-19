@@ -13,13 +13,19 @@ import {
   SecretsSchema,
   RunActionParamsSchema,
   RunActionResponseSchema,
+  InvokeAIActionParamsSchema,
+  InvokeAIActionResponseSchema,
+  StreamingResponseSchema,
   RunApiResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
 export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
 export type RunApiResponse = TypeOf<typeof RunApiResponseSchema>;
 export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
+export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;
 export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
