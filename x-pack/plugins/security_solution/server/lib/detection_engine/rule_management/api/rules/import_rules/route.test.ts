@@ -91,6 +91,7 @@ describe('Import rules route', () => {
       });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
+
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         errors: [

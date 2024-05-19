@@ -110,12 +110,12 @@ export const importRules = async ({
                 status_code: 200,
               });
             } catch (err) {
-              const { rule_id: ruleId, error } = err;
+              const { error, statusCode, message } = err;
               resolve(
                 createBulkErrorObject({
-                  ruleId,
-                  statusCode: error.status_code ?? 400,
-                  message: error.message,
+                  ruleId: parsedRule.rule_id,
+                  statusCode: statusCode ?? error?.statusCode ?? 400,
+                  message: message ?? error?.message ?? 'unknown error',
                 })
               );
             }
