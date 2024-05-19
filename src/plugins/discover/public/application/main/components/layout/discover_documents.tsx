@@ -262,11 +262,7 @@ function DiscoverDocumentsComponent({
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations() || {};
 
-  const baseGetCellRenderers = useCallback(
-    () => externalCustomRenderers ?? {},
-    [externalCustomRenderers]
-  );
-
+  const baseGetCellRenderers = useCallback(() => customCellRenderer ?? {}, [customCellRenderer]);
   const getCellRenderers = useProfileAccessor('getCellRenderers', baseGetCellRenderers);
   const cellRenderers = useMemo(() => getCellRenderers(), [getCellRenderers]);
 

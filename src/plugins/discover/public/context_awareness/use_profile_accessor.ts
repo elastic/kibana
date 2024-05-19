@@ -6,27 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { useMemo } from 'react';
 import { getMergedAccessor } from './composable_profile';
-import { recordHasProfile } from './profiles';
+import { GetProfilesOptions } from './profiles_manager';
 import { useProfiles } from './profiles_provider';
 import type { Profile } from './types';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
   key: TKey,
   baseImpl: Profile[TKey],
-  { record }: { record?: DataTableRecord } = {}
+  options: GetProfilesOptions = {}
 ) => {
-  const profiles = useProfiles();
-
-  return useMemo(() => {
-    let allProfiles = profiles;
-
-    if (recordHasProfile(record)) {
-      allProfiles = [...profiles, record.profile];
-    }
-
-    return getMergedAccessor(allProfiles, key, baseImpl);
-  }, [baseImpl, key, profiles, record]);
+  const profiles = useProfiles(options);
+  return useMemo(() => getMergedAccessor(profiles, key, baseImpl), [baseImpl, key, profiles]);
 };
