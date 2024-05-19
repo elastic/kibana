@@ -7,7 +7,7 @@
  */
 
 import type { Reducer, RefObject } from 'react';
-import { useRef, useEffect, useLayoutEffect, useReducer, useMemo } from 'react';
+import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';

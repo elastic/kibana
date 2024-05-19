@@ -7,7 +7,6 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InPortal } from 'react-reverse-portal';
 import { EuiPanel } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
 

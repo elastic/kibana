@@ -13,7 +13,7 @@ import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import {renderHook , getByTestId, queryByTestId, screen } from '@testing-library/react';
+import { renderHook, getByTestId, queryByTestId, screen } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 

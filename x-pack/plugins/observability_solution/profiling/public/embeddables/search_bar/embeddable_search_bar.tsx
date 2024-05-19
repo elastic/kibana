@@ -66,7 +66,7 @@ export class EmbeddableSearchBar extends Embeddable<
   }
 
   public destroy() {
-       if (this._root) {
+    if (this._root) {
       setTimeout(() => {
         this._root.unmount();
       });
