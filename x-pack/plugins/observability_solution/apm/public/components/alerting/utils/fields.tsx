@@ -143,7 +143,7 @@ export function TransactionTypeField({
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.transactionTypesSelectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+          defaultMessage: `Add '{searchValue}' as a new transaction type`,
         })}
         defaultValue={currentValue}
         fieldName={TRANSACTION_TYPE}

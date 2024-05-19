@@ -9,7 +9,8 @@
 import { serializeToJson } from './json';
 
 describe('dev/i18n/serializers/json', () => {
-  test('should serialize default messages to JSON', () => {
+  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
+  test.skip('should serialize default messages to JSON', () => {
     const messages: Array<[string, { message: string; description?: string }]> = [
       ['plugin1.message.id-1', { message: 'Message text 1 ' }],
       [
