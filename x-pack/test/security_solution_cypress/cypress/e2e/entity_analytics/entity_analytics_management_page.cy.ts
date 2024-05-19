@@ -64,6 +64,10 @@ describe(
     });
 
     describe('Risk preview', () => {
+      beforeEach(() => {
+        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+      });
+
       it('risk scores reacts on change in datepicker', () => {
         const START_DATE = 'Jan 18, 2019 @ 20:33:29.186';
         const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
@@ -104,6 +108,10 @@ describe(
     });
 
     describe('Risk engine', () => {
+      beforeEach(() => {
+        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+      });
+
       it('should init, disable and enable risk engine', () => {
         cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
 
