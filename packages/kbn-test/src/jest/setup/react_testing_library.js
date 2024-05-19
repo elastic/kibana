@@ -7,6 +7,17 @@
  */
 
 import '@testing-library/jest-dom';
+
+/* eslint-env jest */
+
+jest.mock('@testing-library/react', () => ({
+  ...jest.requireActual('@testing-library/react'),
+  render: (component, options = {}) =>
+    jest
+      .requireActual('@testing-library/react')
+      .render(component, { ...options, legacyRoot: true }),
+}));
+
 /**
  * PLEASE NOTE:
  * Importing '@testing-library/react' registers an `afterEach(cleanup)` side effect.

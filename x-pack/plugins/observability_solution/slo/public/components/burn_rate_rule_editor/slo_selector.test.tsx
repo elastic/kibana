@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { wait } from '@testing-library/user-event/dist/utils';
 import React from 'react';
 
 import { emptySloList } from '../../data/slo/slo';
@@ -39,9 +38,10 @@ describe('SLO Selector', () => {
     const input = screen.getByTestId('comboBoxInput');
     await act(async () => {
       await userEvent.type(input, 'latency', { delay: 1 });
-      await wait(310); // debounce delay
     });
 
-    expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: 'latency' });
+    await waitFor(() => {
+      expect(useFetchSloDefinitionsMock).toHaveBeenCalledWith({ name: 'latency' });
+    });
   });
 });
