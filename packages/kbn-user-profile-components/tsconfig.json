@@ -19,6 +19,7 @@
     "@kbn/core-theme-browser",
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",
