@@ -6,32 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useContext, useMemo, useState } from 'react';
-import type { ComposableProfile } from './composable_profile';
-import { dataSourceProfileService } from './profiles/data_source_profile';
-import { documentProfileService } from './profiles/document_profile';
-import { rootProfileService } from './profiles/root_profile';
-import { ProfilesManager } from './profiles_manager';
+import { createContext, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { DataSourceProfileService, DocumentProfileService, RootProfileService } from './profiles';
+import { GetProfilesOptions, ProfilesManager } from './profiles_manager';
 
-const profilesContext = createContext<ComposableProfile[]>([]);
+const profilesContext = createContext(
+  new ProfilesManager(
+    new RootProfileService(),
+    new DataSourceProfileService(),
+    new DocumentProfileService()
+  )
+);
 
-export const ProfilesProvider: FC<{
-  rootProfile: ComposableProfile;
-  dataSourceProfile: ComposableProfile | undefined;
-}> = ({ rootProfile, dataSourceProfile, children }) => {
-  const [manager] = useState(
-    () => new ProfilesManager(rootProfileService, dataSourceProfileService, documentProfileService)
-  );
-  const profiles = useMemo(
-    () => [rootProfile, dataSourceProfile].filter(profileExists),
-    [dataSourceProfile, rootProfile]
-  );
+export const ProfilesProvider = profilesContext.Provider;
 
-  return <profilesContext.Provider value={profiles}>{children}</profilesContext.Provider>;
-};
+export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
+  const manager = useContext(profilesContext);
+  const profiles$ = useMemo(() => manager.getProfiles$({ record }), [manager, record]);
+  const profiles = useMemo(() => manager.getProfiles({ record }), [manager, record]);
 
-export const useProfiles = () => useContext(profilesContext);
-
-const profileExists = (profile?: ComposableProfile): profile is ComposableProfile => {
-  return profile !== undefined;
+  return useObservable(profiles$, profiles);
 };

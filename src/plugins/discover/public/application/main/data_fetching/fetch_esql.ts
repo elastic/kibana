@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils';
 import type { RecordsFetchResponse } from '../../types';
-import { DataTableRecordWithProfile, documentProfileService } from '../../../context_awareness';
+import { ProfilesManager } from '../../../context_awareness/profiles_manager';
 
 interface EsqlErrorResponse {
   error: {
@@ -32,6 +32,7 @@ export function fetchEsql(
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
   inspectorAdapters: Adapters,
+  profilesManager: ProfilesManager,
   abortSignal?: AbortSignal,
   filters?: Filter[],
   inputQuery?: Query
@@ -57,10 +58,11 @@ export function fetchEsql(
         });
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();
-        let finalData: DataTableRecordWithProfile[] = [];
+        let finalData: DataTableRecord[] = [];
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
+        const contextCollector = profilesManager.createDocumentContextCollector();
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
@@ -81,10 +83,9 @@ export function fetchEsql(
                 flattened: row,
               };
 
-              return {
-                ...record,
-                profile: documentProfileService.resolve({ record }),
-              };
+              contextCollector.collect({ record });
+
+              return record;
             });
           }
         });
@@ -92,6 +93,8 @@ export function fetchEsql(
           if (error) {
             throw new Error(error);
           } else {
+            contextCollector.finalize(true);
+
             return {
               records: finalData || [],
               esqlQueryColumns,

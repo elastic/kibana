@@ -40,7 +40,14 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import { ComposableProfile, ProfilesProvider, rootProfileService } from '../../context_awareness';
+import {
+  dataSourceProfileService,
+  documentProfileService,
+  ProfilesProvider,
+  rootProfileService,
+} from '../../context_awareness';
+import { ProfilesManager } from '../../context_awareness/profiles_manager';
+import { useRootProfile } from '../../context_awareness/use_root_profile';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -72,13 +79,15 @@ export function DiscoverMainRoute({
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-  const [dataSourceProfile, setDataSourceProfile] = useState<ComposableProfile>();
+  const [profilesManager] = useState(
+    () => new ProfilesManager(rootProfileService, dataSourceProfileService, documentProfileService)
+  );
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
     history,
     services,
     customizationContext,
     stateStorageContainer,
-    setDataSourceProfile,
+    profilesManager,
   });
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
@@ -342,33 +351,19 @@ export function DiscoverMainRoute({
   ]);
 
   const { solutionNavId } = customizationContext;
-  const [rootProfile, setRootProfile] = useState<ComposableProfile>();
-
-  useEffect(() => {
-    let aborted = false;
-
-    rootProfileService.resolve({ solutionNavId }).then((profile) => {
-      if (!aborted) {
-        setRootProfile(profile);
-      }
-    });
-
-    return () => {
-      aborted = true;
-    };
-  }, [solutionNavId]);
+  const { rootProfileLoading } = useRootProfile({ profilesManager, solutionNavId });
 
   if (error) {
     return <DiscoverError error={error} />;
   }
 
-  if (!customizationService || !rootProfile) {
+  if (!customizationService || rootProfileLoading) {
     return loadingIndicator;
   }
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
-      <ProfilesProvider rootProfile={rootProfile} dataSourceProfile={dataSourceProfile}>
+      <ProfilesProvider value={profilesManager}>
         <DiscoverMainProvider value={stateContainer}>
           <>
             <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />

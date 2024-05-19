@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import type { ComposableProfile } from './composable_profile';
-import type { DocumentProfile } from './profiles';
 
 export interface Profile {
   getTopNavItems: () => TopNavMenuData[];
@@ -21,8 +18,4 @@ export interface Profile {
     | undefined;
   getCellRenderers: () => CustomCellRenderer;
   getDocViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
-}
-
-export interface DataTableRecordWithProfile extends DataTableRecord {
-  profile: ComposableProfile<DocumentProfile>;
 }

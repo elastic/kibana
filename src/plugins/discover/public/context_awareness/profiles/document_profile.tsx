@@ -7,7 +7,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DataTableRecordWithProfile, Profile } from '../types';
+import type { Profile } from '../types';
 import { ProfileService } from '../profile_service';
 
 export enum DocumentType {
@@ -34,9 +34,3 @@ export class DocumentProfileService extends ProfileService<
 export type DocumentProfileProvider = Parameters<DocumentProfileService['registerProvider']>[0];
 
 export const documentProfileService = new DocumentProfileService();
-
-export const recordHasProfile = (
-  record?: DataTableRecord
-): record is DataTableRecordWithProfile => {
-  return Boolean(record && 'profile' in record);
-};

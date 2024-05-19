@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs';
+import { filter, map, tap } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
@@ -16,7 +16,6 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
 import { getAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 import { FetchDeps } from './fetch_all';
-import { DataTableRecordWithProfile, documentProfileService } from '../../../context_awareness';
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
@@ -24,7 +23,14 @@ import { DataTableRecordWithProfile, documentProfileService } from '../../../con
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
+  {
+    abortController,
+    inspectorAdapters,
+    searchSessionId,
+    services,
+    getAppState,
+    profilesManager,
+  }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
   const sampleSize = getAppState().sampleSize;
   searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
@@ -44,6 +50,8 @@ export const fetchDocuments = (
   const executionContext = {
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
+
+  const contextCollector = profilesManager.createDocumentContextCollector();
 
   const fetch$ = searchSource
     .fetch$({
@@ -68,16 +76,15 @@ export const fetchDocuments = (
     .pipe(
       filter((res) => !isRunningResponse(res)),
       map((res) => {
-        return buildDataTableRecordList<DataTableRecordWithProfile>(
-          res.rawResponse.hits.hits as EsHitRecord[],
-          dataView,
-          {
-            processRecord: (record) => {
-              const profile = documentProfileService.resolve({ record });
-              return { ...record, profile };
-            },
-          }
-        );
+        return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView, {
+          processRecord: (record) => {
+            contextCollector.collect({ record });
+            return record;
+          },
+        });
+      }),
+      tap(() => {
+        contextCollector.finalize(!isFetchingMore);
       })
     );
 

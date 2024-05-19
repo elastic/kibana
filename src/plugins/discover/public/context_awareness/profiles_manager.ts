@@ -9,6 +9,7 @@
 import { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import type { ComposableProfile } from './composable_profile';
 import type {
@@ -32,10 +33,18 @@ interface SerializedDataSourceProfileParams {
   esqlQuery: string | undefined;
 }
 
+export interface GetProfilesOptions {
+  record?: DataTableRecord;
+}
+
 export class ProfilesManager {
-  private rootProfile?: ComposableProfile<RootProfile>;
-  private dataSourceProfile?: ComposableProfile<DataSourceProfile>;
-  private documentProfiles?: Map<string, ComposableProfile<DocumentProfile>>;
+  private rootProfile$ = new BehaviorSubject<ComposableProfile<RootProfile> | undefined>(undefined);
+  private dataSourceProfile$ = new BehaviorSubject<
+    ComposableProfile<DataSourceProfile> | undefined
+  >(undefined);
+  private documentProfiles$ = new BehaviorSubject<Map<string, ComposableProfile<DocumentProfile>>>(
+    new Map()
+  );
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
 
@@ -45,25 +54,43 @@ export class ProfilesManager {
     private readonly documentProfileService: DocumentProfileService
   ) {}
 
-  public async resolveRootContext(params: RootProfileProviderParams) {
-    const serializedParams = this.parseRootProfileParams(params);
+  public async resolveRootContext(params: RootProfileProviderParams, abortSignal: AbortSignal) {
+    const serializedParams = this.serializeRootProfileParams(params);
 
-    if (this.rootProfile && isEqual(this.prevRootProfileParams, serializedParams)) {
+    if (this.rootProfile$.getValue() && isEqual(this.prevRootProfileParams, serializedParams)) {
       return;
     }
 
-    this.rootProfile = await this.rootProfileService.resolve(params);
+    const profile = await this.rootProfileService.resolve(params);
+
+    if (abortSignal.aborted) {
+      return;
+    }
+
+    this.rootProfile$.next(profile);
     this.prevRootProfileParams = serializedParams;
   }
 
-  public async resolveDataSourceContext(params: DataSourceProfileProviderParams) {
-    const serializedParams = this.parseDataSourceProfileParams(params);
+  public async resolveDataSourceContext(
+    params: DataSourceProfileProviderParams,
+    abortSignal: AbortSignal
+  ) {
+    const serializedParams = this.serializeDataSourceProfileParams(params);
 
-    if (this.dataSourceProfile && isEqual(this.prevDataSourceProfileParams, serializedParams)) {
+    if (
+      this.dataSourceProfile$.getValue() &&
+      isEqual(this.prevDataSourceProfileParams, serializedParams)
+    ) {
       return;
     }
 
-    this.dataSourceProfile = await this.dataSourceProfileService.resolve(params);
+    const profile = await this.dataSourceProfileService.resolve(params);
+
+    if (abortSignal.aborted) {
+      return;
+    }
+
+    this.dataSourceProfile$.next(profile);
     this.prevDataSourceProfileParams = serializedParams;
   }
 
@@ -74,27 +101,45 @@ export class ProfilesManager {
       collect: (params: DocumentProfileProviderParams) => {
         documentProfiles.set(params.record.id, this.documentProfileService.resolve(params));
       },
-      finalize: () => {
-        this.documentProfiles = documentProfiles;
+      finalize: (clearExisting: boolean) => {
+        if (clearExisting) {
+          this.documentProfiles$.next(documentProfiles);
+        } else {
+          const existingProfiles = this.documentProfiles$.getValue();
+
+          documentProfiles.forEach((profile, id) => {
+            existingProfiles.set(id, profile);
+          });
+
+          this.documentProfiles$.next(existingProfiles);
+        }
       },
     };
   }
 
-  public getProfiles({ record }: { record?: DataTableRecord } = {}) {
+  public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
-      this.rootProfile,
-      this.dataSourceProfile,
-      record ? this.documentProfiles?.get(record.id) : undefined,
+      this.rootProfile$.getValue(),
+      this.dataSourceProfile$.getValue(),
+      record ? this.documentProfiles$.getValue().get(record.id) : undefined,
     ].filter(profileExists);
   }
 
-  private parseRootProfileParams(params: RootProfileProviderParams): SerializedRootProfileParams {
+  public getProfiles$(options: GetProfilesOptions = {}) {
+    return combineLatest([this.rootProfile$, this.dataSourceProfile$, this.documentProfiles$]).pipe(
+      map(() => this.getProfiles(options))
+    );
+  }
+
+  private serializeRootProfileParams(
+    params: RootProfileProviderParams
+  ): SerializedRootProfileParams {
     return {
       solutionNavId: params.solutionNavId,
     };
   }
 
-  private parseDataSourceProfileParams(
+  private serializeDataSourceProfileParams(
     params: DataSourceProfileProviderParams
   ): SerializedDataSourceProfileParams {
     return {

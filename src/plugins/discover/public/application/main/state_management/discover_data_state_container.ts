@@ -28,11 +28,8 @@ import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { InternalState } from './discover_internal_state_container';
-import {
-  ComposableProfile,
-  dataSourceProfileService,
-  getMergedAccessor,
-} from '../../../context_awareness';
+import { getMergedAccessor } from '../../../context_awareness';
+import { ProfilesManager } from '../../../context_awareness/profiles_manager';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -145,21 +142,21 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
+  profilesManager,
   getAppState,
   getInternalState,
   getSavedSearch,
   setDataView,
-  setDataSourceProfile,
-  uppdateAppState,
+  updateAppState,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
+  profilesManager: ProfilesManager;
   getAppState: () => DiscoverAppState;
   getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
-  setDataSourceProfile: (profile: ComposableProfile) => void;
-  uppdateAppState: DiscoverAppStateContainer['update'];
+  updateAppState: DiscoverAppStateContainer['update'];
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -237,6 +234,7 @@ export function getDataStateContainer({
             getInternalState,
             savedSearch: getSavedSearch(),
             useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+            profilesManager,
           };
 
           abortController?.abort();
@@ -280,6 +278,34 @@ export function getDataStateContainer({
             autoRefreshDone?.();
             autoRefreshDone = undefined;
           }
+
+          await profilesManager.resolveDataSourceContext(
+            {
+              dataSource: getAppState().dataSource,
+              dataView: getSavedSearch().searchSource.getField('index'),
+              query: getAppState().query,
+            },
+            abortController.signal
+          );
+
+          const defaultColumns = getMergedAccessor(
+            profilesManager.getProfiles(),
+            'getDefaultColumns',
+            () => undefined
+          )();
+
+          if (defaultColumns) {
+            updateAppState(
+              {
+                columns: defaultColumns.columns,
+                grid: {
+                  ...getAppState().grid,
+                  columns: defaultColumns.settings,
+                },
+              },
+              true
+            );
+          }
         })
       )
       .subscribe();
@@ -301,33 +327,6 @@ export function getDataStateContainer({
         setDataView(nextDataView);
         dataView = nextDataView;
       }
-    }
-
-    const dataSourceProfile = await dataSourceProfileService.resolve({
-      dataSource: getAppState().dataSource,
-      dataView,
-      query,
-    });
-
-    setDataSourceProfile(dataSourceProfile);
-
-    const defaultColumns = getMergedAccessor(
-      [dataSourceProfile],
-      'getDefaultColumns',
-      () => undefined
-    )();
-
-    if (defaultColumns) {
-      uppdateAppState(
-        {
-          columns: defaultColumns.columns,
-          grid: {
-            ...getAppState().grid,
-            columns: defaultColumns.settings,
-          },
-        },
-        true
-      );
     }
 
     if (resetQuery) {
