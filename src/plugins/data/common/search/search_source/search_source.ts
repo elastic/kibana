@@ -807,8 +807,6 @@ export class SearchSource {
   }
 
   public async loadDataViewFields(dataView: DataViewLazy) {
-    // eslint-disable-next-line no-console
-    console.log('loadDataViewFields because of DataViewLazy');
     const request = this.mergeProps(this, { body: {} }, ['query', 'filter']);
     let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
     const sort = this.getField('sort');
@@ -863,7 +861,7 @@ export class SearchSource {
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = index
-      ? index.getComputedFields({})
+      ? index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
@@ -893,11 +891,11 @@ export class SearchSource {
 
       const filter = fieldWildcardFilter(body._source.excludes, metaFields);
       // also apply filters to provided fields & default docvalueFields
-      body.fields = body.fields?.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
-      fieldsFromSource = fieldsFromSource?.filter((fld: SearchFieldValue) =>
+      body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
+      fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
         filter(this.getFieldName(fld))
       );
-      filteredDocvalueFields = filteredDocvalueFields?.filter((fld: SearchFieldValue) =>
+      filteredDocvalueFields = filteredDocvalueFields.filter((fld: SearchFieldValue) =>
         filter(this.getFieldName(fld))
       );
     }
@@ -911,7 +909,7 @@ export class SearchSource {
         // filter down script_fields to only include items specified
         body.script_fields = pick(
           body.script_fields,
-          Object.keys(body.script_fields)?.filter((f) => uniqFieldNames.includes(f))
+          Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
         );
       }
 
@@ -920,7 +918,7 @@ export class SearchSource {
       const remainingFields = difference(uniqFieldNames, [
         ...Object.keys(body.script_fields),
         ...Object.keys(body.runtime_mappings),
-      ])?.filter((remainingField) => {
+      ]).filter((remainingField) => {
         if (!remainingField) return false;
         if (!body._source || !body._source.excludes) return true;
         return !body._source.excludes.includes(remainingField);
@@ -939,7 +937,7 @@ export class SearchSource {
         // already set in docvalue_fields
         body.fields = [
           ...body.fields,
-          ...filteredDocvalueFields?.filter((fld: SearchFieldValue) => {
+          ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
             return (
               fieldsFromSource.includes(this.getFieldName(fld)) &&
               !(body.docvalue_fields || [])
@@ -966,8 +964,7 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    // @ts-ignore
-    body.fields = body.fields?.filter((field) => Boolean(field));
+    body.fields = body.fields.filter((field: string) => Boolean(field));
 
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>

@@ -95,6 +95,7 @@ describe('SearchSource', () => {
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
       scriptedFieldsEnabled: true,
+      fieldFormats: {} as SearchSourceDependencies['fieldFormats'],
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);

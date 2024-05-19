@@ -10,10 +10,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, pickBy, mapValues, pick, assign, chain, reject } from 'lodash';
+import { each, pickBy, mapValues, pick, assign, chain } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
-import { DataViewField, fieldList } from '../fields';
+import { DataViewField } from '../fields';
 import { fieldMatchesFieldsRequested, fieldsMatchFieldsRequested } from './data_view_lazy_util';
 
 import type {
@@ -64,7 +64,6 @@ export class DataViewLazy extends AbstractDataView {
     super(config);
     this.apiClient = config.apiClient;
     this.scriptedFieldsEnabled = config.scriptedFieldsEnabled;
-    this.fields = fieldList([], this.shortDotsEnable);
   }
 
   async getFields({
@@ -76,7 +75,6 @@ export class DataViewLazy extends AbstractDataView {
     unmapped,
     indexFilter,
     metaFields = true,
-    fieldTypes,
   }: GetFieldsParams) {
     let mappedResult: DataViewFieldMap = {};
     let scriptedResult: DataViewFieldMap = {};
@@ -93,7 +91,6 @@ export class DataViewLazy extends AbstractDataView {
         unmapped,
         indexFilter,
         metaFields,
-        fieldTypes,
       });
     }
 
@@ -111,7 +108,7 @@ export class DataViewLazy extends AbstractDataView {
 
     return {
       getFieldMap: () => fieldMap,
-      getFieldMapSorted: (): Record<string, DataViewField> => {
+      getFieldMapSorted: () => {
         if (!hasBeenSorted) {
           fieldMapSorted = chain(fieldMap).toPairs().sortBy(0).fromPairs().value();
           hasBeenSorted = true;
@@ -119,10 +116,6 @@ export class DataViewLazy extends AbstractDataView {
         return fieldMapSorted;
       },
     };
-  }
-
-  public setFields(spec: FieldSpec[]) {
-    this.fields = fieldList(spec, this.shortDotsEnable);
   }
 
   public getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
@@ -471,20 +464,19 @@ export class DataViewLazy extends AbstractDataView {
     );
   }
 
-  getComputedFields({ fieldName = ['*'] }: { fieldName: string[] }) {
+  async getComputedFields({ fieldName = ['*'] }: { fieldName: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
-    if (!this.fields) {
-      return {
-        scriptFields,
-        docvalueFields: [] as Array<{ field: string; format: string }>,
-        runtimeFields: {},
-      };
-    }
 
-    // Date value returned in "_source" could be in a number of formats
-    // Use a docvalue for each date field to ensure standardized formats when working with date fields
-    // dataView.flattenHit will override "_source" values when the same field is also defined in "fields"
-    const docvalueFields = reject(this.fields.getByType('date'), 'scripted').map((dateField) => {
+    const fieldMap = (
+      await this.getFields({
+        fieldName,
+        fieldTypes: ['date', 'date_nanos'],
+        scripted: false,
+        runtime: false,
+      })
+    ).getFieldMap();
+
+    const docvalueFields = Object.values(fieldMap).map((dateField) => {
       return {
         field: dateField.name,
         format:
@@ -596,9 +588,6 @@ export class DataViewLazy extends AbstractDataView {
   getTimeField = () => (this.timeFieldName ? this.getFieldByName(this.timeFieldName) : undefined);
 
   async getFieldByName(name: string, forceRefresh = false) {
-    if (this.fields?.getByName(name)) {
-      return this.fields.getByName(name);
-    }
     const fieldMap = (await this.getFields({ fieldName: [name], forceRefresh })).getFieldMap();
     return fieldMap[name];
   }

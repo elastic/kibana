@@ -24,6 +24,7 @@ describe('createSearchSource', () => {
       search: jest.fn(),
       onResponse: (req, res) => res,
       scriptedFieldsEnabled: true,
+      fieldFormats: {} as SearchSourceDependencies['fieldFormats'],
     };
 
     indexPatternContractMock = {

@@ -20,6 +20,7 @@ describe('SearchSource service', () => {
       search: jest.fn(),
       onResponse: jest.fn(),
       scriptedFieldsEnabled: true,
+      fieldFormats: {} as SearchSourceDependencies['fieldFormats'],
     };
   });
 
