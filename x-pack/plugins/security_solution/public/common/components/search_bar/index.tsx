@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
@@ -49,13 +49,12 @@ interface SiemSearchBarProps {
   hideQueryInput?: boolean;
 }
 
-export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
+export const SearchBarComponent = memo<SiemSearchBarProps>(
   ({
     hideFilterBar = false,
     hideQueryInput = false,
     id,
     pollForSignalIndex,
-    queries,
     sourcererDataView,
     dataTestSubj,
   }) => {
@@ -75,16 +74,17 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     const dispatch = useDispatch();
 
     const inputsRange = useSelector((state: State) => state.inputs[id] || {});
-    const end = useSelector(endSelector(inputsRange));
-    const fromStr = useSelector(fromStrSelector(inputsRange));
-    const isLoading = useSelector(isLoadingSelector(inputsRange));
-    const queries = useSelector((state: State) => queriesSelector(state, id));
-    const start = useSelector(startSelector(inputsRange));
-    const toStr = useSelector(toStrSelector(inputsRange));
-    const filterQuery = useSelector(filterQuerySelector(inputsRange));
-    const savedQuery = useSelector(savedQuerySelector(inputsRange));
+    const end = useSelector(() => endSelector()(inputsRange));
+    const fromStr = useSelector(() => fromStrSelector()(inputsRange));
+    const isLoading = useSelector(() => isLoadingSelector()(inputsRange));
+    const queries = useSelector((state: State) => queriesSelector()(state, id));
+    const start = useSelector(() => startSelector()(inputsRange));
+    const toStr = useSelector(() => toStrSelector()(inputsRange));
+    const filterQuery = useSelector(() => filterQuerySelector()(inputsRange));
+    const savedQuery = useSelector(() => savedQuerySelector()(inputsRange));
     const setSearchBarFilter = useCallback(
-      (payload) => dispatch(inputsActions.setSearchBarFilter(payload)),
+      (payload: { id: InputsModelId; filters: Filter[] }) =>
+        dispatch(inputsActions.setSearchBarFilter(payload)),
       [dispatch]
     );
     const updateSearch = useCallback(
@@ -168,7 +168,8 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       [dispatch, id]
     );
     const setSavedQuery = useCallback(
-      (payload) => dispatch(inputsActions.setSavedQuery(payload)),
+      (payload: { id: InputsModelId; savedQuery: SavedQuery | undefined }) =>
+        dispatch(inputsActions.setSavedQuery(payload)),
       [dispatch]
     );
 
@@ -431,8 +432,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   (prevProps, nextProps) =>
     deepEqual(prevProps.sourcererDataView, nextProps.sourcererDataView) &&
     prevProps.id === nextProps.id &&
-    prevProps.dataTestSubj === nextProps.dataTestSubj &&
-    deepEqual(prevProps.queries, nextProps.queries)
+    prevProps.dataTestSubj === nextProps.dataTestSubj
 );
 
 SearchBarComponent.displayName = 'SiemSearchBar';
