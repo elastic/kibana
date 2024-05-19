@@ -86,12 +86,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await removeOpenAIConnector?.();
+      await esArchiver.unload(esArchiveIndex);
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
       await pageObjects.svlCommonPage.forceLogout();
-    });
-
-    after(async () => {
-      await esArchiver.unload(esArchiveIndex);
     });
 
     describe('start chat page', () => {
