@@ -35,8 +35,7 @@ export default function (providerContext: FtrProviderContext) {
     return getPkgRes;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/183529
-  describe.skip('fleet_agent_policies', () => {
+  describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
 
     describe('GET /api/fleet/agent_policies', () => {
@@ -1357,8 +1356,12 @@ export default function (providerContext: FtrProviderContext) {
               created_at: ppcreatedAt,
               updated_at: ppupdatedAt,
               version,
+              package: { version: pkgVersion, ...pkgRest },
               ...ppRest
-            }: any) => ppRest
+            }: any) => ({
+              ...ppRest,
+              package: pkgRest,
+            })
           ),
         }).toMatch();
       });
