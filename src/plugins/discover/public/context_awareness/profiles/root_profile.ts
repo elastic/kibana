@@ -26,10 +26,12 @@ export interface RootContext {
 
 export type RootProfile = Profile;
 
-export const rootProfileService = new AsyncProfileService<
+export class RootProfileService extends AsyncProfileService<
   RootProfile,
   RootProfileProviderParams,
   RootContext
->();
+> {}
 
-export type RootProfileProvider = Parameters<typeof rootProfileService.registerProvider>[0];
+export type RootProfileProvider = Parameters<RootProfileService['registerProvider']>[0];
+
+export const rootProfileService = new RootProfileService();

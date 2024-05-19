@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useContext, useMemo } from 'react';
+import React, { createContext, FC, useContext, useMemo, useState } from 'react';
 import type { ComposableProfile } from './composable_profile';
+import { dataSourceProfileService } from './profiles/data_source_profile';
+import { documentProfileService } from './profiles/document_profile';
+import { rootProfileService } from './profiles/root_profile';
+import { ProfilesManager } from './profiles_manager';
 
 const profilesContext = createContext<ComposableProfile[]>([]);
 
@@ -15,6 +19,9 @@ export const ProfilesProvider: FC<{
   rootProfile: ComposableProfile;
   dataSourceProfile: ComposableProfile | undefined;
 }> = ({ rootProfile, dataSourceProfile, children }) => {
+  const [manager] = useState(
+    () => new ProfilesManager(rootProfileService, dataSourceProfileService, documentProfileService)
+  );
   const profiles = useMemo(
     () => [rootProfile, dataSourceProfile].filter(profileExists),
     [dataSourceProfile, rootProfile]
