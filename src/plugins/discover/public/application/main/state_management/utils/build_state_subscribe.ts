@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { isEqual } from 'lodash';
 import type { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import type { DiscoverServices } from '../../../../build_services';
@@ -17,7 +18,6 @@ import {
   isEqualState,
 } from '../discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
 import {
@@ -52,11 +52,11 @@ export const buildStateSubscribe =
     const nextQuery = nextState.query;
     const savedSearch = savedSearchState.getState();
     const prevQuery = savedSearch.searchSource.getField('query');
-    const isTextBasedQueryLang = isTextBasedQuery(nextQuery);
+    const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
 
     if (
-      isTextBasedQueryLang &&
+      isEsqlMode &&
       isEqualState(prevState, nextState, ['dataSource', 'viewMode']) &&
       !queryChanged
     ) {
@@ -73,11 +73,11 @@ export const buildStateSubscribe =
 
     addLog('[appstate] subscribe triggered', nextState);
 
-    if (isTextBasedQueryLang) {
-      const isTextBasedQueryLangPrev = isTextBasedQuery(prevQuery);
-      if (!isTextBasedQueryLangPrev) {
+    if (isEsqlMode) {
+      const isEsqlModePrev = isDataSourceType(prevState.dataSource, DataSourceType.Esql);
+      if (!isEsqlModePrev) {
         savedSearchState.update({ nextState });
-        dataState.reset(savedSearch);
+        dataState.reset();
       }
     }
 
@@ -85,11 +85,11 @@ export const buildStateSubscribe =
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const chartDisplayChanged = Boolean(nextState.hideChart) !== Boolean(hideChart);
-    const chartIntervalChanged = nextState.interval !== interval && !isTextBasedQueryLang;
+    const chartIntervalChanged = nextState.interval !== interval && !isEsqlMode;
     const breakdownFieldChanged = nextState.breakdownField !== breakdownField;
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
-    const docTableSortChanged = !isEqual(nextState.sort, sort) && !isTextBasedQueryLang;
-    const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isTextBasedQueryLang;
+    const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
+    const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
 
     let savedSearchDataView;
 
@@ -100,7 +100,7 @@ export const buildStateSubscribe =
         : undefined;
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        { id: dataViewId, savedSearch, isTextBasedQuery: isTextBasedQueryLang },
+        { id: dataViewId, savedSearch, isEsqlMode },
         { internalStateContainer: internalState, services }
       );
 
@@ -120,7 +120,7 @@ export const buildStateSubscribe =
       }
 
       savedSearch.searchSource.setField('index', nextDataView);
-      dataState.reset(savedSearch);
+      dataState.reset();
       setDataView(nextDataView);
       savedSearchDataView = nextDataView;
     }

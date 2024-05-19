@@ -10,7 +10,7 @@ import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-ut
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../../build_services';
 
-export async function getDataViewByTextBasedQueryLang(
+export async function getEsqlDataView(
   query: AggregateQuery,
   currentDataView: DataView | undefined,
   services: DiscoverServices
