@@ -6,8 +6,9 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import { Dictionary, first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
@@ -92,6 +93,16 @@ export interface IWaterfallLegend {
   value: string | undefined;
   color: string;
 }
+
+export interface IWaterfallNode {
+  id: string;
+  item: IWaterfallSpanOrTransaction;
+  children: IWaterfallNode[];
+  level: number;
+  expanded: boolean;
+}
+
+export type IWaterfallNodeFlatten = Omit<IWaterfallNode, 'children'> & { childrenCount: number };
 
 function getLegendValues(transactionOrSpan: WaterfallTransaction | WaterfallSpan) {
   return {
@@ -222,7 +233,7 @@ export function getOrderedWaterfallItems(
 
     item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = item.doc.timestamp.us - entryTimestamp; // Math.min(entryTimestamp, item.parent?.doc.timestamp.us ?? 0); // entryTimestamp;
+    item.offset = Math.max(item.doc.timestamp.us - entryTimestamp, 0);
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 
@@ -462,3 +473,114 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     orphanTraceItemsCount,
   };
 }
+
+export const buildTraceTree = (
+  waterfall: IWaterfall,
+  criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>,
+  showCriticalPath: boolean,
+  maxLevelOpen: number,
+  isOpen: boolean
+): IWaterfallNode | null => {
+  const entry = waterfall.entryWaterfallTransaction;
+  if (!entry) {
+    return null;
+  }
+
+  const root: IWaterfallNode = {
+    id: entry.id,
+    item: entry,
+    children: [],
+    level: 0,
+    expanded: isOpen,
+  };
+
+  const queue: IWaterfallNode[] = [root];
+
+  while (queue.length > 0) {
+    const node = queue.shift()!;
+
+    const children = waterfall.childrenByParentId[node.item.id] || [];
+    const filteredChildren = showCriticalPath
+      ? children.filter((child) => criticalPathSegmentsById[child.id]?.length)
+      : children;
+
+    filteredChildren.forEach((child, index) => {
+      const nextLevel = node.level + 1;
+      const childNode: IWaterfallNode = {
+        id: btoa(`${node.id}-${child.id}-${index}`),
+        item: child,
+        children: [],
+        level: nextLevel,
+        expanded: true,
+      };
+
+      node.children.push(childNode);
+
+      if (maxLevelOpen > nextLevel) {
+        queue.push(childNode);
+      }
+    });
+  }
+
+  return root;
+};
+
+export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFlatten[] => {
+  if (!root) {
+    return [];
+  }
+
+  const result: IWaterfallNodeFlatten[] = [];
+  const stack: IWaterfallNode[] = [root];
+
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+
+    const { children, ...nodeWithoutChildren } = node;
+    result.push({ ...nodeWithoutChildren, childrenCount: node.children.length });
+
+    if (node.expanded) {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        stack.push(node.children[i]);
+      }
+    }
+  }
+
+  return result;
+};
+
+export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfallNodeFlatten) => {
+  if (!root) return;
+
+  let tree = { ...root };
+  const stack: Array<{ parent: IWaterfallNode | null; index: number; node: IWaterfallNode }> = [
+    { parent: null, index: 0, node: root },
+  ];
+
+  while (stack.length > 0) {
+    const { parent, index, node } = stack.pop()!;
+
+    if (node.id === updatedNode.id) {
+      const newNode = {
+        ...node,
+        expanded: updatedNode.expanded,
+      };
+
+      if (parent) {
+        parent.children[index] = newNode;
+      } else {
+        tree = newNode;
+      }
+
+      break;
+    }
+
+    if (node.children) {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        stack.push({ parent: node, index: i, node: node.children[i] });
+      }
+    }
+  }
+
+  return tree;
+};

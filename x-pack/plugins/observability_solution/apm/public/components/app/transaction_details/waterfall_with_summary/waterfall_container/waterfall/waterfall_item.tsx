@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useRef, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
@@ -229,26 +229,16 @@ export function WaterfallItem({
     }
   }, [marginLeftLevel]);
 
-  const width = useMemo(
-    () => (item.duration / (totalDuration ?? 1)) * widthFactor * 100,
-    [item.duration, totalDuration, widthFactor]
-  );
-  const left = useMemo(
-    () =>
-      (((item.offset + item.skew) / (totalDuration ?? 1)) * widthFactor - widthFactor + 1) * 100,
-    [item.offset, item.skew, totalDuration, widthFactor]
-  );
-
-  const itemBarStyle = useMemo(
-    () => getItemBarStyle(item, color, width, left),
-    [color, item, left, width]
-  );
-
   if (!totalDuration) {
     return null;
   }
 
+  const width = (item.duration / totalDuration) * widthFactor * 100;
+  const left = (((item.offset + item.skew) / totalDuration) * widthFactor - widthFactor + 1) * 100;
+
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
+
+  const itemBarStyle = getItemBarStyle(item, color, width, left);
 
   const isServerlessColdstart = item.docType === 'transaction' && item.doc.faas?.coldstart;
 

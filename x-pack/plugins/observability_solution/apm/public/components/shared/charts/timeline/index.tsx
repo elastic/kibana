@@ -26,33 +26,47 @@ interface TimelineProps {
   marks?: Mark[];
   xMin?: number;
   xMax?: number;
-  height: number;
   margins: Margins;
   width?: number;
 }
 
-function TimeLineContainer({ width, xMin, xMax, height, marks, margins }: TimelineProps) {
-  if (xMax == null || !width) {
+export function TimelineAxisContainer({ xMax, xMin, margins, marks }: TimelineProps) {
+  const [width, setWidth] = useState(0);
+  if (xMax == null) {
     return null;
   }
-  const plotValues = getPlotValues({ width, xMin, xMax, height, margins });
+  const plotValues = getPlotValues({ width, xMin, xMax, margins });
   const topTraceDuration = xMax - (xMin ?? 0);
 
-  return (
-    <>
-      <TimelineAxis plotValues={plotValues} marks={marks} topTraceDuration={topTraceDuration} />
-      <VerticalLines plotValues={plotValues} marks={marks} topTraceDuration={topTraceDuration} />
-    </>
-  );
-}
-
-export function Timeline(props: TimelineProps) {
-  const [width, setWidth] = useState(0);
   return (
     <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
       {(resizeRef) => (
         <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
-          <TimeLineContainer {...props} width={width} />
+          <TimelineAxis plotValues={plotValues} marks={marks} topTraceDuration={topTraceDuration} />
+        </div>
+      )}
+    </EuiResizeObserver>
+  );
+}
+
+export function VerticalLinesContainer({ xMax, xMin, margins, marks }: TimelineProps) {
+  const [width, setWidth] = useState(0);
+
+  if (xMax == null) {
+    return null;
+  }
+  const plotValues = getPlotValues({ width, xMin, xMax, margins });
+  const topTraceDuration = xMax - (xMin ?? 0);
+
+  return (
+    <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
+      {(resizeRef) => (
+        <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+          <VerticalLines
+            plotValues={plotValues}
+            marks={marks}
+            topTraceDuration={topTraceDuration}
+          />
         </div>
       )}
     </EuiResizeObserver>
