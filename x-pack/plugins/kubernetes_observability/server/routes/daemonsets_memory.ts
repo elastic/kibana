@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, checkDefaultNamespace } from '../lib/utils';
+import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod } from '../lib/utils';
 import { defineQueryForAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation } from '../lib/pods_memory_utils';
 
 import { IRouter, Logger } from '@kbn/core/server';
@@ -32,12 +32,14 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
             query: schema.object({
               name: schema.string(),
               namespace: schema.maybe(schema.string()),
+              period: schema.maybe(schema.string())
             }),
           },
         },
       },
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
+        var period =  checkDefaultPeriod(request.query.period);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
         const mustsPods = [
           {
@@ -94,7 +96,7 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
           for (const entries of hitsPodsAggs) {
             const podName = entries.key;
             console.log(podName);
-            const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client);
+            const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client, period);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
             const [reason, pod] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePodsCpu);
             pod_reasons.push(reason);

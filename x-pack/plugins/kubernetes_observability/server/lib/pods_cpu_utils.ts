@@ -12,7 +12,7 @@ const limits: Limits = {
 const deviation = 0.3 // We define that deviations more than 30% should be looked by the user
 
 
-export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: string, client: ElasticsearchClient) {
+export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: string, client: ElasticsearchClient, period: string) {
     const mustsPodsCpu = [
         {
             term: {
@@ -30,7 +30,7 @@ export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: 
         {
             range: {
                 "@timestamp": {
-                    "gte": "now-5m"
+                    "gte": period
                 }
             }
         }
@@ -111,7 +111,7 @@ export function calulcatePodsCpuUtilisation(podName: string, namespace: string, 
 }
 
 
-export function defineQueryGeneralCpuUtilisation(namespace: string, client: ElasticsearchClient) {
+export function defineQueryGeneralCpuUtilisation(namespace: string, client: ElasticsearchClient, period: string) {
     const mustsPodsCpu = [
         {
             term: {
@@ -124,7 +124,7 @@ export function defineQueryGeneralCpuUtilisation(namespace: string, client: Elas
         {
             range: {
                 "@timestamp": {
-                    "gte": "now-5m"
+                    "gte": period
                 }
             }
         }
