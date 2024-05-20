@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FileLayer } from '@elastic/ems-client';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
@@ -23,6 +24,7 @@ import { emsWorldLayerId } from '../../../common/constants';
 import { ChoroplethChartProps } from './types';
 import { getEmsSuggestion } from './get_ems_suggestion';
 import { PassiveMap } from '../passive_map';
+import { getAnalytics, getCoreI18n, getTheme } from '../../kibana_services';
 
 interface Props extends ChoroplethChartProps {
   formatFactory: FormatFactory;
@@ -126,7 +128,11 @@ export function ChoroplethChart({
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  return <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />;
+  return (
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getCoreI18n()} theme={getTheme()}>
+      <PassiveMap passiveLayer={choroplethLayer} onRenderComplete={onRenderComplete} />
+    </KibanaRenderContextProvider>
+  );
 }
 
 function getAccessorLabel(table: Datatable, accessor: string) {

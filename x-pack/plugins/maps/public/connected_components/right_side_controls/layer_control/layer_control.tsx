@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LayerTOC } from './layer_toc';
-import { isScreenshotMode } from '../../../kibana_services';
+import { getAnalytics, getCoreI18n, getTheme, isScreenshotMode } from '../../../kibana_services';
 import { ILayer } from '../../../classes/layers/layer';
 import { ExpandButton } from './expand_button';
 
@@ -36,7 +37,7 @@ export interface Props {
   zoom: number;
 }
 
-export function LayerControl({
+export function LayerControlInternal({
   isReadOnly,
   isLayerTOCOpen,
   showAddLayerWizard,
@@ -188,5 +189,13 @@ export function LayerControl({
 
       {addLayer}
     </Fragment>
+  );
+}
+
+export function LayerControl(props: Props) {
+  return (
+    <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getCoreI18n()} theme={getTheme()}>
+      <LayerControlInternal {...props} />
+    </KibanaRenderContextProvider>
   );
 }

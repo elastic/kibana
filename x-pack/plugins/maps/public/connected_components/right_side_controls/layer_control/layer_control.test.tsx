@@ -20,7 +20,7 @@ jest.mock('../../../kibana_services', () => ({
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { LayerControl } from './layer_control';
+import { LayerControlInternal } from './layer_control';
 import { ILayer } from '../../../classes/layers/layer';
 
 const defaultProps = {
@@ -36,34 +36,34 @@ const defaultProps = {
   zoom: 0,
 };
 
-describe('LayerControl', () => {
+describe('LayerControlInternal', () => {
   test('is rendered', () => {
-    const component = shallow(<LayerControl {...defaultProps} />);
+    const component = shallow(<LayerControlInternal {...defaultProps} />);
 
     expect(component).toMatchSnapshot();
   });
 
   test('should disable buttons when flyout is open', () => {
-    const component = shallow(<LayerControl {...defaultProps} isFlyoutOpen={true} />);
+    const component = shallow(<LayerControlInternal {...defaultProps} isFlyoutOpen={true} />);
 
     expect(component).toMatchSnapshot();
   });
 
   test('isReadOnly', () => {
-    const component = shallow(<LayerControl {...defaultProps} isReadOnly={true} />);
+    const component = shallow(<LayerControlInternal {...defaultProps} isReadOnly={true} />);
 
     expect(component).toMatchSnapshot();
   });
 
   describe('isLayerTOCOpen', () => {
     test('Should render expand button', () => {
-      const component = shallow(<LayerControl {...defaultProps} isLayerTOCOpen={false} />);
+      const component = shallow(<LayerControlInternal {...defaultProps} isLayerTOCOpen={false} />);
       expect(component).toMatchSnapshot();
     });
 
     test('Should render expand button with loading icon when layer is loading', () => {
       const component = shallow(
-        <LayerControl
+        <LayerControlInternal
           {...defaultProps}
           isLayerTOCOpen={false}
           layerList={[
@@ -97,7 +97,7 @@ describe('LayerControl', () => {
         },
       } as unknown as ILayer;
       const component = shallow(
-        <LayerControl
+        <LayerControlInternal
           {...defaultProps}
           isLayerTOCOpen={false}
           layerList={[mockLayerThatHasError]}
