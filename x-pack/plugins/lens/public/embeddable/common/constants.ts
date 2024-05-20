@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export const COMMON_SLO_GROUPING = [
+export const COMMON_VISUALIZATION_GROUPING = [
   {
-    id: 'slos',
-    getDisplayName: () => 'Observability',
+    id: 'visualizations',
+    getDisplayName: () => 'Visualizations',
     getIconType: () => {
       return 'visGauge';
     },

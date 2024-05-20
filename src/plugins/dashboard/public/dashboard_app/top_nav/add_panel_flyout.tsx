@@ -72,6 +72,8 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
     // TODO: handle search
   }, [searchTerm]);
 
+  console.log('panels:: %o \n', panels.current);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -109,12 +111,13 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
               {Object.values(panelsSearchResult).map(({ id, title, items }) => (
                 <React.Fragment key={id}>
                   <EuiFlexItem>
-                    <EuiText>
+                    <EuiText size="xs">
                       <h3>{title}</h3>
                     </EuiText>
                     <EuiListGroup>
-                      {items?.map((item) => (
+                      {items?.map((item, idx) => (
                         <EuiListGroupItem
+                          key={`${id}.${idx}`}
                           label={item.name}
                           iconType={item.icon!}
                           data-test-subj={item['data-test-subj']}

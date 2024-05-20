@@ -10,6 +10,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { LensPluginStartDependencies } from '../../plugin';
+import { COMMON_VISUALIZATION_GROUPING } from '../../embeddable/common/constants';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 
@@ -19,6 +20,8 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
   public id = ACTION_CREATE_ESQL_CHART;
   public order = 50;
+
+  public grouping = COMMON_VISUALIZATION_GROUPING;
 
   constructor(
     protected readonly startDependencies: LensPluginStartDependencies,

@@ -244,6 +244,9 @@ export const EditorMenu = ({
       const registeredActions = await uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
         embeddable: api,
       });
+
+      console.log('registered actions:: %o \n', registeredActions);
+
       if (isMounted.current) {
         setAddPanelActions(registeredActions);
       }
@@ -340,6 +343,8 @@ export const EditorMenu = ({
       closePopover
     );
 
+    console.log('ungroup panel actions:: %o \n', ungroupedAddPanelActions);
+
     const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(
       getEmbeddableFactoryMenuItem
     )(factoryGroupMap, groupedAddPanelAction);
@@ -352,6 +357,7 @@ export const EditorMenu = ({
       ...initialPanelGroups,
       ...promotedVisTypes.map(getVisTypeMenuItem),
     ];
+
     if (aggsBasedVisTypes.length > 0) {
       initialPanelItems.push({
         name: aggsPanelTitle,
