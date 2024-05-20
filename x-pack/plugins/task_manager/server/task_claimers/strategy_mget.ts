@@ -16,6 +16,8 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import type { estypes } from '@elastic/elasticsearch';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
 
@@ -152,14 +154,6 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   }
 
-  for (const doc of missingTasks) {
-    logger.info(`Task ${doc.id} is missing from the task store or something`, logMeta);
-  }
-
-  for (const doc of staleTasks) {
-    logger.info(`Task ${doc.id} is stale`, logMeta);
-  }
-
   const candidateTasks = applyLimitedConcurrency(currentTasks, batches);
   const taskUpdates: ConcreteTaskInstance[] = Array.from(candidateTasks)
     .slice(0, initialCapacity)
@@ -178,15 +172,31 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   const finalResults: ConcreteTaskInstance[] = [];
   let conflicts = staleTasks.size;
+  let bulkErrors = 0;
+
   try {
     const updateResults = await taskStore.bulkUpdate(taskUpdates, { validate: false });
     for (const updateResult of updateResults) {
       if (isOk(updateResult)) {
         finalResults.push(updateResult.value);
       } else {
-        conflicts++;
         const { id, type, error } = updateResult.error;
-        logger.warn(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+
+        // this check is needed so error will be typed correctly for isConflictError
+        if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+          if (SavedObjectsErrorHelpers.isConflictError(error)) {
+            conflicts++;
+          } else {
+            logger.warn(
+              `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
+              logMeta
+            );
+            bulkErrors++;
+          }
+        } else {
+          logger.warn(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+          bulkErrors++;
+        }
       }
     }
   } catch (err) {
@@ -195,6 +205,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   // separate update for removed tasks; shouldn't happen often, so unlikely
   // a performance concern, and keeps the rest of the logic simpler
+  let removedCount = 0;
   if (removedTasks.size > 0) {
     const tasksToRemove = Array.from(removedTasks);
     for (const task of tasksToRemove) {
@@ -205,7 +216,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     try {
       const removeResults = await taskStore.bulkUpdate(tasksToRemove, { validate: false });
       for (const removeResult of removeResults) {
-        if (!isOk(removeResult)) {
+        if (isOk(removeResult)) {
+          removedCount++;
+        } else {
           const { id, type, error } = removeResult.error;
           logger.warn(
             `Error updating task ${id}:${type} to mark as unrecognized during claim: ${error.message}`,
@@ -217,6 +230,9 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`, logMeta);
     }
   }
+
+  const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.size}; conflicts: ${conflicts}; missing: ${missingTasks.size}; updateErrors: ${bulkErrors}; removed: ${removedCount}`;
+  logger.debug(message, logMeta);
 
   return {
     stats: {

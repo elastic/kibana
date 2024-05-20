@@ -178,7 +178,8 @@ async function getRuleRunEventDocs(url) {
   });
 
   if (!fetchResult.ok) {
-    throw new Error(`Failed to fetch from ${searchUrl}: ${fetchResult.statusText}`);
+    const text = await fetchResult.text();
+    throw new Error(`Failed to fetch from ${searchUrl}: ${fetchResult.statusText}\n${text}`);
   }
 
   const result = await fetchResult.json();
