@@ -5,90 +5,36 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
-import { testHasEmbeddedConsole } from './embedded_console';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials } from '../../../shared/services';
+import { createOpenAIConnector } from './utils/create_openai_connector';
+import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
 
 const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
-async function createOpenAIConnector({
-  supertest,
-  requestHeader = {},
-  apiKeyHeader = {},
-}: {
-  supertest: SuperTest.Agent;
-  requestHeader?: Record<string, string>;
-  apiKeyHeader?: Record<string, string>;
-}): Promise<() => Promise<void>> {
-  const config = {
-    apiProvider: 'OpenAI',
-    defaultModel: 'gpt-4',
-    apiUrl: 'http://localhost:3002',
-  };
 
-  const connector: { id: string } | undefined = (
-    await supertest
-      .post('/api/actions/connector')
-      .set(requestHeader)
-      .set(apiKeyHeader)
-      .send({
-        name: 'test Open AI',
-        connector_type_id: '.gen-ai',
-        config,
-        secrets: {
-          apiKey: 'genAiApiKey',
-        },
-      })
-      .expect(200)
-  ).body;
-
-  return async () => {
-    if (connector) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set(requestHeader)
-        .set(apiKeyHeader)
-        .expect(204);
-    }
-  };
-}
-
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+export default function (ftrContext: FtrProviderContext) {
+  const { getService, getPageObjects } = ftrContext;
+  const pageObjects = getPageObjects(['common', 'searchPlayground']);
+  const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
-  let roleAuthc: RoleCredentials;
+  let removeOpenAIConnector: () => Promise<void>;
+  const createConnector = async () => {
+    removeOpenAIConnector = await createOpenAIConnector({
+      supertest,
+      requestHeader: commonAPI.getCommonRequestHeader(),
+    });
+  };
 
-  describe('Serverless Playground Overview', () => {
-    let removeOpenAIConnector: () => Promise<void>;
-    let createConnector: () => Promise<void>;
-
+  describe('Playground Overview', () => {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
-      await pageObjects.svlCommonNavigation.sidenav.clickLink({
-        deepLinkId: 'searchPlayground',
-      });
-
-      const requestHeader = svlCommonApi.getInternalRequestHeader();
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-      createConnector = async () => {
-        removeOpenAIConnector = await createOpenAIConnector({
-          supertest: supertestWithoutAuth,
-          requestHeader,
-          apiKeyHeader: roleAuthc.apiKeyHeader,
-        });
-      };
+      await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
     });
 
     after(async () => {
-      await removeOpenAIConnector?.();
       await esArchiver.unload(esArchiveIndex);
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-      await pageObjects.svlCommonPage.forceLogout();
+      await removeOpenAIConnector?.();
     });
 
     describe('start chat page', () => {
@@ -99,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('show no index callout', async () => {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToMissed();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
       });
 
       it('hide no index callout when index added', async () => {
@@ -143,10 +89,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('show edit context', async () => {
         await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
       });
-    });
-
-    it('has embedded console', async () => {
-      await testHasEmbeddedConsole(pageObjects);
     });
   });
 }

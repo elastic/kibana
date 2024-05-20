@@ -41,7 +41,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   }, [usageTracker]);
 
   return (
-    <EuiFlexGroup justifyContent="center" className="eui-yScroll">
+    <EuiFlexGroup justifyContent="center" className="eui-yScroll" data-test-subj="startChatPage">
       <EuiFlexGroup
         css={{
           height: 'fit-content',
@@ -85,7 +85,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
           <SourcesPanelForStartChat />
         </EuiFlexItem>
 
-        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="startChatButton">
+        <EuiFlexGroup justifyContent="flexEnd">
           <EuiButton
             fill
             iconType="arrowRight"
@@ -96,6 +96,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
               !watch(ChatFormFields.elasticsearchQuery, '')
             }
             onClick={onStartClick}
+            data-test-subj="startChatButton"
           >
             <FormattedMessage
               id="xpack.searchPlayground.startNewChat.startBtn"
