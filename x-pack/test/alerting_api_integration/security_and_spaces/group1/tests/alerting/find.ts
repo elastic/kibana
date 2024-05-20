@@ -656,7 +656,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);

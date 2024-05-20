@@ -20,7 +20,9 @@ const findTestUtils = (
   supertestWithoutAuth: any
 ) => {
   describe(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -579,7 +581,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find with post', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });
