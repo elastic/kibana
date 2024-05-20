@@ -11,6 +11,7 @@ import {
   consoleSharedLexerRules,
   matchTokensWithEOL,
   matchToken,
+  matchTokens,
 } from './shared';
 import { monaco } from '../../monaco_imports';
 
@@ -30,6 +31,11 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       matchToken('whitespace', '\\s+'),
       // text
       matchToken('text', '.+?'),
+    ],
+    comments: [
+      // line comment indicated by #
+      matchTokens(['comment.punctuation', 'comment.line'], /(#)(.*$)/),
+      ...consoleSharedLexerRules.tokenizer.comments,
     ],
     method_sep: [
       // protocol host with slash
