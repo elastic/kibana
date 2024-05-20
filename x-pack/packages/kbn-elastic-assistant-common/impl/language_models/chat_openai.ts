@@ -23,7 +23,7 @@ import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
-interface ActionsClientChatOpenAIParams {
+export interface ActionsClientChatOpenAIParams {
   actions: ActionsPluginStart;
   connectorId: string;
   llmType?: string;

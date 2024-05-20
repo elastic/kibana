@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import { PassThrough } from 'stream';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -135,7 +136,7 @@ describe('ActionsClientSimpleChatModel', () => {
     });
   });
 
-  describe('_call', () => {
+  describe('_call streaming: false', () => {
     it('returns the expected content when _call is invoked', async () => {
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel(defaultArgs);
 

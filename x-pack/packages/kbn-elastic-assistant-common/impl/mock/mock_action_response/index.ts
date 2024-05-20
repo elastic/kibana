@@ -5,7 +5,33 @@
  * 2.0.
  */
 
+import { ChatCompletion } from 'openai/src/resources/chat/completions';
+
 export const mockActionResponse = {
   message: 'Yes, your name is Andrew. How can I assist you further, Andrew?',
   usage: { prompt_tokens: 4, completion_tokens: 10, total_tokens: 14 },
+};
+
+export const mockChatCompletion: ChatCompletion = {
+  id: 'abc123',
+  choices: [
+    {
+      index: 0,
+      message: {
+        role: 'assistant',
+        content: 'Yes, your name is Andrew. How can I assist you further, Andrew?',
+      },
+      finish_reason: 'stop',
+      logprobs: null,
+    },
+  ],
+  created: 1684572400, // Unix timestamp example: May 20, 2023
+  model: 'gpt-4',
+  object: 'chat.completion',
+  system_fingerprint: 'fingerprint123',
+  usage: {
+    prompt_tokens: 10,
+    completion_tokens: 15,
+    total_tokens: 25,
+  },
 };
