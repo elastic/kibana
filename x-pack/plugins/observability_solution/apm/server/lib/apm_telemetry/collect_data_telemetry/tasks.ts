@@ -1411,7 +1411,7 @@ export const tasks: TelemetryTask[] = [
       const kueryExpressions = response.saved_objects.map(({ attributes: { kuery } }) => kuery);
       const kueryFields = kueryExpressions
         .map(getKqlFieldNamesFromExpression)
-        .reduce((a, b) => a.concat(b));
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         service_groups: {
@@ -1438,7 +1438,7 @@ export const tasks: TelemetryTask[] = [
       );
       const kueryFields = kueryExpressions
         .map(getKqlFieldNamesFromExpression)
-        .reduce((a, b) => a.concat(b));
+        .reduce((a, b) => a.concat(b), []);
 
       return {
         custom_dashboards: {
