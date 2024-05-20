@@ -8,7 +8,10 @@
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { RISK_SCORE_PREVIEW_URL } from '../../../../../common/constants';
-import { RiskWeightTypes } from '../../../../../common/entity_analytics/risk_engine';
+import {
+  RiskCategories,
+  RiskWeightTypes,
+} from '../../../../../common/entity_analytics/risk_engine';
 import {
   serverMock,
   requestContextMock,
@@ -168,7 +171,8 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({
           weights: [
             {
-              type: RiskWeightTypes.global,
+              type: RiskWeightTypes.riskCategory,
+              value: RiskCategories.category_1,
               host: 0.1,
               user: 0.2,
             },
@@ -182,7 +186,8 @@ describe('POST risk_engine/preview route', () => {
           expect.objectContaining({
             weights: [
               {
-                type: RiskWeightTypes.global,
+                type: RiskWeightTypes.riskCategory,
+                value: RiskCategories.category_1,
                 host: 0.1,
                 user: 0.2,
               },
@@ -195,7 +200,8 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({
           weights: [
             {
-              type: RiskWeightTypes.global,
+              type: RiskWeightTypes.riskCategory,
+              value: RiskCategories.category_1,
               host: 1.1,
             },
           ],
@@ -212,6 +218,7 @@ describe('POST risk_engine/preview route', () => {
           weights: [
             {
               type: 'something new',
+              value: RiskCategories.category_1,
               host: 0.1,
               user: 0.2,
             },
